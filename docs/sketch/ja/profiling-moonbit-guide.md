@@ -1,13 +1,13 @@
 # ガイド: `moon run --profile` / `moon test --profile` でプロファイルして改善する
 
-本ガイドでは、MoonBit のネイティブ実行ファイルとテストをプロファイラにかけて分析し、ボトルネックを特定して修正し、再度計測するという一連の流れを、一つの手順書にまとめました。題材として、このガイドのために追加した `moonbit/experiments/profile-demo`（2,000行の文書をHTMLに変換する処理を、単純な実装と `StringBuilder` を使った実装で比較するもの）を使用しています。ここに記載されている手順通りに進めれば、他のドキュメントを参照しなくても同様の作業が可能です。
+本ガイドでは、MoonBit のネイティブ実行ファイルとテストをプロファイラにかけて分析し、ボトルネックを特定して修正し、再度計測するという一連の流れを、一つの手順書にまとめました。題材として、このガイドのために追加した [`moonbit/experiments/profile-demo`](https://github.com/podhmo/html-sandbox/tree/main/moonbit/experiments/profile-demo)（2,000行の文書をHTMLに変換する処理を、単純な実装と `StringBuilder` を使った実装で比較するもの）を使用しています。ここに記載されている手順通りに進めれば、他のドキュメントを参照しなくても同様の作業が可能です。
 
 ## 前提条件
 
 - **対象**: `--target native` の MoonBit。`moon run --profile` と `moon test --profile` が対象です。
 - **実測環境**: WSL2（`Linux 6.18.54.1-microsoft-standard-WSL2`, x86_64）、`moon 0.1.20261012 (748b63c 2026-10-12)`、`perf 6.18.54.1.g26d1ceb55087`。
 - **注意点**: この環境では `moon --profile` の集計結果が空になります（詳細は §4）。そのため、「本来の使い方」（§1〜§3）と「この環境での代替手段」（§5）の両方を記載しています。どちらを使用するかは、§0 のチェックで判断してください。
-- **調査記録**: 元の調査記録は [profiling.md](profiling.md) と [profiling-moonbit.md](profiling-moonbit.md)（[issue #39](https://github.com/podhmo/html-sandbox/issues/39)）をご参照ください。
+- **調査記録**: 元の調査記録は [profiling.md](profiling.md) と [profiling-moonbit.md](profiling-moonbit.md) をご参照ください。
 
 ## 0. 事前確認：必要なもの
 
@@ -31,7 +31,7 @@ macOS の場合は `xcrun xctrace version` で確認します。`ldd` の出力�
 
 なお、`moon run --profile` は実行ファイル（`pkgtype(kind: "executable")` のパッケージ）にのみ使用可能です。ライブラリ内の関数を計測したい場合は、次のいずれかの方法を取ります。
 
-- その関数を呼び出す小さなネイティブ実行ファイルを追加する（`profile-demo` の `naive` / `fast` が該当）。
+- その関数を呼び出す小さなネイティブ実行ファイルを追加する（`profile-demo` の [`naive`](https://github.com/podhmo/html-sandbox/blob/main/moonbit/experiments/profile-demo/naive/main.mbt) / [`fast`](https://github.com/podhmo/html-sandbox/blob/main/moonbit/experiments/profile-demo/fast/main.mbt) が該当）。
 - `moon test --profile` でテスト実行ファイルを計測する（重いテストを1つ用意しておく）。
 
 ## 1. 実行方法
@@ -49,7 +49,7 @@ moon run --profile fast  -- 2000 4000
 moon test --profile
 ```
 
-このディレクトリの `Makefile` は、上記と同様の処理を簡潔に実行できます。
+このディレクトリの [`Makefile`](https://github.com/podhmo/html-sandbox/blob/main/moonbit/experiments/profile-demo/Makefile) は、上記と同様の処理を簡潔に実行できます。
 
 ```sh
 make profile       # moon run --profile naive -- 2000 70
@@ -258,7 +258,7 @@ naive.exe    4027  1813.266037:   10000000 cpu-clock:u:
 
 ## 5. 代替: `perf` と `nm` で self time を取る
 
-`moon --profile` が空の結果を返しても、`perf record` 自体は利用可能です。葉（スタックの先頭）のアドレスを `nm` で関数名に変換し、集計を行います。`profile-demo` には、この処理を行う小さなスクリプト `top.py` が含まれています。
+`moon --profile` が空の結果を返しても、`perf record` 自体は利用可能です。葉（スタックの先頭）のアドレスを `nm` で関数名に変換し、集計を行います。`profile-demo` には、この処理を行う小さなスクリプト [`top.py`](https://github.com/podhmo/html-sandbox/blob/main/moonbit/experiments/profile-demo/top.py) が含まれています。
 
 ```sh
 cd moonbit/experiments/profile-demo
