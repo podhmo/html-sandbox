@@ -4,3 +4,4 @@
 
 - [Go 版](profiling-go.md): ベンチを足し、pprof で確保と走査を見て直した。API の変更込みの実験（`Inline` の構造体化、`el` のライターの変更）もここに追記している。
 - [MoonBit 版](profiling-moonbit.md): `moon bench` で前後を取り、`perf` と `addr2line` で内訳を見た。Go 版で効いたところ（セル、インラインの走査、タグと属性の連結）をなぞり、行とセルを `StringView` のまま引き回した。
+- [MoonBit の profiler の使い方](profiling-moonbit-guide.md): `moon run --profile` / `moon test --profile` の仕組み、生成されるファイル、結果の読み方を、その 1 枚で完結するように書いたガイド。この環境の `perf` では集計が空になる理由と、そのときの代替手順（`perf` と `nm` で self time を取る）も入れてある。

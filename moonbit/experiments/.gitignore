@@ -3,3 +3,4 @@ _build/
 build/
 .wrangler/
 .gen/
+__pycache__/
