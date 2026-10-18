@@ -3,9 +3,12 @@
 # that the profiler's answer (copying and allocation) can be seen and then
 # made to go away.  Run `make help` for the targets.
 #
-# `profile*` use moon's own profiler; on a machine whose perf cannot unwind
-# the DWARF call graph (WSL2's, for one) those reports come out empty, and
-# `record*` + `top*` are the fallback: plain perf, ranked with nm by top.py.
+# `profile*` use moon's own profiler.  They put bin/perf first on PATH: it is a
+# small wrapper that adds `--sample-cpu` to `perf record`, which moon's report
+# parser needs but moon does not pass.  They still need a perf built with
+# libdw/libelf; the WSL2 one is not, and `record*` + `top*` (plain perf, ranked
+# with nm by top.py) remain the fallback for such machines.
+# See docs/sketch/ja/profiling-moonbit-guide.md and profiling-moonbit-setup.md.
 
 # Where moon puts the release executables.
 NAIVE := _build/native/release/build/naive/naive.exe
@@ -16,6 +19,10 @@ FAST := _build/native/release/build/fast/fast.exe
 LINES ?= 2000
 NAIVE_REPS ?= 70
 FAST_REPS ?= 4000
+
+# moon's profiler needs `[cpu]` in perf script output; bin/perf adds
+# `--sample-cpu` to `perf record`.  Only the `profile*` targets use it.
+PROFILE_PATH := $(CURDIR)/bin:$(PATH)
 
 .PHONY: build run test profile profile-fast profile-test record record-fast top top-fast clean help
 
@@ -34,15 +41,15 @@ test:
 
 ## profile: moon's profiler on the naive executable (writes _build/native/release/profile/naive/<stamp>/)
 profile:
-	moon run --profile naive -- $(LINES) $(NAIVE_REPS)
+	PATH=$(PROFILE_PATH) moon run --profile naive -- $(LINES) $(NAIVE_REPS)
 
 ## profile-fast: moon's profiler on the fast executable
 profile-fast:
-	moon run --profile fast -- $(LINES) $(FAST_REPS)
+	PATH=$(PROFILE_PATH) moon run --profile fast -- $(LINES) $(FAST_REPS)
 
 ## profile-test: moon's profiler on the test executable
 profile-test:
-	moon test --profile
+	PATH=$(PROFILE_PATH) moon test --profile
 
 ## record: record the naive run with plain perf into build/naive.data (the fallback)
 record: build
