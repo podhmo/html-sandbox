@@ -125,7 +125,7 @@ perf script -i <出力先>/perf.data        # この出力が <出力先>/perf-s
 - `--call-graph dwarf`: スタックをDWARFで展開（関数の呼び出し関係を解析）。
 - macOS では `xcrun xctrace record --template 'Time Profiler' ...` と `xctrace export --xpath '/trace-toc/run[@number="1"]/data/table[@schema="time-profile"]'` が実行されます。
 
-`--no-strip` で作られた実行ファイルは `_build/native/release/build/<パッケージ>/<パッケージ>.exe` にあり、§5 の `nm` による名前解決はこれを対象にします。ここで注意が必要です。**`moon build --target native --release` を実行すると、同じパスの実行ファイルが strip された別物に差し替わります**（この環境ではサイズ 1249976 → 527616、Build ID も変化しました）。記録（§5 の `perf record`）と集計（`nm`）の間に通常のビルドを挟むと、名前解決が壊れます。**記録する前に実行ファイルをコピーしておいてください**（§5）。
+`--no-strip` で作られた実行ファイルは `_build/native/release/build/<パッケージ>/<パッケージ>.exe` にあり、§5 の `nm` による名前解決はこれを対象にします。ここで注意が必要です。**`moon build --target native --release` を実行すると、同じパスの実行ファイルがストリップされた別物に差し替わります**（この環境ではサイズ 1249976 → 527616、Build ID も変化しました）。シンボル表（`.symtab`）は残るので `nm` は名前を返しますが、**アドレスの配置が変わる**ため、記録済みの `perf.data` を新しい実行ファイルで解決すると別の関数名になります。実際に同じ `perf.data` を両方の実行ファイルで解決すると、正しい `moonbit_make_string+0x5c`（30.48%）が `moonbit_unsafe_ref_array_blit+0x1bc`（30.48%）になりました。サンプル数も割合も同じで名前だけが変わるため、**間違いに気づきにくい**のが厄介です。**記録する前に実行ファイルをコピーしておいてください**（§5）。
 
 計測時間は「100Hzで数秒」を目安に設定しています。`profile-demo` では、単純な実装が1回あたり約30msかかるため70回（約2.2秒）、高速な実装が1回あたり約0.53msかかるため4,000回（約2.1秒）としています。`make` の変数 `LINES` / `NAIVE_REPS` / `FAST_REPS` で調整可能です。
 
@@ -179,7 +179,7 @@ Program stderr: .../stderr.txt
 
 Top self time:
    12.3%    12.30ms     12  _M0...escape__naive
-   11.0%    11.00ms     11  libc.so.6
+    4.1%     4.10ms      4  _mi_page_malloc_zero+0xd
    ...
 
 Top inclusive time:
@@ -197,6 +197,7 @@ Inspect the full trace with perf:
 
 - `Top self time` などは4列で表示されます（上位12行まで）。左から割合（profiledサンプルに対する比率）、時間、サンプル数、シンボル名です。
 - `Runtime leaf costs ...` の行だけは書式が異なり、`<自分の関数> <- <ランタイムの関数>` の形式で表示されます。
+- 並ぶのは MoonBit 側とランタイムのシンボルだけです。この題材では libc 内のメモリコピーが時間の大半を占めますが、**それはランキングには現れません**（§5 の代替手段では見えます）。
 
 成功したかどうかの判定は `Samples:` の数だけです。**`Samples: 0` は失敗**（何も取得できていない）で、§4 の状態です。このときは上の形ではなく、次の形になります。
 
