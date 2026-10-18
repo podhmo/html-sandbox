@@ -89,6 +89,15 @@
     `cpu-clock` に CPU 属性が無くヘッダを認識できない）と、`perf` と `nm` で
     self time を取る代替手順も入れた。題材は `moonbit/experiments/profile-demo`
     （[ガイド](docs/sketch/ja/profiling-moonbit-guide.md)）。
+  - [x] MoonBit 版（ガイド、追試）: 何も知らないセッションにガイドだけを与え、naive 実装
+    だけのプロジェクトで同じ改善を追試させて自己完結性を確かめた（約55〜61倍、出力一致）。
+    引っかかったところ（`ldd` の判定、moon の `perf.data` には `ip` も残らないこと、
+    `--no-strip` の実行ファイルが通常のビルドで差し替わること、`top.py` の仕様と
+    実行ファイルのパスが書かれていないこと）を直し、`top.py` の全文を付録に入れた。
+    修正後にもう一度追試して約60倍で同じ結果を確認し、残った事実誤り2件（`--no-strip`
+    で名前が別の関数に化ける仕組みの説明、§3 の成功例が libc の行を含んでいたこと）を直した
+    （[ガイド](docs/sketch/ja/profiling-moonbit-guide.md)、
+    [PR #51](https://github.com/podhmo/html-sandbox/pull/51)）。
 - [-] **`moon run --profile` が空になる原因を切り分けて直す**: この環境（WSL2）では
   `moon run --profile` が常に `Samples: 0` になる。原因は、環境側では perf が libdw /
   libelf を持たずにビルドされていること、moon 側では `perf record` に `--sample-cpu` を

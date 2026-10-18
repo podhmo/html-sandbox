@@ -12,7 +12,7 @@ libunwind/libdw (to unwind the DWARF call graph) and when the kernel reports the
 CPU for the `cpu-clock` event.  Some environments -- WSL2 with a `perf` built
 without libunwind, in particular -- satisfy neither: `perf script` prints stacks
 with `[unknown]` symbols (or none at all) and `perf` refuses to print the CPU
-field, at which point `moon --profile` reports `Samples: 0`.
+field, at which point `moon run --profile` reports `Samples: 0`.
 
 `perf` there also cannot symbolize addresses, because it was not linked against
 libelf/libdw.  This script fills the gap with tools that are always present:

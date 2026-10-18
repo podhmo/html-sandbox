@@ -7,7 +7,7 @@
 
 ## 結論
 
-`moon --profile` が空になる原因は 2 つあり、**片方は環境、もう片方は moon 側**です。
+`moon run --profile` / `moon test --profile` が空になる原因は 2 つあり、**片方は環境、もう片方は moon 側**です。
 
 1. **perf が libdw / libelf を持たない**（環境）。WSL2 に同梱されている `perf` は
    `dwarf: [ off ]`, `libelf: [ off ]` でビルドされており、DWARF のスタック展開も
@@ -76,7 +76,7 @@ perf script -i /tmp/dw.data | head
 [`moonbit/experiments/profile-demo/bin/perf`](../../../moonbit/experiments/profile-demo/bin/perf)
 が、`record` のときだけ `--sample-cpu` を足して次の `perf` に委譲します。
 `Makefile` の `profile` / `profile-fast` / `profile-test` は、このディレクトリを PATH の
-先頭に置いて `moon --profile` を呼びます。
+先頭に置いて `moon run --profile` を呼びます。
 
 ```sh
 cd moonbit/experiments/profile-demo
