@@ -89,6 +89,12 @@
     `cpu-clock` に CPU 属性が無くヘッダを認識できない）と、`perf` と `nm` で
     self time を取る代替手順も入れた。題材は `moonbit/experiments/profile-demo`
     （[ガイド](docs/sketch/ja/profiling-moonbit-guide.md)）。
+- [ ] **`moon run --profile` が空になる原因を切り分けて直す**: この環境（WSL2）では
+  `moon run --profile` が常に `Samples: 0` になる。環境側は perf が libdw / libelf を
+  持たずにビルドされていること、moon 側は `perf record` に `--sample-cpu` を付けず
+  パーサがヘッダの `[cpu]` を必須にしていることが分かった。libdw 付きの perf を
+  用意し、moon 側の扱い（`--sample-cpu` を足すか `[cpu]` 無しを許容するか）を決めて、
+  [issue #52](https://github.com/podhmo/html-sandbox/issues/52) に沿って進める。
 
 ### Future work
 
