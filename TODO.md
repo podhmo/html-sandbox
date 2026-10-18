@@ -100,7 +100,8 @@
     `--sample-cpu` を足すラッパー）を追加し、`Makefile` の `profile*` から使うようにした。
   - [x] ドキュメント: ガイド（`docs/sketch/ja/profiling-moonbit-guide.md`）の §0 / §3 / §4 /
     §5 / §7 を修正し、[セットアップメモ](docs/sketch/ja/profiling-moonbit-setup.md)を追加した。
-  - [ ] ネイティブ Linux（WSL2 でない）でも `observed_rows: 0` になるかを対照実験で確認する。
+  - [ ] ネイティブ Linux（WSL2 でない）でも `observed_rows: 0` になるかを対照実験で確認する
+    （WSL2 はやや特殊かもしれないので、[他の人に依頼する](https://github.com/podhmo/html-sandbox/issues/53)）。
   - [ ] [moonbitlang/moon](https://github.com/moonbitlang/moon) に `--sample-cpu` の欠落を報告する
     （下書きは [issue #53](https://github.com/podhmo/html-sandbox/issues/53)。Linux 対応は
     [PR #1722](https://github.com/moonbitlang/moon/pull/1722) で入り、その時点から付いていない）。
