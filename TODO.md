@@ -83,6 +83,12 @@
     108 µs から 67 µs / 233 µs から 191 µs になった。出力は変えておらず、
     `make check` が通る（`make compare` はこの環境では回していない）
     （[調査メモ](docs/sketch/ja/profiling-moonbit.md)）。
+  - [x] MoonBit 版（ガイド）: `moon run --profile` / `moon test --profile` の仕組み、
+    生成されるファイル、結果の読み方を、その 1 枚で完結するように書いた。この環境の
+    `perf` では集計が空になる理由（libdw が無く DWARF の call graph を展開できない、
+    `cpu-clock` に CPU 属性が無くヘッダを認識できない）と、`perf` と `nm` で
+    self time を取る代替手順も入れた。題材は `moonbit/experiments/profile-demo`
+    （[ガイド](docs/sketch/ja/profiling-moonbit-guide.md)）。
 
 ### Future work
 
