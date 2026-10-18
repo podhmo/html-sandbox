@@ -5,8 +5,8 @@
 ## 前提条件
 
 - **対象**: `--target native` の MoonBit。`moon run --profile` と `moon test --profile` が対象です。
-- **実測環境**: WSL2（`Linux 6.18.54.1-microsoft-standard-WSL2`, x86_64）、`moon 0.1.20261012 (748b63c 2026-10-12)`、`perf 6.18.54.1.g26d1ceb55087`。
-- **注意点**: この環境では `moon run --profile` / `moon test --profile` の集計結果が空になります（詳細は §4）。そのため、「本来の使い方」（§1〜§3）と「この環境での代替手段」（§5）の両方を記載しています。どちらを使用するかは、§0 のチェックで判断してください。
+- **実測環境**: WSL2（`Linux 6.18.54.1-microsoft-standard-WSL2`, x86_64）、`moon 0.1.20261012 (748b63c 2026-10-12)`、`perf 7.0.14`（Ubuntu の `linux-perf`。libdw / libelf 付き）。
+- **前提**: この環境で `moon run --profile` / `moon test --profile` を動かすには、`perf` が libdw / libelf 付きであることと、`perf record` に `--sample-cpu` を付けることが必要です（moon は付けません）。WSL2 同梱の `perf` は libdw / libelf を持たないため、そのままでは集計が空になります。セットアップと経緯は [profiling-moonbit-setup.md](profiling-moonbit-setup.md) にまとめました。空のままの場合は §0 のチェックで切り分けてください。
 - **調査記録**: 元の調査記録は [profiling.md](profiling.md) と [profiling-moonbit.md](profiling-moonbit.md) をご参照ください。
 
 ## 0. 事前確認：必要なもの
@@ -15,7 +15,7 @@
 
 | OS | 使用プロファイラ | 必要なもの |
 | --- | --- | --- |
-| Linux | `perf` | `perf` が PATH にあり、DWARF のコールグラフを展開できること（libunwind / libdw） |
+| Linux | `perf` | `perf` が PATH にあり、DWARF のコールグラフを展開できること（libdw / libelf。`perf version --build-options` で `dwarf: [ on ]`、`libelf: [ on ]`） |
 | macOS | `xcrun xctrace` | Xcode の Command Line Tools |
 
 まず、これらを確認しましょう。Linux の場合：
@@ -23,13 +23,14 @@
 ```sh
 moon version
 perf --version
-ldd "$(which perf)" | grep -E 'libdw|libunwind|libelf'   # コールグラフの展開に必要
+perf version --build-options | grep -E 'dwarf|libelf'   # dwarf と libelf が [ on ] であること
+ldd "$(which perf)" | grep -E 'libdw|libunwind|libelf'   # 何も出力されなければ、コールグラフの展開ができません
 cat /proc/sys/kernel/perf_event_paranoid                  # 2 以下であれば、一般ユーザーでも取得可能
 ```
 
-`ldd` の出力が空の場合、本ガイドの環境と同様に `moon run --profile` / `moon test --profile` の集計結果が空になります（§4）。その際は §5 の方法を使用してください。
+macOS の場合は `xcrun xctrace version` で確認します。Linux で `dwarf: [ off ]` や `libelf: [ off ]` の `perf` を使うと、`moon run --profile` / `moon test --profile` の集計結果が空になります（§4）。その場合は libdw / libelf 付きの `perf`（Ubuntu なら `linux-perf`）を入れます。手順は [profiling-moonbit-setup.md](profiling-moonbit-setup.md) にまとめました。どうしても用意できないときは §5 の方法を使ってください。
 
-ただし `ldd` は目安にすぎません。この環境の `perf` は静的リンクなので、`ldd "$(which perf)"` は `not a dynamic executable` と表示します。このメッセージは標準エラー出力に出るため、上の `grep` を素通りして画面に残ります。「何も出力されない」場合だけでなく、この表示が出た場合もコールグラフは展開できません。確実に知りたい場合は `perf` 自身に聞きます。何か記録してから（§5 の `perf record` でかまいません）次を実行し、警告が出れば展開できません。
+ただし `ldd` は目安にすぎません。この環境の元の `perf` は静的リンクなので、`ldd "$(which perf)"` は `not a dynamic executable` と表示します。このメッセージは標準エラー出力に出るため、上の `grep` を素通りして画面に残ります。「何も出力されない」場合だけでなく、この表示が出た場合もコールグラフは展開できません。確実に知りたい場合は `perf version --build-options` を見るか、`perf` 自身に聞きます。何か記録してから（§5 の `perf record` でかまいません）次を実行し、警告が出れば展開できません。
 
 ```sh
 perf report -i <perf.data> --stdio
@@ -37,7 +38,7 @@ perf report -i <perf.data> --stdio
 # Please install libunwind or libdw development packages during the perf build.
 ```
 
-macOS の場合は `xcrun xctrace version` で確認します。
+あわせて、moon は `perf record` に `--sample-cpu` を付けませんが、moon のパーサは `perf script` の出力に `[cpu]` 欄があることを前提にしています。素の `perf record` は `[cpu]` を出さないため、そのままだと集計が空になります（§4）。`profile-demo` の `Makefile` は、`record` に `--sample-cpu` を足す [`bin/perf`](https://github.com/podhmo/html-sandbox/blob/main/moonbit/experiments/profile-demo/bin/perf) を PATH の先頭に置いて `moon run --profile` を呼びます。
 
 なお、`moon run --profile` は実行ファイル（`pkgtype(kind: "executable")` のパッケージ）にのみ使用可能です。ライブラリ内の関数を計測したい場合は、次のいずれかの方法を取ります。
 
@@ -99,12 +100,12 @@ moon run --profile fast  -- 2000 4000
 moon test --profile
 ```
 
-このディレクトリの [`Makefile`](https://github.com/podhmo/html-sandbox/blob/main/moonbit/experiments/profile-demo/Makefile) は、上記と同様の処理を簡潔に実行できます。
+このディレクトリの [`Makefile`](https://github.com/podhmo/html-sandbox/blob/main/moonbit/experiments/profile-demo/Makefile) は、上記と同様の処理を簡潔に実行できます。`profile*` は `bin/perf`（`record` に `--sample-cpu` を足すラッパー）を PATH の先頭に置いて実行します。
 
 ```sh
-make profile       # moon run --profile naive -- 2000 70
-make profile-fast  # moon run --profile fast  -- 2000 4000
-make profile-test  # moon test --profile
+make profile       # PATH=bin:$PATH moon run --profile naive -- 2000 70
+make profile-fast  # PATH=bin:$PATH moon run --profile fast  -- 2000 4000
+make profile-test  # PATH=bin:$PATH moon test --profile
 ```
 
 `--profile` オプションは、以下の設定を自動的に適用します（`--target native` 以外は無効）。
@@ -167,28 +168,31 @@ macOS の場合、`perf.data` / `perf-script.txt` の代わりに `profile.trace
 
 ### ターミナル出力
 
-`moon run --profile` は、集計結果を標準出力に表示します。まずは**サンプルが取得できた場合**の形です（数値は説明のための例で、環境により異なります）。
+`moon run --profile` は、集計結果を標準出力に表示します。まずは**サンプルが取得できた場合**の形です（数値はこの環境の実測値で、マシンにより異なります）。
 
 ```
 Profile: native Linux perf
 Executables: 1
-Samples: 418, sample weight: 10.00ms
+Samples: 110, sample weight: 10.00ms
 Trace: .../perf.data
 Program stdout: .../stdout.txt
 Program stderr: .../stderr.txt
 
 Top self time:
-   12.3%    12.30ms     12  _M0...escape__naive
-    4.1%     4.10ms      4  _mi_page_malloc_zero+0xd
+   84.5%   930.00ms     93  moonbit_add_string
+    3.6%    40.00ms      4  _mi_page_malloc_zero
+    2.7%    30.00ms      3  moonbit_drop_object
    ...
 
 Top inclusive time:
-   30.0%    30.00ms     30  _M0...render__naive
+  100.0%  1100.00ms    110  @podhmo/profile-demo/work.render_naive
+   90.9%  1000.00ms    100  moonbit_add_string
+   12.7%   140.00ms     14  @podhmo/profile-demo/work.escape_naive
    ...
 
 Runtime leaf costs attributed to MoonBit callers:
     8.0%     8.00ms      8  _M0...render__naive <- _mi_page_malloc_zero
-   ...
+   ...（確保や文字列操作が重い場合に、<自分の関数> <- <ランタイムの関数> の形で表示）
 
 Detailed JSON report: .../profile.json
 Inspect the full trace with perf:
@@ -206,18 +210,9 @@ Samples: 0, sample weight: 10.00ms
 
 Warnings:
   No profiled running samples with MoonBit/runtime symbols were found.
-
-Top self time:
-  no samples
-
-Top inclusive time:
-  no samples
-
-Runtime leaf costs attributed to MoonBit callers:
-  no attributed runtime leaf samples
 ```
 
-この環境では §4 の理由でこの形になり、`Top self time` / `Top inclusive time` / `Runtime leaf costs ...` は**1行も表示されません**（§3 のうち、この環境で使えるのは `profile.json` と `stdout.txt` だけです）。§5 で読み替えます。
+集計が空の場合は `Samples: 0` になり、各ランキングが `no samples` になります。そのときは §4 を確認してください。
 
 ### サンプルの重み
 
@@ -248,15 +243,32 @@ Runtime leaf costs attributed to MoonBit callers:
   "artifacts": { "trace": ".../perf.data", "perf_script": ".../perf-script.txt",
                  "stdout": ".../stdout.txt", "stderr": ".../stderr.txt",
                  "json_report": ".../profile.json", "time_profile_xml": null },
-  "summary": { "executables": 1, "observed_rows": 0, "running_samples": 0,
-               "profiled_samples": 0, "sample_weight_ms": 10.0, "profiled_time_ms": 0.0 },
-  "rankings": { "self_time": [], "inclusive_time": [],
-                "runtime_leaf_attributed_to_user": [] },
-  "observations": [],
+  "summary": { "executables": 1, "observed_rows": 110, "running_samples": 110,
+               "profiled_samples": 110, "sample_weight_ms": 10.0, "profiled_time_ms": 1100.0 },
+  "rankings": {
+    "self_time": [
+      { "rank": 1, "symbol": "moonbit_add_string", "mangled_symbol": "moonbit_add_string",
+        "samples": 93, "time_ms": 930.0, "percent_of_profiled_samples": 84.5 }
+    ],
+    "inclusive_time": [
+      { "rank": 1, "symbol": "@podhmo/profile-demo/work.render_naive",
+        "mangled_symbol": "_M0FP36podhmo14profile_2ddemo4work13render__naive",
+        "samples": 110, "time_ms": 1100.0, "percent_of_profiled_samples": 100.0 }
+    ],
+    "runtime_leaf_attributed_to_user": [
+      { "rank": 1, "symbol": "@podhmo/profile-demo/work.render_naive",
+        "samples": 90, "time_ms": 900.0, "percent_of_profiled_samples": 81.8 }
+    ]
+  },
+  "observations": [
+    { "kind": "highest_self_time", "rank": 1, "symbol": "moonbit_add_string",
+      "samples": 93, "time_ms": 930.0, "percent_of_profiled_samples": 84.5,
+      "note": "Largest leaf-frame hotspot; inspect this function for local work." }
+  ],
   "data_quality": { "non_running_samples_ignored": 0, "missing_stack_samples": 0,
                     "samples_without_profile_symbols": 0,
                     "inclusive_symbols_suppressed_from_ranking": ["main", "____moonbit__main", "@moonbitlang/async/"],
-                    "warnings": ["No profiled running samples with MoonBit/runtime symbols were found."] },
+                    "warnings": [] },
   "executables": [],
   "analysis_notes": ["self_time ranks leaf samples by the top frame in each sampled stack.", "..."]
 }
@@ -271,7 +283,7 @@ Runtime leaf costs attributed to MoonBit callers:
 
 ### 警告
 
-- `profiled_samples == 0`: `No profiled running samples with MoonBit/runtime symbols were found.` → §4 の状態。
+- `profiled_samples == 0`: `No profiled running samples with MoonBit/runtime symbols were found.` → 集計が空。§4 を確認してください（perf のビルドか `--sample-cpu` の欠落）。
 - `profiled_samples < 100`: `Only N profiled samples were collected; results may be noisy. Consider profiling a larger workload.`（`MIN_ACTIONABLE_SAMPLES = 100`。100Hzなら1秒分。負荷を増やして再計測を推奨）
 
 ### 生データの確認
@@ -282,11 +294,11 @@ Runtime leaf costs attributed to MoonBit callers:
 perf report -i _build/native/release/profile/naive/20261018-102156/perf.data
 ```
 
-この環境では、`perf report` も libdw が無いためコールツリーを表示できません（`Please install libunwind or libdw development packages during the perf build.` と警告されます）。§4 を参照してください。
+libdw / libelf を持たない `perf` では、`perf report` もコールツリーを表示できません（`Please install libunwind or libdw development packages during the perf build.` と警告されます）。
 
-## 4. この環境で集計が空になる理由
+## 4. 集計が空になる原因と直し方
 
-この環境では、`make profile`（`moon run --profile`）を実行すると `Samples: 0` となり、`profile.json` も空になります。
+`moon run --profile` / `moon test --profile` の集計が `Samples: 0` になる原因は2つあり、**片方は環境、もう片方は moon 側**です。
 
 ```console
 $ moon run --profile naive -- 2000 70
@@ -298,27 +310,18 @@ Warnings:
   No profiled running samples with MoonBit/runtime symbols were found.
 ```
 
-原因は2つあり、いずれもこの環境の `perf` の問題です。
-
-1. **DWARFのコールグラフが展開できない**: この `perf` は libunwind / libdw / libelf にリンクされていません。`--call-graph dwarf` は記録時にスタックの生データを `perf.data` にコピーし、展開は `perf script` 時に行います。libdw が無いため、その展開ができず、`perf-script.txt` のスタック行が空になります（`perf.data` は1.9MBあるにもかかわらず、テキストにはサンプルのヘッダしか表示されません）。展開できないのはスタックだけではありません。葉のアドレス（`ip`）だけを要求しても空になります。
-
-   ```sh
-   $ T=_build/native/release/profile/naive/20261018-102156
-   $ perf script -i "$T/perf.data" -F ip
-   # （空行だけが並ぶ）
-   ```
-
-   つまり、この `perf.data` にはスタックが無いだけでなく、**`ip` もシンボルもオブジェクトのパスも残っていません**。§5 の集計にそのまま使うことはできないので、`perf record` で取り直します（`--call-graph` を付けなければ `ip` は残ります）。
-2. **`cpu-clock` にCPU属性がない**: このWSL2カーネルでは、`perf script` がCPU欄を出力できません。そのためヘッダが `comm pid timestamp:` となり、moonが要求する `[cpu]` が存在しないため、ヘッダと認識されません。`profile.json` の `observed_rows` が0になるのはこのためです。
+1. **perf が libdw / libelf を持たない**（環境）: WSL2 に同梱されている `perf` はこれらにリンクされておらず、`--call-graph dwarf` で記録したスタックを `perf script` の時点で展開できません。`perf version --build-options` が `dwarf: [ off ]` / `libelf: [ off ]` なら該当します。このときはスタックだけでなく、葉のアドレス（`ip`）もシンボルもオブジェクトのパスも残らず、`perf script -i ... -F ip` も空行だけになります（`perf.data` 自体は1.9MBあります）。→ libdw / libelf 付きの `perf`（Ubuntu なら `linux-perf`）を入れます。
+2. **moon が `perf record` に `--sample-cpu` を付けない**（moon 側）: moon のパーサは `perf script` の出力に `[cpu]` 欄があることを前提にしています。しかし perf は `-a` / `-C` / `--sample-cpu` のときだけ CPU を記録するため、素の `perf record` ではヘッダが `comm pid timestamp:` になり、`[cpu]` が無いのでヘッダと認識されず `observed_rows: 0` になります。これは WSL2 に限らず Linux 全般で起こりえます。→ `record` に `--sample-cpu` を足すラッパーを使います（`profile-demo` の `bin/perf`。上流にも報告したい）。
 
 確認方法：
 
 ```sh
-$ ldd "$(which perf)"
-	not a dynamic executable          # 静的リンク。libdw / libunwind / libelf は無い
+$ perf version --build-options | grep -E 'dwarf|libelf'
+                 dwarf: [ off ]   # libdw / libelf 付きの perf なら [ on ]
+                libelf: [ off ]
 
-# 出力先は profile.json の artifacts.trace。ここでは先ほどの実行結果を使用。
-$ T=_build/native/release/profile/naive/20261018-102156
+# 出力先は profile.json の artifacts.trace。ここでは実行結果の例を使用。
+$ T=_build/native/release/profile/naive/<stamp>
 $ perf script -i "$T/perf.data" -F +cpu
 Samples for 'cpu-clock:u' event do not have CPU attribute set. Cannot print 'cpu' field.
 
@@ -331,11 +334,26 @@ naive.exe    4027  1813.266037:   10000000 cpu-clock:u:
 # ↑ ヘッダの後にスタック行がなく、ヘッダにも [cpu] がない。
 ```
 
-`perf` 自体はサンプルを取得できています（このとき233サンプル）。しかしこの `perf.data` には「スタックの展開」も「CPU欄」も「シンボルの解決」も、葉のアドレスすら残っていないため、集計には使えません。§5 では `--call-graph` を付けずに `perf record` で取り直し、取得できたサンプルを手動で集計する方法を紹介します。
+`perf` 自体はサンプルを取得できています（このとき233サンプル）。不足しているのは「スタックの展開」「CPU欄」「シンボルの解決」だけで、葉のアドレスも残っていません。そのため、そのままでは集計に使えず、`perf record` で取り直す必要があります（`--call-graph` を付けなければ `ip` は残ります）。
+
+直し方は [profiling-moonbit-setup.md](profiling-moonbit-setup.md) にまとめました。要点は、`sudo apt-get install -y linux-perf` で libdw / libelf 付きの `perf` を入れることと、`profile-demo` の [`bin/perf`](https://github.com/podhmo/html-sandbox/blob/main/moonbit/experiments/profile-demo/bin/perf) を PATH の先頭に置くことです。直すと次のようになります。
+
+```console
+$ make profile
+Profile: native Linux perf
+Executables: 1
+Samples: 110, sample weight: 10.00ms
+...
+Top self time:
+   84.5%   930.00ms     93  moonbit_add_string
+   ...
+```
+
+`perf` をどうしても用意できないときは、取得できているサンプルを手動で集計する方法があります（§5）。
 
 ## 5. 代替: `perf` と `nm` で self time を取る
 
-`moon run --profile` が空の結果を返しても、`perf record` 自体は利用可能です。葉（スタックの先頭）のアドレスを `nm` で関数名に変換し、集計を行います。この処理を行うスクリプトが [`top.py`](https://github.com/podhmo/html-sandbox/blob/main/moonbit/experiments/profile-demo/top.py) で、**全文を付録A に掲載しています**。そのまま保存して使えます。
+libdw / libelf 付きの `perf` を用意できない環境では、`moon run --profile` / `moon test --profile` が空の結果を返します。その場合でも `perf record` 自体は利用可能です。葉（スタックの先頭）のアドレスを `nm` で関数名に変換し、集計を行います。`profile-demo` には、この処理を行う小さなスクリプト [`top.py`](https://github.com/podhmo/html-sandbox/blob/main/moonbit/experiments/profile-demo/top.py) が含まれており、**全文を付録A に掲載しています**。そのまま保存して使えます。
 
 `perf record` に渡す実行ファイルは `_build/native/release/build/<パッケージ>/<パッケージ>.exe` です（`--profile` が `--release --no-strip` で作ったもの。§1）。先に注意したとおり通常のビルドで strip 版に差し替わるので、`moon run --profile` を1回実行して実行ファイルを作らせ、**先にコピーしてから**記録します。
 
@@ -404,7 +422,7 @@ samples: 219  resolved: 216  unresolved: 3
 
 上位8行はすべて libc 内の同一関数の異なるオフセット（0x1b0cab〜0x1b0ce1）で、合計で約81%を占めています。逆アセンブルすると `vmovdqu64` / `vmovdqa64` が連続するベクトル化されたメモリコピーのループで、glibc の `__memmove_*` に相当します（`objdump -d --start-address=0x1b0cab --stop-address=0x1b0ce1 /lib/x86_64-linux-gnu/libc.so.6` のようにして確認します）。この関数は動的シンボルに含まれないため、名前解決ができず、オブジェクト名とオフセットで表示されています。次に多いのは `_mi_page_malloc_zero`（mimalloc によるメモリ確保）で4%。つまり、**時間の大部分は「確保とコピー」に費やされている**ことが分かります。`escape__naive` 自身の出現は極めて少ないです。
 
-`top.py` は `perf script` の生出力を読み取るだけなので、`moon run --profile` が生成した `perf.data` にも（`ip` さえ残っていれば）適用できます。ただし §4 のとおり、この環境の `perf.data` は `--call-graph dwarf` で記録されていて `ip` すら残っていないため、結果は得られません。上記のとおり `perf record` で取り直してください。
+`top.py` は `perf script` の生出力を読み取るだけなので、`moon run --profile` が生成した `perf.data` にも（`ip` さえ残っていれば）適用できます。ただし §4 のとおり、libdw / libelf を持たない `perf` が `--call-graph dwarf` で記録した `perf.data` にはスタックも `ip` も残っていないため、結果は得られません。上記のとおり `perf record` で取り直してください（`make record` で取得し直せます）。
 
 ### `fast` の結果
 
@@ -552,10 +570,10 @@ test "render_fast agrees with render_naive on a large document" {
 
 ## 7. チェックリスト
 
-1. `moon version`、`perf --version`、`ldd "$(which perf)"` で環境を確認します（`not a dynamic executable` と表示される場合もコールグラフは展開できません）。
+1. `moon version`、`perf --version`、`perf version --build-options | grep -E 'dwarf|libelf'`（`dwarf` と `libelf` が `[ on ]`）で環境を確認します。`--sample-cpu` は `profile-demo` の `bin/perf` が足します（[profiling-moonbit-setup.md](profiling-moonbit-setup.md)）。
 2. 計測用の実行ファイルを用意します。行数・繰り返し回数を引数で受け取り、`bytes` / `checksum` / `elapsed`（1回あたりの時間）を出力させます（§0）。
 3. 100Hzで数秒になるよう、処理量（`reps`）を調整します。
-4. `moon run --profile <名前> -- <args>` または `moon test --profile` を実行します。
+4. `PATH=bin:$PATH moon run --profile <exe> -- <args>` または `PATH=bin:$PATH moon test --profile` を実行します（`profile-demo` なら `make profile` / `make profile-fast` / `make profile-test`）。
 5. `Samples: N` を確認します。`1` 以上なら成功です。`0` の場合は §4 を読み、§5 へ移行します（その際、先に実行ファイルをコピーしておきます）。`100` 未満の場合は処理量を増やします。
 6. `Top self time` で「自分自身が重い関数」、`Top inclusive time` で「呼び出し先まで含めた重い関数」を確認します。`Runtime leaf costs ...` で確保や文字列操作の犯人を特定します（§5 の方法を使う場合は、`top.py` の `self%` が `Top self time` に相当します）。
 7. 必要に応じて `profile.json` を確認し、`analysis_notes` で定義を再確認します。
@@ -806,3 +824,4 @@ def main() -> int:
 if __name__ == "__main__":
     sys.exit(main())
 ```
+

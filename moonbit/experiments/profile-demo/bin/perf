@@ -1,0 +1,40 @@
+#!/bin/sh
+# `perf` wrapper for moon's `--profile` (moonbit/experiments/profile-demo).
+#
+# moon runs `perf record` without `--sample-cpu`, but its report parser requires
+# the `[cpu]` field in `perf script` output, so the report comes out empty
+# (observed_rows: 0).  Upstream perf only records PERF_SAMPLE_CPU for `-a`,
+# `-C` or `--sample-cpu`.  This wrapper injects `--sample-cpu` into `record`
+# and delegates everything else to the next real `perf` found on PATH.
+#
+# Background: docs/sketch/ja/profiling-moonbit-guide.md (and the setup memo
+# docs/sketch/ja/profiling-moonbit-setup.md).
+set -eu
+
+self_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+
+found=
+old_ifs=$IFS
+IFS=:
+for dir in $PATH; do
+  [ -n "$dir" ] || dir=.
+  if [ "$dir" = "$self_dir" ]; then
+    continue
+  fi
+  if [ -x "$dir/perf" ]; then
+    found="$dir/perf"
+    break
+  fi
+done
+IFS=$old_ifs
+
+if [ -z "$found" ]; then
+  echo "perf wrapper: no real perf found on PATH" >&2
+  exit 127
+fi
+
+if [ "$#" -gt 0 ] && [ "$1" = "record" ]; then
+  shift
+  exec "$found" record --sample-cpu "$@"
+fi
+exec "$found" "$@"
