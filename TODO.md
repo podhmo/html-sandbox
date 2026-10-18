@@ -103,18 +103,6 @@
   libelf を持たずにビルドされていること、moon 側では `perf record` に `--sample-cpu` を
   付けずパーサがヘッダの `[cpu]` を必須にしていることの 2 つだった
   （[issue #52](https://github.com/podhmo/html-sandbox/issues/52)）。
-  - [x] 環境: `linux-perf`（libdw / libelf 付きの perf 7.0.14）を入れ、`moon run --profile` /
-    `moon test --profile` が動くことを確認した。
-  - [x] moon 側の穴埋め: `moonbit/experiments/profile-demo/bin/perf`（`record` に
-    `--sample-cpu` を足すラッパー）を追加し、`Makefile` の `profile*` から使うようにした。
-  - [x] ドキュメント: ガイド（`docs/sketch/ja/profiling-moonbit-guide.md`）の §0 / §3 / §4 /
-    §5 / §7 を修正し、[セットアップメモ](docs/sketch/ja/profiling-moonbit-setup.md)を追加した。
-  - [ ] ネイティブ Linux（WSL2 でない）でも `observed_rows: 0` になるかを対照実験で確認する
-    （WSL2 はやや特殊かもしれないので、[他の人に依頼する](https://github.com/podhmo/html-sandbox/issues/53)）。
-  - [x] [moonbitlang/moon](https://github.com/moonbitlang/moon) に `--sample-cpu` の欠落を報告した
-    （[moon#2322](https://github.com/moonbitlang/moon/issues/2322)。下書きは
-    [issue #53](https://github.com/podhmo/html-sandbox/issues/53)。Linux 対応は
-    [PR #1722](https://github.com/moonbitlang/moon/pull/1722) で入り、その時点から付いていない）。
 
 ### Future work
 
