@@ -433,6 +433,62 @@ test "doc markdown" {
 }
 
 ///|
+test "prev next nav" {
+  let s = new_site([
+    (
+      "2026-10-01-old.md", "---\ntitle: Old post\nnext: 2026-10-14-hello.md\n---\nbody",
+    ),
+    (
+      "2026-10-14-hello.md", "---\ntitle: Hello\nprev: [Go to old](2026-10-01-old.md)\nnext: ../docs/ja/design.md\n---\nbody",
+    ),
+  ])
+  assert_contains(body(s, "/posts/hello"), [
+    "</article><nav><ul><li><small>← Previous</small><br><a href=\"/posts/old\">Go to old</a></li></ul>",
+    "<ul><li><small>Next →</small><br><a href=\"/docs/ja/design\">Design &lt;x&gt;</a></li></ul></nav>",
+  ])
+  assert_contains(body(s, "/posts/old"), [
+    "</article><nav><ul></ul><ul><li><small>Next →</small><br><a href=\"/posts/hello\">Hello</a></li></ul></nav>",
+  ])
+}
+
+///|
+test "prev next nav text only" {
+  let s = new_site([
+    (
+      "2026-10-14-hello.md", "---\ntitle: Hello\nprev: javascript:alert(1)\nnext: [a](x) [b](y)\n---\nbody",
+    ),
+  ])
+  let b = body(s, "/posts/hello")
+  assert_contains(b, [
+    "<nav><ul><li><small>← Previous</small><br>javascript:alert(1)</li></ul>",
+    "<ul><li><small>Next →</small><br>[a](x) [b](y)</li></ul></nav>",
+  ])
+  assert_false(b.contains("href=\"javascript:"))
+}
+
+///|
+test "no prev next nav" {
+  let b = body(new_site(test_posts), "/posts/hello")
+  assert_false(b.contains("</article><nav>"))
+}
+
+///|
+test "doc prev next nav" {
+  let posts = @site.load_posts(test_posts)
+  let docs = @site.load_docs([
+    (
+      "TODO.md", "---\nprev: posts/2026-10-01-old.md\nnext: [Design](docs/ja/design.md)\n---\n# TODO\n\n> note",
+    ),
+    ("docs/ja/design.md", "# Design <x>\n\nwhy\n## Use `el`\n- run `go test`"),
+  ])
+  let s = @site.Site(base_url="https://example.com", posts~, docs~)
+  assert_contains(body(s, "/docs/TODO"), [
+    "</article><nav><ul><li><small>← Previous</small><br><a href=\"/posts/old\">Old post</a></li></ul>",
+    "<ul><li><small>Next →</small><br><a href=\"/docs/ja/design\">Design</a></li></ul></nav>",
+  ])
+}
+
+///|
 test "more not found pages" {
   let s = new_site(test_posts)
   let cases = [

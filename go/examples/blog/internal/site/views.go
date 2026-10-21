@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/podhmo/html-sandbox/go/pkg/el"
 	pe "github.com/podhmo/html-sandbox/go/pkg/picoel"
 	"github.com/podhmo/html-sandbox/go/pkg/tinymarkdown"
 )
@@ -113,7 +114,11 @@ func postPage(env pageEnv, link linker, p Post) pe.Node {
 		URL:         env.BaseURL + postPath(p),
 		Type:        "article",
 	}
-	return layout(env, meta, pageHeader(pe.Date(p.Date), postMarkdownPath(p), p.File), pe.Article(body...))
+	page := []pe.Node{pageHeader(pe.Date(p.Date), postMarkdownPath(p), p.File), pe.Article(body...)}
+	if nav := relNav(p.Prev, p.Next); nav != nil {
+		page = append(page, nav)
+	}
+	return layout(env, meta, page...)
 }
 
 // docList links to every repository document, showing its file path below
@@ -137,8 +142,39 @@ func docPage(env pageEnv, link linker, d Doc) pe.Node {
 	}
 	body = append(body, renderBlocks(d.Doc.Children, link)...)
 	meta := pageMeta{Title: d.Title, Description: d.Description, URL: env.BaseURL + docPath(d), Type: "article"}
-	return layout(env, meta, pageHeader(pe.Small(pe.Text(d.Source)), docMarkdownPath(d), path.Base(d.Source)), pe.Article(body...))
+	page := []pe.Node{pageHeader(pe.Small(pe.Text(d.Source)), docMarkdownPath(d), path.Base(d.Source)), pe.Article(body...)}
+	if nav := relNav(d.Prev, d.Next); nav != nil {
+		page = append(page, nav)
+	}
+	return layout(env, meta, page...)
 }
+
+// relNav is the prev/next navigation below the article: prev on the left
+// and next on the right, split like the "Download .md" row above it. A
+// nil item leaves its side empty; when both are nil there is no nav.
+func relNav(prev, next *navItem) pe.Node {
+	if prev == nil && next == nil {
+		return nil
+	}
+	side := func(heading string, it *navItem) pe.Node {
+		if it == nil {
+			return el.El(el.Ul)
+		}
+		label := renderInlines(it.label, noLinks)
+		children := []pe.Node{pe.Small(pe.Text(heading)), el.El(el.Br)}
+		if it.href != "" {
+			children = append(children, pe.A(it.href, label...))
+		} else {
+			children = append(children, label...)
+		}
+		return el.El(el.Ul, el.El(el.Li, children...))
+	}
+	return el.El(el.Nav, side("← Previous", prev), side("Next →", next))
+}
+
+// noLinks resolves no URL: a nav label renders its text only, since a
+// link cannot sit inside another link.
+var noLinks linker = func(string) (string, bool) { return "", false }
 
 func postPath(p Post) string {
 	return "/posts/" + p.Slug
@@ -221,7 +257,7 @@ func renderList(items []tinymarkdown.Item, link linker) pe.Node {
 // linkedTitle renders a title written in Markdown inside the link to its
 // page. Links in the title show only their text, as links cannot nest.
 func linkedTitle(title string) []pe.Node {
-	return renderInlines(tinymarkdown.Inlines(title), func(string) (string, bool) { return "", false })
+	return renderInlines(tinymarkdown.Inlines(title), noLinks)
 }
 
 // plainText drops the markup of inline Markdown: code spans and links keep

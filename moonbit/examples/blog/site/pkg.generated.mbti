@@ -30,8 +30,17 @@ pub struct Doc {
   source : String
   title : String
   description : String
+  prev : String
+  next : String
+  mut prev_nav : NavItem?
+  mut next_nav : NavItem?
   doc : @tinymarkdown.Document
   markdown : String
+}
+
+pub struct NavItem {
+  label : Array[@tinymarkdown.Inline]
+  href : String
 }
 
 pub struct Post {
@@ -40,6 +49,10 @@ pub struct Post {
   date : String
   title : String
   description : String
+  prev : String
+  next : String
+  mut prev_nav : NavItem?
+  mut next_nav : NavItem?
   doc : @tinymarkdown.Document
   markdown : String
 }

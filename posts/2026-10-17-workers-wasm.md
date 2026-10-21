@@ -1,6 +1,7 @@
 ---
 title: TinyGo と標準 Go、2 つの wasm ビルド
 description: Cloudflare Workers 向けのビルドを TinyGo と標準 Go に分けた話と、TinyGo を入れずに Docker でビルドしてデプロイしている話。
+next: 2026-10-18-moonbit.md
 ---
 このブログは、同じ `http.Handler` を Cloudflare Workers でも動かせる。
 Workers 用のエントリポイントは別モジュールの `examples/blog/workers` にあり、

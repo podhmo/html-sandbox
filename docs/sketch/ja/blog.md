@@ -124,9 +124,10 @@ var postsFS embed.FS
 
 - 記事を読む関数は `fs.FS` を受け取る形にする（`loadPosts(fsys fs.FS) ([]Post, error)`）。本番では `fs.Sub(postsFS, "posts")` を渡し、テストでは `fstest.MapFS` を渡せる。
 - ファイル名は `2026-10-14-hello.md` の形にし、日付とスラッグをファイル名から取る。
-- 記事の先頭に `pkg/tinyfrontmatter` の front matter（`---` で囲んだ `key: value` の行）を書ける。使えるキーは `title` と `description` だけで、ほかのキーは打ち間違いとして起動時のエラーにする。
+- 記事の先頭に `pkg/tinyfrontmatter` の front matter（`---` で囲んだ `key: value` の行）を書ける。使えるキーは `title`、`description`、`prev`、`next` だけで、ほかのキーは打ち間違いとして起動時のエラーにする。ドキュメント（`TODO.md`、`docs/**/*.md`）にも同じキーを書ける。
 - タイトルは front matter の `title`、なければ最初の `#` 見出しから取る。本文に `#` 見出しがなければ、記事ページで `<h1>` を補う。
 - 説明文は front matter の `description`、なければ最初の段落から取る。`<meta name="description">` と OGP に使う。
+- `prev` と `next` は前後の記事へのリンクで、記事ページの `</article>` の下に `← Previous`（左）と `Next →`（右）のナビゲーションとして描く。値は `[text](url)` のリンクか URL だけの 1 つを書く。URL は本文のリンクと同じ規則で解決するが、相対 URL はこのサイトが配信する記事・ドキュメントに指すときだけリンクにし、GitHub 上のファイルへのリンクにはしない。URL がこのサイトのページを指すときタイトルはページのタイトルになり、そうでなければ書いた値がそのままテキストになる。両方未指定ならナビゲーション自体を出さない。
 - 記事は起動時に一度だけ全部読む。記事を書き換えたら再ビルドが必要になる（ブログの例としてはこれで十分）。
 
 ### レイアウトは Go の関数

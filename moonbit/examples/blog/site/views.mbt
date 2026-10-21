@@ -133,10 +133,15 @@ fn Site::post_page(self : Site, p : Post) -> @el.Node {
     url: "\{self.base_url}\{p.page_path()}",
     type_: "article",
   }
-  layout(meta, [
+  let page = [
     page_header(@picoel.date(p.date), href=p.markdown_path(), filename=p.file),
     @picoel.article(body),
-  ])
+  ]
+  match rel_nav(p.prev_nav, p.next_nav) {
+    Some(nav) => page.push(nav)
+    None => ()
+  }
+  layout(meta, page)
 }
 
 ///|
@@ -177,15 +182,55 @@ fn Site::doc_page(self : Site, d : Doc) -> @el.Node {
     url: "\{self.base_url}\{d.page_path()}",
     type_: "article",
   }
-  layout(meta, [
+  let page = [
     page_header(
       @picoel.small([@picoel.text(d.source)]),
       href=d.markdown_path(),
       filename=base(d.source),
     ),
     @picoel.article(body),
-  ])
+  ]
+  match rel_nav(d.prev_nav, d.next_nav) {
+    Some(nav) => page.push(nav)
+    None => ()
+  }
+  layout(meta, page)
 }
+
+///|
+/// rel_nav is the prev/next navigation below the article: prev on the
+/// left and next on the right, split like the "Download .md" row above
+/// it. A None item leaves its side empty; when both are None there is no
+/// nav.
+fn rel_nav(prev : NavItem?, next : NavItem?) -> @el.Node? {
+  if prev is None && next is None {
+    return None
+  }
+  let side = (heading : String, it : NavItem?) => {
+    match it {
+      None => @el.el(@el.ul, [])
+      Some(it) => {
+        let children = [
+          @picoel.small([@picoel.text(heading)]),
+          @el.el(@el.br, []),
+        ]
+        let label = render_inlines(it.label, no_links)
+        if it.href != "" {
+          children.push(@picoel.a(it.href, label))
+        } else {
+          children.push_iter(label.iter())
+        }
+        @el.el(@el.ul, [@el.el(@el.li, children)])
+      }
+    }
+  }
+  Some(@el.el(@el.nav, [side("← Previous", prev), side("Next →", next)]))
+}
+
+///|
+/// no_links resolves no URL: a nav label renders its text only, since a
+/// link cannot sit inside another link.
+let no_links : Linker = _ => None
 
 ///|
 fn Post::page_path(self : Post) -> String {
@@ -298,7 +343,7 @@ fn render_list(items : Array[@tinymarkdown.Item], link : Linker) -> @el.Node {
 /// linked_title renders a title written in Markdown inside the link to its
 /// page. Links in the title show only their text, as links cannot nest.
 fn linked_title(title : String) -> Array[@el.Node] {
-  render_inlines(@tinymarkdown.inlines(title), (_ : String) => None)
+  render_inlines(@tinymarkdown.inlines(title), no_links)
 }
 
 ///|
