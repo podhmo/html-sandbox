@@ -18,14 +18,29 @@ type Post struct {
 	Slug        string
 	File        string // file name, e.g. 2026-10-14-hello.md
 	Date        time.Time
-	Title       string // front matter "title", or the first "#" heading
-	Description string // front matter "description", or the first paragraph
+	Title       string   // front matter "title", or the first "#" heading
+	Description string   // front matter "description", or the first paragraph
+	Prev        *navItem // front matter "prev", resolved by newSite
+	Next        *navItem // front matter "next", resolved by newSite
+	prevRaw     string   // front matter "prev", as written
+	nextRaw     string   // front matter "next", as written
 	Doc         tinymarkdown.Document
 	Markdown    string // the file as written, front matter included
 }
 
-// frontMatterKeys are the keys a post may set; others are reported as typos.
-var frontMatterKeys = []string{"title", "description"}
+// frontMatterKeys are the keys a post or document may set; others are
+// reported as typos.
+var frontMatterKeys = []string{"title", "description", "prev", "next"}
+
+// checkMeta reports a key of meta that is not in frontMatterKeys.
+func checkMeta(name string, meta map[string]string) error {
+	for k := range meta {
+		if !slices.Contains(frontMatterKeys, k) {
+			return fmt.Errorf("%s: unknown front matter key %q (want one of %v)", name, k, frontMatterKeys)
+		}
+	}
+	return nil
+}
 
 var postName = regexp.MustCompile(`^(\d{4}-\d{2}-\d{2})-([a-z0-9]+(?:-[a-z0-9]+)*)\.md$`)
 
@@ -60,10 +75,8 @@ func LoadPosts(fsys fs.FS) ([]Post, error) {
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", name, err)
 		}
-		for k := range meta {
-			if !slices.Contains(frontMatterKeys, k) {
-				return nil, fmt.Errorf("%s: unknown front matter key %q (want one of %v)", name, k, frontMatterKeys)
-			}
+		if err := checkMeta(name, meta); err != nil {
+			return nil, err
 		}
 		doc := tinymarkdown.Parse(body)
 		title := meta["title"]
@@ -77,7 +90,7 @@ func LoadPosts(fsys fs.FS) ([]Post, error) {
 		if description == "" {
 			description = firstParagraph(doc.Children)
 		}
-		posts = append(posts, Post{Slug: slug, File: name, Date: date, Title: title, Description: description, Doc: doc, Markdown: string(src)})
+		posts = append(posts, Post{Slug: slug, File: name, Date: date, Title: title, Description: description, prevRaw: meta["prev"], nextRaw: meta["next"], Doc: doc, Markdown: string(src)})
 	}
 	slices.SortFunc(posts, func(a, b Post) int {
 		return cmp.Or(b.Date.Compare(a.Date), cmp.Compare(a.Slug, b.Slug))

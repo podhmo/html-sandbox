@@ -7,18 +7,23 @@ import (
 	"path"
 	"strings"
 
+	"github.com/podhmo/html-sandbox/go/pkg/tinyfrontmatter"
 	"github.com/podhmo/html-sandbox/go/pkg/tinymarkdown"
 )
 
 // Doc is a repository document, such as TODO.md or docs/ja/design.md,
 // served under /docs/.
 type Doc struct {
-	Path        string // URL path below /docs/: the file path without "docs/" and ".md"
-	Source      string // file path in the repository
-	Title       string // the first "#" heading, or Source
-	Description string // the first paragraph
+	Path        string   // URL path below /docs/: the file path without "docs/" and ".md"
+	Source      string   // file path in the repository
+	Title       string   // front matter "title", the first "#" heading, or Source
+	Description string   // front matter "description", or the first paragraph
+	Prev        *navItem // front matter "prev", resolved by newSite
+	Next        *navItem // front matter "next", resolved by newSite
+	prevRaw     string   // front matter "prev", as written
+	nextRaw     string   // front matter "next", as written
 	Doc         tinymarkdown.Document
-	Markdown    string // the file as written
+	Markdown    string // the file as written, front matter included
 }
 
 // DocSources are the files and directories of fsys that hold documents.
@@ -44,12 +49,26 @@ func LoadDocs(fsys fs.FS) ([]Doc, error) {
 		if err != nil {
 			return err
 		}
-		doc := tinymarkdown.Parse(string(src))
-		title, ok := firstTitle(doc)
-		if !ok {
+		meta, body, err := tinyfrontmatter.Split(string(src))
+		if err != nil {
+			return fmt.Errorf("%s: %w", name, err)
+		}
+		if err := checkMeta(name, meta); err != nil {
+			return err
+		}
+		doc := tinymarkdown.Parse(body)
+		title := meta["title"]
+		if title == "" {
+			title, _ = firstTitle(doc)
+		}
+		if title == "" {
 			title = name
 		}
-		docs = append(docs, Doc{Path: p, Source: name, Title: title, Description: firstParagraph(doc.Children), Doc: doc, Markdown: string(src)})
+		description := meta["description"]
+		if description == "" {
+			description = firstParagraph(doc.Children)
+		}
+		docs = append(docs, Doc{Path: p, Source: name, Title: title, Description: description, prevRaw: meta["prev"], nextRaw: meta["next"], Doc: doc, Markdown: string(src)})
 		return nil
 	}
 	for _, root := range DocSources {

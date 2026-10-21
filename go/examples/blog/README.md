@@ -93,13 +93,15 @@ TinyGo (also through Docker) or the standard Go toolchain. See
 Add a file to [`posts/`](../../../posts/) in the repository root named `YYYY-MM-DD-slug.md`. The date and
 slug come from the file name; the slug may contain `a-z`, `0-9`, and `-`.
 
-A post may start with front matter. Only `title` and `description` are
-allowed:
+A post may start with front matter. Only `title`, `description`, `prev`,
+and `next` are allowed:
 
 ```markdown
 ---
 title: Hello
 description: Shown in <meta name="description"> and OGP.
+prev: 2026-10-01-old.md
+next: [The next post](2026-10-03-new.md)
 ---
 ```
 
@@ -107,6 +109,15 @@ Each key falls back on its own: without `title`, the title is the first
 top-level `#` heading (a post with neither is an error at startup); without
 `description`, the description is the first paragraph. When the title comes
 from front matter and the body has no `#` heading, the post page adds one.
+
+`prev` and `next` are one value each, either a `[text](url)` link or a bare
+URL. They render as a navigation row below the article — `prev` on the
+left, `next` on the right — and are absent when unset. A bare URL to a page
+of the site shows the page's title; any other value shows as written. URLs
+resolve like body links (see [Links](#links)), except that a relative URL
+is not linked unless it points at a served post or document — it never
+links to a file on GitHub. The same keys work on documents (`TODO.md`,
+`docs/**/*.md`).
 
 The body supports a tiny subset of Markdown:
 

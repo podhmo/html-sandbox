@@ -124,3 +124,63 @@ test "load docs" {
     ("notes", "docs/notes.md", "docs/notes.md", "no heading"),
   ])
 }
+
+///|
+/// plain_inlines drops the markup of ins: code spans and links keep only
+/// their text.
+fn plain_inlines(ins : Array[@tinymarkdown.Inline]) -> String {
+  let sb = StringBuilder()
+  fn walk(ins : Array[@tinymarkdown.Inline]) {
+    for i in ins {
+      match i {
+        Text(t) | Code(t) => sb.write_string(t)
+        Link(children~, ..) => walk(children)
+      }
+    }
+  }
+
+  walk(ins)
+  sb.to_string()
+}
+
+///|
+test "nav item" {
+  let s = Site(
+    base_url="https://example.com",
+    posts=load_posts([
+      ("2026-10-01-old.md", "# Old post\nold body"),
+      ("2026-10-14-hello.md", "# Hello"),
+    ]),
+    docs=load_docs([("docs/ja/design.md", "# Design <x>\n\nwhy")]),
+  )
+  let src = "posts/2026-10-14-hello.md"
+  let cases = [
+    ("2026-10-01-old.md", "Old post", "/posts/old"),
+    ("[Back](2026-10-01-old.md)", "Back", "/posts/old"),
+    ("[Go `fmt`](2026-10-01-old.md)", "Go fmt", "/posts/old"),
+    ("../docs/ja/design.md", "Design <x>", "/docs/ja/design"),
+    ("https://example.com/x", "https://example.com/x", "https://example.com/x"),
+    ("mailto:a@example.com", "mailto:a@example.com", "mailto:a@example.com"),
+    ("#anchor", "#anchor", "#anchor"),
+    // Refused by the linker: text only.
+    ("javascript:alert(1)", "javascript:alert(1)", ""),
+    ("../outside.md", "../outside.md", ""),
+    // A relative URL that is not a page of the site is text only;
+    // the body would link it to the file on GitHub.
+    (".claude/skills/todo-md/SKILL.md", ".claude/skills/todo-md/SKILL.md", ""),
+    // Not a single link or a single URL: shown as written.
+    ("[a](x) [b](y)", "[a](x) [b](y)", ""),
+    ("just some words", "just some words", ""),
+    ("[title] (url)", "[title] (url)", ""),
+  ]
+  for (value, label, href) in cases {
+    match s.nav_item(src, value) {
+      None => fail("\{value}: got None")
+      Some(it) => {
+        assert_eq(plain_inlines(it.label), label, msg=value)
+        assert_eq(it.href, href, msg=value)
+      }
+    }
+  }
+  assert_true(s.nav_item(src, "") is None)
+}

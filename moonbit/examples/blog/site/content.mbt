@@ -31,14 +31,35 @@ pub struct Post {
   date : String // YYYY-MM-DD
   title : String // front matter "title", or the first "#" heading
   description : String // front matter "description", or the first paragraph
+  prev : String // front matter "prev", as written
+  next : String // front matter "next", as written
+  mut prev_nav : NavItem? // "prev" resolved by Site::Site
+  mut next_nav : NavItem? // "next" resolved by Site::Site
   doc : @tinymarkdown.Document
   markdown : String // the file as written, front matter included
 }
 
 ///|
-/// front_matter_keys are the keys a post may set; others are reported as
-/// typos.
-let front_matter_keys : ReadOnlyArray[String] = ["title", "description"]
+/// front_matter_keys are the keys a post or document may set; others are
+/// reported as typos.
+let front_matter_keys : ReadOnlyArray[String] = [
+  "title", "description", "prev", "next",
+]
+
+///|
+/// check_meta reports a key of meta that is not in front_matter_keys.
+fn check_meta(
+  name : String,
+  meta : Map[String, String],
+) -> Unit raise LoadError {
+  for k, _ in meta {
+    if !front_matter_keys.contains(k) {
+      raise LoadError(
+        message="\{name}: unknown front matter key \{k.escape()} (want one of [\{front_matter_keys.join(" ")}])",
+      )
+    }
+  }
+}
 
 ///|
 /// load_posts reads every *.md file in files, given as (file name,
@@ -70,13 +91,7 @@ pub fn load_posts(
       e => raise LoadError(message="\{name}: \{e}")
     }
     let meta = meta.unwrap_or(Map([]))
-    for k, _ in meta {
-      if !front_matter_keys.contains(k) {
-        raise LoadError(
-          message="\{name}: unknown front matter key \{k.escape()} (want one of [\{front_matter_keys.join(" ")}])",
-        )
-      }
-    }
+    check_meta(name, meta)
     let doc = @tinymarkdown.parse(body)
     let title = match meta {
       { "title": t, .. } if t != "" => t
@@ -97,6 +112,10 @@ pub fn load_posts(
       date,
       title,
       description,
+      prev: meta.get("prev").unwrap_or(""),
+      next: meta.get("next").unwrap_or(""),
+      prev_nav: None,
+      next_nav: None,
       doc,
       markdown: src,
     })
@@ -200,10 +219,14 @@ fn first_paragraph(bs : Array[@tinymarkdown.Block]) -> String {
 pub struct Doc {
   path : String // URL path below /docs/: the file path without "docs/" and ".md"
   source : String // file path in the repository
-  title : String // the first "#" heading, or source
-  description : String // the first paragraph
+  title : String // front matter "title", the first "#" heading, or source
+  description : String // front matter "description", or the first paragraph
+  prev : String // front matter "prev", as written
+  next : String // front matter "next", as written
+  mut prev_nav : NavItem? // "prev" resolved by Site::Site
+  mut next_nav : NavItem? // "next" resolved by Site::Site
   doc : @tinymarkdown.Document
-  markdown : String // the file as written
+  markdown : String // the file as written, front matter included
 }
 
 ///|
@@ -236,12 +259,29 @@ pub fn load_docs(
       raise LoadError(message="\{name}: /docs/\{p} is already used by \{prev}")
     }
     seen[p] = name
-    let doc = @tinymarkdown.parse(src)
+    let (meta, body) = @tinyfrontmatter.split(src) catch {
+      e => raise LoadError(message="\{name}: \{e}")
+    }
+    let meta = meta.unwrap_or(Map([]))
+    check_meta(name, meta)
+    let doc = @tinymarkdown.parse(body)
+    let title = match meta {
+      { "title": t, .. } if t != "" => t
+      _ => first_title(doc).unwrap_or(name)
+    }
+    let description = match meta {
+      { "description": d, .. } if d != "" => d
+      _ => first_paragraph(doc.children)
+    }
     docs.push({
       path: p,
       source: name,
-      title: first_title(doc).unwrap_or(name),
-      description: first_paragraph(doc.children),
+      title,
+      description,
+      prev: meta.get("prev").unwrap_or(""),
+      next: meta.get("next").unwrap_or(""),
+      prev_nav: None,
+      next_nav: None,
       doc,
       markdown: src,
     })

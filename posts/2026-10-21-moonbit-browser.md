@@ -1,6 +1,7 @@
 ---
 title: 同じ wasm をブラウザーと Worker で動かしたい
 description: MoonBit の tinymarkdown と el を wasm-gc のままブラウザーで動かすことはできた。理想ではこのブログの Worker と同じ wasm でつながるはずなのに、今はつながらない。その理由と、つながりそうな道筋。
+prev: 2026-10-20-moonbit-http.md
 ---
 記事を書く画面があったとして、打った Markdown をその場でプレビューしたい。
 このブログが記事を描画しているのは、MoonBit の `tinymarkdown` と `el` だ。

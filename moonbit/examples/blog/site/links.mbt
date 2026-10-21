@@ -215,6 +215,20 @@ type Linker = (String) -> String?
 /// go to the file on GitHub, and those that leave the repository are not
 /// linked.
 fn Site::linker(self : Site, source : String) -> Linker {
+  self.resolver(source, repo_files=true)
+}
+
+///|
+/// Site::page_linker resolves like linker, except that a relative URL
+/// links only to a document or post served here — never to a file on
+/// GitHub. It is for the prev/next navigation, where pointing at a file
+/// listing on GitHub would not be the previous or next page.
+fn Site::page_linker(self : Site, source : String) -> Linker {
+  self.resolver(source, repo_files=false)
+}
+
+///|
+fn Site::resolver(self : Site, source : String, repo_files~ : Bool) -> Linker {
   raw => {
     guard Ref::parse(raw) is Some(u) else { return None }
     if u.scheme != "" {
@@ -235,12 +249,14 @@ fn Site::linker(self : Site, source : String) -> Linker {
       escape(d.page_path(), fragment=false)
     } else if self.by_file.get(p) is Some(post) {
       escape(post.page_path(), fragment=false)
-    } else {
+    } else if repo_files {
       // The file on the main branch on GitHub, which redirects blob/ to
       // tree/ for directories.
       let path = join([REPO_PATH, p])
       let query = if u.raw_query != "" { "?\{u.raw_query}" } else { "" }
       "https://\{REPO_HOST}\{escape(path, fragment=false)}\{query}"
+    } else {
+      return None
     }
     let fragment = if u.fragment != "" {
       "#\{escape(u.fragment, fragment=true)}"

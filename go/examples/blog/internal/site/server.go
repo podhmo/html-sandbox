@@ -46,6 +46,23 @@ func newSite(posts []Post, docs []Doc) *site {
 		st.byPath[d.Path] = d
 		st.bySource[d.Source] = d
 	}
+	// With every file mapped, resolve the prev/next links of each page,
+	// which may point at other pages of the site. The resolved item is
+	// stored in both the slice and the maps, which hold copies.
+	for i := range st.posts {
+		p := &st.posts[i]
+		p.Prev = st.navItem(postSource(*p), p.prevRaw)
+		p.Next = st.navItem(postSource(*p), p.nextRaw)
+		st.bySlug[p.Slug] = *p
+		st.byFile[postSource(*p)] = *p
+	}
+	for i := range st.docs {
+		d := &st.docs[i]
+		d.Prev = st.navItem(d.Source, d.prevRaw)
+		d.Next = st.navItem(d.Source, d.nextRaw)
+		st.byPath[d.Path] = *d
+		st.bySource[d.Source] = *d
+	}
 	return st
 }
 

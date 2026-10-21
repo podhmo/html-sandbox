@@ -58,7 +58,7 @@ pub fn Site::Site(
     by_path[d.path] = d
     by_source[d.source] = d
   }
-  {
+  let st = Site::{
     base_url: origin.to_owned(),
     posts,
     by_slug,
@@ -68,6 +68,18 @@ pub fn Site::Site(
     by_source,
     router: None,
   }
+  // With every file mapped, resolve the prev/next links of each page,
+  // which may point at other pages of the site. The maps hold the same
+  // posts and docs, so they see the resolved items.
+  for p in st.posts {
+    p.prev_nav = st.nav_item(p.source(), p.prev)
+    p.next_nav = st.nav_item(p.source(), p.next)
+  }
+  for d in st.docs {
+    d.prev_nav = st.nav_item(d.source, d.prev)
+    d.next_nav = st.nav_item(d.source, d.next)
+  }
+  st
 }
 
 ///|

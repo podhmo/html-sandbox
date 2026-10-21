@@ -1,6 +1,8 @@
 ---
 title: MoonBit の Worker 用アダプターをライブラリにする
 description: ブログ専用だった MoonBit の wasm と Worker のあいだの受け渡しを、POST、ヘッダー、フォーム、ルーティングまで扱える小さな HTTP ライブラリに切り出した話。
+prev: 2026-10-19-moonbit-memory.md
+next: [同じ wasm をブラウザーと Worker で動かしたい](2026-10-21-moonbit-browser.md)
 ---
 [前の記事](./2026-10-19-moonbit-memory.md)の受け渡しは、このブログのためだけのものだった。
 wasm に届くのは `BASE_URL`、メソッド、クエリー、パスだけで、POST の本文もヘッダーも届かない。

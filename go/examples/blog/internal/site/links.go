@@ -32,6 +32,18 @@ type linker func(u string) (href string, ok bool)
 // go to the file on GitHub, and those that leave the repository are not
 // linked.
 func (st *site) linker(source string) linker {
+	return st.resolver(source, true)
+}
+
+// pageLinker resolves like linker, except that a relative URL links only
+// to a document or post served here — never to a file on GitHub. It is
+// for the prev/next navigation, where pointing at a file listing on
+// GitHub would not be the previous or next page.
+func (st *site) pageLinker(source string) linker {
+	return st.resolver(source, false)
+}
+
+func (st *site) resolver(source string, repoFiles bool) linker {
 	return func(raw string) (string, bool) {
 		u, err := url.Parse(raw)
 		if err != nil {
@@ -56,11 +68,13 @@ func (st *site) linker(source string) linker {
 			target.Path = docPath(d)
 		} else if post, ok := st.byFile[p]; ok {
 			target.Path = postPath(post)
-		} else {
+		} else if repoFiles {
 			// GitHub redirects blob/ to tree/ for directories.
 			target = repoURL
 			target.Path = path.Join(target.Path, p)
 			target.RawQuery = u.RawQuery
+		} else {
+			return "", false
 		}
 		target.Fragment = u.Fragment
 		return target.String(), true
