@@ -103,6 +103,11 @@
   libelf を持たずにビルドされていること、moon 側では `perf record` に `--sample-cpu` を
   付けずパーサがヘッダの `[cpu]` を必須にしていることの 2 つだった
   （[issue #52](https://github.com/podhmo/html-sandbox/issues/52)）。
+- [ ] **記事のセクションに `id` を付けて `#` リンクが届くようにする**: 今は
+  tinymarkdown の `Section` が `<section>` だけを出すので、`#見出し` への
+  フラグメントリンクがどこにも届かない（`prev` / `next` の値にも `#` 付きの
+  URL を書ける）。見出しから id を作る規則（GitHub 式のスラッグ化など）を
+  決めて、Go 版と MoonBit 版の両方で `<section>` に付ける。
 
 ### Future work
 
