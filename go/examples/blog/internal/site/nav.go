@@ -36,6 +36,10 @@ func (st *site) navItem(source, value string) *navItem {
 		// Not a single link nor a single URL: show the value as text.
 		return &navItem{label: []tinymarkdown.Inline{tinymarkdown.Text(value)}}
 	}
+	if len(label) == 0 {
+		// An empty label ("[](url)") is filled like a bare URL's.
+		label = nil
+	}
 	href, ok := st.pageLinker(source)(raw)
 	if !ok {
 		// The URL must not be linked; like a refused link in the body,
@@ -58,7 +62,8 @@ func (st *site) navItem(source, value string) *navItem {
 // pageTitle returns the title of the post or document at href, a URL that
 // pageLinker resolved, or "" when it is not a page of this site.
 func (st *site) pageTitle(href string) string {
-	p, _, _ := strings.Cut(href, "#")
+	p, _, _ := strings.Cut(href, "?")
+	p, _, _ = strings.Cut(p, "#")
 	if slug, ok := strings.CutPrefix(p, "/posts/"); ok && slug != "" && !strings.Contains(slug, "/") {
 		if post, ok := st.bySlug[slug]; ok {
 			return post.Title

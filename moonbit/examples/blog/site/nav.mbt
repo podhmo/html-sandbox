@@ -27,7 +27,8 @@ fn Site::nav_item(self : Site, source : String, value : String) -> NavItem? {
     // Not a single link nor a single URL: show the value as text.
     _ => return Some({ label: [Text(value)], href: "", })
   }
-  let label = label
+  // An empty label ("[](url)") is filled like a bare URL's.
+  let label = if label is Some([]) { None } else { label }
   let raw = raw
   match self.page_linker(source)(raw) {
     None => {
@@ -58,9 +59,13 @@ fn Site::nav_item(self : Site, source : String, value : String) -> NavItem? {
 /// URL that page_linker resolved, or "" when it is not a page of this
 /// site.
 fn Site::page_title(self : Site, href : String) -> String {
-  let p = match href.find("#") {
+  let p = match href.find("?") {
     Some(i) => href[:i].to_owned()
     None => href
+  }
+  let p = match p.find("#") {
+    Some(i) => p[:i].to_owned()
+    None => p
   }
   match p {
     [.. "/posts/", .. slug] if slug != "" && !slug.contains("/") =>

@@ -23,10 +23,15 @@ func TestNavItem(t *testing.T) {
 		{"2026-10-01-old.md", "Old post", "/posts/old"},
 		{"[Back](2026-10-01-old.md)", "Back", "/posts/old"},
 		{"[Go `fmt`](2026-10-01-old.md)", "Go fmt", "/posts/old"},
+		{"[](2026-10-01-old.md)", "Old post", "/posts/old"},
+		{"/posts/old?ref=nav", "Old post", "/posts/old?ref=nav"},
+		{"/posts/old#points", "Old post", "/posts/old#points"},
 		{"../docs/ja/design.md", "Design <x>", "/docs/ja/design"},
 		{"https://example.com/x", "https://example.com/x", "https://example.com/x"},
 		{"mailto:a@example.com", "mailto:a@example.com", "mailto:a@example.com"},
 		{"#anchor", "#anchor", "#anchor"},
+		// An empty URL is not a served page, so it is text only.
+		{"[Current]()", "Current", ""},
 		// Refused by the linker: text only.
 		{"javascript:alert(1)", "javascript:alert(1)", ""},
 		{"../outside.md", "../outside.md", ""},
