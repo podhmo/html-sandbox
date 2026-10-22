@@ -120,6 +120,12 @@
 
 ### Future work
 
+- [ ] **```svg ブロックの中身をサニタイズする**: ```svg フェンスのブロックは
+  中身をそのまま HTML に書くので、`<script>` や `on*` 属性、`foreignObject`
+  経由でブログと同じオリジンのスクリプトが動く。今は記事の作者=自分なので
+  意図どおりだが、要素/属性の allowlist 方式のサニタイザーを Go と MoonBit
+  に同じ形で入れると安心（Devin Review SEC finding 由来）。
+
 - [x] **MoonBit の Workers 用アダプターを最適な形に磨く**: 今のアダプター
   （`moonbit/cloudflare/worker.mjs`（当時は `moonbit/workers/`）と `moonbit/worker` の export、host の
   import）は、ブログに必要十分で、足りないものはない。ただ、spike から必要に
