@@ -196,7 +196,7 @@ func TestReadmeHoistKeepsOrder(t *testing.T) {
 func TestDocBundleNonMarkdownFace(t *testing.T) {
 	posts, _ := LoadPosts(fstest.MapFS{})
 	docs, err := LoadDocs(fstest.MapFS{
-		"docs/x.md/00-run.sh": file("echo hi\n"),
+		"docs/x.md/00-run.sh":  file("echo hi\n"),
 		"docs/x.md/01-note.md": file("# Note"),
 	})
 	if err != nil {
