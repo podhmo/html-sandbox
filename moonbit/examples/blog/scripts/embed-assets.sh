@@ -13,7 +13,7 @@ set -eu
 out=$1
 # moon passes DIR as ./DIR; drop that so both callers write the same file.
 dir=${2#./}
-tmp=$out.tmp
+tmp=$out.tmp.$$
 trap 'rm -f "$tmp" "$tmp.one"' EXIT
 
 sha256() {

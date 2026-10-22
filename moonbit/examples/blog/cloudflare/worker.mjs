@@ -7,16 +7,66 @@ import { wasmApp, toResponse } from "../../../pkg/http/wasm/adapter.mjs";
 
 const app = wasmApp(wasm);
 
+// assetURL is the URL to ask the ASSETS binding for path, a path under
+// build/content. The binding ignores the host, and each segment is escaped
+// so that a name with "#" or "?" still finds its file.
+function assetURL(path) {
+  return new URL(path.split("/").map(encodeURIComponent).join("/"), "https://assets.local");
+}
+
+// loadContent reads the Static Assets once per isolate: files.txt lists
+// them (the build makes it), and each file goes to the Wasm, which builds
+// the site from them on the first request. A failure is not kept, so the
+// next request tries again.
+let loading;
+
+function loadContent(env) {
+  if (!loading) {
+    const pending = fetchContent(env);
+    loading = pending;
+    pending.catch(() => {
+      if (loading === pending) loading = undefined;
+    });
+  }
+  return loading;
+}
+
+async function fetchContent(env) {
+  if (!env.ASSETS) throw new Error("the ASSETS binding is not configured");
+  const list = await env.ASSETS.fetch(assetURL("/files.txt"));
+  if (!list.ok) throw new Error(`files.txt: ${list.status} ${list.statusText}`);
+  const names = (await list.text()).split("\n").filter((name) => name !== "");
+  if (names.length === 0) throw new Error("files.txt lists no files");
+  const contents = await Promise.all(
+    names.map(async (name) => {
+      const res = await env.ASSETS.fetch(assetURL(`/${name}`));
+      if (!res.ok) throw new Error(`${name}: ${res.status} ${res.statusText}`);
+      return new Uint8Array(await res.arrayBuffer());
+    }),
+  );
+  app.load(names.map((name, i) => [name, contents[i]]));
+}
+
 // cache holds the 200 responses to GET and HEAD by path, for this isolate.
-// The content is embedded in the Wasm, so a path's page never changes, and
-// the query only matters to redirects. Spelling a path with different
-// escapes makes a new key, so the cache starts over when it is full.
+// The content comes from Static Assets, which only change on a deploy, so
+// a path's page never changes; the query only matters to redirects.
+// Spelling a path with different escapes makes a new key, so the cache
+// starts over when it is full.
 const cache = new Map();
 const cacheLimit = 1024;
 let cachedBaseURL;
 
 export default {
   async fetch(request, env) {
+    try {
+      await loadContent(env);
+    } catch (e) {
+      // Like the Wasm's own 500 for content it cannot load.
+      return new Response(`${e.message}\n`, {
+        status: 500,
+        headers: { "content-type": "text/plain; charset=utf-8" },
+      });
+    }
     const baseURL = env.BASE_URL ?? "";
     if (baseURL !== cachedBaseURL || cache.size >= cacheLimit) {
       cache.clear();

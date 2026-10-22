@@ -1,5 +1,5 @@
 ///|
-let site : @site.Site = @site.Site::embedded(
+let site : @site.Site = @content.site(
   base_url="https://blog.podhmo.workers.dev",
 ) catch {
   _ => panic()

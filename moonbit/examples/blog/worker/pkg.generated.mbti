@@ -2,6 +2,8 @@
 package "podhmo/html-sandbox/examples/blog/worker"
 
 // Values
+pub fn file(Int) -> Int
+
 pub fn serve(Int) -> Int
 
 // Errors

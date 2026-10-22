@@ -1,5 +1,6 @@
 // Loading posts and documents: a port of the Go blog's posts.go and
-// docs.go, reading the embedded (name, content) pairs instead of an fs.FS.
+// docs.go. The Worker reads the (name, content) pairs from Static Assets;
+// the tests and the spikes read them from the embedded copies.
 
 ///|
 /// LoadError is content that cannot be served; the message names the
@@ -301,9 +302,7 @@ pub fn load_posts(
       )
     }
     seen[slug] = dir_name
-    posts.push(
-      load_post_bundle(dir_name, date, slug, bundles[dir_name]),
-    )
+    posts.push(load_post_bundle(dir_name, date, slug, bundles[dir_name]))
   }
   posts.sort_by((a, b) => {
     let c = b.date.lexical_compare(a.date)

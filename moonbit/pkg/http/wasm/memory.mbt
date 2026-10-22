@@ -29,7 +29,8 @@ fn reserve(n : Int32) -> Unit {
 }
 
 ///|
-/// read copies the n bytes at address 0.
+/// read copies the n bytes at address 0. read_file reads what the host
+/// wrote there through it.
 fn read(n : Int32) -> Bytes {
   Bytes::makei(n, i => load8(i).to_byte())
 }

@@ -11,7 +11,7 @@
 
 ## To Be Implemented
 
-- [ ] **MoonBit 版のブログで、記事や文書を足しても Wasm が太らないようにする**:
+- [x] **MoonBit 版のブログで、記事や文書を足しても Wasm が太らないようにする**:
   今は記事、`TODO.md`、`docs/**/*.md` を Wasm に埋め込んでいるので、書くたびに
   Wasm が大きくなる（249 KB のうち、埋め込んだ文章が約 134 KB）。`wrangler deploy`
   と `make dev` だけで済む今の手軽さを保ったまま、文章を Wasm の外に出す。

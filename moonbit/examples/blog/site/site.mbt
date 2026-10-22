@@ -98,16 +98,6 @@ pub fn Site::Site(
 }
 
 ///|
-/// Site::embedded serves the posts and documents built into the Wasm.
-pub fn Site::embedded(base_url~ : String) -> Site raise LoadError {
-  Site(
-    base_url~,
-    posts=load_posts(@posts.files),
-    docs=load_docs(@repodocs.files),
-  )
-}
-
-///|
 /// handle answers req. Like the Go blog, it answers only GET and HEAD, and
 /// any other method gets the 404 page, before the redirects.
 pub fn Site::handle(self : Site, req : @http.Request) -> @http.Response {

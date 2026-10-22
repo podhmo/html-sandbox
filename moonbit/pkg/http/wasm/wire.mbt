@@ -103,6 +103,53 @@ fn is_token(name : String) -> Bool {
 }
 
 ///|
+/// FileError is a file the host wrote that cannot be read.
+pub(all) suberror FileError {
+  FileError(message~ : String)
+} derive(Debug)
+
+///|
+/// output writes the message alone, so "\{e}" reads as the error text.
+pub impl Show for FileError with fn output(self, logger) {
+  let FileError(message~) = self
+  logger.write_string(message)
+}
+
+///|
+#deprecated("Use \"\\{e}\" or Show::to_string instead")
+pub extend FileError with Show::{to_string, output}
+
+///|
+#deprecated("Use Debug::to_repr instead")
+pub extend FileError with Debug::{to_repr}
+
+///|
+/// read_file reads the file the host wrote at address 0, n bytes long: the
+/// name, a tab, and the content. A name cannot hold a tab, so the first
+/// tab ends it. It raises FileError when there is none.
+pub fn read_file(n : Int32) -> (String, String) raise FileError {
+  let data = read(n)
+  let tab = for i, b in data {
+    if b == b'\t' {
+      break Some(i)
+    }
+  } nobreak {
+    None
+  }
+  guard tab is Some(i) else {
+    raise FileError(message="no tab between the name and the content")
+  }
+  (@utf8.decode_lossy(data[:i]), @utf8.decode_lossy(data[i + 1:]))
+}
+
+///|
+/// write_error writes message at address 0 and returns its length: how an
+/// export tells the host what it could not take.
+pub fn write_error(message : String) -> Int32 {
+  write(0, message)
+}
+
+///|
 /// handle answers the request in the wire format at address 0, n bytes
 /// long, with handler, and writes the response over it, returning its
 /// length. A request that cannot be parsed gets 400, as Go's net/http

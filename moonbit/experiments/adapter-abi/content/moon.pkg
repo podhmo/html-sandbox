@@ -1,0 +1,9 @@
+import {
+  "podhmo/html-sandbox/examples/blog/site",
+  "podhmo/html-sandbox/examples/blog/posts",
+  "podhmo/html-sandbox/examples/blog/repodocs",
+}
+
+// Only wasm-gc, like the spikes that use it.
+
+supported_targets = "+wasm-gc"
