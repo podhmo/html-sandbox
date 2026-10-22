@@ -10,10 +10,6 @@ rule(
 
 dev_build(
   rule: "embed-md",
-  input: [
-    "../../../../TODO.md",
-    "../../../../docs",
-    "../../../../docs/blog.metadata.json",
-  ],
+  input: [ "../../../../TODO.md", "../../../../docs" ],
   output: "embedded.mbt",
 )

@@ -8,9 +8,10 @@
 # With no PATH, it takes every *.md file directly in BASE, or every file of
 # a directory named *.md directly in BASE (a bundle, given as dir/name).
 # Each PATH is a file, or a directory whose files are all taken,
-# subdirectories included, as long as they are *.md files or live under a
-# *.md directory; a PATH may be given relative to BASE or with BASE in
-# front, and names are relative to BASE.
+# subdirectories included, as long as they are *.md files, live under a
+# *.md directory, or are metadata files named *.metadata.json (which may
+# be absent); a PATH may be given relative to BASE or with BASE in front,
+# and names are relative to BASE.
 #
 #   sh examples/blog/scripts/embed.sh examples/blog/posts/embedded.mbt ../posts
 #   sh examples/blog/scripts/embed.sh examples/blog/repodocs/embedded.mbt .. ../TODO.md ../docs
@@ -49,7 +50,7 @@ list() {
     p=${p#./}
     p=${p#"$base"/}
     if [ -d "$base/$p" ]; then
-      find "$base/$p" -type f \( -name '*.md' -o -path '*.md/*' \) | sed "s|^$base/||"
+      find "$base/$p" -type f \( -name '*.md' -o -path '*.md/*' -o -name '*.metadata.json' \) | sed "s|^$base/||"
     elif [ -f "$base/$p" ]; then
       echo "$p"
     else
