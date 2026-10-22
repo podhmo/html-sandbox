@@ -161,9 +161,8 @@ fn load_members(
   }
   for i, m in members {
     if m.name == "README.md" {
-      let f = members[0]
-      members[0] = m
-      members[i] = f
+      ignore(members.remove(i))
+      members.insert(0, m)
       break
     }
   }

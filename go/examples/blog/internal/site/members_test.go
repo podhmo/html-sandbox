@@ -175,3 +175,45 @@ func TestDocBundleMemberRaw(t *testing.T) {
 		t.Errorf("member of non-bundle doc: status %d", res.StatusCode)
 	}
 }
+
+func TestReadmeHoistKeepsOrder(t *testing.T) {
+	posts, err := LoadPosts(fstest.MapFS{
+		"2026-10-15-b.md/README.md": file("---\ntitle: F\n---\nface"),
+		"2026-10-15-b.md/a.md":      file("# A"),
+		"2026-10-15-b.md/b.md":      file("# B"),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []string{"README.md", "a.md", "b.md"}
+	for i, m := range posts[0].Members {
+		if m.Name != want[i] {
+			t.Fatalf("member %d = %s, want order %v", i, m.Name, want)
+		}
+	}
+}
+
+func TestDocBundleNonMarkdownFace(t *testing.T) {
+	posts, _ := LoadPosts(fstest.MapFS{})
+	docs, err := LoadDocs(fstest.MapFS{
+		"docs/x.md/00-run.sh": file("echo hi\n"),
+		"docs/x.md/01-note.md": file("# Note"),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	h, err := NewServer("https://example.com", posts, docs)
+	if err != nil {
+		t.Fatal(err)
+	}
+	res, body := get(t, h, "/docs/x")
+	if res.StatusCode != http.StatusOK {
+		t.Fatalf("status %d", res.StatusCode)
+	}
+	if !strings.Contains(body, "<pre>echo hi") {
+		t.Errorf("non-markdown face must render as a pre block")
+	}
+	if !strings.Contains(body, `<h2><a href="/docs/x/01-note.md"><code>01-note.md</code></a></h2>`) {
+		t.Errorf("companion section missing")
+	}
+}

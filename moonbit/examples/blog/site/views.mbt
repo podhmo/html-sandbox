@@ -126,7 +126,7 @@ fn Site::post_page(self : Site, p : Post) -> @el.Node {
     // The title came from front matter only, so the body has no heading.
     body.push(@picoel.h1(render_inlines(@tinymarkdown.inlines(p.title), link)))
   }
-  body.push_iter(render_blocks(p.doc.children, link).iter())
+  body.push_iter(render_face(link, p.members, p.doc).iter())
   let meta = PageMeta::{
     title: p.title,
     description: p.description,
@@ -138,7 +138,8 @@ fn Site::post_page(self : Site, p : Post) -> @el.Node {
     @picoel.article(body),
   ]
   for i = 1; i < p.members.length(); i = i + 1 {
-    page.push(member_section(link, p.page_path(), p.members[i]))
+    let m = p.members[i]
+    page.push(member_section(self.linker(m.source), p.page_path(), m))
   }
   match rel_nav(p.prev_nav, p.next_nav) {
     Some(nav) => page.push(nav)
@@ -178,7 +179,7 @@ fn Site::doc_page(self : Site, d : Doc) -> @el.Node {
   if first_title(d.doc) is None {
     body.push(@picoel.h1(render_inlines(@tinymarkdown.inlines(d.title), link)))
   }
-  body.push_iter(render_blocks(d.doc.children, link).iter())
+  body.push_iter(render_face(link, d.members, d.doc).iter())
   let meta = PageMeta::{
     title: d.title,
     description: d.description,
@@ -194,13 +195,28 @@ fn Site::doc_page(self : Site, d : Doc) -> @el.Node {
     @picoel.article(body),
   ]
   for i = 1; i < d.members.length(); i = i + 1 {
-    page.push(member_section(link, d.page_path(), d.members[i]))
+    let m = d.members[i]
+    page.push(member_section(self.linker(m.source), d.page_path(), m))
   }
   match rel_nav(d.prev_nav, d.next_nav) {
     Some(nav) => page.push(nav)
     None => ()
   }
   layout(meta, page)
+}
+
+///|
+/// render_face renders the page body: the face member's document, or its
+/// raw text in a pre block when the face is not a Markdown file.
+fn render_face(
+  link : Linker,
+  members : Array[Member],
+  doc : @tinymarkdown.Document,
+) -> Array[@el.Node] {
+  if !members.is_empty() && !members[0].is_markdown {
+    return [@picoel.pre(members[0].raw)]
+  }
+  render_blocks(doc.children, link)
 }
 
 ///|

@@ -719,3 +719,40 @@ test "doc bundle collides with a directory" {
     msg="got \{msg}, want \"collide\"",
   )
 }
+
+///|
+test "doc bundle with non-markdown face" {
+  let s = @site.Site(
+    base_url="https://example.com",
+    posts=[],
+    docs=@site.load_docs([
+      ("docs/x.md/00-run.sh", "echo hi\n"),
+      ("docs/x.md/01-note.md", "# Note"),
+    ]),
+  ) catch {
+    e => fail("\{e}")
+  }
+  let page = body(s, "/docs/x")
+  assert_true(
+    page.contains("<pre>echo hi"),
+    msg="non-markdown face must render as a pre block",
+  )
+  assert_true(
+    page.contains(
+      "<h2><a href=\"/docs/x/01-note.md\"><code>01-note.md</code></a></h2>",
+    ),
+    msg="companion section missing",
+  )
+}
+
+///|
+test "README hoisting keeps member order" {
+  let posts = @site.load_posts([
+    ("2026-10-15-b.md/README.md", "---\ntitle: F\n---\nface"),
+    ("2026-10-15-b.md/a.md", "# A"),
+    ("2026-10-15-b.md/b.md", "# B"),
+  ])
+  assert_eq([ for m in posts[0].members => m.name ], [
+    "README.md", "a.md", "b.md",
+  ])
+}

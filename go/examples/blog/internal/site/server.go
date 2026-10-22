@@ -171,7 +171,7 @@ func (s *Server) handlePost(w http.ResponseWriter, r *http.Request) {
 		s.renderError(w, r, http.StatusNotFound, "Post not found.", nil)
 		return
 	}
-	s.page(w, r, postPage(s.env, st.linker(p.linkBase()), p))
+	s.page(w, r, postPage(s.env, st, p))
 }
 
 func (s *Server) handleDocList(w http.ResponseWriter, r *http.Request) {
@@ -185,7 +185,7 @@ func (s *Server) handleDoc(w http.ResponseWriter, r *http.Request) {
 		s.renderError(w, r, http.StatusNotFound, "Document not found.", nil)
 		return
 	}
-	s.page(w, r, docPage(s.env, st.linker(d.linkBase()), d))
+	s.page(w, r, docPage(s.env, st, d))
 }
 
 // handlePostMarkdown serves the source of a post — a bundle's face —

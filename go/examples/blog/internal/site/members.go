@@ -75,7 +75,9 @@ func loadMembers(fsys fs.FS, name, repoDir string) ([]Member, error) {
 	}
 	for i := range members {
 		if members[i].Name == "README.md" {
-			members[0], members[i] = members[i], members[0]
+			m := members[i]
+			copy(members[1:i+1], members[:i])
+			members[0] = m
 			break
 		}
 	}
