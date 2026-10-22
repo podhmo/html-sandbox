@@ -1,0 +1,25 @@
+{
+  "docs": {
+    "head": [
+      "docs/ja/design.md",
+      "docs/sketch/ja/blog.md",
+      "docs/ja/layout.md",
+      "docs/sketch/ja/blog-tinygo-workers.md",
+      "docs/sketch/ja/moonbit-workers-wasm.md",
+      "docs/sketch/ja/moonbit-static-assets.md",
+      "docs/sketch/ja/moonbit-workers-adapter.md",
+      "docs/sketch/ja/moonbit-workers-http.md",
+      "docs/sketch/ja/moonbit-browser-render.md",
+      "docs/sketch/ja/moonbit-wasm-pair.md",
+      "docs/sketch/ja/ts-hono-workers.md",
+      "docs/sketch/ja/moonbit-js-tinymarkdown.md"
+    ],
+    "tail": [
+      "docs/sketch/ja/profiling.md",
+      "docs/sketch/ja/profiling-go.md",
+      "docs/sketch/ja/profiling-moonbit.md",
+      "docs/sketch/ja/profiling-moonbit-guide.md",
+      "docs/sketch/ja/profiling-moonbit-setup.md"
+    ]
+  }
+}

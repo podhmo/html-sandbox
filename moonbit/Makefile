@@ -28,8 +28,9 @@ WRANGLER ?= npx wrangler@4
 GO_URL ?= http://localhost:8080
 MOONBIT_URL ?= http://localhost:$(PORT)
 POSTS := ../posts
-# The repository's own documents, as the Go blog's repodocs embeds them.
-DOCS := ../TODO.md ../docs
+# The repository's own documents, as the Go blog's repodocs embeds them,
+# and the metadata file that orders them.
+DOCS := ../TODO.md ../docs ../docs/blog.metadata.json
 # The Go blog's site.css and favicon.svg.
 ASSETS := ../go/examples/blog/internal/site
 # The js build of tinymarkdown, and where the ts blog keeps it.
