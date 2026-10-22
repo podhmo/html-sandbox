@@ -569,3 +569,153 @@ test "redirects" {
     )
   }
 }
+
+///|
+let test_bundle : ReadOnlyArray[(String, String)] = [
+  ("2026-10-01-old.md", "# Old\nbody"),
+  ("2026-10-22-bundle.md/README.md", "---\ntitle: Bundle\n---\nface body"),
+  ("2026-10-22-bundle.md/00-memo.md", "# Memo\nmember body"),
+  ("2026-10-22-bundle.md/hello.go", "package main\n\nfunc main() {}\n"),
+]
+
+///|
+test "load post bundle" {
+  let posts = @site.load_posts(test_bundle)
+  let p = posts[0]
+  assert_eq("\{p.date} \{p.slug} \{p.title}", "2026-10-22 bundle Bundle")
+  assert_eq([ for m in p.members => m.name ], [
+    "README.md", "00-memo.md", "hello.go",
+  ])
+  assert_eq([ for m in p.members => m.is_markdown ], [true, true, false])
+}
+
+///|
+test "load post bundle without README" {
+  let posts = @site.load_posts([
+    ("2026-10-22-b.md/02-extra.md", "---\ntitle: X\n---\nextra"),
+    ("2026-10-22-b.md/00-face.md", "---\ntitle: Face\n---\nface"),
+  ])
+  let p = posts[0]
+  assert_eq(p.title, "Face")
+  assert_eq([ for m in p.members => m.name ], ["00-face.md", "02-extra.md"])
+}
+
+///|
+test "load post bundle errors" {
+  let cases : Array[(String, ReadOnlyArray[(String, String)], String)] = [
+    (
+      "subdirectory",
+      [("2026-10-22-b.md/sub/f.md", "# x")],
+      "is inside a subdirectory (bundles are flat)",
+    ),
+    (
+      "face without title",
+      [("2026-10-22-b.md/README.md", "## only h2")],
+      "no title",
+    ),
+    (
+      "slug clash with a file",
+      [("2026-10-01-b.md", "# f"), ("2026-10-22-b.md/README.md", "# d")],
+      "slug \"b\" is already used",
+    ),
+    (
+      "bad front matter",
+      [("2026-10-22-b.md/README.md", "---\ntitle: x\n")],
+      "tinyfrontmatter: no closing",
+    ),
+  ]
+  for (name, files, want) in cases {
+    let msg = try @site.load_posts(files) catch {
+      e => "\{e}"
+    } noraise {
+      _ => fail("\{name}: want an error")
+    }
+    assert_true(msg.contains(want), msg="\{name}: got \{msg}, want \{want}")
+  }
+}
+
+///|
+test "post bundle page and members" {
+  let s = new_site(test_bundle)
+  assert_contains(body(s, "/posts/bundle"), [
+    "face body",
+    "<h2><a href=\"/posts/bundle/00-memo.md\"><code>00-memo.md</code></a></h2>",
+    "member body",
+    "<h2><a href=\"/posts/bundle/hello.go\"><code>hello.go</code></a></h2>",
+    "<pre>package main",
+  ])
+  // The face is the page; its heading is not a member section.
+  let page = body(s, "/posts/bundle")
+  assert_false(
+    page.contains(">README.md</code>"),
+    msg="face must not be a member section",
+  )
+  // Members are served raw.
+  let res = s.render("/posts/bundle/00-memo.md")
+  assert_eq(res.status, 200)
+  assert_eq(header(res, "content-type"), Some("text/markdown; charset=utf-8"))
+  assert_eq(header(res, "x-content-type-options"), Some("nosniff"))
+  assert_eq(res.body.text(), test_bundle[2].1)
+  let res = s.render("/posts/bundle/hello.go")
+  assert_eq(res.status, 200)
+  assert_eq(header(res, "content-type"), Some("text/plain; charset=utf-8"))
+  assert_eq(res.body.text(), test_bundle[3].1)
+  let res = s.render("/posts/bundle/README.md")
+  assert_eq(res.status, 200)
+  assert_eq(res.body.text(), test_bundle[1].1)
+  // Unknown member, or under a single-file post.
+  assert_eq(s.render("/posts/bundle/nope.md").status, 404)
+  assert_eq(s.render("/posts/old/x.md").status, 404)
+}
+
+///|
+let test_doc_bundle : ReadOnlyArray[(String, String)] = [
+  ("docs/guide.md/README.md", "---\ntitle: Guide\n---\nface body"),
+  ("docs/guide.md/00-setup.md", "# Setup\nsetup body"),
+  ("docs/guide.md/run.sh", "echo hi\n"),
+]
+
+///|
+test "load doc bundle" {
+  let s = @site.Site(
+    base_url="https://example.com",
+    posts=[],
+    docs=@site.load_docs(test_doc_bundle),
+  ) catch {
+    e => fail("\{e}")
+  }
+  assert_contains(body(s, "/docs/guide"), [
+    "face body",
+    "<h2><a href=\"/docs/guide/00-setup.md\"><code>00-setup.md</code></a></h2>",
+    "<h2><a href=\"/docs/guide/run.sh\"><code>run.sh</code></a></h2>",
+    "<pre>echo hi",
+  ])
+  let res = s.render("/docs/guide/00-setup.md")
+  assert_eq(res.status, 200)
+  assert_eq(header(res, "content-type"), Some("text/markdown; charset=utf-8"))
+  assert_eq(res.body.text(), test_doc_bundle[1].1)
+  let res = s.render("/docs/guide/run.sh")
+  assert_eq(res.status, 200)
+  assert_eq(header(res, "content-type"), Some("text/plain; charset=utf-8"))
+  // The face source keeps serving from /docs/guide.md.
+  assert_eq(body(s, "/docs/guide.md"), test_doc_bundle[0].1)
+  assert_eq(s.render("/docs/guide/nope").status, 404)
+}
+
+///|
+test "doc bundle collides with a directory" {
+  let msg = try
+    @site.load_docs([
+      ("docs/x.md/README.md", "# x"),
+      ("docs/x/memo.md", "# memo"),
+    ])
+  catch {
+    e => "\{e}"
+  } noraise {
+    _ => fail("want an error")
+  }
+  assert_true(
+    msg.contains("collide"),
+    msg="got \{msg}, want \"collide\"",
+  )
+}

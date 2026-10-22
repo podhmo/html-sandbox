@@ -24,6 +24,9 @@ struct Site {
   docs : Array[Doc]
   by_path : Map[String, Doc]
   by_source : Map[String, Doc]
+  // by_member maps a bundle member's path in the repository to the raw
+  // URL serving it, for links.
+  by_member : Map[String, String]
   mut router : @http.Router? // made on the first request
 }
 
@@ -58,6 +61,17 @@ pub fn Site::Site(
     by_path[d.path] = d
     by_source[d.source] = d
   }
+  let by_member = Map([])
+  for p in posts {
+    for m in p.members {
+      by_member[m.source] = "\{p.page_path()}/\{m.name}"
+    }
+  }
+  for d in docs {
+    for m in d.members {
+      by_member[m.source] = "\{d.page_path()}/\{m.name}"
+    }
+  }
   let st = Site::{
     base_url: origin.to_owned(),
     posts,
@@ -66,18 +80,19 @@ pub fn Site::Site(
     docs,
     by_path,
     by_source,
+    by_member,
     router: None,
   }
   // With every file mapped, resolve the prev/next links of each page,
   // which may point at other pages of the site. The maps hold the same
   // posts and docs, so they see the resolved items.
   for p in st.posts {
-    p.prev_nav = st.nav_item(p.source(), p.prev)
-    p.next_nav = st.nav_item(p.source(), p.next)
+    p.prev_nav = st.nav_item(p.link_base(), p.prev)
+    p.next_nav = st.nav_item(p.link_base(), p.next)
   }
   for d in st.docs {
-    d.prev_nav = st.nav_item(d.source, d.prev)
-    d.next_nav = st.nav_item(d.source, d.next)
+    d.prev_nav = st.nav_item(d.link_base(), d.prev)
+    d.next_nav = st.nav_item(d.link_base(), d.next)
   }
   st
 }
@@ -167,8 +182,31 @@ fn Site::new_router(self : Site) -> @http.Router {
         }
     }
   })
+  // /posts/<slug>/<member> serves the raw member of a bundle.
+  r.handle("GET /posts/{slug}/{member}", req => {
+    let slug = req.param("slug")
+    let name = req.param("member")
+    match self.by_slug.get(slug) {
+      Some(p) =>
+        match member_of(p.members, name) {
+          Some(m) => raw_member(m)
+          None => not_found("Page not found.")
+        }
+      None => not_found("Page not found.")
+    }
+  })
   r.handle("GET /docs/{path...}", req => {
     let path = req.param("path")
+    // /docs/<p>/<member> serves the raw member of a bundle at /docs/<p>.
+    if path.rev_find("/") is Some(i) {
+      let parent = path[:i].to_owned()
+      let name = path[i + 1:].to_owned()
+      if self.by_path.get(parent) is Some(d) {
+        if member_of(d.members, name) is Some(m) {
+          return raw_member(m)
+        }
+      }
+    }
     match path {
       [.. p, .. ".md"] =>
         match self.by_path.get(p.to_owned()) {
@@ -224,6 +262,21 @@ fn clean_path(p : String) -> String {
 /// Markdown containing tags is HTML.
 fn markdown(src : String) -> @http.Response {
   @http.Response::typed(200, "text/markdown; charset=utf-8", Text(src))..header(
+    "x-content-type-options",
+    value="nosniff",
+  )
+}
+
+///|
+/// member sends a bundle member's raw content: text/markdown for .md
+/// members, text/plain otherwise, with nosniff.
+fn raw_member(m : Member) -> @http.Response {
+  let content_type = if m.is_markdown {
+    "text/markdown; charset=utf-8"
+  } else {
+    "text/plain; charset=utf-8"
+  }
+  @http.Response::typed(200, content_type, Text(m.raw))..header(
     "x-content-type-options",
     value="nosniff",
   )

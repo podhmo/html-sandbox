@@ -120,7 +120,7 @@ fn Site::post_list(self : Site) -> @el.Node {
 
 ///|
 fn Site::post_page(self : Site, p : Post) -> @el.Node {
-  let link = self.linker(p.source())
+  let link = self.linker(p.link_base())
   let body = []
   if first_title(p.doc) is None {
     // The title came from front matter only, so the body has no heading.
@@ -137,6 +137,9 @@ fn Site::post_page(self : Site, p : Post) -> @el.Node {
     page_header(@picoel.date(p.date), href=p.markdown_path(), filename=p.file),
     @picoel.article(body),
   ]
+  for i = 1; i < p.members.length(); i = i + 1 {
+    page.push(member_section(link, p.page_path(), p.members[i]))
+  }
   match rel_nav(p.prev_nav, p.next_nav) {
     Some(nav) => page.push(nav)
     None => ()
@@ -170,7 +173,7 @@ fn Site::doc_list(self : Site) -> @el.Node {
 
 ///|
 fn Site::doc_page(self : Site, d : Doc) -> @el.Node {
-  let link = self.linker(d.source)
+  let link = self.linker(d.link_base())
   let body = []
   if first_title(d.doc) is None {
     body.push(@picoel.h1(render_inlines(@tinymarkdown.inlines(d.title), link)))
@@ -190,11 +193,31 @@ fn Site::doc_page(self : Site, d : Doc) -> @el.Node {
     ),
     @picoel.article(body),
   ]
+  for i = 1; i < d.members.length(); i = i + 1 {
+    page.push(member_section(link, d.page_path(), d.members[i]))
+  }
   match rel_nav(d.prev_nav, d.next_nav) {
     Some(nav) => page.push(nav)
     None => ()
   }
   layout(meta, page)
+}
+
+///|
+/// member_section renders one member of a bundle below the face: an
+/// article headed by its file name, which links to the raw file served
+/// at <page>/<name>. A .md member renders as Markdown; any other member
+/// is shown as a pre block.
+fn member_section(link : Linker, base : String, m : Member) -> @el.Node {
+  let body = [
+    @picoel.h2([@picoel.a("\{base}/\{m.name}", [@picoel.code(m.name)])]),
+  ]
+  if m.is_markdown {
+    body.push_iter(render_blocks(m.doc.children, link).iter())
+  } else {
+    body.push(@picoel.pre(m.raw))
+  }
+  @picoel.article(body)
 }
 
 ///|

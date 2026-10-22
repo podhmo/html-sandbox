@@ -5,10 +5,12 @@
 #
 #   sh examples/blog/scripts/embed.sh OUT BASE [PATH...]
 #
-# With no PATH, it takes every *.md file directly in BASE. Each PATH is a
-# file, or a directory whose *.md files are all taken, subdirectories
-# included; a PATH may be given relative to BASE or with BASE in front, and
-# names are relative to BASE.
+# With no PATH, it takes every *.md file directly in BASE, or every file of
+# a directory named *.md directly in BASE (a bundle, given as dir/name).
+# Each PATH is a file, or a directory whose files are all taken,
+# subdirectories included, as long as they are *.md files or live under a
+# *.md directory; a PATH may be given relative to BASE or with BASE in
+# front, and names are relative to BASE.
 #
 #   sh examples/blog/scripts/embed.sh examples/blog/posts/embedded.mbt ../posts
 #   sh examples/blog/scripts/embed.sh examples/blog/repodocs/embedded.mbt .. ../TODO.md ../docs
@@ -35,7 +37,11 @@ export LC_ALL
 list() {
   if [ $# -eq 0 ]; then
     for f in "$base"/*.md; do
-      [ -f "$f" ] && echo "${f##*/}"
+      if [ -f "$f" ]; then
+        echo "${f##*/}"
+      elif [ -d "$f" ]; then
+        find "$f" -type f | sed "s|^$base/||"
+      fi
     done
     return 0
   fi
@@ -43,7 +49,7 @@ list() {
     p=${p#./}
     p=${p#"$base"/}
     if [ -d "$base/$p" ]; then
-      find "$base/$p" -type f -name '*.md' | sed "s|^$base/||"
+      find "$base/$p" -type f \( -name '*.md' -o -path '*.md/*' \) | sed "s|^$base/||"
     elif [ -f "$base/$p" ]; then
       echo "$p"
     else

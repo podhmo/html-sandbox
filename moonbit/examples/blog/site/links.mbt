@@ -249,6 +249,8 @@ fn Site::resolver(self : Site, source : String, repo_files~ : Bool) -> Linker {
       escape(d.page_path(), fragment=false)
     } else if self.by_file.get(p) is Some(post) {
       escape(post.page_path(), fragment=false)
+    } else if self.by_member.get(p) is Some(murl) {
+      escape(murl, fragment=false)
     } else if repo_files {
       // The file on the main branch on GitHub, which redirects blob/ to
       // tree/ for directories.

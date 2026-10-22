@@ -68,6 +68,8 @@ func (st *site) resolver(source string, repoFiles bool) linker {
 			target.Path = docPath(d)
 		} else if post, ok := st.byFile[p]; ok {
 			target.Path = postPath(post)
+		} else if murl, ok := st.byMember[p]; ok {
+			target.Path = murl
 		} else if repoFiles {
 			// GitHub redirects blob/ to tree/ for directories.
 			target = repoURL

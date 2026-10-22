@@ -27,6 +27,7 @@ type site struct {
 	docs     []Doc
 	byPath   map[string]Doc
 	bySource map[string]Doc
+	byMember map[string]string // member file path in the repository -> raw URL
 }
 
 func newSite(posts []Post, docs []Doc) *site {
@@ -37,29 +38,36 @@ func newSite(posts []Post, docs []Doc) *site {
 		docs:     docs,
 		byPath:   make(map[string]Doc, len(docs)),
 		bySource: make(map[string]Doc, len(docs)),
+		byMember: make(map[string]string),
 	}
 	for _, p := range posts {
 		st.bySlug[p.Slug] = p
 		st.byFile[postSource(p)] = p
+		for _, m := range p.Members {
+			st.byMember[m.Source] = postPath(p) + "/" + m.Name
+		}
 	}
 	for _, d := range docs {
 		st.byPath[d.Path] = d
 		st.bySource[d.Source] = d
+		for _, m := range d.Members {
+			st.byMember[m.Source] = docPath(d) + "/" + m.Name
+		}
 	}
 	// With every file mapped, resolve the prev/next links of each page,
 	// which may point at other pages of the site. The resolved item is
 	// stored in both the slice and the maps, which hold copies.
 	for i := range st.posts {
 		p := &st.posts[i]
-		p.Prev = st.navItem(postSource(*p), p.prevRaw)
-		p.Next = st.navItem(postSource(*p), p.nextRaw)
+		p.Prev = st.navItem(p.linkBase(), p.prevRaw)
+		p.Next = st.navItem(p.linkBase(), p.nextRaw)
 		st.bySlug[p.Slug] = *p
 		st.byFile[postSource(*p)] = *p
 	}
 	for i := range st.docs {
 		d := &st.docs[i]
-		d.Prev = st.navItem(d.Source, d.prevRaw)
-		d.Next = st.navItem(d.Source, d.nextRaw)
+		d.Prev = st.navItem(d.linkBase(), d.prevRaw)
+		d.Next = st.navItem(d.linkBase(), d.nextRaw)
 		st.byPath[d.Path] = *d
 		st.bySource[d.Source] = *d
 	}
@@ -128,15 +136,16 @@ func (s *Server) route(w http.ResponseWriter, r *http.Request) {
 	case isPost && strings.HasSuffix(slug, ".md") && !strings.Contains(slug, "/"):
 		r.SetPathValue("slug", strings.TrimSuffix(slug, ".md"))
 		s.handlePostMarkdown(w, r)
+	case isPost && strings.Count(slug, "/") == 1:
+		postSlug, member, _ := strings.Cut(slug, "/")
+		r.SetPathValue("slug", postSlug)
+		r.SetPathValue("member", member)
+		s.handlePostMember(w, r)
 	case isPost && slug != "" && !strings.Contains(slug, "/"):
 		r.SetPathValue("slug", slug)
 		s.handlePost(w, r)
-	case strings.HasPrefix(p, "/docs/") && strings.HasSuffix(p, ".md"):
-		r.SetPathValue("path", strings.TrimSuffix(p[len("/docs/"):], ".md"))
-		s.handleDocMarkdown(w, r)
 	case strings.HasPrefix(p, "/docs/"):
-		r.SetPathValue("path", p[len("/docs/"):])
-		s.handleDoc(w, r)
+		s.routeDoc(w, r, p[len("/docs/"):])
 	default:
 		notFound(w, r)
 	}
@@ -162,7 +171,7 @@ func (s *Server) handlePost(w http.ResponseWriter, r *http.Request) {
 		s.renderError(w, r, http.StatusNotFound, "Post not found.", nil)
 		return
 	}
-	s.page(w, r, postPage(s.env, st.linker(postSource(p)), p))
+	s.page(w, r, postPage(s.env, st.linker(p.linkBase()), p))
 }
 
 func (s *Server) handleDocList(w http.ResponseWriter, r *http.Request) {
@@ -176,10 +185,11 @@ func (s *Server) handleDoc(w http.ResponseWriter, r *http.Request) {
 		s.renderError(w, r, http.StatusNotFound, "Document not found.", nil)
 		return
 	}
-	s.page(w, r, docPage(s.env, st.linker(d.Source), d))
+	s.page(w, r, docPage(s.env, st.linker(d.linkBase()), d))
 }
 
-// handlePostMarkdown serves the source of a post, as linked from its page.
+// handlePostMarkdown serves the source of a post — a bundle's face —
+// as linked from its page.
 func (s *Server) handlePostMarkdown(w http.ResponseWriter, r *http.Request) {
 	p, ok := s.site.Load().bySlug[r.PathValue("slug")]
 	if !ok {
@@ -187,6 +197,38 @@ func (s *Server) handlePostMarkdown(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeMarkdown(w, p.Markdown)
+}
+
+// handlePostMember serves a file of a bundle as written.
+func (s *Server) handlePostMember(w http.ResponseWriter, r *http.Request) {
+	p, ok := s.site.Load().bySlug[r.PathValue("slug")]
+	if ok {
+		if m, ok := memberOf(p.Members, r.PathValue("member")); ok {
+			writeMember(w, m)
+			return
+		}
+	}
+	s.renderError(w, r, http.StatusNotFound, "Page not found.", nil)
+}
+
+// routeDoc serves a file of a bundle when inner's parent is a bundle
+// holding it, else the page or the Markdown source at inner.
+func (s *Server) routeDoc(w http.ResponseWriter, r *http.Request, inner string) {
+	if i := strings.LastIndexByte(inner, '/'); i >= 0 {
+		if d, ok := s.site.Load().byPath[inner[:i]]; ok {
+			if m, ok := memberOf(d.Members, inner[i+1:]); ok {
+				writeMember(w, m)
+				return
+			}
+		}
+	}
+	if strings.HasSuffix(inner, ".md") {
+		r.SetPathValue("path", strings.TrimSuffix(inner, ".md"))
+		s.handleDocMarkdown(w, r)
+		return
+	}
+	r.SetPathValue("path", inner)
+	s.handleDoc(w, r)
 }
 
 // handleDocMarkdown serves the source of a document, as linked from its page.
@@ -207,6 +249,20 @@ func writeMarkdown(w http.ResponseWriter, src string) {
 	h.Set("X-Content-Type-Options", "nosniff")
 	h.Set("Content-Length", strconv.Itoa(len(src)))
 	io.WriteString(w, src)
+}
+
+// writeMember sends a bundle member's content as text, Markdown as
+// text/markdown like writeMarkdown and anything else as plain text.
+func writeMember(w http.ResponseWriter, m Member) {
+	h := w.Header()
+	if m.Markdown {
+		h.Set("Content-Type", "text/markdown; charset=utf-8")
+	} else {
+		h.Set("Content-Type", "text/plain; charset=utf-8")
+	}
+	h.Set("X-Content-Type-Options", "nosniff")
+	h.Set("Content-Length", strconv.Itoa(len(m.Raw)))
+	io.WriteString(w, m.Raw)
 }
 
 // cleanPath is p without "." and ".." elements and repeated slashes. A
