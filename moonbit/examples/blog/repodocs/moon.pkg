@@ -1,4 +1,5 @@
-// The repository's own documents, TODO.md and docs/**/*.md, embedded by
+// The repository's own documents, TODO.md and docs/**/*.md, and
+// docs/blog.metadata.json, which orders them, embedded by
 // ../scripts/embed.sh into embedded.mbt, which is generated and ignored by
 // git. moon sees edits to TODO.md and files added to or removed from docs/
 // itself; `make` regenerates it for the rest.

@@ -756,3 +756,105 @@ test "README hoisting keeps member order" {
     "README.md", "a.md", "b.md",
   ])
 }
+
+///|
+fn load_docs_with_metadata(src : String?) -> Array[String] raise {
+  let files = [
+    ("TODO.md", "# TODO"),
+    ("docs/develop.md", "# Develop"),
+    ("docs/ja/design.md", "# Design"),
+    ("docs/ja/layout.md", "# Layout"),
+    ("docs/x.md/a.md", "# Bundle"),
+  ]
+  if src is Some(src) {
+    files.push(("docs/blog.metadata.json", src))
+  }
+  [
+    for d in @site.load_docs(ReadOnlyArray::from_array(files)) => d.source
+  ]
+}
+
+///|
+test "docs ordered by docs/blog.metadata.json" {
+  let all = [
+    "TODO.md", "docs/develop.md", "docs/ja/design.md", "docs/ja/layout.md", "docs/x.md",
+  ]
+  assert_eq(load_docs_with_metadata(None), all)
+  assert_eq(load_docs_with_metadata(Some("{}")), all)
+  assert_eq(
+    load_docs_with_metadata(
+      Some("{\"docs\": {\"head\": [\"docs/ja/layout.md\", \"docs/x.md\"]}}"),
+    ),
+    [
+      "docs/ja/layout.md", "docs/x.md", "TODO.md", "docs/develop.md", "docs/ja/design.md",
+    ],
+  )
+  assert_eq(
+    load_docs_with_metadata(
+      Some("{\"docs\": {\"tail\": [\"TODO.md\", \"docs/develop.md\"]}}"),
+    ),
+    [
+      "docs/ja/design.md", "docs/ja/layout.md", "docs/x.md", "TODO.md", "docs/develop.md",
+    ],
+  )
+  assert_eq(
+    load_docs_with_metadata(
+      Some(
+        "{\"docs\": {\"head\": [\"docs/ja/design.md\"], \"tail\": [\"TODO.md\"]}}",
+      ),
+    ),
+    [
+      "docs/ja/design.md", "docs/develop.md", "docs/ja/layout.md", "docs/x.md", "TODO.md",
+    ],
+  )
+}
+
+///|
+test "docs/blog.metadata.json errors" {
+  let cases = [
+    ("[]", "docs/blog.metadata.json: want a JSON object"),
+    (
+      "{\"doc\": {}}", "docs/blog.metadata.json: unknown key \"doc\" (want one of [docs])",
+    ),
+    ("{\"docs\": []}", "docs/blog.metadata.json: \"docs\" must be an object"),
+    (
+      "{\"docs\": {\"order\": []}}", "docs/blog.metadata.json: unknown key \"docs.order\" (want one of [head tail])",
+    ),
+    (
+      "{\"docs\": {\"head\": \"TODO.md\"}}", "docs/blog.metadata.json: \"docs.head\" must be an array of strings",
+    ),
+    (
+      "{\"docs\": {\"tail\": null}}", "docs/blog.metadata.json: \"docs.tail\" must be an array of strings",
+    ),
+    (
+      "{\"docs\": {\"head\": [1]}}", "docs/blog.metadata.json: \"docs.head\" must be an array of strings",
+    ),
+    (
+      "{\"docs\": {\"head\": [\"docs/missing.md\"]}}", "docs/blog.metadata.json: docs.head: \"docs/missing.md\" is not a document",
+    ),
+    (
+      "{\"docs\": {\"tail\": [\"docs/x.md/a.md\"]}}", "docs/blog.metadata.json: docs.tail: \"docs/x.md/a.md\" is not a document",
+    ),
+    (
+      "{\"docs\": {\"head\": [\"TODO.md\", \"TODO.md\"]}}", "docs/blog.metadata.json: docs.head: \"TODO.md\" is listed twice",
+    ),
+    (
+      "{\"docs\": {\"head\": [\"TODO.md\"], \"tail\": [\"TODO.md\"]}}", "docs/blog.metadata.json: docs.tail: \"TODO.md\" is listed twice",
+    ),
+  ]
+  for c in cases {
+    let (src, want) = c
+    let msg = try load_docs_with_metadata(Some(src)) catch {
+      e => "\{e}"
+    } noraise {
+      _ => fail("\{src}: want an error")
+    }
+    assert_eq(msg, want, msg=src)
+  }
+  let msg = try load_docs_with_metadata(Some("{\"docs\": ")) catch {
+    e => "\{e}"
+  } noraise {
+    _ => fail("want an error for broken JSON")
+  }
+  assert_true(msg.has_prefix("docs/blog.metadata.json: "), msg~)
+}

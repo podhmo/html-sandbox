@@ -44,7 +44,9 @@ func (d Doc) linkBase() string {
 var DocSources = []string{"TODO.md", "docs"}
 
 // LoadDocs reads every *.md file in docSources, in that order and then in
-// file path order. Sources missing from fsys are skipped.
+// file path order, except as docs.head and docs.tail of
+// docs/blog.metadata.json reorder them. Sources missing from fsys are
+// skipped.
 func LoadDocs(fsys fs.FS) ([]Doc, error) {
 	var docs []Doc
 	seen := map[string]string{} // Path -> Source
@@ -129,7 +131,7 @@ func LoadDocs(fsys fs.FS) ([]Doc, error) {
 			return nil, err
 		}
 	}
-	return docs, nil
+	return orderDocs(fsys, docs)
 }
 
 func docPath(d Doc) string {

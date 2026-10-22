@@ -140,3 +140,72 @@ func TestLoadDocsMissing(t *testing.T) {
 		t.Errorf("got %d docs, want none", len(docs))
 	}
 }
+
+func TestLoadDocsOrder(t *testing.T) {
+	base := fstest.MapFS{
+		"TODO.md":           file("# TODO"),
+		"docs/develop.md":   file("# Develop"),
+		"docs/ja/design.md": file("# Design"),
+		"docs/ja/layout.md": file("# Layout"),
+		"docs/x.md/a.md":    file("# Bundle"),
+	}
+	withMetadata := func(src string) fstest.MapFS {
+		fsys := fstest.MapFS{metadataFile: file(src)}
+		for k, v := range base {
+			fsys[k] = v
+		}
+		return fsys
+	}
+	sources := func(docs []Doc) []string {
+		var got []string
+		for _, d := range docs {
+			got = append(got, d.Source)
+		}
+		return got
+	}
+
+	for _, c := range []struct {
+		name, src string
+		want      []string
+	}{
+		{"no docs key", `{}`, []string{"TODO.md", "docs/develop.md", "docs/ja/design.md", "docs/ja/layout.md", "docs/x.md"}},
+		{"head", `{"docs": {"head": ["docs/ja/layout.md", "docs/x.md"]}}`, []string{"docs/ja/layout.md", "docs/x.md", "TODO.md", "docs/develop.md", "docs/ja/design.md"}},
+		{"tail", `{"docs": {"tail": ["TODO.md", "docs/develop.md"]}}`, []string{"docs/ja/design.md", "docs/ja/layout.md", "docs/x.md", "TODO.md", "docs/develop.md"}},
+		{"head and tail", `{"docs": {"head": ["docs/ja/design.md"], "tail": ["TODO.md"]}}`, []string{"docs/ja/design.md", "docs/develop.md", "docs/ja/layout.md", "docs/x.md", "TODO.md"}},
+	} {
+		docs, err := LoadDocs(withMetadata(c.src))
+		if err != nil {
+			t.Errorf("%s: %v", c.name, err)
+			continue
+		}
+		if got := sources(docs); !reflect.DeepEqual(got, c.want) {
+			t.Errorf("%s: got %v\nwant %v", c.name, got, c.want)
+		}
+	}
+
+	if docs, err := LoadDocs(base); err != nil {
+		t.Error(err)
+	} else if got, want := sources(docs), []string{"TODO.md", "docs/develop.md", "docs/ja/design.md", "docs/ja/layout.md", "docs/x.md"}; !reflect.DeepEqual(got, want) {
+		t.Errorf("no metadata file: got %v\nwant %v", got, want)
+	}
+
+	for _, c := range []struct{ src, want string }{
+		{`{"docs": `, "docs/blog.metadata.json: unexpected end of JSON input"},
+		{`[]`, "docs/blog.metadata.json: want a JSON object"},
+		{`{"doc": {}}`, `docs/blog.metadata.json: unknown key "doc" (want one of [docs])`},
+		{`{"docs": []}`, `docs/blog.metadata.json: "docs" must be an object`},
+		{`{"docs": {"order": []}}`, `docs/blog.metadata.json: unknown key "docs.order" (want one of [head tail])`},
+		{`{"docs": {"head": "TODO.md"}}`, `docs/blog.metadata.json: "docs.head" must be an array of strings`},
+		{`{"docs": {"tail": null}}`, `docs/blog.metadata.json: "docs.tail" must be an array of strings`},
+		{`{"docs": {"head": [1]}}`, `docs/blog.metadata.json: "docs.head" must be an array of strings`},
+		{`{"docs": {"head": ["docs/missing.md"]}}`, `docs/blog.metadata.json: docs.head: "docs/missing.md" is not a document`},
+		{`{"docs": {"tail": ["docs/x.md/a.md"]}}`, `docs/blog.metadata.json: docs.tail: "docs/x.md/a.md" is not a document`},
+		{`{"docs": {"head": ["TODO.md", "TODO.md"]}}`, `docs/blog.metadata.json: docs.head: "TODO.md" is listed twice`},
+		{`{"docs": {"head": ["TODO.md"], "tail": ["TODO.md"]}}`, `docs/blog.metadata.json: docs.tail: "TODO.md" is listed twice`},
+	} {
+		_, err := LoadDocs(withMetadata(c.src))
+		if err == nil || err.Error() != c.want {
+			t.Errorf("%s: got error %v, want %q", c.src, err, c.want)
+		}
+	}
+}

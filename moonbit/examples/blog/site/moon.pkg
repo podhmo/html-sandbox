@@ -8,6 +8,7 @@ import {
   "podhmo/html-sandbox/examples/blog/assets",
   "podhmo/html-sandbox/pkg/http",
   "moonbitlang/core/encoding/utf8",
+  "moonbitlang/core/json",
 }
 
 import {

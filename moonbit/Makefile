@@ -28,7 +28,8 @@ WRANGLER ?= npx wrangler@4
 GO_URL ?= http://localhost:8080
 MOONBIT_URL ?= http://localhost:$(PORT)
 POSTS := ../posts
-# The repository's own documents, as the Go blog's repodocs embeds them.
+# The repository's own documents, as the Go blog's repodocs embeds them,
+# docs/blog.metadata.json, which orders them, included.
 DOCS := ../TODO.md ../docs
 # The Go blog's site.css and favicon.svg.
 ASSETS := ../go/examples/blog/internal/site

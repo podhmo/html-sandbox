@@ -36,6 +36,16 @@ pub struct Doc {
   mut next_nav : NavItem?
   doc : @tinymarkdown.Document
   markdown : String
+  members : Array[Member]
+}
+
+pub struct Member {
+  name : String
+  source : String
+  is_markdown : Bool
+  meta : Map[String, String]
+  doc : @tinymarkdown.Document
+  raw : String
 }
 
 pub struct NavItem {
@@ -55,6 +65,7 @@ pub struct Post {
   mut next_nav : NavItem?
   doc : @tinymarkdown.Document
   markdown : String
+  members : Array[Member]
 }
 
 type Site

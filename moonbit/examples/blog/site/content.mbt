@@ -437,7 +437,8 @@ let doc_sources : ReadOnlyArray[String] = ["TODO.md", "docs"]
 ///|
 /// load_docs reads every *.md file in files, given as (file path in the
 /// repository, content) pairs, in the order of doc_sources and then in the
-/// order Go's fs.WalkDir visits them.
+/// order Go's fs.WalkDir visits them, except as docs.head and docs.tail of
+/// docs/blog.metadata.json reorder them.
 pub fn load_docs(
   files : ReadOnlyArray[(String, String)],
 ) -> Array[Doc] raise LoadError {
@@ -524,7 +525,10 @@ pub fn load_docs(
       members: [],
     })
   }
-  docs
+  match files.iter().find_first(f => f.0 == metadata_file) {
+    Some((_, src)) => order_docs(docs, src)
+    None => docs
+  }
 }
 
 ///|
@@ -576,4 +580,111 @@ fn walk_order(a : String, b : String) -> Int32 {
     }
   }
   xs.length().compare(ys.length())
+}
+
+///|
+/// metadata_file holds settings of the blog as a whole, one key per
+/// feature. It is optional.
+let metadata_file : String = "docs/blog.metadata.json"
+
+///|
+let metadata_keys : ReadOnlyArray[String] = ["docs"]
+
+///|
+let docs_metadata_keys : ReadOnlyArray[String] = ["head", "tail"]
+
+///|
+/// order_docs moves the documents listed in docs.head of the metadata file
+/// src to the front and those in docs.tail to the back, each in the order
+/// written; the rest keep their order in between. Entries are file paths in
+/// the repository, as in Doc::source.
+fn order_docs(docs : Array[Doc], src : String) -> Array[Doc] raise LoadError {
+  let (head, tail) = parse_docs_order(src) catch {
+    LoadError(message~) =>
+      raise LoadError(message="\{metadata_file}: \{message}")
+  }
+  let index : Map[String, Int32] = Map([])
+  for i, d in docs {
+    index[d.source] = i
+  }
+  let listed : Set[Int32] = Set([])
+  fn pick(key : String, sources : Array[String]) -> Array[Doc] raise LoadError {
+    let picked = []
+    for s in sources {
+      guard index.get(s) is Some(i) else {
+        raise LoadError(
+          message="\{metadata_file}: docs.\{key}: \{s.escape()} is not a document",
+        )
+      }
+      if listed.contains(i) {
+        raise LoadError(
+          message="\{metadata_file}: docs.\{key}: \{s.escape()} is listed twice",
+        )
+      }
+      listed.add(i)
+      picked.push(docs[i])
+    }
+    picked
+  }
+  let first = pick("head", head)
+  let last = pick("tail", tail)
+  let ordered = first
+  for i, d in docs {
+    if !listed.contains(i) {
+      ordered.push(d)
+    }
+  }
+  ordered..push_iter(last.iter())
+}
+
+///|
+/// parse_docs_order reads docs.head and docs.tail from the metadata file
+/// src. The messages match the Go blog's.
+fn parse_docs_order(
+  src : String,
+) -> (Array[String], Array[String]) raise LoadError {
+  let v = @json.parse(src) catch { e => raise LoadError(message="\{e}") }
+  guard v is Object(top) else { raise LoadError(message="want a JSON object") }
+  check_keys("", top, metadata_keys)
+  guard top.get("docs") is Some(d) else { return ([], []) }
+  guard d is Object(docs) else {
+    raise LoadError(message="\"docs\" must be an object")
+  }
+  check_keys("docs.", docs, docs_metadata_keys)
+  (string_list(docs, "head"), string_list(docs, "tail"))
+}
+
+///|
+/// check_keys reports the first key of m, in sorted order, not in want.
+fn check_keys(
+  prefix : String,
+  m : Map[String, Json],
+  want : ReadOnlyArray[String],
+) -> Unit raise LoadError {
+  let keys = m.keys().to_array()
+  keys.sort_by((a, b) => a.lexical_compare(b))
+  for k in keys {
+    if !want.contains(k) {
+      raise LoadError(
+        message="unknown key \{(prefix + k).escape()} (want one of [\{want.join(" ")}])",
+      )
+    }
+  }
+}
+
+///|
+/// string_list returns docs[key] as strings, or [] if it is absent.
+fn string_list(
+  docs : Map[String, Json],
+  key : String,
+) -> Array[String] raise LoadError {
+  guard docs.get(key) is Some(v) else { return [] }
+  let err = LoadError(message="\"docs.\{key}\" must be an array of strings")
+  guard v is Array(xs) else { raise err }
+  let ss = []
+  for x in xs {
+    guard x is String(s) else { raise err }
+    ss.push(s)
+  }
+  ss
 }

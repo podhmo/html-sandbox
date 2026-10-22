@@ -88,6 +88,29 @@ TinyGo (also through Docker) or the standard Go toolchain. See
 | `/favicon.svg` | The embedded favicon |
 | anything else | 404 error page |
 
+### Document order
+
+`/docs/` lists the documents in the order of `TODO.md` and then `docs/`,
+by file path. `docs/blog.metadata.json`, if present, moves some of them to
+the front or the back:
+
+```json
+{
+  "docs": {
+    "head": ["docs/ja/design.md", "docs/sketch/ja/blog.md"],
+    "tail": ["docs/sketch/ja/profiling.md"]
+  }
+}
+```
+
+`docs.head` comes first and `docs.tail` last, each in the order written;
+the rest keep their order in between. Entries are file paths in the
+repository, as shown on `/docs/` (a bundle is `docs/x.md`), not URLs. Both
+keys are optional. The blog refuses to start on broken JSON, an unknown
+key, a value that is not an array of strings, a path that is not a
+document, or a path listed twice (in either key). Only the document list
+is reordered; post order, URLs, and links stay the same.
+
 ## Writing posts
 
 Add a file to [`posts/`](../../../posts/) in the repository root named `YYYY-MM-DD-slug.md`. The date and
