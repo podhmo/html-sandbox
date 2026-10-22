@@ -52,6 +52,9 @@
     // matching unrelated pages, which plain OR did badly.
     combineWith: "AND",
   };
+  // AND is strict about multi-word queries: when no page has all of the
+  // words, it shows nothing. Ask again with OR rather than an empty page.
+  const orOptions = { ...searchOptions, combineWith: "OR" };
 
   const index = new MiniSearch({
     fields: ["title", "text"],
@@ -63,6 +66,7 @@
   });
 
   let ready = false;
+  let loading = null; // the in-flight /search.json fetch, if any
   let generation = 0;
   let timer = 0;
 
@@ -179,13 +183,47 @@
     }
   }
 
+  // loadIndex fetches the corpus on first use. Opening the search page
+  // alone does not download it: only people who type a query, or follow a
+  // /search?q=... link, pay for the JSON.
+  function loadIndex() {
+    if (ready) {
+      return Promise.resolve();
+    }
+    if (loading) {
+      return loading;
+    }
+    loading = fetch("/search.json")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("HTTP " + response.status);
+        }
+        return response.json();
+      })
+      .then((entries) => {
+        index.addAll(entries);
+        ready = true;
+      })
+      .catch((err) => {
+        loading = null; // let the next input try again
+        throw err;
+      });
+    return loading;
+  }
+
+  function searchNow(query, mine) {
+    let hits = index.search(query, searchOptions);
+    if (hits.length === 0) {
+      hits = index.search(query, orOptions);
+    }
+    if (mine === generation) {
+      render(hits, query);
+    }
+  }
+
   function runSearch() {
     const query = input.value.trim();
     syncURL(query);
-    if (!ready) {
-      setStatus("Loading the search index…");
-      return;
-    }
     if (query === "") {
       results.replaceChildren();
       setStatus("Type a word to search.");
@@ -194,10 +232,24 @@
     // A newer query may have arrived while MiniSearch was working; drop the
     // old one rather than letting it overwrite the newer results.
     const mine = ++generation;
-    const hits = index.search(query, searchOptions);
-    if (mine === generation) {
-      render(hits, query);
+    if (ready) {
+      searchNow(query, mine);
+      return;
     }
+    setStatus("Loading the search index…");
+    loadIndex().then(
+      () => {
+        if (mine === generation) {
+          searchNow(query, mine);
+        }
+      },
+      (err) => {
+        if (mine === generation) {
+          console.error("search index failed to load", err);
+          setStatus("Could not load the search index. Please try again later.");
+        }
+      }
+    );
   }
 
   function syncURL(query) {
@@ -225,23 +277,8 @@
   const initial = new URLSearchParams(window.location.search).get("q");
   if (initial) {
     input.value = initial;
+    runSearch();
+  } else {
+    setStatus("Type a word to search.");
   }
-  setStatus("Loading the search index…");
-
-  fetch("/search.json")
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("HTTP " + response.status);
-      }
-      return response.json();
-    })
-    .then((entries) => {
-      index.addAll(entries);
-      ready = true;
-      runSearch();
-    })
-    .catch((err) => {
-      console.error("search index failed to load", err);
-      setStatus("Could not load the search index. Please try again later.");
-    });
 })();

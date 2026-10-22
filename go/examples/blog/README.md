@@ -97,8 +97,10 @@ TinyGo (also through Docker) or the standard Go toolchain. See
 
 `/search` loads [MiniSearch](https://github.com/lucaong/minisearch) from
 jsDelivr and indexes `/search.json` in the browser; the server only serves
-the text. The corpus is rebuilt from the loaded posts and documents on every
-request, so it follows `-watch`. Each entry is
+the text. The JSON is fetched on the first input, or when the page is opened
+with `?q=...`, so opening the page alone does not download the corpus. The
+corpus is rebuilt from the loaded posts and documents on every request, so it
+follows `-watch`. Each entry is
 `{url, kind, title, date?, text}`: posts newest first, then the documents in
 the order of `/docs/`. Only this page runs JavaScript (apart from `-watch`);
 other pages just link to it from the header.

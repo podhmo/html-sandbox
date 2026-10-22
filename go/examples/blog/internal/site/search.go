@@ -189,7 +189,7 @@ func searchPage(env pageEnv) pe.Node {
 		el.El(el.P,
 			el.Attr(el.ID, "search-status"),
 			el.Attr(el.AttrName("role"), "status"),
-			pe.Text("Loading the search index…"),
+			pe.Text("Type a word to search."),
 		),
 		el.El(el.Ul, el.Attr(el.ID, "search-results")),
 		pe.Script(miniSearchURL),
