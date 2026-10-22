@@ -109,8 +109,8 @@ check: test
 dev:
 	cd $(BLOG)/cloudflare && $(WRANGLER) dev --port $(PORT)
 
-## deploy: deploy the Worker as blog, replacing the Go blog
-deploy:
+## deploy: clean, then deploy the Worker as blog (the build starts from the cleaned tree)
+deploy: clean
 	cd $(BLOG)/cloudflare && $(WRANGLER) deploy
 
 ## compare: compare the Go blog at GO_URL with the Worker at MOONBIT_URL (PATHS= to pick paths)
