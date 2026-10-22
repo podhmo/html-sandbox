@@ -120,6 +120,7 @@ func TestPostPageText(t *testing.T) {
 	want := `Hello <script> - blog
 blog
 docs
+search
 github
 2026-10-14
 Download .md

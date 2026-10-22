@@ -75,3 +75,49 @@ article > hgroup:last-child {
 article > hgroup h2 {
   --pico-font-size: 1.25rem;
 }
+
+/* The search page. The form and the results are filled in by search.js;
+   without it the page shows the noscript message and an empty list. */
+form[role="search"] {
+  display: flex;
+  gap: 0.5rem;
+}
+form[role="search"] > input,
+form[role="search"] > button {
+  width: auto;
+  margin-bottom: 0;
+}
+form[role="search"] > input {
+  flex: 1;
+}
+form[role="search"] > button {
+  white-space: nowrap;
+}
+#search-status {
+  color: var(--pico-muted-color);
+}
+#search-results {
+  list-style: none;
+  padding-inline-start: 0;
+}
+#search-results:empty {
+  display: none;
+}
+#search-results > li {
+  margin-bottom: var(--pico-block-spacing-vertical);
+}
+#search-results > li > a {
+  font-weight: 600;
+}
+#search-results > li > small {
+  margin-inline-start: 0.5rem;
+  color: var(--pico-muted-color);
+}
+#search-results > li > p {
+  margin-bottom: 0;
+  line-height: 1.6;
+}
+#search-results mark {
+  padding: 0 0.1em;
+  border-radius: 0.15em;
+}

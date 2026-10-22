@@ -129,6 +129,12 @@ func (s *Server) route(w http.ResponseWriter, r *http.Request) {
 		handleFavicon(w, r)
 	case p == "/site.css":
 		handleSiteCSS(w, r)
+	case p == "/search.json":
+		s.handleSearchJSON(w, r)
+	case p == "/search.js":
+		handleSearchJS(w, r)
+	case p == "/search":
+		s.handleSearch(w, r)
 	case p == liveReloadScriptPath:
 		s.handleLiveReloadScript(w, r)
 	case p == liveReloadEventsPath:
