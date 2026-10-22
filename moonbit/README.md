@@ -182,6 +182,14 @@ It deploys as the Worker `blog`, in place of the Go blog, at
 <https://blog.podhmo.workers.dev>. Deploying the Go blog again puts it
 back.
 
+The ignored `build/` and `_build/` directories keep their files across
+branches, so run `make clean` before a local deploy after switching
+branches. Otherwise an `app.wasm` from one branch and a `worker.mjs` from
+another can be deployed together, and the site fails with `no content
+loaded: the host must call file for each asset`: the old Worker never
+passes the Wasm the files the new one expects. The GitHub Actions deploy
+checks out a clean tree, so it is not affected.
+
 It can also be deployed from GitHub Actions, by running the `deploy`
 workflow (`.github/workflows/deploy.yml`) by hand, from the Actions tab or
 the GitHub mobile app. It runs `make test` and then `make deploy`. It needs

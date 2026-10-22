@@ -195,6 +195,10 @@ Node.js 24 で、`worker.mjs` と同じ順序（`load` してから `call`）を
 
 同じコードを `/tmp` に置いても速くなり、リポジトリの中の、中身が `return new Response("hi")` だけの Worker でも遅かった。ローカルの往復時間を比べるときは、状態の置き場所もそろえる必要がある。
 
+**デプロイで古い JS と新しい Wasm が混ざった。** マージ直後に本番へデプロイしたところ、`https://blog.podhmo.workers.dev/` が 500 で `no content loaded: the host must call file for each asset` を返した。git 管理外の `build/` と `_build/` はブランチを切り替えても残るので、あるブランチで作った `app.wasm` と `content/` が残ったまま、別のブランチの `worker.mjs` でデプロイすると、この組み合わせになりうる。古い `worker.mjs` は `file` を呼ばないが、新しい Wasm は呼ばれる前提で `Site` を作るため、内容が空のまま最初のリクエストを迎える。
+
+`main` を取り込んでからデプロイし直すと直り、Go 版との 62 パスの比較も一致した。CI のデプロイはクリーンな checkout なので起きない。ローカルでブランチを切り替えた直後にデプロイするときは、`make clean` を挟む（README の「Deploying」にも書いた）。
+
 ## 残る懸念
 
 文章を Wasm から出したことで、記事を足しても Wasm は太らなくなった。代わりに、注意して見る場所が「Wasm のサイズ」から「isolate ごとの最初のリクエスト」に移った。

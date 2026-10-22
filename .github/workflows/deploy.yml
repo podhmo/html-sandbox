@@ -36,7 +36,7 @@ jobs:
       # found until it is fetched.
       - run: moon update
       - run: make test
-      # wrangler's build command runs make build (embed, moon, wasm-opt).
+      # wrangler's build command runs make build (content, moon, wasm-opt).
       - run: make deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
