@@ -85,5 +85,8 @@ article :is(img, svg) {
   height: auto;
 }
 article svg {
+  /* pico styles <img> only, so an inline svg also needs its own margins:
+     the same vertical rhythm as p and pre, and centered horizontally. */
+  margin-block: var(--pico-typography-spacing-vertical);
   margin-inline: auto;
 }
