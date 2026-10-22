@@ -16,7 +16,8 @@ import (
 type Member struct {
 	Name     string // file name inside the bundle, e.g. "memo.md"
 	Source   string // its path in the repository
-	Markdown bool   // Name ends in .md: rendered as Markdown, else as a pre block
+	Markdown bool   // Name ends in .md: rendered as Markdown
+	SVG      bool   // Name ends in .svg: served as image/svg+xml, shown as an image
 	Doc      tinymarkdown.Document
 	Meta     map[string]string // front matter, when Markdown
 	Raw      string            // the file as written
@@ -51,6 +52,7 @@ func loadMembers(fsys fs.FS, name, repoDir string) ([]Member, error) {
 			Name:     e.Name(),
 			Source:   repoDir + "/" + e.Name(),
 			Markdown: strings.HasSuffix(e.Name(), ".md"),
+			SVG:      strings.HasSuffix(e.Name(), ".svg"),
 		}
 		src, err := fs.ReadFile(fsys, name+"/"+e.Name())
 		if err != nil {

@@ -70,9 +70,11 @@ type Table struct {
 }
 
 // CodeBlock is the verbatim content between "```" fences, lines joined with
-// "\n". Text after the opening fence (a language name) is ignored.
+// "\n". Info is the text after the opening fence, trimmed — usually a
+// language name such as "go" or "svg".
 type CodeBlock struct {
 	Code string
+	Info string
 }
 
 func (Section) block()   {}
@@ -131,14 +133,15 @@ func scan(src string) []Block {
 		}
 	}
 	var code []string
+	var codeInfo string
 	inCode := false
 	for line := range strings.SplitSeq(src, "\n") {
 		line = strings.TrimSuffix(line, "\r")
 		trimmed := strings.TrimSpace(line)
 		if inCode {
 			if trimmed == fence {
-				out = append(out, CodeBlock{Code: strings.Join(code, "\n")})
-				code, inCode = nil, false
+				out = append(out, CodeBlock{Code: strings.Join(code, "\n"), Info: codeInfo})
+				code, codeInfo, inCode = nil, "", false
 			} else {
 				code = append(code, line)
 			}
@@ -147,6 +150,7 @@ func scan(src string) []Block {
 		switch {
 		case strings.HasPrefix(trimmed, fence):
 			flush()
+			codeInfo = strings.TrimSpace(trimmed[len(fence):])
 			inCode = true
 		case trimmed == "":
 			flush()
@@ -181,7 +185,7 @@ func scan(src string) []Block {
 	}
 	if inCode {
 		// An unclosed fence runs to the end of the document.
-		out = append(out, CodeBlock{Code: strings.Join(code, "\n")})
+		out = append(out, CodeBlock{Code: strings.Join(code, "\n"), Info: codeInfo})
 	}
 	flush()
 	return out

@@ -29,7 +29,7 @@ fn block(b : @tinymarkdown.Block) -> Json {
         "header": Json::array(header.map(inlines)),
         "rows": Json::array(rows.map(r => Json::array(r.map(inlines)))),
       }
-    CodeBlock(code) => { "t": "code", "text": Json(code) }
+    CodeBlock(code, ..) => { "t": "code", "text": Json(code) }
   }
 }
 

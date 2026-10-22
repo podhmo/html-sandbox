@@ -231,31 +231,67 @@ test "nested lists" {
 // The cases of TestCodeBlocks in go/pkg/tinymarkdown.
 test "code blocks" {
   run([
-    ("code block", "```\nfmt.Println(1)\n```", [CodeBlock("fmt.Println(1)")]),
-    ("language name is ignored", "```go\nx := 1\n```", [CodeBlock("x := 1")]),
+    (
+      "code block",
+      "```\nfmt.Println(1)\n```",
+      [CodeBlock("fmt.Println(1)", info="")],
+    ),
+    (
+      "language name is kept as info",
+      "```go\nx := 1\n```",
+      [CodeBlock("x := 1", info="go")],
+    ),
+    (
+      "info is the trimmed text after the fence",
+      "``` svg \nx\n```",
+      [CodeBlock("x", info="svg")],
+    ),
+    (
+      "info is everything after the fence",
+      "```go fmt\nx\n```",
+      [CodeBlock("x", info="go fmt")],
+    ),
+    (
+      "unclosed fence keeps the info",
+      "```mermaid\nx",
+      [CodeBlock("x", info="mermaid")],
+    ),
     (
       "contents are kept verbatim",
       "```\n# not a heading\n- not a list\n\n\tindented  \n```",
-      [CodeBlock("# not a heading\n- not a list\n\n\tindented  ")],
+      [CodeBlock("# not a heading\n- not a list\n\n\tindented  ", info="")],
     ),
-    ("empty code block", "```\n```", [CodeBlock("")]),
+    ("empty code block", "```\n```", [CodeBlock("", info="")]),
     (
       "closing fence may have surrounding spaces",
       "```\na\n  ```  \nafter",
-      [CodeBlock("a"), Paragraph("after")],
+      [CodeBlock("a", info=""), Paragraph("after")],
     ),
-    ("closing fence must be bare", "```\n```go\n```", [CodeBlock("```go")]),
-    ("CRLF line endings", "```\r\na\r\n```\r\n", [CodeBlock("a")]),
-    ("unclosed fence runs to EOF", "```\na\n\n# b", [CodeBlock("a\n\n# b")]),
+    (
+      "closing fence must be bare",
+      "```\n```go\n```",
+      [CodeBlock("```go", info="")],
+    ),
+    ("CRLF line endings", "```\r\na\r\n```\r\n", [CodeBlock("a", info="")]),
+    (
+      "unclosed fence runs to EOF",
+      "```\na\n\n# b",
+      [CodeBlock("a\n\n# b", info="")],
+    ),
     (
       "fence ends a paragraph and a list",
       "p\n```\nc\n```\n- a\n```\nd\n```",
-      [Paragraph("p"), CodeBlock("c"), List(items(["a"])), CodeBlock("d")],
+      [
+        Paragraph("p"),
+        CodeBlock("c", info=""),
+        List(items(["a"])),
+        CodeBlock("d", info=""),
+      ],
     ),
     (
       "code block inside a section",
       "# A\n```\n## x\n```",
-      [Section(level=1, title="A", children=[CodeBlock("## x")])],
+      [Section(level=1, title="A", children=[CodeBlock("## x", info="")])],
     ),
   ])
 }
@@ -274,7 +310,7 @@ test "quotes" {
     (
       "blocks inside a quote",
       "> - x\n>   y\n> ```\n>   code\n> ```",
-      [Quote([List(items(["x\ny"])), CodeBlock("  code")])],
+      [Quote([List(items(["x\ny"])), CodeBlock("  code", info="")])],
     ),
     (
       "nested quote",
@@ -306,7 +342,11 @@ test "quotes" {
       "# A\n> q",
       [Section(level=1, title="A", children=[Quote([Paragraph("q")])])],
     ),
-    ("> inside a code block is code", "```\n> x\n```", [CodeBlock("> x")]),
+    (
+      "> inside a code block is code",
+      "```\n> x\n```",
+      [CodeBlock("> x", info="")],
+    ),
   ])
 }
 

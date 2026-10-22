@@ -231,6 +231,24 @@ test "post" {
 }
 
 ///|
+test "svg code block" {
+  let s = new_site([
+    (
+      "2026-10-14-fig.md", "# Fig\n```svg\n<svg><rect/></svg>\n```\n```xml\n<svg/>\n```",
+    ),
+  ])
+  let body = body(s, "/posts/fig")
+  assert_true(
+    body.contains("<svg><rect/></svg>"),
+    msg="a ```svg block must render as markup, not a pre block",
+  )
+  assert_true(
+    body.contains("<pre>&lt;svg/&gt;</pre>"),
+    msg="a non-svg block must stay an escaped pre block",
+  )
+}
+
+///|
 test "not found pages" {
   let s = new_site(test_posts)
   assert_contains(body(s, "/posts/nope", want=404), [
@@ -587,6 +605,7 @@ let test_bundle : ReadOnlyArray[(String, String)] = [
   ("2026-10-01-old.md", "# Old\nbody"),
   ("2026-10-22-bundle.md/README.md", "---\ntitle: Bundle\n---\nface body"),
   ("2026-10-22-bundle.md/00-memo.md", "# Memo\nmember body"),
+  ("2026-10-22-bundle.md/diagram.svg", "<svg><rect/></svg>"),
   ("2026-10-22-bundle.md/hello.go", "package main\n\nfunc main() {}\n"),
 ]
 
@@ -596,9 +615,10 @@ test "load post bundle" {
   let p = posts[0]
   assert_eq("\{p.date} \{p.slug} \{p.title}", "2026-10-22 bundle Bundle")
   assert_eq([ for m in p.members => m.name ], [
-    "README.md", "00-memo.md", "hello.go",
+    "README.md", "00-memo.md", "diagram.svg", "hello.go",
   ])
-  assert_eq([ for m in p.members => m.is_markdown ], [true, true, false])
+  assert_eq([ for m in p.members => m.is_markdown ], [true, true, false, false])
+  assert_eq([ for m in p.members => m.is_svg ], [false, false, true, false])
 }
 
 ///|
@@ -652,7 +672,8 @@ test "post bundle page and members" {
   assert_contains(body(s, "/posts/bundle"), [
     "face body", "<h2><a href=\"/posts/bundle/00-memo.md\"><code>00-memo.md</code></a></h2>",
     "member body", "<h2><a href=\"/posts/bundle/hello.go\"><code>hello.go</code></a></h2>",
-    "<pre>package main",
+    "<pre>package main", "<h2><a href=\"/posts/bundle/diagram.svg\"><code>diagram.svg</code></a></h2>",
+    "<img src=\"/posts/bundle/diagram.svg\" alt=\"diagram.svg\">",
   ])
   // The face is the page; its heading is not a member section.
   let page = body(s, "/posts/bundle")
@@ -666,10 +687,14 @@ test "post bundle page and members" {
   assert_eq(header(res, "content-type"), Some("text/markdown; charset=utf-8"))
   assert_eq(header(res, "x-content-type-options"), Some("nosniff"))
   assert_eq(res.body.text(), test_bundle[2].1)
+  let res = s.render("/posts/bundle/diagram.svg")
+  assert_eq(res.status, 200)
+  assert_eq(header(res, "content-type"), Some("image/svg+xml"))
+  assert_eq(res.body.text(), test_bundle[3].1)
   let res = s.render("/posts/bundle/hello.go")
   assert_eq(res.status, 200)
   assert_eq(header(res, "content-type"), Some("text/plain; charset=utf-8"))
-  assert_eq(res.body.text(), test_bundle[3].1)
+  assert_eq(res.body.text(), test_bundle[4].1)
   let res = s.render("/posts/bundle/README.md")
   assert_eq(res.status, 200)
   assert_eq(res.body.text(), test_bundle[1].1)

@@ -48,14 +48,15 @@ pub extend Document with Debug::{to_repr}
 ///   and "\|" is unescaped to "|"; every row has as many cells as the
 ///   header. Column alignment is accepted but ignored.
 /// - CodeBlock is the verbatim content between "```" fences, lines joined
-///   with "\n". Text after the opening fence (a language name) is ignored.
+///   with "\n". info is the text after the opening fence, trimmed —
+///   usually a language name such as "go" or "svg".
 pub(all) enum Block {
   Section(level~ : Int32, title~ : String, children~ : Array[Block])
   Paragraph(String)
   List(Array[Item])
   Quote(Array[Block])
   Table(header~ : Array[String], rows~ : Array[Array[String]])
-  CodeBlock(String)
+  CodeBlock(String, info~ : String)
 } derive(Eq, Debug)
 
 ///|
@@ -178,6 +179,7 @@ fn scan(src : String) -> Array[Flat] {
   }
 
   let code : Array[StringView] = []
+  let mut code_info : StringView = ""
   let mut in_code = false
   for raw in src.split("\n") {
     // line stays a view: only the lines that are kept are copied to a String.
@@ -185,8 +187,9 @@ fn scan(src : String) -> Array[Flat] {
     let trimmed = trim_space(line)
     if in_code {
       if trimmed == FENCE {
-        out.push(Block(CodeBlock(code.join("\n"))))
+        out.push(Block(CodeBlock(code.join("\n"), info=code_info.to_owned())))
         code.clear()
+        code_info = ""
         in_code = false
       } else {
         code.push(line)
@@ -195,6 +198,7 @@ fn scan(src : String) -> Array[Flat] {
     }
     if trimmed.has_prefix(FENCE) {
       flush()
+      code_info = trim_space(trimmed[FENCE.length():])
       in_code = true
     } else if trimmed == "" {
       flush()
@@ -231,7 +235,7 @@ fn scan(src : String) -> Array[Flat] {
   }
   if in_code {
     // An unclosed fence runs to the end of the document.
-    out.push(Block(CodeBlock(code.join("\n"))))
+    out.push(Block(CodeBlock(code.join("\n"), info=code_info.to_owned())))
   }
   flush()
   out

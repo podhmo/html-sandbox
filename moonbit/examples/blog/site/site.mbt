@@ -259,10 +259,13 @@ fn markdown(src : String) -> @http.Response {
 
 ///|
 /// member sends a bundle member's raw content: text/markdown for .md
-/// members, text/plain otherwise, with nosniff.
+/// members, image/svg+xml for .svg members so that pages can show them
+/// with <img>, and text/plain otherwise, with nosniff.
 fn raw_member(m : Member) -> @http.Response {
   let content_type = if m.is_markdown {
     "text/markdown; charset=utf-8"
+  } else if m.is_svg {
+    "image/svg+xml"
   } else {
     "text/plain; charset=utf-8"
   }

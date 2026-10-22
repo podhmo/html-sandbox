@@ -26,7 +26,7 @@ fn blocks(bs : Array[@tinymarkdown.Block]) -> Array[@el.Node] {
         let cells = (row : Array[String]) => [ for c in row => inlines(c) ]
         @picoel.table(cells(header), [ for r in rows => cells(r) ])
       }
-      CodeBlock(code) => @picoel.pre(code)
+      CodeBlock(code, ..) => @picoel.pre(code)
     }
   })
 }

@@ -75,7 +75,7 @@ fn blocks(bs : Array[@tinymarkdown.Block]) -> Js {
           ("header", strings(header)),
           ("rows", array(rows, strings)),
         ])
-      CodeBlock(code) => object("code", [("code", of_string(code))])
+      CodeBlock(code, ..) => object("code", [("code", of_string(code))])
     }
   })
 }

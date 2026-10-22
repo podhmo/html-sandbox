@@ -43,6 +43,7 @@ pub struct Member {
   name : String
   source : String
   is_markdown : Bool
+  is_svg : Bool
   meta : Map[String, String]
   doc : @tinymarkdown.Document
   raw : String

@@ -85,7 +85,9 @@ fn check_meta(
 pub struct Member {
   name : String // file name inside the bundle, e.g. "memo.md"
   source : String // its path in the repository
-  is_markdown : Bool // name ends in .md: rendered as Markdown, else as a pre block
+  is_markdown : Bool // name ends in .md: rendered as Markdown
+  // name ends in .svg: served as image/svg+xml, shown as an image
+  is_svg : Bool
   meta : Map[String, String] // front matter, when is_markdown
   doc : @tinymarkdown.Document
   raw : String // the file as written
@@ -121,6 +123,7 @@ fn load_member(
       name: member_name,
       source,
       is_markdown: false,
+      is_svg: member_name.has_suffix(".svg"),
       meta: Map([]),
       doc: @tinymarkdown.parse(""),
       raw: src,
@@ -135,6 +138,7 @@ fn load_member(
     name: member_name,
     source,
     is_markdown: true,
+    is_svg: false,
     meta,
     doc: @tinymarkdown.parse(body),
     raw: src,
