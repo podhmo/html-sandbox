@@ -101,13 +101,14 @@ func postList(env pageEnv, posts []Post) pe.Node {
 	return layout(env, pageMeta{Description: siteDescription, URL: env.BaseURL + "/", Type: "website"}, body...)
 }
 
-func postPage(env pageEnv, link linker, p Post) pe.Node {
+func postPage(env pageEnv, st *site, p Post) pe.Node {
+	link := st.linker(p.linkBase())
 	var body []pe.Node
 	if _, ok := firstTitle(p.Doc); !ok {
 		// The title came from front matter only, so the body has no heading.
 		body = append(body, pe.H1(renderInlines(tinymarkdown.Inlines(p.Title), link)...))
 	}
-	body = append(body, renderBlocks(p.Doc.Children, link)...)
+	body = append(body, renderFace(link, p.Members, p.Doc)...)
 	meta := pageMeta{
 		Title:       p.Title,
 		Description: p.Description,
@@ -115,10 +116,45 @@ func postPage(env pageEnv, link linker, p Post) pe.Node {
 		Type:        "article",
 	}
 	page := []pe.Node{pageHeader(pe.Date(p.Date), postMarkdownPath(p), p.File), pe.Article(body...)}
+	for _, m := range sectionMembers(p.Members) {
+		page = append(page, memberSection(st.linker(m.Source), postPath(p), m))
+	}
 	if nav := relNav(p.Prev, p.Next); nav != nil {
 		page = append(page, nav)
 	}
 	return layout(env, meta, page...)
+}
+
+// renderFace renders the page body: the face member's document, or its raw
+// text in a pre block when the face is not a Markdown file.
+func renderFace(link linker, ms []Member, doc tinymarkdown.Document) []pe.Node {
+	if len(ms) > 0 && !ms[0].Markdown {
+		return []pe.Node{pe.Pre(ms[0].Raw)}
+	}
+	return renderBlocks(doc.Children, link)
+}
+
+// sectionMembers returns the members of ms shown as sections: every member but
+// the face, which the page renders as its body.
+func sectionMembers(ms []Member) []Member {
+	if len(ms) == 0 {
+		return nil
+	}
+	return ms[1:]
+}
+
+// memberSection renders one member of a bundle after the face: an article
+// headed by its file name, which links to the raw file served under the
+// page's URL. Markdown members render their document; others render as a
+// pre block.
+func memberSection(link linker, base string, m Member) pe.Node {
+	body := []pe.Node{pe.H2(pe.A(base+"/"+m.Name, pe.Code(m.Name)))}
+	if m.Markdown {
+		body = append(body, renderBlocks(m.Doc.Children, link)...)
+	} else {
+		body = append(body, pe.Pre(m.Raw))
+	}
+	return pe.Article(body...)
 }
 
 // docList links to every repository document, showing its file path below
@@ -135,14 +171,18 @@ func docList(env pageEnv, docs []Doc) pe.Node {
 	return layout(env, meta, body...)
 }
 
-func docPage(env pageEnv, link linker, d Doc) pe.Node {
+func docPage(env pageEnv, st *site, d Doc) pe.Node {
+	link := st.linker(d.linkBase())
 	var body []pe.Node
 	if _, ok := firstTitle(d.Doc); !ok {
 		body = append(body, pe.H1(renderInlines(tinymarkdown.Inlines(d.Title), link)...))
 	}
-	body = append(body, renderBlocks(d.Doc.Children, link)...)
+	body = append(body, renderFace(link, d.Members, d.Doc)...)
 	meta := pageMeta{Title: d.Title, Description: d.Description, URL: env.BaseURL + docPath(d), Type: "article"}
 	page := []pe.Node{pageHeader(pe.Small(pe.Text(d.Source)), docMarkdownPath(d), path.Base(d.Source)), pe.Article(body...)}
+	for _, m := range sectionMembers(d.Members) {
+		page = append(page, memberSection(st.linker(m.Source), docPath(d), m))
+	}
 	if nav := relNav(d.Prev, d.Next); nav != nil {
 		page = append(page, nav)
 	}

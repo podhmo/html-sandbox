@@ -26,6 +26,19 @@ type Post struct {
 	nextRaw     string   // front matter "next", as written
 	Doc         tinymarkdown.Document
 	Markdown    string // the file as written, front matter included
+	// Members holds every file of a bundle (a directory named like a post
+	// file), face first; nil for a single-file post.
+	Members []Member
+}
+
+// linkBase is the repository path that relative links of p resolve
+// against: for a bundle the face member's own file, so relative links
+// stay inside the bundle directory.
+func (p Post) linkBase() string {
+	if len(p.Members) > 0 {
+		return p.Members[0].Source
+	}
+	return postSource(p)
 }
 
 // frontMatterKeys are the keys a post or document may set; others are
@@ -44,17 +57,27 @@ func checkMeta(name string, meta map[string]string) error {
 
 var postName = regexp.MustCompile(`^(\d{4}-\d{2}-\d{2})-([a-z0-9]+(?:-[a-z0-9]+)*)\.md$`)
 
-// LoadPosts reads every *.md file at the top of fsys, newest first.
+// LoadPosts reads every *.md file and every *.md directory (a bundle) at
+// the top of fsys, newest first. Directories not named like a post file
+// and files not named *.md are not content.
 func LoadPosts(fsys fs.FS) ([]Post, error) {
-	names, err := fs.Glob(fsys, "*.md")
+	entries, err := fs.ReadDir(fsys, ".")
 	if err != nil {
 		return nil, err
 	}
 	seen := map[string]string{} // slug -> file name
-	posts := make([]Post, 0, len(names))
-	for _, name := range names {
+	posts := make([]Post, 0, len(entries))
+	for _, e := range entries {
+		name := e.Name()
 		m := postName.FindStringSubmatch(name)
-		if m == nil {
+		switch {
+		case e.IsDir():
+			if m == nil {
+				continue
+			}
+		case !strings.HasSuffix(name, ".md"):
+			continue
+		case m == nil:
 			return nil, fmt.Errorf("%s: file name must look like YYYY-MM-DD-slug.md (slug: a-z, 0-9, -)", name)
 		}
 		date, err := time.Parse(time.DateOnly, m[1])
@@ -67,6 +90,14 @@ func LoadPosts(fsys fs.FS) ([]Post, error) {
 		}
 		seen[slug] = name
 
+		if e.IsDir() {
+			p, err := loadPostBundle(fsys, name, date, slug)
+			if err != nil {
+				return nil, err
+			}
+			posts = append(posts, p)
+			continue
+		}
 		src, err := fs.ReadFile(fsys, name)
 		if err != nil {
 			return nil, err
@@ -96,6 +127,30 @@ func LoadPosts(fsys fs.FS) ([]Post, error) {
 		return cmp.Or(b.Date.Compare(a.Date), cmp.Compare(a.Slug, b.Slug))
 	})
 	return posts, nil
+}
+
+// loadPostBundle reads the bundle directory name as a single post. Its
+// first member — README.md if present, else the file first in name order —
+// is the face: it gives the post its title, description, and prev/next.
+func loadPostBundle(fsys fs.FS, name string, date time.Time, slug string) (Post, error) {
+	members, err := loadMembers(fsys, name, postsDir+"/"+name)
+	if err != nil {
+		return Post{}, err
+	}
+	face := members[0]
+	meta := face.Meta
+	title := meta["title"]
+	if title == "" {
+		title, _ = firstTitle(face.Doc)
+	}
+	if title == "" {
+		return Post{}, fmt.Errorf("%s: no title (set \"title\" in front matter or start with a \"# title\" heading)", face.Source)
+	}
+	description := meta["description"]
+	if description == "" {
+		description = firstParagraph(face.Doc.Children)
+	}
+	return Post{Slug: slug, File: name, Date: date, Title: title, Description: description, prevRaw: meta["prev"], nextRaw: meta["next"], Doc: face.Doc, Markdown: face.Raw, Members: members}, nil
 }
 
 // firstTitle returns the title of the first top-level "#" section.

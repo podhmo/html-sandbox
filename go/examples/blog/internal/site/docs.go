@@ -24,6 +24,19 @@ type Doc struct {
 	nextRaw     string   // front matter "next", as written
 	Doc         tinymarkdown.Document
 	Markdown    string // the file as written, front matter included
+	// Members holds every file of a bundle (a directory named like a
+	// document file), face first; nil for a single-file document.
+	Members []Member
+}
+
+// linkBase is the repository path that relative links of d resolve
+// against: for a bundle the face member's own file, so relative links
+// stay inside the bundle directory.
+func (d Doc) linkBase() string {
+	if len(d.Members) > 0 {
+		return d.Members[0].Source
+	}
+	return d.Source
 }
 
 // DocSources are the files and directories of fsys that hold documents.
@@ -36,8 +49,45 @@ func LoadDocs(fsys fs.FS) ([]Doc, error) {
 	var docs []Doc
 	seen := map[string]string{} // Path -> Source
 	walk := func(name string, d fs.DirEntry, err error) error {
-		if err != nil || d.IsDir() || path.Ext(name) != ".md" {
+		if err != nil {
 			return err
+		}
+		if d.IsDir() {
+			if !strings.HasSuffix(name, ".md") {
+				return nil
+			}
+			// A directory named like a document file is a bundle: its
+			// files form a single page.
+			p := strings.TrimPrefix(strings.TrimSuffix(name, ".md"), "docs/")
+			if prev, ok := seen[p]; ok {
+				return fmt.Errorf("%s: /docs/%s is already used by %s", name, p, prev)
+			}
+			if st, err := fs.Stat(fsys, "docs/"+p); err == nil && st.IsDir() {
+				return fmt.Errorf("%s: pages under docs/%s/ would collide with its members", name, p)
+			}
+			seen[p] = name
+			members, err := loadMembers(fsys, name, name)
+			if err != nil {
+				return err
+			}
+			face := members[0]
+			meta := face.Meta
+			title := meta["title"]
+			if title == "" {
+				title, _ = firstTitle(face.Doc)
+			}
+			if title == "" {
+				title = name
+			}
+			description := meta["description"]
+			if description == "" {
+				description = firstParagraph(face.Doc.Children)
+			}
+			docs = append(docs, Doc{Path: p, Source: name, Title: title, Description: description, prevRaw: meta["prev"], nextRaw: meta["next"], Doc: face.Doc, Markdown: face.Raw, Members: members})
+			return fs.SkipDir
+		}
+		if path.Ext(name) != ".md" {
+			return nil
 		}
 		p := strings.TrimPrefix(strings.TrimSuffix(name, ".md"), "docs/")
 		if prev, ok := seen[p]; ok {

@@ -120,13 +120,13 @@ fn Site::post_list(self : Site) -> @el.Node {
 
 ///|
 fn Site::post_page(self : Site, p : Post) -> @el.Node {
-  let link = self.linker(p.source())
+  let link = self.linker(p.link_base())
   let body = []
   if first_title(p.doc) is None {
     // The title came from front matter only, so the body has no heading.
     body.push(@picoel.h1(render_inlines(@tinymarkdown.inlines(p.title), link)))
   }
-  body.push_iter(render_blocks(p.doc.children, link).iter())
+  body.push_iter(render_face(link, p.members, p.doc).iter())
   let meta = PageMeta::{
     title: p.title,
     description: p.description,
@@ -137,6 +137,10 @@ fn Site::post_page(self : Site, p : Post) -> @el.Node {
     page_header(@picoel.date(p.date), href=p.markdown_path(), filename=p.file),
     @picoel.article(body),
   ]
+  for i = 1; i < p.members.length(); i = i + 1 {
+    let m = p.members[i]
+    page.push(member_section(self.linker(m.source), p.page_path(), m))
+  }
   match rel_nav(p.prev_nav, p.next_nav) {
     Some(nav) => page.push(nav)
     None => ()
@@ -170,12 +174,12 @@ fn Site::doc_list(self : Site) -> @el.Node {
 
 ///|
 fn Site::doc_page(self : Site, d : Doc) -> @el.Node {
-  let link = self.linker(d.source)
+  let link = self.linker(d.link_base())
   let body = []
   if first_title(d.doc) is None {
     body.push(@picoel.h1(render_inlines(@tinymarkdown.inlines(d.title), link)))
   }
-  body.push_iter(render_blocks(d.doc.children, link).iter())
+  body.push_iter(render_face(link, d.members, d.doc).iter())
   let meta = PageMeta::{
     title: d.title,
     description: d.description,
@@ -190,11 +194,46 @@ fn Site::doc_page(self : Site, d : Doc) -> @el.Node {
     ),
     @picoel.article(body),
   ]
+  for i = 1; i < d.members.length(); i = i + 1 {
+    let m = d.members[i]
+    page.push(member_section(self.linker(m.source), d.page_path(), m))
+  }
   match rel_nav(d.prev_nav, d.next_nav) {
     Some(nav) => page.push(nav)
     None => ()
   }
   layout(meta, page)
+}
+
+///|
+/// render_face renders the page body: the face member's document, or its
+/// raw text in a pre block when the face is not a Markdown file.
+fn render_face(
+  link : Linker,
+  members : Array[Member],
+  doc : @tinymarkdown.Document,
+) -> Array[@el.Node] {
+  if !members.is_empty() && !members[0].is_markdown {
+    return [@picoel.pre(members[0].raw)]
+  }
+  render_blocks(doc.children, link)
+}
+
+///|
+/// member_section renders one member of a bundle below the face: an
+/// article headed by its file name, which links to the raw file served
+/// at <page>/<name>. A .md member renders as Markdown; any other member
+/// is shown as a pre block.
+fn member_section(link : Linker, base : String, m : Member) -> @el.Node {
+  let body = [
+    @picoel.h2([@picoel.a("\{base}/\{m.name}", [@picoel.code(m.name)])]),
+  ]
+  if m.is_markdown {
+    body.push_iter(render_blocks(m.doc.children, link).iter())
+  } else {
+    body.push(@picoel.pre(m.raw))
+  }
+  @picoel.article(body)
 }
 
 ///|
