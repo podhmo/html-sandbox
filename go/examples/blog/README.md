@@ -2,8 +2,10 @@
 
 A mobile-first, server-side rendered blog built on `pkg/picoel`,
 `pkg/tinymarkdown`, and `pkg/tinyfrontmatter`. It uses only the Go standard
-library: there is no template engine, no JavaScript (except the `-watch`
-reload script), and no CSS classes of its own.
+library: there is no template engine, no CSS classes of its own, and no
+JavaScript except the `-watch` reload script and the search page. Every page
+is rendered on the server; search runs in the browser over a JSON copy of the
+posts and documents.
 Styling is [pico.css v2](https://picocss.com/docs), loaded from a CDN;
 pages are made of semantic elements and pico's `container` class.
 The few rules pico cannot express (a sticky site header and tighter spacing
@@ -85,8 +87,23 @@ TinyGo (also through Docker) or the standard Go toolchain. See
 | `/posts/{slug}` | A post |
 | `/docs/` | Repository documents: `TODO.md` and `docs/**/*.md` |
 | `/docs/{path}` | A document; `TODO.md` is `/docs/TODO`, `docs/ja/design.md` is `/docs/ja/design` |
+| `/search` | Search posts and documents in the browser |
+| `/search.json` | Plain text of every post and document, for `/search` |
+| `/search.js` | The search page's script, served as `/search.js?v=<hash>` |
 | `/favicon.svg` | The embedded favicon |
 | anything else | 404 error page |
+
+### Search
+
+`/search` loads [MiniSearch](https://github.com/lucaong/minisearch) from
+jsDelivr and indexes `/search.json` in the browser; the server only serves
+the text. The JSON is fetched on the first input, or when the page is opened
+with `?q=...`, so opening the page alone does not download the corpus. The
+corpus is rebuilt from the loaded posts and documents on every request, so it
+follows `-watch`. Each entry is
+`{url, kind, title, date?, text}`: posts newest first, then the documents in
+the order of `/docs/`. Only this page runs JavaScript (apart from `-watch`);
+other pages just link to it from the header.
 
 ### Document order
 
@@ -181,7 +198,9 @@ linked only for `http`, `https`, and `mailto`; others, such as
 | `main.go` | Flags and startup |
 | `repo.go` | Finding the module root and opening the repository root for `-debug` |
 | `posts/posts.go` | Embedding the posts, copied in by `go generate` |
-| `internal/site/content.go` | Embedded favicon, posts, and documents |
+| `internal/site/content.go` | Embedded favicon, posts, documents, CSS, and search script |
+| `internal/site/search.go` | `/search`, `/search.json`, `/search.js`, and plain-text extraction |
+| `internal/site/search.js` | The browser-side search (MiniSearch) |
 | `internal/site/posts.go` | Loading posts from an `fs.FS` |
 | `internal/site/docs.go` | Loading repository documents |
 | `repodocs/repodocs.go` | Embedding the repository documents, copied in by `go generate` |

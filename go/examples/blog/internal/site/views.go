@@ -56,6 +56,7 @@ func layout(env pageEnv, meta pageMeta, body ...pe.Node) pe.Node {
 			[]pe.Node{
 				pe.A("/", pe.Strong(pe.Text(siteName))),
 				pe.A("/docs/", pe.Text("docs")),
+				pe.A("/search", pe.Text("search")),
 			},
 			[]pe.Node{pe.A(repoHomeURL, pe.Text("github"))},
 		)),

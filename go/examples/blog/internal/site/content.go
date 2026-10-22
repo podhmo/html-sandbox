@@ -22,12 +22,24 @@ var favicon []byte
 //go:embed site.css
 var siteCSS []byte
 
-// siteCSSPath carries a hash of siteCSS, so browsers may cache it for long
-// and still pick up a new version right after a deploy.
-var siteCSSPath = func() string {
-	sum := sha256.Sum256(siteCSS)
-	return "/site.css?v=" + hex.EncodeToString(sum[:4])
-}()
+// searchJS is the client of the search page. Only /search loads it; other
+// pages stay JavaScript-free.
+//
+//go:embed search.js
+var searchJS []byte
+
+// versionedPath carries a hash of data in the query, so browsers may cache
+// it for long and still pick up a new version right after a deploy.
+func versionedPath(name string, data []byte) string {
+	sum := sha256.Sum256(data)
+	return name + "?v=" + hex.EncodeToString(sum[:4])
+}
+
+// siteCSSPath and searchJSPath carry a hash of the file they serve.
+var (
+	siteCSSPath  = versionedPath("/site.css", siteCSS)
+	searchJSPath = versionedPath("/search.js", searchJS)
+)
 
 // EmbeddedSources returns the posts and documents built into the binary.
 // Every entry point serves these unless told to read files from disk.
