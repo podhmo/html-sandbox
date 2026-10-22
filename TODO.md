@@ -120,7 +120,7 @@
 
 ### Future work
 
-- [-] **MoonBit の Workers 用アダプターを最適な形に磨く**: 今のアダプター
+- [x] **MoonBit の Workers 用アダプターを最適な形に磨く**: 今のアダプター
   （`moonbit/cloudflare/worker.mjs`（当時は `moonbit/workers/`）と `moonbit/worker` の export、host の
   import）は、ブログに必要十分で、足りないものはない。ただ、spike から必要に
   応じて継ぎ足してきたものなので、これまでの知見を総動員して最適な形に設計し
@@ -142,8 +142,11 @@
   - [x] パスのデコードを Wasm に移し、`/%FF` のような UTF-8 でないパスにも Go 版と
     同じ 404 を返す（案 H）。
   - [x] GET と HEAD への 200 の応答を、isolate の中でパスごとにキャッシュする（案 I）。
-  - [ ] フラグ入りの wrangler が入れられるようになったら（2026-10-21 ごろ以降）、
-    `wasm_esm_integration_builtins` を使う案 E を試す。
+  - [x] 2026-10-22 に、フラグ入りの wrangler 4.151.3（workerd 1.20261019.1）で
+    `wasm_esm_integration_builtins` を使う案 E を `wrangler dev` と本番で動かした。
+    通常の 70 パスは Go 版と一致し、`-Oz` の Wasm は今の案 D' より 78,050 B 小さいが、
+    いちばん大きいページは約 7% 遅く、案 H のパスのデコードは再現できなかった
+    （[探索メモ](docs/sketch/ja/moonbit-workers-adapter.md)）。
 
 - [ ] **記事に図を載せられるようにする**: [同じ wasm をブラウザーと Worker で
   動かしたい](posts/2026-10-21-moonbit-browser.md)のように、ブラウザー、Worker、

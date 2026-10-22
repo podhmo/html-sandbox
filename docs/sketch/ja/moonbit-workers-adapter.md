@@ -1,6 +1,6 @@
 # 探索メモ: MoonBit の Workers 用アダプターを磨く
 
-TODO.md の「MoonBit の Workers 用アダプターを最適な形に磨く」の探索の記録（2026-10-16）。
+TODO.md の「MoonBit の Workers 用アダプターを最適な形に磨く」の探索の記録（2026-10-16、追試 2026-10-22）。
 今のアダプター（`moonbit/workers/worker.mjs`、`moonbit/worker` の export、host の import）に代わる形を、`/tmp` の spike でいくつか作って比べた。
 案ごとに結果を確かめてから、どれを取り込むか決める。案 D' と案 G は取り込んだ（「取り込み」の節）。
 
@@ -11,8 +11,8 @@ TODO.md の「MoonBit の Workers 用アダプターを最適な形に磨く」�
 - **受け渡しは、Wasm の線形メモリに UTF-8 でまとめて書く形（案 D'）がいちばん速い。** いちばん大きいページ（53,784 B）で、1 リクエストが約 740 µs から約 390 µs になった。受け渡しのコストは約 390 µs から約 50 µs に減り、残りのほとんどは Wasm の中の `render`（約 340 µs）になる。
 - その形にすると、export は `serve` と `memory` の 2 つ、import は 0、`worker.mjs` は 65 行から 31 行になる。`set_base_url`、`set_query`、`path_push` と、`host` の 4 つの import はいらなくなる。
 - **`wasm-opt -Oz` は、moon に同梱の `moon-wasm-opt` で依存を増やさずにかけられる。** 255,859 B が 237,559 B（-7%）、gzip 後は 83.5 KB が 76.5 KB になり、速さは変わらないか少し速い。
-- **workerd に、js-string builtins を有効にする互換性フラグ `wasm_esm_integration_builtins` が 2026-10-12 に入った**（後述）。これを使う案 E は `worker.mjs` が 23 行でいちばん短く、Wasm もいちばん小さい（231,619 B）が、Node で測ると案 D' より遅い（約 540 µs）。手元の wrangler ではまだフラグを使えず、Workers の上では確かめられていない。
-- 推す順番: 案 D' + `-Oz` + メソッドを Wasm に渡す（案 G）。案 E はフラグを試せるようになったら測り直す。
+- **workerd に、js-string builtins を有効にする互換性フラグ `wasm_esm_integration_builtins` が 2026-10-12 に入った**（後述）。これを使う案 E は `worker.mjs` が 23 行でいちばん短く、Wasm もいちばん小さい（231,619 B）が、Node で測ると案 D' より遅い（約 540 µs）。2026-10-22 に wrangler 4.151.3 で `wrangler dev` と本番の Workers の両方で動くことを確かめた（「追試」の節）。ただし、いちばん大きいページは今も案 D' より遅く、案 H のパスのデコードは再現できない。
+- 推す順番: 案 D' + `-Oz` + メソッドを Wasm に渡す（案 G）。案 E はフラグが使えるようになったので測り直したが、大きいページの遅さとパスのデコードの違いが残るので、今のところ D' のままにする。
 
 ## 環境
 
@@ -134,18 +134,18 @@ spike は `git archive HEAD` で `/tmp/go-html-sandbox/adapter` に取り出し�
 
 ### Go 版との比較
 
-C、D、A のそれぞれを `wrangler dev` で動かし、ローカルの Go 版（`-base-url https://blog.podhmo.workers.dev`）と `make compare` で比べた。既定の 6 パスと、上の 35 パスに `//posts/../`、`/docs?x=1`、`/site.css?v=...` などを足した 41 パスが、3 つとも一致した。D' と E は `wrangler dev` では比べておらず、Node での案 A との一致だけを確かめた（D' は D と JS が同じで、Wasm の UTF-8 の書き方だけが違う）。
+C、D、A のそれぞれを `wrangler dev` で動かし、ローカルの Go 版（`-base-url https://blog.podhmo.workers.dev`）と `make compare` で比べた。既定の 6 パスと、上の 35 パスに `//posts/../`、`/docs?x=1`、`/site.css?v=...` などを足した 41 パスが、3 つとも一致した。D' と E はこのときは `wrangler dev` で比べておらず、Node での案 A との一致だけを確かめた（D' は D と JS が同じで、Wasm の UTF-8 の書き方だけが違う）。案 E は 2026-10-22 に `wrangler dev` と本番で比べた（「追試」の節）。
 
 ## 確かめられなかったこと、アクセスできなかったもの
 
-次の探索では、ここから再開できるかもしれない。
+次の探索では、ここから再開できるかもしれない（一部は 2026-10-22 の「追試」で解消した）。
 
-- **`wasm_esm_integration_builtins` を `wrangler dev` で試せなかった。** 手元の wrangler 4.148.0（workerd 1.20261006.1）では、`compatibility_flags` に書くと `No such compatibility flag: wasm_esm_integration_builtins` で workerd が起動しない。フラグが入ったのは 2026-10-13 公開の workerd 1.20261013.1 以降で、最新の wrangler は 4.151.0。しかし npm の設定 `min-release-age = 8` で、公開から 8 日たっていない版は入らない（`No matching version found for wrangler@4.151.0 with a date before 2026/10/8`）。この設定は依存の取り込みを遅らせるための意図的なものなので、迂回していない。**2026-10-21 ごろ以降なら、フラグ入りの wrangler を入れて試せる見込み。**
-- **本番の Workers でこのフラグが使えるかは確かめていない。** 本番のランタイムに入る時期は分からない。確かめるにはデプロイが要る。
-- **案ごとの本番での起動時間（Worker Startup Time）は測っていない。** spike の段階では `wrangler deploy --dry-run` で Total Upload だけを取った。取り込んだ案 D' と main のアダプターは、その後 `make deploy` で測った（「取り込み」の節）。
+- **`wasm_esm_integration_builtins` を試せなかったのは、wrangler の workerd が古かったため。** 当時の wrangler 4.148.0（workerd 1.20261006.1）では、`compatibility_flags` に書くと `No such compatibility flag: wasm_esm_integration_builtins` で workerd が起動しなかった。2026-10-22 に wrangler 4.151.3（workerd 1.20261019.1）で `wrangler dev` と本番の両方を試し、フラグが通ることを確かめた（「追試」の節）。
+- **本番の Workers でこのフラグが使えるかは、2026-10-22 に確かめた。** `wrangler deploy` はフラグを受け付け、確認用の `spike-jsstr` と `spike-jsstroz` をデプロイできた。ただし、このフラグが正式にサポートされたのか、いつ既定になるのかは分かっていない。互換性フラグの一覧（2026-09-18 更新）にはまだ載っていない。
+- **案ごとの本番での起動時間（Worker Startup Time）は、案 E だけ測った。** `-Oz` なしと `-Oz` のどちらも 4 ms だった（2026-10-22）。案 D' は今回デプロイしていない（前回のデプロイでは 2〜3 ms）。ms 単位なので、差はほとんど分からない。
 - **workerd の中での CPU 時間を測っていない。** Workers の中ではタイマーが I/O まで進まないので、前の調査と同じく Node で代わりに測った。本番の CPU 時間は、デプロイして Workers のダッシュボードかログ（`cpuTime`）で見られるかもしれない。
-- **案 D' と E を Go 版と `make compare` で比べていない**（上の「Go 版との比較」）。
-- **workerd の正式なドキュメントでのフラグの説明**は見つからなかった。Web 検索では Cloudflare の [Wasm のドキュメント](https://developers.cloudflare.com/workers/runtime-apis/webassembly/)にも builtins の話はなく、workerd のソース（`src/workerd/io/compatibility-date.capnp`）と PR を `gh` で読んで分かった。[互換性フラグの一覧](https://developers.cloudflare.com/workers/configuration/compatibility-flags/)に載ったかは、次に確かめる。
+- **案 E のパスのデコードは、案 H と一致しない。** 案 E の `worker.mjs` は `decodeURIComponent` で JS 側のデコードをしており、変なエスケープの 10 パスが Go 版と違う（「追試」の節）。案 H と同じにするには、案 E の `serve` にデコードを足すか、Worker 側に Go と同じデコーダーが要る。
+- **workerd の正式なドキュメントでのフラグの説明**はまだ見つからない。Web 検索では Cloudflare の [Wasm のドキュメント](https://developers.cloudflare.com/workers/runtime-apis/webassembly/)にも builtins の話はなく、workerd のソース（`src/workerd/io/compatibility-date.capnp`）と PR を `gh` で読んで分かった。互換性フラグの一覧にも載っていない（2026-09-18 更新のページを 2026-10-22 に読んだ）。
 
 ## 取り込み（案 D' と案 G）
 
@@ -241,12 +241,67 @@ C、D、A のそれぞれを `wrangler dev` で動かし、ローカルの Go �
 - `make dev` とローカルの Go 版を、44 パス + 変なエスケープの 14 パス + `/posts/hell%6F` と `/site.css?v=other` の 60 パスで、続けて 3 回比べた。2 回目と 3 回目はキャッシュから返る。どの回も、一致しないのは案 H の節の `/%FF//` だけだった。デプロイした `blog` でも同じく 3 回比べ、一致しないのは案 H の節の 3 パスだけだった。
 - デプロイした版の Total Upload は 276.63 KiB（gzip 後 88.03 KiB。文書がこのメモの分だけ増えた）、Worker Startup Time は 2 ms。
 
+## 追試（2026-10-22、案 E）
+
+`wasm_esm_integration_builtins` を wrangler 4.151.3（workerd 1.20261019.1）で試した。4.150.0 は workerd 1.20261006.1 で、まだ `No such compatibility flag` になった。4.151.2 から workerd 1.20261019.1 を積む（4.151.0 と 4.151.1 は 1.20261012.1）。この環境では npm の `min-release-age` は設定されておらず（`npm config get min-release-age` が `null`）、4.151.3 を npx で使えた。
+
+### `wrangler dev`
+
+`moonbit/experiments/adapter-abi` の `make build` で spike を作り、`workers/wrangler-jsstr.jsonc` と `worker-jsstr.mjs` を `wrangler dev` で動かした。`-Oz` の `jsstr-Oz.wasm` も、`main` だけ `worker-jsstroz.mjs` にした設定を一時的に作って試した。フラグは通り、`Ready on http://localhost:8787` になった。
+
+Go 版（`-debug`、`-base-url https://blog.podhmo.workers.dev`）と 84 パスを `make compare` で比べた。
+
+- 通常の 70 パス（`/`、`/docs/`、記事と文書とその `.md`、`/favicon.svg`、`/site.css`、リダイレクト、存在しないパス）は、`-Oz` の有無にかかわらず、すべて status・Content-Type・本文が一致した。
+- 変なエスケープの 14 パスのうち、10 パスが一致しなかった（`/%FF`、`/posts/%FF`、`/docs/%FF`、`/posts/%FF.md`、`/%FF/`、`/%FF//`、`/%C3%28`、`/%ED%A0%80`、`/%E0%A4%A`、`/%zz`）。これはフラグのせいではなく、案 E の `worker.mjs` が `decodeURIComponent` でパスを JS 側でデコードするため。Go 版は UTF-8 でないバイトを U+FFFD にして 404 を返すが、`decodeURIComponent` は例外を投げるので 400 になる。`/%zz` と `/%E0%A4%A` はどちらも 400 だが、Content-Type（`text/plain;charset=UTF-8` と `text/plain; charset=utf-8`）と本文が違う。
+- 残りの 4 パス（`/a%00b`、`/docs%2F`、`/a%2Fb`、`/posts/hello%3F`）は一致した。
+- エスケープしたパスをそのまま `serve` に渡す（デコードしない）版も試したが、`/%FF//`、`/%E0%A4%A`、`/%zz`、`/docs%2F` の 4 パスが違った。案 H と同じデコードを再現するには、案 E の `serve` にパスのデコードを足すか、Worker 側に Go と同じデコーダーが要る。
+- `POST /posts/hello` と `POST /docs` は 404 で本文まで一致した。`HEAD /` は 200 と Content-Type が一致した（`wrangler dev` は HEAD に Content-Length を返さないが、`make compare` は見ていない）。
+
+### 本番
+
+`wrangler deploy` でもフラグは通り、確認用の Worker を 2 つデプロイできた。
+
+- `spike-jsstr`（`-Oz` なし）: https://spike-jsstr.podhmo.workers.dev （確認後に削除）、Total Upload 462.18 KiB（gzip 160.81 KiB）、Worker Startup Time 4 ms。
+- `spike-jsstroz`（`-Oz`）: https://spike-jsstroz.podhmo.workers.dev （確認後に削除）、441.17 KiB（gzip 153.01 KiB）、4 ms。
+- デプロイした `spike-jsstr` とローカルの Go 版を 84 パスで比べると、11 パスが違った。上の 10 パスに `/a%00b` が加わる。`/a%00b` と `/%zz` は Cloudflare の前段が HTML の 400 を返す（案 H の節と同じ）。通常の 70 パスはすべて一致した。
+- 確認用の 2 つは確認後に `wrangler delete` で削除した。
+
+### サイズと速さ
+
+`-Oz` は、案 E の `jsstr.wasm` に `--enable-strings` を足してかけた。文書がこのメモの分だけ増えたので、前の節の絶対値とは比べられない。
+
+| | 案 D'（今の blog、`-Oz`） | 案 E（`-Oz` なし） | 案 E + `-Oz` |
+| --- | --- | --- | --- |
+| Wasm | 528,994 B（gzip -9 後 158,090 B） | 472,464 B（同 162,910 B） | 450,944 B（同 154,810 B） |
+| Total Upload | 520.27 KiB（gzip 後 157.09 KiB） | 462.18 KiB（同 160.81 KiB） | 441.17 KiB（同 153.01 KiB） |
+| Worker Startup Time | 2〜3 ms（前回のデプロイ） | 4 ms | 4 ms |
+
+- 案 D' は今回デプロイしていない。Total Upload は `wrangler deploy --dry-run`、起動時間は前回の値。
+- 案 E + `-Oz` は案 D' より Wasm が 78,050 B（14.8%）小さく、gzip 後も 3,280 B 小さい。Total Upload も gzip 後で 4.08 KiB 小さい。
+- ただし、`-Oz` なしの案 E は gzip 後で案 D' より大きい（162,910 B 対 158,090 B）。案 E のサイズは `-Oz` とセットで見る。
+
+Node の `bench.mjs` で 2,000 回 × 5 回を 2 回測った、中央値の範囲:
+
+| | 案 D' | 案 E | 案 E + `-Oz` |
+| --- | --- | --- | --- |
+| `/` | 28.7〜29.0 µs | 25.9〜26.0 µs | 23.9〜24.6 µs |
+| いちばん大きいページ（67,918 B） | 567.0〜571.2 µs | 644.5〜649.7 µs | 608.4〜613.2 µs |
+
+- `/` は案 E のほうが速い。いちばん大きいページは案 E が案 D' より約 13% 遅く、`-Oz` でも約 7% 遅い。前の節の「約 540 µs」は文書が 53,784 B のときの値で、今は 67,918 B なので絶対値は比べられない。速い順は案 D'、案 E + `-Oz`、案 E。
+- これは Node で `new WebAssembly.Module(..., { builtins: ["js-string"] })` を使った値。本番の CPU 時間は測っていない。
+
+### まとめ
+
+- フラグは `wrangler dev` でも本番でも使える（2026-10-22 時点）。案 E の Wasm は `-Oz` でいちばん小さく、起動時間も 4 ms で、通常のページは Go 版と一致する。
+- それでも今の案 D' を置き換える理由にはならない。いちばん大きいページは案 D' より遅く、案 H のパスのデコードを再現できない。案 E を使うなら、パスのデコードを Wasm に移す設計が要る。
+- フラグ自体は、将来ほかの ABI を試すときに使える。
+
 ## 次の一歩（一つずつ確かめる）
 
 1. （済み）案 D'（UTF-8 の線形メモリ、export は `serve` と `memory`）と案 G（メソッドを渡す）を `moonbit/worker` と `worker.mjs` に取り込み、`make compare` で Go 版と一致することを確かめる。「取り込み」の節を参照。
 2. （済み）案 F（`moon-wasm-opt -Oz`）を `make build` に入れ、サイズと `make compare` を確かめる。「取り込み（案 F、`-Oz`）」の節を参照。
 3. （済み）1 と 2 をデプロイし、Total Upload と Worker Startup Time を記録する。
-4. 2026-10-21 ごろ以降に、フラグ入りの wrangler で案 E を `wrangler dev` で動かす。動けば、本番でも試してから D' と比べ直す。
+4. （済み）2026-10-22 に、フラグ入りの wrangler 4.151.3 で案 E を `wrangler dev` と本番で動かし、案 D' と比べた。「追試」の節を参照。
 5. （済み）案 H（パスのデコード）と案 I（応答のキャッシュ）を試す。I は [Static Assets の TODO](moonbit-static-assets.md) で文章を JS から渡すときにも関わる。線形メモリの形にしておけば、文章をコード単位ずつではなく、UTF-8 のバイト列のまま渡せる。
 
 ## spike のコード
