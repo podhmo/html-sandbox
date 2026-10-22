@@ -19,7 +19,7 @@ section h1 "Title"
     paragraph "q"
   section h2 "Sub"
     table ["x" "y"]
-    code "x := 1"
+    code "go" "x := 1"
 `
 
 func TestStdin(t *testing.T) {

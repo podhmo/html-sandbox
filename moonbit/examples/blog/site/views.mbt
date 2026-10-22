@@ -222,14 +222,21 @@ fn render_face(
 ///|
 /// member_section renders one member of a bundle below the face: an
 /// article headed by its file name, which links to the raw file served
-/// at <page>/<name>. A .md member renders as Markdown; any other member
-/// is shown as a pre block.
+/// at <page>/<name>. A .md member renders as Markdown, an .svg member
+/// shows as an image, and any other member is shown as a pre block.
 fn member_section(link : Linker, base : String, m : Member) -> @el.Node {
   let body = [
     @picoel.h2([@picoel.a("\{base}/\{m.name}", [@picoel.code(m.name)])]),
   ]
   if m.is_markdown {
     body.push_iter(render_blocks(m.doc.children, link).iter())
+  } else if m.is_svg {
+    body.push(
+      @el.el(@el.img, [
+        @el.Attr(@el.src, "\{base}/\{m.name}"),
+        @el.Attr(@el.alt, m.name),
+      ]),
+    )
   } else {
     body.push(@picoel.pre(m.raw))
   }
@@ -358,7 +365,14 @@ fn render_blocks(
         let cells = (row : Array[String]) => [ for c in row => inlines(c) ]
         @picoel.table(cells(header), [ for r in rows => cells(r) ])
       }
-      CodeBlock(code) => @picoel.pre(code)
+      CodeBlock(code, info~) =>
+        // A ```svg block is the image itself: its content is
+        // author-controlled markup, so it may be written out raw.
+        if info == "svg" {
+          @el.Raw(code)
+        } else {
+          @picoel.pre(code)
+        }
     }
   })
 }

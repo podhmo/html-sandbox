@@ -90,7 +90,11 @@ func dump(w io.Writer, bs []tinymarkdown.Block, depth int) error {
 				}
 			}
 		case tinymarkdown.CodeBlock:
-			_, err = fmt.Fprintf(w, "%scode %q\n", indent, b.Code)
+			if b.Info != "" {
+				_, err = fmt.Fprintf(w, "%scode %q %q\n", indent, b.Info, b.Code)
+			} else {
+				_, err = fmt.Fprintf(w, "%scode %q\n", indent, b.Code)
+			}
 		default:
 			err = fmt.Errorf("unknown block %T", b)
 		}

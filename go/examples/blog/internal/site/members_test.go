@@ -11,6 +11,7 @@ var bundlePosts = fstest.MapFS{
 	"2026-10-14-hello.md":              file("# Hello\nbody"),
 	"2026-10-15-bundle.md/README.md":   file("---\ntitle: Bundle title\ndescription: Bundle desc\n---\n# Bundle\nSee [code](main.go)."),
 	"2026-10-15-bundle.md/00-intro.md": file("# Intro\nextra text"),
+	"2026-10-15-bundle.md/icon.svg":    file("<svg xmlns=\"http://www.w3.org/2000/svg\"></svg>"),
 	"2026-10-15-bundle.md/main.go":     file("package main\n\nfunc main() {}"),
 }
 
@@ -30,12 +31,15 @@ func TestLoadPostBundle(t *testing.T) {
 	for _, m := range b.Members {
 		names = append(names, m.Name)
 	}
-	want := []string{"README.md", "00-intro.md", "main.go"}
+	want := []string{"README.md", "00-intro.md", "icon.svg", "main.go"}
 	if strings.Join(names, ",") != strings.Join(want, ",") {
 		t.Errorf("member order %v, want %v", names, want)
 	}
-	if b.Members[2].Name != "main.go" || b.Members[2].Markdown {
+	if b.Members[3].Name != "main.go" || b.Members[3].Markdown {
 		t.Error("main.go must be a non-markdown member")
+	}
+	if !b.Members[2].SVG {
+		t.Error("icon.svg must be an SVG member")
 	}
 }
 
@@ -76,6 +80,8 @@ func TestPostBundlePage(t *testing.T) {
 		`<h2><a href="/posts/bundle/main.go"><code>main.go</code></a></h2>`,
 		`<pre>package main`,
 		`<a href="/posts/bundle/main.go">code</a>`,
+		`<h2><a href="/posts/bundle/icon.svg"><code>icon.svg</code></a></h2>`,
+		`<img src="/posts/bundle/icon.svg" alt="icon.svg">`,
 	} {
 		if !strings.Contains(body, want) {
 			t.Errorf("page does not contain %q", want)
@@ -98,6 +104,10 @@ func TestBundleMemberRaw(t *testing.T) {
 	res, _ = get(t, h, "/posts/bundle/00-intro.md")
 	if ct := res.Header.Get("Content-Type"); ct != "text/markdown; charset=utf-8" {
 		t.Errorf("md member: Content-Type %q", ct)
+	}
+	res, _ = get(t, h, "/posts/bundle/icon.svg")
+	if ct := res.Header.Get("Content-Type"); ct != "image/svg+xml" {
+		t.Errorf("svg member: Content-Type %q", ct)
 	}
 	res, body = get(t, h, "/posts/bundle/nope.md")
 	if res.StatusCode != http.StatusNotFound || !strings.Contains(body, "Page not found.") {

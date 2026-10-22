@@ -252,12 +252,16 @@ func writeMarkdown(w http.ResponseWriter, src string) {
 }
 
 // writeMember sends a bundle member's content as text, Markdown as
-// text/markdown like writeMarkdown and anything else as plain text.
+// text/markdown like writeMarkdown, an SVG as image/svg+xml so that pages
+// can show it with <img>, and anything else as plain text.
 func writeMember(w http.ResponseWriter, m Member) {
 	h := w.Header()
-	if m.Markdown {
+	switch {
+	case m.Markdown:
 		h.Set("Content-Type", "text/markdown; charset=utf-8")
-	} else {
+	case m.SVG:
+		h.Set("Content-Type", "image/svg+xml")
+	default:
 		h.Set("Content-Type", "text/plain; charset=utf-8")
 	}
 	h.Set("X-Content-Type-Options", "nosniff")

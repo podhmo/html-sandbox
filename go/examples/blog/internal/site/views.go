@@ -145,13 +145,17 @@ func sectionMembers(ms []Member) []Member {
 
 // memberSection renders one member of a bundle after the face: an article
 // headed by its file name, which links to the raw file served under the
-// page's URL. Markdown members render their document; others render as a
-// pre block.
+// page's URL. Markdown members render their document, an SVG member shows
+// as an image, and other members render as a pre block.
 func memberSection(link linker, base string, m Member) pe.Node {
 	body := []pe.Node{pe.H2(pe.A(base+"/"+m.Name, pe.Code(m.Name)))}
-	if m.Markdown {
+	switch {
+	case m.Markdown:
 		body = append(body, renderBlocks(m.Doc.Children, link)...)
-	} else {
+	case m.SVG:
+		body = append(body, el.El(el.Img,
+			el.Attr(el.Src, base+"/"+m.Name), el.Attr(el.Alt, m.Name)))
+	default:
 		body = append(body, pe.Pre(m.Raw))
 	}
 	return pe.Article(body...)
@@ -274,7 +278,13 @@ func renderBlocks(bs []tinymarkdown.Block, link linker) []pe.Node {
 			}
 			out = append(out, pe.Table(cells(b.Header), rows))
 		case tinymarkdown.CodeBlock:
-			out = append(out, pe.Pre(b.Code))
+			// A ```svg block is the image itself: its content is author-
+			// controlled markup, so it may be written out raw.
+			if b.Info == "svg" {
+				out = append(out, el.Raw(b.Code))
+			} else {
+				out = append(out, pe.Pre(b.Code))
+			}
 		}
 	}
 	return out

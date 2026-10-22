@@ -364,6 +364,19 @@ func TestRedirects(t *testing.T) {
 	}
 }
 
+func TestSVGCodeBlock(t *testing.T) {
+	h := newTestServer(t, fstest.MapFS{
+		"2026-10-14-fig.md": file("# Fig\n```svg\n<svg><rect/></svg>\n```\n```xml\n<svg/>\n```"),
+	})
+	_, body := get(t, h, "/posts/fig")
+	if !strings.Contains(body, "<svg><rect/></svg>") {
+		t.Error("a ```svg block must render as markup, not a pre block")
+	}
+	if !strings.Contains(body, "<pre>&lt;svg/&gt;</pre>") {
+		t.Error("a non-svg block must stay an escaped pre block")
+	}
+}
+
 func TestTablesAndDeepHeadings(t *testing.T) {
 	h := newTestServer(t, fstest.MapFS{
 		"2026-10-14-hello.md": file("# Hello\n#### Four\n##### Five\n| a | `b` |\n| --- | --- |\n| [x](#x) | <i> |"),

@@ -75,3 +75,15 @@ article > hgroup:last-child {
 article > hgroup h2 {
   --pico-font-size: 1.25rem;
 }
+
+/* An image in a post — an inline ```svg block or an .svg member shown with
+   <img> — keeps its aspect ratio and stays inside the column. They are
+   blocks so that they do not hang on the text baseline. */
+article :is(img, svg) {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+article svg {
+  margin-inline: auto;
+}

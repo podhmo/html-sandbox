@@ -14,12 +14,12 @@ pub fn parse(String) -> Document
 
 // Types and methods
 pub(all) enum Block {
-  Section(level~ : Int, title~ : String, children~ : Array[Block])
+  Section(level~ : Int32, title~ : String, children~ : Array[Block])
   Paragraph(String)
   List(Array[Item])
   Quote(Array[Block])
   Table(header~ : Array[String], rows~ : Array[Array[String]])
-  CodeBlock(String)
+  CodeBlock(String, info~ : String)
 } derive(Eq, @debug.Debug)
 #deprecated
 pub fn Block::equal(Self, Self) -> Bool
