@@ -1,5 +1,6 @@
 import {
   "podhmo/html-sandbox/examples/blog/site",
+  "podhmo/adapter-abi/content",
   "podhmo/html-sandbox/pkg/http",
 }
 

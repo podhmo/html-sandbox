@@ -62,6 +62,18 @@ fn new_site(
 }
 
 ///|
+/// embedded_site serves the posts and documents the build embedded, so
+/// that the tests check that every file the Worker gets from Static Assets
+/// loads.
+fn embedded_site() -> @site.Site raise @site.LoadError {
+  @site.Site(
+    base_url="https://example.com",
+    posts=@site.load_posts(@posts.files),
+    docs=@site.load_docs(@repodocs.files),
+  )
+}
+
+///|
 fn header(res : @http.Response, name : String) -> String? {
   for (n, v) in res.headers {
     if n == name {
@@ -351,7 +363,7 @@ test "links in pages" {
 
 ///|
 test "the embedded posts and documents load" {
-  let s = @site.Site::embedded(base_url="https://example.com")
+  let s = embedded_site()
   assert_contains(body(s, "/"), ["<a href=\"/posts/hello\">"])
   assert_contains(body(s, "/posts/hello"), ["<h1>Hello</h1>"])
 }
@@ -393,7 +405,7 @@ test "doc pages" {
 
 ///|
 test "the embedded documents have pages" {
-  let s = @site.Site::embedded(base_url="https://example.com")
+  let s = embedded_site()
   for p in ["/docs/TODO", "/docs/ja/design", "/docs/sketch/ja/blog"] {
     assert_true(body(s, p).contains("<article>"), msg=p)
   }
@@ -638,10 +650,8 @@ test "load post bundle errors" {
 test "post bundle page and members" {
   let s = new_site(test_bundle)
   assert_contains(body(s, "/posts/bundle"), [
-    "face body",
-    "<h2><a href=\"/posts/bundle/00-memo.md\"><code>00-memo.md</code></a></h2>",
-    "member body",
-    "<h2><a href=\"/posts/bundle/hello.go\"><code>hello.go</code></a></h2>",
+    "face body", "<h2><a href=\"/posts/bundle/00-memo.md\"><code>00-memo.md</code></a></h2>",
+    "member body", "<h2><a href=\"/posts/bundle/hello.go\"><code>hello.go</code></a></h2>",
     "<pre>package main",
   ])
   // The face is the page; its heading is not a member section.
@@ -685,10 +695,8 @@ test "load doc bundle" {
     e => fail("\{e}")
   }
   assert_contains(body(s, "/docs/guide"), [
-    "face body",
-    "<h2><a href=\"/docs/guide/00-setup.md\"><code>00-setup.md</code></a></h2>",
-    "<h2><a href=\"/docs/guide/run.sh\"><code>run.sh</code></a></h2>",
-    "<pre>echo hi",
+    "face body", "<h2><a href=\"/docs/guide/00-setup.md\"><code>00-setup.md</code></a></h2>",
+    "<h2><a href=\"/docs/guide/run.sh\"><code>run.sh</code></a></h2>", "<pre>echo hi",
   ])
   let res = s.render("/docs/guide/00-setup.md")
   assert_eq(res.status, 200)
@@ -714,10 +722,7 @@ test "doc bundle collides with a directory" {
   } noraise {
     _ => fail("want an error")
   }
-  assert_true(
-    msg.contains("collide"),
-    msg="got \{msg}, want \"collide\"",
-  )
+  assert_true(msg.contains("collide"), msg="got \{msg}, want \"collide\"")
 }
 
 ///|

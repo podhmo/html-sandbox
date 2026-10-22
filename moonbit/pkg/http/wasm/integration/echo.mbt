@@ -18,6 +18,11 @@ const PAGE =
   #|</form>
 
 ///|
+/// files holds what the host passed to the file export, for
+/// /stored/{path...}.
+let files : Ref[Array[(String, String)]] = Ref([])
+
+///|
 fn values_json(v : @http.Values) -> Json {
   Json::array([ for (name, value) in v.pairs => [name, value] ])
 }
@@ -73,6 +78,15 @@ fn router() -> @http.Router {
   r.handle("GET /files/{path...}", req => {
     @http.Response::text(200, "file: \{req.param("path")}\n")
   })
+  r.handle("GET /stored/{path...}", req => {
+    let name = req.param("path")
+    for (n, content) in files.val {
+      if n == name {
+        return @http.Response::text(200, content)
+      }
+    }
+    @http.Response::text(404, "no such file\n")
+  })
   r.handle("PUT /items/{id}", req => {
     @http.Response::json(200, { "id": req.param("id"), "body": req.text() })
   })
@@ -108,4 +122,19 @@ let app : @http.Router = router()
 ///|
 pub fn serve(n : Int32) -> Int32 {
   @wasm.handle(n, req => app.serve(req))
+}
+
+///|
+/// file stores the file the host wrote at address 0, n bytes long, as
+/// "name \t content", for /stored/{name}. It returns 0, or the length of an
+/// error message written at address 0.
+pub fn file(n : Int32) -> Int32 {
+  let (name, content) = @wasm.read_file(n) catch {
+    e => return @wasm.write_error("\{e}")
+  }
+  if name.has_prefix("/") {
+    return @wasm.write_error("\{name}: want a path relative to the content")
+  }
+  files.val.push((name, content))
+  0
 }

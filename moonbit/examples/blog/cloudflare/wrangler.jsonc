@@ -12,13 +12,24 @@
     // `wrangler dev`. Not ../posts, ../repodocs, or ../assets: the build
     // writes embedded.mbt there.
     "watch_dir": [
-      "../../../pkg", "../site", "../worker",
-      "../../../../posts", "../../../../go/examples/blog/internal/site", "../../../../docs"
+      "../../../pkg", "../site", "../worker", "../scripts",
+      "../../../../posts", "../../../../TODO.md",
+      "../../../../go/examples/blog/internal/site", "../../../../docs"
     ]
   },
   "vars": {
     // Public origin for OGP tags, like the Go blog's -base-url. This is the
     // deployed URL, so `wrangler dev` also writes it into OGP tags.
     "BASE_URL": "https://blog.podhmo.workers.dev"
+  },
+  "assets": {
+    // The posts and the repository's documents, which `make build` copies
+    // into build/content together with files.txt, the list of them. The
+    // Worker reads them through env.ASSETS; nothing is served directly.
+    "directory": "./build/content",
+    "binding": "ASSETS",
+    // Every request goes through the Worker as before, so the routes and
+    // the 404 pages do not change.
+    "run_worker_first": true
   }
 }

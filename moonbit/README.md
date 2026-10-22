@@ -35,7 +35,8 @@ as in `../go`.
   `handle(n, handler)` reads the request the host wrote into the linear
   memory as UTF-8 (the method, the URL, the headers, the variables, and
   the body as bytes) and writes the response over it; `adapter.mjs` is
-  the host side, `wasmApp(module)`, which gives a `fetch` handler
+  the host side, `wasmApp(module)`, which gives a `fetch` handler and
+  `load(files)`, which hands content to a Wasm that exports `file`
 - `http/wasm/integration` — the integration test of `http/wasm`: a stub
   app that echoes back the request (methods, wildcards, the query, text,
   JSON and form bodies, binary responses, cookies, and variables), and
@@ -45,28 +46,35 @@ as in `../go`.
 `examples/blog/`, the blog:
 
 - `site` — the blog, ported from the Go blog's `internal/site`:
-  `load_posts` and `load_docs` read the embedded files, and
+  `load_posts` and `load_docs` build the posts and documents from
+  `(name, content)` pairs, and
   `Site::handle(req)` answers an `@http.Request` (methods other than GET
   and HEAD get the 404 page) for every route of the Go blog: `/`,
   `/posts/{slug}` and `/docs/{path}` with their `.md` sources, `/docs/`,
   `/favicon.svg`, `/site.css`, the redirects to cleaned paths, and the
-  404 pages, routing with an `@http.Router`
+  404 pages, routing with an `@http.Router`. The Worker builds the `Site`
+  from the posts and documents it loads from Static Assets; the tests
+  build one from the embedded copies.
 - `assets` — the Go blog's `site.css` and `favicon.svg`, and the hash of
   `site.css` that pages put in its URL, generated into
   `assets/embedded.mbt` by `scripts/embed-assets.sh`
 - `posts` — `files`, the blog's posts (`posts/*.md` in the repository root)
   as pairs of file name and content, generated into `posts/embedded.mbt`
-  (ignored by git) by `scripts/embed.sh`
+  (ignored by git) by `scripts/embed.sh`; the tests and the spikes in
+  `experiments/` read it, and the Worker does not
 - `repodocs` — `files`, the repository's own `TODO.md` and
   `docs/**/*.md` as pairs of path (from the repository root) and content,
   generated into `repodocs/embedded.mbt` the same way, as the Go blog's
-  `repodocs` embeds them
-- `worker` — the blog's Wasm entry point, a MoonBit package: `serve` and
-  the linear memory exported, nothing imported; `serve` hands the request
-  to `Site::handle` through `http/wasm`
-- `cloudflare` — the Cloudflare Worker that runs it, in JS: `worker.mjs` runs the Wasm with
-  `http/wasm/adapter.mjs`, keeping each 200 response to GET and HEAD by
-  path for the rest of the isolate's life, and `wrangler.jsonc` builds it
+  `repodocs` embeds them; used like `posts`
+- `worker` — the blog's Wasm entry point, a MoonBit package: `file`,
+  `serve`, and the linear memory exported, nothing imported; `file` takes
+  each post and document the host loads from Static Assets, and `serve`
+  hands the request to `Site::handle` through `http/wasm`
+- `cloudflare` — the Cloudflare Worker that runs it, in JS: `worker.mjs`
+  loads `build/content` through the `ASSETS` binding once per isolate and
+  runs the Wasm with `http/wasm/adapter.mjs`, keeping each 200 response to
+  GET and HEAD by path for the rest of the isolate's life, and
+  `wrangler.jsonc` builds it and uploads the content as Static Assets
 - `compare` — compares the Go blog with the Worker path by path (status,
   `Content-Type`, and a diff of the body); `compare/cmd` is its native
   CLI, built on `moonbitlang/async`, and the only package that uses it
@@ -93,7 +101,7 @@ own echo, leaving the tools' output). To work on one part, run
 moon directly (`moon test -p podhmo/html-sandbox/pkg/http`).
 
 ```sh
-make build    # the blog's Wasm, into _build/wasm-gc/release/build/examples/blog/worker/worker.wasm, and after wasm-opt -Oz, examples/blog/cloudflare/build/app.wasm
+make build    # the blog's Wasm, into _build/wasm-gc/release/build/examples/blog/worker/worker.wasm, and after wasm-opt -Oz into examples/blog/cloudflare/build/app.wasm; also copies the posts and documents into examples/blog/cloudflare/build/content
 make test     # moon test, and the integration test of pkg/http/wasm on Node through adapter.mjs
 make -s check # before every commit: make test, moon fmt --check, moon check (wasm-gc, native, and in experiments/), moon info
 ```
@@ -103,16 +111,26 @@ The blog's `worker`, `http/wasm`, and `http/wasm/integration` are built for wasm
 native only (async's I/O is native only), so the CLI and its dependency
 stay out of the Wasm.
 
-MoonBit has no `go:embed`, so `examples/blog/scripts/embed.sh` writes the
-posts into `posts/embedded.mbt`, and `TODO.md` and `docs/**/*.md` into
-`repodocs/embedded.mbt`, as MoonBit source (both in `examples/blog/`).
-`posts/moon.pkg` and `repodocs/moon.pkg` run it before every `moon check`, `moon build`, and
-`moon test`, but moon looks only at the mtime of its inputs: it reruns
-the script when a post or a file directly in `docs/` is added or removed,
-or `TODO.md` is edited, not when a post or document is edited or a file
-in a subdirectory of `docs/` changes. `make build`, `make test`, and
-`make -s check` run it every time (`make embed` alone), so use them after
-editing a post or a document.
+MoonBit has no `go:embed`, and the Worker does not need one: `make build`
+runs `examples/blog/scripts/content.sh`, which copies the posts and the
+documents into `examples/blog/cloudflare/build/content/` (ignored by git)
+and writes `files.txt`, the sorted list of them. `worker.mjs` fetches
+every file listed there through the `ASSETS` binding on the isolate's
+first request. Because Static Assets has no API to list its files, the
+build makes the list, and a post added to `posts/` reaches the site with
+the same `make dev` or `make deploy` as before.
+
+The tests and the spikes in `experiments/` still use `embed.sh`, which
+writes the posts into `posts/embedded.mbt`, and `TODO.md` and
+`docs/**/*.md` into `repodocs/embedded.mbt`, as MoonBit source (both in
+`examples/blog/`). `content.sh` picks the files with the same script,
+`list-files.sh`. `posts/moon.pkg` and `repodocs/moon.pkg` run `embed.sh`
+before every `moon check`, `moon build`, and `moon test`, but moon looks
+only at the mtime of its inputs: it reruns the script when a post or a
+file directly in `docs/` is added or removed, or `TODO.md` is edited, not
+when a post or document is edited or a file in a subdirectory of `docs/`
+changes. `make test` and `make -s check` run it every time (`make embed`
+alone), so use them after editing a post or a document.
 
 Needs `moon` and `moon-wasm-opt` (binaryen's `wasm-opt`, installed with
 moon) on `PATH`, and Node.js for wrangler.
@@ -125,9 +143,14 @@ make dev            # or: make dev PORT=8798, if the Go Worker uses 8787
 
 Then open <http://localhost:8787>. wrangler's build command runs
 `make build`, which writes the Wasm, shrunk by `wasm-opt -Oz`, to
-`examples/blog/cloudflare/build/app.wasm`, ignored by git, and `wrangler dev`
+`examples/blog/cloudflare/build/app.wasm` and the posts and documents to
+`examples/blog/cloudflare/build/content/`, ignored by git, and `wrangler dev`
 rebuilds when `pkg/`, `examples/blog/site/`, `examples/blog/worker/`, the
-posts in `posts/`, or the documents in `docs/` change.
+scripts under `examples/blog/scripts/`, the posts in `posts/`, `TODO.md`,
+or the documents in `docs/` change. The content is
+Static Assets: they are uploaded with the Worker, and the Worker reads
+them through `env.ASSETS` on the first request, so a request never gets
+one of those files directly.
 
 ## Comparing with the Go blog
 

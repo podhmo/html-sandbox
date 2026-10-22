@@ -1,9 +1,9 @@
 # 調査レポート: MoonBit 版のブログの文章を Wasm の外に出す
 
-TODO.md の「MoonBit 版のブログで、記事や文書を足しても Wasm が太らないようにする」の調査。
+TODO.md の「MoonBit 版のブログで、記事や文書を足しても Wasm が太らないようにする」の調査と実装。
 今の MoonBit 版は、記事、`TODO.md`、`docs/**/*.md` を Wasm に埋め込んでいるので、書くたびに Wasm が大きくなる。
-`wrangler deploy` と `make dev` だけで済む今の手軽さを保ったまま、文章を Wasm の外に出す方法を調べ、`/tmp` の小さな spike で確かめた。
-実装はまだしていない。
+`wrangler deploy` と `make dev` だけで済む今の手軽さを保ったまま、文章を Wasm の外に出す方法を調べ、`/tmp` の小さな spike で確かめ、`moonbit/examples/blog` に実装した。
+以下は、調査したときの記録に、実装と結果を足したもの。
 
 ## 結論
 
@@ -108,11 +108,106 @@ Go 版は今までどおり `go:embed` で埋め込む。変わるのは MoonBit
 ### 変わらないこと、変わること
 
 - `make dev` と `make deploy` の使い方は変わらない。`wrangler dev` の `watch_dir` には、すでに記事と `docs/` が入っている。
-- `make test` は、テスト用の文章を `Site` に直接渡すので、ネットワークも Assets も要らない。埋め込みは、テストの中で全部の文章がそろっていることを確かめる用途にだけ残すか、やめる。
+- `make test` は、テスト用の文章を `Site` に直接渡すので、ネットワークも Assets も要らない。実装では、埋め込みをテストと `experiments/` に残した。
 - 比較（`make compare`）は今までどおり、Go 版と一致することを確かめる物差しになる。
+
+## 実装
+
+2026-10-22 に、`moonbit/examples/blog/` に案 1 を実装した。
+
+### 置き場所とビルド
+
+| 場所 | 変更 |
+| --- | --- |
+| `examples/blog/scripts/content.sh` | 記事と文書を `examples/blog/cloudflare/build/content/` にコピーし、`files.txt` に一覧を書く。ファイルの選び方は `list-files.sh` に切り出し、`embed.sh` と共有する |
+| `examples/blog/cloudflare/wrangler.jsonc` | `assets`（`directory: ./build/content`、`binding: ASSETS`、`run_worker_first: true`）を足した |
+| `examples/blog/cloudflare/worker.mjs` | 初回リクエストで `files.txt` と全部のファイルを `ASSETS` から並行して取り、`app.load(files)` で Wasm に渡す。失敗したら 500 を返し、次のリクエストでやり直す |
+| `examples/blog/worker/worker.mbt` | `file(n)` を export。`name\tcontent` を受け取り、`posts/` と `docs/` の下だけを受け付ける。`serve` は受け取ったファイルから最初のリクエストで `Site` を作る |
+| `pkg/http/wasm/adapter.mjs` | `load(files)` を足した。`file(n)` を 1 ファイルずつ呼び、Wasm が返したエラーは `Error` にする |
+| `pkg/http/wasm/wire.mbt` | `read_file`、`write_error`、`FileError` を足した |
+| `examples/blog/site/` | `Site::embedded` をやめ、`load_posts` と `load_docs` は `(名前, 本文)` の組を受け取る。記事と文書の埋め込みはテストだけの依存にした |
+| `experiments/adapter-abi/content/` | spike が使っていた `Site::embedded` の代わり。`site(base_url~)` を返す |
+| `Makefile` | `embed` を `embed-posts`、`embed-repodocs`、`embed-assets` に分けた。`build` は `embed-assets` と `content` だけを実行し、`test` と `check` は今までどおり全部の `embed` を実行する |
+
+`build/content/` は git で無視している（`files.txt` も含む）。記事を足したときに再生成が要るのは `build` だけで、テストは埋め込みを使うので `embed` が走る。
+
+### Wasm への渡し方
+
+`worker.mjs` は `files.txt` を取ってから、一覧の各ファイルを `Promise.all` で取る。それを `app.load()` に渡すと、`adapter.mjs` が 1 ファイルずつ `file(n)` を呼ぶ。`Site` は `serve` の最初の呼び出しで作る。`BASE_URL` はリクエストの env から来るので、`Site` の組み立てをリクエストの処理まで遅らせている。
+
+`Site` の組み立てに失敗したときは、その内容を 500 の本文にして返す。`worker.mjs` 側も `ASSETS` の取得に失敗したら 500 を返し、`loading` を捨てて次のリクエストでやり直す。isolate が生きているあいだ、内容は取り直さない（Static Assets はデプロイのときしか変わらない）。
+
+### サイズ
+
+2026-10-22、投稿 10 本（バンドルの 3 ファイルを含めて 12 ファイル）と文書 21（`files.txt` を足して 34 ファイル、約 397 KB）での比較。変更前は `2a3cdf1` の worktree で測った。
+
+| もの | 変更前 | 変更後 |
+| --- | --- | --- |
+| Wasm（`moon build --target wasm-gc --release`） | 649,223 B | 175,001 B |
+| `app.wasm`（`wasm-opt -Oz` の後） | 615,994 B | 141,966 B |
+| wrangler の Total Upload | 605.23 KiB（gzip 195.43 KiB） | 144.55 KiB（gzip 63.56 KiB） |
+
+調査のときに「249 KB から 100 KB 強になる見込み」と書いたが、実際は 175 KB になった。文書が調査時より増えた（このレポート自身も入っている）のに、Wasm は記事と文書の量に比例しなくなった。`wrangler deploy --dry-run` は `Read 41 files from the assets directory` と言うが、これは 34 ファイルと 7 ディレクトリを数えたもので、Total Upload には入らない。
+
+### 時間
+
+Node.js 24 で、`worker.mjs` と同じ順序（`load` してから `call`）を実行して測った。内容は上の 34 ファイルのうち、`files.txt` を除く 33 ファイル。
+
+| 処理 | 時間 |
+| --- | --- |
+| `app.load(files)`（33 ファイル、約 396 KB） | 7.66 ms |
+| 最初の `app.call(/)`（`Site` の組み立てを含む） | 8.88 ms |
+| 2 回目の `app.call(/)` | 0.26 ms |
+| 一番大きい文書の `app.call` | 0.90 ms |
+
+`wrangler dev` の往復時間（`curl` を 40 回送り、最初の 10 回を除いた 30 回の中央値）は、同じ `--persist-to` を指定した変更前と変更後で次になった。
+
+| 条件 | 変更前 | 変更後 |
+| --- | --- | --- |
+| 起動後の最初のリクエスト（3 回の範囲） | 20〜23 ms | 62〜73 ms |
+| 温まったあとの `/`（3 回の中央値の範囲） | 5.8〜5.9 ms | 6.1〜6.6 ms |
+
+最初のリクエストだけ 40〜50 ms ほど遅い。内容の取得と `Site` の組み立ての分で、ローカルの workerd の数字なので、本番では未確認。温まったあとは 0.5 ms ほどで、リクエストごとの差はほぼない。
+
+### 確かめたこと
+
+- `make test`: MoonBit のテスト 93 件（ほかに JS ターゲットの 2 件）と、Node での統合テスト 10 件が通る。
+- Go 版のブログ（`-debug -base-url https://blog.podhmo.workers.dev`）と 62 パスを比べ、`0 of 62 paths differ`。記事のページと `.md`、文書と `.md`、一覧、`/favicon.svg`、`/site.css`、存在しないパスを含む。
+- `wrangler dev` を動かしたまま記事を 1 本足すと、20 秒ほどで新しい記事が 200 で返り、`app.wasm` の SHA-256 は変わらなかった。消すと `files.txt` から外れて 404 に戻った（ファイルは `build/content/` に残る。`make clean` で消える）。
+- 記事の front matter に知らないキーを書くと、最初のリクエストが 500 になり、本文にそのキー名が出る（内容の誤りがリクエスト時に分かる）。
+
+### つまずいたこと
+
+**`wrangler dev` のビルドが重なる。** `watch_dir` のファイルを続けて変えると、前の `make build` が終わる前に次が始まる。最初の `content.sh` は出力を `rm -rf` してからコピーしていたので、そのあいだのリクエストが内容を見つけられなかった。`embed.sh` も `$out.tmp` という固定の名前を使っていたので、2 つのビルドが同じ一時ファイルを奪い合い、`mv: cannot stat '...embedded.mbt.tmp'` で失敗した。さらに、その途中で 0 バイトの `app.wasm` が置かれ、workerd が `CompileError` を返したことがある（開発中だけ）。
+
+直し方:
+
+- 一時ファイルの名前に `$$`（プロセスの ID）を足した（`embed.sh`、`embed-assets.sh`）。
+- `content.sh` はファイルを出力の隣で作ってから `mv` で置き換え、`files.txt` を最後に書くようにした。ビルドの途中でも、壊れたファイルは見えない（新旧のファイルが混ざることはある）。
+- `content.sh` は、消えた記事のファイルを消さずに `files.txt` から外すようにした。重なったビルドが互いのファイルを消す競合を避けるため。配信されないので、残っても害はない。
+
+**計測の落とし穴。** 最初に `wrangler dev` の往復時間を比べたとき、変更後が 14 ms、変更前が 5.5 ms で、温まったあとも 8 ms も遅いように見えた。しかし、ブログのコードではなく `wrangler dev` の置き場所の問題だった。
+
+- 変更前の worktree は `/tmp`（tmpfs）にあり、変更後はリポジトリ（ext4）にあった。
+- `wrangler dev` はローカルの状態を `.wrangler/state` に持ち、リクエストごとにそこへ書く。tmpfs と ext4 でその費用が変わる。
+- `ASSETS` を外して Wasm を呼ばずに 500 を返す経路でも 14 ms だったので、アプリの処理時間ではないと分かった。
+- 両方に `--persist-to` で同じ tmpfs の場所を指定すると、6 ms 前後にそろった。
+
+同じコードを `/tmp` に置いても速くなり、リポジトリの中の、中身が `return new Response("hi")` だけの Worker でも遅かった。ローカルの往復時間を比べるときは、状態の置き場所もそろえる必要がある。
+
+## 残る懸念
+
+文章を Wasm から出したことで、記事を足しても Wasm は太らなくなった。代わりに、注意して見る場所が「Wasm のサイズ」から「isolate ごとの最初のリクエスト」に移った。
+
+- 新しい isolate の最初のリクエストは、`files.txt` と 33 ファイルの取得、`file` の呼び出し、`Site` の組み立てを行う。ローカルでは 40〜50 ms かかる。
+- これはリクエストごとではなく isolate ごとに起きる。同じ isolate に複数の利用者が当たれば 1 回で、別の isolate ならそれぞれ 1 回。isolate は一定時間で破棄されるので、時間を空けたアクセスや別の地域からのアクセスでは、また起こりやすい。
+- そのため、記事や文書が増えて取得が重くなると、影響は「Wasm が大きい」ではなく「新しい isolate に当たったリクエストが遅い」「subrequest や CPU 時間の上限に近づく」という形で出る。
+- 対策の候補は、内容を 1 つの JSON にまとめて取得を 1 回にする、ページ単位で遅延ロードする、`Site` の組み立てを軽くする、など。今の量（33 ファイル、約 396 KB）ではどれも要らない。
 
 ## 未確認
 
-- 本番での、Worker の起動後の最初のリクエストの遅れ。
-- `wrangler dev` で、アセットのディレクトリの中身がビルドで書き換わったときに、再起動なしで新しい文章が見えるか。
+- 本番での、Worker の起動後の最初のリクエストの遅れ。ローカルでは 40 ms ほど増えた。
+- `build/content/` を直接書き換えたときに、`wrangler dev` が isolate を作り直さずに反映するか。`posts/` や `docs/` を変えたときは `watch_dir` がビルドを起こすので反映される。
 - アセットのファイル名に日本語などが入ったときの扱い（今の文章のファイル名は ASCII だけ）。
+- 本番の Workers で、`ASSETS` からの 34 ファイルの取得がどのくらいかかるか。無料プランの CPU 時間の上限（10 ms）に対して、`Site` の組み立てがどこまで食うかも本番では測っていない。
+- `ASSETS` への 34 回の取得が subrequest の上限（無料プランで 50）に数えられるか。数えられるなら、記事と文書が増えると最初のリクエストが失敗しうる。

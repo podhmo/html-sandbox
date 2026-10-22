@@ -15,6 +15,9 @@ BLOG := examples/blog
 WASM := _build/wasm-gc/release/build/$(BLOG)/worker/worker.wasm
 # What the Worker imports: WASM after wasm-opt -Oz.
 APP_WASM := $(BLOG)/cloudflare/build/app.wasm
+# The posts and documents the Worker reads through Static Assets, and
+# files.txt, the list of them; wrangler uploads this directory.
+CONTENT := $(BLOG)/cloudflare/build/content
 # binaryen's wasm-opt, which comes with moon. -all would also enable
 # features V8 cannot load yet, so only the ones moon's output uses.
 WASM_OPT ?= moon-wasm-opt
@@ -39,19 +42,31 @@ TS_TINYMARKDOWN := ../ts/pkg/tinymarkdown/tinymarkdown.mjs
 # The modules under experiments/, each with its own moon.mod.
 EXPERIMENTS := $(patsubst %/moon.mod,%,$(wildcard experiments/*/moon.mod))
 
-.PHONY: embed build ts test check bench dev deploy compare dev-echo clean help
+.PHONY: embed embed-posts embed-repodocs embed-assets content build ts test check bench dev deploy compare dev-echo clean help
 
 ## embed: regenerate the embedded.mbt files: the Go blog's posts, the repository's documents, and the Go blog's site.css and favicon.svg
 # The packages' moon.pkg run the same scripts, but moon reruns them only
 # when a post is added or removed, or a file directly in docs/; this
-# catches edits and subdirectories too.
-embed:
+# catches edits and subdirectories too. The posts and documents are only
+# for the tests now: the Worker reads them from Static Assets, which
+# `content` fills.
+embed: embed-posts embed-repodocs embed-assets
+
+embed-posts:
 	sh $(BLOG)/scripts/embed.sh $(BLOG)/posts/embedded.mbt $(POSTS)
+
+embed-repodocs:
 	sh $(BLOG)/scripts/embed.sh $(BLOG)/repodocs/embedded.mbt .. $(DOCS)
+
+embed-assets:
 	sh $(BLOG)/scripts/embed-assets.sh $(BLOG)/assets/embedded.mbt $(ASSETS)
 
-## build: build the blog's Wasm into _build/wasm-gc/release/build/examples/blog/worker/, and shrink it with wasm-opt -Oz into examples/blog/cloudflare/build/app.wasm
-build: embed
+## content: copy the posts and the documents, and write files.txt, into examples/blog/cloudflare/build/content, the Static Assets directory the Worker reads
+content:
+	sh $(BLOG)/scripts/content.sh $(CONTENT) $(POSTS) .. $(DOCS)
+
+## build: build the blog's Wasm into _build/wasm-gc/release/build/examples/blog/worker/, shrink it with wasm-opt -Oz into examples/blog/cloudflare/build/app.wasm, and fill the Static Assets directory
+build: embed-assets content
 	moon build --target wasm-gc --release $(BLOG)/worker
 	@mkdir -p $(dir $(APP_WASM))
 	$(WASM_OPT) $(WASM_OPT_FLAGS) $(WASM) -o $(APP_WASM)

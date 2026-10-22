@@ -98,3 +98,27 @@ test("binary response, headers, redirect, env", async () => {
   assert.equal(r.headers.get("location"), "/hello/x");
   assert.equal(await (await get("/env")).text(), "GREETING=hi\n");
 });
+
+test("files from the host", async () => {
+  // A fresh instance, so the files go in before the first request.
+  const filesApp = wasmApp(new WebAssembly.Module(readFileSync(wasmURL)));
+  const encoder = new TextEncoder();
+  const getStored = (path) => filesApp.fetch(new Request(`http://localhost${path}`), env);
+  const big = "x".repeat(100 * 1024);
+  const size = filesApp.load([
+    ["a.txt", encoder.encode("hello\n")],
+    ["dir/日本語.md", encoder.encode("# 日本語\n")],
+    // A tab in the content is content; only the name's tab separates them.
+    ["tab.txt", encoder.encode("before\tafter")],
+    ["big.txt", encoder.encode(big)],
+  ]);
+  assert.ok(size > big.length);
+  assert.equal(await (await getStored("/stored/a.txt")).text(), "hello\n");
+  assert.equal(await (await getStored("/stored/dir/%E6%97%A5%E6%9C%AC%E8%AA%9E.md")).text(), "# 日本語\n");
+  assert.equal(await (await getStored("/stored/tab.txt")).text(), "before\tafter");
+  assert.equal(await (await getStored("/stored/big.txt")).text(), big);
+  assert.equal((await getStored("/stored/nope")).status, 404);
+  // A name with a tab cannot cross; the Wasm's own error comes back too.
+  assert.throws(() => filesApp.load([["a\tb", encoder.encode("")]]), /tab/);
+  assert.throws(() => filesApp.load([["/absolute", encoder.encode("")]]), /want a path relative/);
+});

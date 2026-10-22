@@ -60,12 +60,12 @@ foo/
 ## 言語の道具と、それを補う糊
 
 - パッケージとモジュールの扱いは、言語の道具（moon、go）に任せる。一部だけ動かすときは、`moon test -p podhmo/html-sandbox/pkg/http` のように言語の道具を直接使う。
-- make は、言語の道具の外にあるものをつなぐ一時的な糊。`moonbit/` では、記事と文書の埋め込みの生成（`embed`）、wasm-opt、Node でのテスト、wrangler が当たる。
+- make は、言語の道具の外にあるものをつなぐ一時的な糊。`moonbit/` では、Static Assets に置く記事と文書のコピーと目録（`content`）と、テスト用の埋め込みの生成（`embed`）、wasm-opt、Node でのテスト、wrangler が当たる。
 - make のターゲットは保守対象の全体を扱う。
 
   | ターゲット | 内容 |
   | --- | --- |
-  | `make build` | 配備するものだけ（ブログの Worker）をビルドし、wasm-opt をかける |
+  | `make build` | 配備するものだけ（ブログの Worker）をビルドし、wasm-opt をかけ、Static Assets に置く記事と文書をコピーする |
   | `make test` | 保守対象のテストをすべて走らせる（`moon test` と、Node での integration test） |
   | `make check` | コミットの前の簡易チェック。`make test` に加えて、fmt、check（wasm-gc と native）、実験のビルド、`.mbti` の差分 |
 

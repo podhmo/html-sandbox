@@ -2,13 +2,28 @@
 package "podhmo/html-sandbox/pkg/http/wasm"
 
 import {
+  "moonbitlang/core/debug",
   "podhmo/html-sandbox/pkg/http",
 }
 
 // Values
 pub fn handle(Int, (@http.Request) -> @http.Response) -> Int
 
+pub fn read_file(Int) -> (String, String) raise FileError
+
+pub fn write_error(String) -> Int
+
 // Errors
+pub(all) suberror FileError {
+  FileError(message~ : String)
+} derive(@debug.Debug)
+#deprecated
+pub fn FileError::output(Self, &Logger) -> Unit
+#deprecated
+pub fn FileError::to_repr(Self) -> @debug.Repr
+#deprecated
+pub fn FileError::to_string(Self) -> String
+pub impl Show for FileError
 
 // Types and methods
 

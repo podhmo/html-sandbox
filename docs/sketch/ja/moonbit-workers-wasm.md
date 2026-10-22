@@ -332,6 +332,42 @@ Go 版の `pkg/el` を `moonbit/el` に移植した。`picoel` はまだ。
 
 受け渡しの方法と export / import の形を見直す探索は、[別のメモ](moonbit-workers-adapter.md)に記録した（2026-10-16）。線形メモリに UTF-8 でまとめて渡すと、いちばん大きいページの受け渡しにかかる時間は約 390 µs から約 50 µs に減る。workerd に js-string builtins を有効にするフラグが入ったことも、そちらに書いた。
 
+## Static Assets への移行
+
+2026-10-22 に、記事と文書を Wasm の外に出した。詳しい設計、実装、つまずいた点は[別のレポート](moonbit-static-assets.md)に書いた。ここには、サイズと時間の変化だけを残す。
+
+- 記事と文書は `examples/blog/cloudflare/build/content/` にコピーし、`wrangler.jsonc` の `assets` でアップロードする。Worker は `ASSETS` から `files.txt` と全部のファイルを初回リクエストで読み、`file(n)` で Wasm に渡す。
+- テストと `experiments/` は、今までどおり `embed.sh` の埋め込みを使う。
+
+| ビルド（2026-10-22、投稿 10 本・12 ファイル、文書 21） | 変更前 | 変更後 |
+| --- | --- | --- |
+| Wasm（`--release`、wasm-opt 前） | 649,223 B | 175,001 B |
+| `app.wasm`（`wasm-opt -Oz` の後） | 615,994 B | 141,966 B |
+| Total Upload | 605.23 KiB（gzip 195.43 KiB） | 144.55 KiB（gzip 63.56 KiB） |
+
+- `wrangler deploy --dry-run` はアセットを `Read 41 files` と数えるが（34 ファイルと 7 ディレクトリ）、Total Upload には入らない。
+- 記事を 1 本足しても `app.wasm` はバイト単位で変わらない（SHA-256 が同じ）。`wrangler dev` を動かしたまま足すと 20 秒ほどで反映され、消すと `files.txt` から外れて 404 に戻る。
+- 比較は、Go 版（`-debug`）と 62 パスで `0 of 62 paths differ`。
+
+時間（Node.js 24 で `load` してから `call`、33 ファイル、約 396 KB）:
+
+| 処理 | 時間 |
+| --- | --- |
+| `app.load(files)` | 7.66 ms |
+| 最初の `app.call(/)`（`Site` の組み立てを含む） | 8.88 ms |
+| 2 回目の `app.call(/)` | 0.26 ms |
+
+`wrangler dev` の往復時間は、同じ `--persist-to` を指定した変更前と変更後で次になった。
+
+| 条件 | 変更前 | 変更後 |
+| --- | --- | --- |
+| 起動後の最初のリクエスト（3 回の範囲） | 20〜23 ms | 62〜73 ms |
+| 温まったあとの `/`（3 回の中央値の範囲） | 5.8〜5.9 ms | 6.1〜6.6 ms |
+
+最初のリクエストだけ 40〜50 ms ほど遅い。内容の取得と `Site` の組み立ての分で、ローカルの workerd の数字。本番の Startup Time と最初のリクエストの CPU 時間はまだ測っていない。
+
+計測の途中で、変更後だけ 8 ms ほど遅く見えることがあった。原因はコードではなく、変更前の worktree が `/tmp`（tmpfs）にあったことだった。`wrangler dev` はローカルの状態を `.wrangler/state` に持つので、`--persist-to` で両方の置き場所をそろえると差が消えた。詳しくは[別のレポート](moonbit-static-assets.md)の「つまずいたこと」に書いた。
+
 ## 次の一歩
 
 1. （済み）トップレベルに `moonbit/` を作り、spike の ABI と `worker.mjs` を置く。「`moonbit/` への取り込み」の節を参照。
@@ -341,6 +377,7 @@ Go 版の `pkg/el` を `moonbit/el` に移植した。`picoel` はまだ。
 5. （済み）`wasm-opt -Oz` をかけたサイズと、コード単位の受け渡しにかかる時間を測る。「計測」の節を参照。
 6. （済み）Go 版のブログと、パスごとにステータス、`Content-Type`、本文を比べる CLI を `moonbit/compare` に置く。「Go 版との比較スクリプト」の節を参照。
 7. （済み）ブログ全体を移植し、Go 版とサイズを比べて、このレポートに追記する。手順は TODO.md の「Reimplement the blog in MoonBit」の子タスクに分けた（Go 版との比較スクリプト、記事と文書の埋め込み、HTML ビルダー、Markdown、記事、文書とリンク、残りのルート、比較と記録）。
+8. （済み）記事と文書を Static Assets に移し、記事を足しても Wasm が太らないようにする。「Static Assets への移行」の節を参照。
 
 ## spike のコード
 
