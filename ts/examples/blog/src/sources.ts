@@ -1,11 +1,13 @@
 // What the blog serves, imported through Vite: the posts (posts/*.md in the
 // repository root), the repository's own documents (TODO.md and
-// docs/**/*.md) as text, and the Go blog's site.css and favicon.svg as the
-// URLs of assets, with a hash of their content in the file name.
+// docs/**/*.md) as text, and the Go blog's site.css, favicon.svg, and
+// code-copy.js as the URLs of assets, with a hash of their content in the
+// file name.
 import siteCSS from "../../../../go/examples/blog/internal/site/site.css?url";
 import favicon from "../../../../go/examples/blog/internal/site/favicon.svg?url";
+import codeCopyJS from "../../../../go/examples/blog/internal/site/code-copy.js?url";
 
-export { favicon, siteCSS };
+export { codeCopyJS, favicon, siteCSS };
 
 const root = "../../../../";
 

@@ -1,6 +1,5 @@
 // picoel builds pages styled by pico.css v2, on top of el: a port of
-// go/pkg/picoel, keeping the part the blog's pages use. Script is left
-// out, since it serves only the Go blog's live reload.
+// go/pkg/picoel, keeping the part the blog's pages use.
 //
 // Following pico's approach, there are no custom classes: layout and
 // decoration come from semantic elements (article, nav, hgroup, ...) and
@@ -71,6 +70,14 @@ pub fn icon(href : String, mime_type~ : String) -> @el.Node {
     @el.Attr(@el.href, href),
     @el.Attr(@el.type_attr, mime_type),
   ])
+}
+
+///|
+/// script loads the external script at src after the document is parsed.
+/// pico itself needs no JavaScript; the blog uses it for the copy button
+/// on code blocks. (The Go blog also uses it for live reload.)
+pub fn script(src : String) -> @el.Node {
+  @el.el(@el.script, [@el.Attr(@el.src, src), @el.BoolAttr(@el.defer_attr)])
 }
 
 ///|

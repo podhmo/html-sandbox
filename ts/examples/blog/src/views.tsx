@@ -52,6 +52,7 @@ export const layout = jsxRenderer(({ children, ...meta }) => {
         )}
         <link rel="stylesheet" href={sources.siteCSS} />
         <link rel="icon" href={sources.favicon} type="image/svg+xml" />
+        <script src={sources.codeCopyJS} defer />
       </head>
       <body>
         <header class="container">

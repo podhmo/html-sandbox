@@ -29,6 +29,18 @@ var siteCSSPath = func() string {
 	return "/site.css?v=" + hex.EncodeToString(sum[:4])
 }()
 
+// codeCopyJS adds a copy-to-clipboard button to every code block, loaded
+// after the document is parsed. It is the only script a normal page serves.
+//
+//go:embed code-copy.js
+var codeCopyJS []byte
+
+// codeCopyJSPath carries a hash of codeCopyJS, like siteCSSPath.
+var codeCopyJSPath = func() string {
+	sum := sha256.Sum256(codeCopyJS)
+	return "/code-copy.js?v=" + hex.EncodeToString(sum[:4])
+}()
+
 // EmbeddedSources returns the posts and documents built into the binary.
 // Every entry point serves these unless told to read files from disk.
 func EmbeddedSources() (postsFS, docsFS fs.FS) {

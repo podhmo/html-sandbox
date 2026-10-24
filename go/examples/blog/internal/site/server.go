@@ -129,6 +129,8 @@ func (s *Server) route(w http.ResponseWriter, r *http.Request) {
 		handleFavicon(w, r)
 	case p == "/site.css":
 		handleSiteCSS(w, r)
+	case p == "/code-copy.js":
+		handleCodeCopyJS(w, r)
 	case p == liveReloadScriptPath:
 		s.handleLiveReloadScript(w, r)
 	case p == liveReloadEventsPath:
@@ -297,6 +299,16 @@ func handleSiteCSS(w http.ResponseWriter, r *http.Request) {
 	h.Set("Cache-Control", "public, max-age=31536000, immutable")
 	h.Set("Content-Length", strconv.Itoa(len(siteCSS)))
 	w.Write(siteCSS)
+}
+
+// handleCodeCopyJS serves the embedded copy-button script. Like site.css,
+// pages link to it with a version in the query.
+func handleCodeCopyJS(w http.ResponseWriter, r *http.Request) {
+	h := w.Header()
+	h.Set("Content-Type", "text/javascript; charset=utf-8")
+	h.Set("Cache-Control", "public, max-age=31536000, immutable")
+	h.Set("Content-Length", strconv.Itoa(len(codeCopyJS)))
+	w.Write(codeCopyJS)
 }
 
 // page renders n with status 200, or an error page if rendering fails.

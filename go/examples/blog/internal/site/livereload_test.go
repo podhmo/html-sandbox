@@ -16,8 +16,15 @@ import (
 func TestLiveReloadOff(t *testing.T) {
 	h := newTestServer(t, testPosts)
 	_, body := get(t, h, "/")
-	if strings.Contains(body, "<script") {
-		t.Error("want no script without -watch")
+	if strings.Contains(body, liveReloadScriptPath) {
+		t.Error("want no live reload script without -watch")
+	}
+	if !strings.Contains(body, `<script src="`+codeCopyJSPath+`" defer></script>`) {
+		t.Error("want the copy button script")
+	}
+	res, js := get(t, h, "/code-copy.js")
+	if ct := res.Header.Get("Content-Type"); ct != "text/javascript; charset=utf-8" || !strings.Contains(js, "clipboard") {
+		t.Errorf("code-copy.js: Content-Type %q, body %.40q", ct, js)
 	}
 	for _, p := range []string{liveReloadScriptPath, liveReloadEventsPath} {
 		if res, _ := get(t, h, p); res.StatusCode != http.StatusNotFound {

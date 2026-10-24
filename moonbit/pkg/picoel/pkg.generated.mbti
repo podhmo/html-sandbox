@@ -58,6 +58,8 @@ pub fn p(Array[@el.Node]) -> @el.Node
 
 pub fn pre(String) -> @el.Node
 
+pub fn script(String) -> @el.Node
+
 pub fn section(Array[@el.Node]) -> @el.Node
 
 pub fn small(Array[@el.Node]) -> @el.Node

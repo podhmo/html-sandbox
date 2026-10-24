@@ -30,6 +30,12 @@ fn site_css_path() -> String {
 }
 
 ///|
+/// code_copy_js_path carries a hash of code-copy.js, like site_css_path.
+fn code_copy_js_path() -> String {
+  "/code-copy.js?v=\{@assets.code_copy_js_version}"
+}
+
+///|
 /// layout is the frame shared by every page. The doctype is written by
 /// Response::page.
 fn layout(meta : PageMeta, body : Array[@el.Node]) -> @el.Node {
@@ -41,6 +47,7 @@ fn layout(meta : PageMeta, body : Array[@el.Node]) -> @el.Node {
     ..ogp({ ..meta, title, description, }),
     @picoel.stylesheet(site_css_path()),
     @picoel.icon("/favicon.svg", mime_type="image/svg+xml"),
+    @picoel.script(code_copy_js_path()),
   ]
   @picoel.document("ja", head~, [
     @picoel.header([
