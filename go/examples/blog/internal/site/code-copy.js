@@ -3,6 +3,26 @@
 // part of the pre's text. Clicking it writes the block's text to the
 // clipboard and shows the outcome on the button for a moment.
 (() => {
+  const copyText = async (text) => {
+    if (navigator.clipboard) {
+      await navigator.clipboard.writeText(text);
+      return;
+    }
+    // navigator.clipboard needs a secure context; on plain HTTP (e.g. the
+    // Go server reached over LAN) fall back to a hidden textarea.
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.append(ta);
+    ta.select();
+    try {
+      if (!document.execCommand("copy")) throw new Error("copy failed");
+    } finally {
+      ta.remove();
+    }
+  };
+
   for (const pre of document.querySelectorAll("pre")) {
     const button = document.createElement("button");
     button.type = "button";
@@ -10,7 +30,7 @@
     button.textContent = "Copy";
     button.addEventListener("click", async () => {
       try {
-        await navigator.clipboard.writeText(pre.textContent);
+        await copyText(pre.textContent);
         button.textContent = "Copied";
       } catch {
         button.textContent = "Failed";

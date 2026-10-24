@@ -129,11 +129,12 @@
   変わらず、`make compare` の一致もそのまま。通常のページが読む初めての
   JavaScript になる（これまでは `-watch` の livereload だけだった）。
 - [ ] **ts 版のブログが front matter の `prev` と `next` で起動できない**:
-  記事が `prev:` / `next:` を持つようになったが、ts 版の `frontMatterKeys`
-  （ts/examples/blog/src/content.ts）は `title` と `description` しか
-  認めないので、`loadPosts` が例外で止まり `app.test.ts` が落ちる。
-  Go 版と MoonBit 版の relNav（記事末の前後リンク）に相当するものも
-  まだない。
+  記事が `prev:` / `next:` を持つようになったが（
+  [docs/sketch/ja/blog.md](docs/sketch/ja/blog.md)）、ts 版の
+  `frontMatterKeys`（ts/examples/blog/src/content.ts）は `title` と
+  `description` しか認めないので、`loadPosts` が例外で止まり
+  `app.test.ts` が落ちる。Go 版と MoonBit 版の relNav（記事末の
+  前後リンク）に相当するものもまだない。
 
 ### Future work
 
