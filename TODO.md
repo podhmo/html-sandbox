@@ -123,6 +123,17 @@
   （[issue #65](https://github.com/podhmo/html-sandbox/issues/65)）。
   pico.css v2 にアラートのコンポーネントはないので、タイトルと種類
   ごとの色は site.css で自作した。
+- [x] **コードブロックにコピーのボタンを付ける**: フェンスのコード
+  ブロックの右上に、中身をクリップボードへ写すボタンを出す。ボタンは
+  ページが読む `code-copy.js` が `pre` ごとに作るので、描画する HTML は
+  変わらず、`make compare` の一致もそのまま。通常のページが読む初めての
+  JavaScript になる（これまでは `-watch` の livereload だけだった）。
+- [ ] **ts 版のブログが front matter の `prev` と `next` で起動できない**:
+  記事が `prev:` / `next:` を持つようになったが、ts 版の `frontMatterKeys`
+  （ts/examples/blog/src/content.ts）は `title` と `description` しか
+  認めないので、`loadPosts` が例外で止まり `app.test.ts` が落ちる。
+  Go 版と MoonBit 版の relNav（記事末の前後リンク）に相当するものも
+  まだない。
 
 ### Future work
 

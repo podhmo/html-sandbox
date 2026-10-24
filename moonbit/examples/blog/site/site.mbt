@@ -155,6 +155,14 @@ fn Site::new_router(self : Site) -> @http.Router {
       Text(@assets.site_css),
     )..header("cache-control", value="public, max-age=31536000, immutable")
   })
+  // The copy-button script, versioned and cached like site.css.
+  r.handle("GET /code-copy.js", _ => {
+    @http.Response::typed(
+      200,
+      "text/javascript; charset=utf-8",
+      Text(@assets.code_copy_js),
+    )..header("cache-control", value="public, max-age=31536000, immutable")
+  })
   // A pattern cannot end in ".md" after a wildcard, so the handlers look
   // at the suffix.
   r.handle("GET /posts/{slug}", req => {

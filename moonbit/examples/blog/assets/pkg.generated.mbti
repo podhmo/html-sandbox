@@ -2,6 +2,10 @@
 package "podhmo/html-sandbox/examples/blog/assets"
 
 // Values
+pub let code_copy_js : String
+
+pub let code_copy_js_version : String
+
 pub let favicon_svg : String
 
 pub let site_css : String

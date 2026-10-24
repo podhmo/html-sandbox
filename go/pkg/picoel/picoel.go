@@ -74,7 +74,8 @@ func Icon(href, mimeType string) Node {
 }
 
 // Script loads the external script at src after the document is parsed.
-// pico itself needs no JavaScript; use this only for development aids.
+// pico itself needs no JavaScript; the blog uses it for the copy button on
+// code blocks and the development-only live reload.
 func Script(src string) Node {
 	return el.El(el.Script, el.Attr(el.Src, src), el.BoolAttrNode(el.Defer))
 }
