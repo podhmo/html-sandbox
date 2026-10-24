@@ -97,15 +97,14 @@ article svg {
    GitHub's dark palette, colors the bar and the title. The title icons are
    @primer/octicons drawn through mask so they take the accent color. */
 article blockquote.markdown-alert {
-  --alert-color: var(--pico-muted-color);
-  border-inline-start-color: var(--alert-color);
+  border-inline-start-color: var(--alert-color, var(--pico-muted-color));
 }
 article .markdown-alert-title {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
-  color: var(--alert-color);
+  color: var(--alert-color, var(--pico-muted-color));
   font-weight: 500;
 }
 article .markdown-alert-title::before {
@@ -114,7 +113,7 @@ article .markdown-alert-title::before {
   width: 1em;
   height: 1em;
   flex: none;
-  background-color: var(--alert-color);
+  background-color: var(--alert-color, var(--pico-muted-color));
   mask: var(--alert-icon) center / contain no-repeat;
 }
 article .markdown-alert-note {
