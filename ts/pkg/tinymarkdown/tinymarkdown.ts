@@ -14,7 +14,7 @@
 
 export type Document = { children: Block[] };
 
-export type Block = Section | Paragraph | List | Quote | Table | CodeBlock;
+export type Block = Section | Paragraph | List | Quote | Alert | Table | CodeBlock;
 
 // Section is a heading together with everything up to the next heading of
 // the same or a shallower level.
@@ -34,6 +34,12 @@ export type Item = { text: string; children: Item[] };
 // Quote is a run of lines starting with ">", whose content is parsed again
 // as a document.
 export type Quote = { kind: "quote"; children: Block[] };
+
+// Alert is a quote whose first line is a GitHub-style alert marker such as
+// "[!NOTE]": the marker is taken off the content and kept as alert, the
+// marker's lowercase type — "note", "tip", "important", "warning", or
+// "caution".
+export type Alert = { kind: "alert"; alert: string; children: Block[] };
 
 // Table is a header row, a delimiter row, and body rows. Every row has as
 // many cells as the header; alignment is accepted but ignored.

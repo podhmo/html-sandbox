@@ -117,6 +117,12 @@
   ファイルの順序と境界、非 Markdown ファイルの扱いを決める。
   - 完了の条件: `make compare` で Go 版と MoonBit 版が一致したまま、
     ディレクトリを1つ足すだけで1ページが増える。
+- [x] **GitHub のアラート記法 `> [!NOTE]` などを描く**: 引用の先頭行が
+  `[!NOTE]`、`[!TIP]`、`[!IMPORTANT]`、`[!WARNING]`、`[!CAUTION]` の
+  どれかだけのとき、その行を外してアラートとして描く
+  （[issue #65](https://github.com/podhmo/html-sandbox/issues/65)）。
+  pico.css v2 にアラートのコンポーネントはないので、タイトルと種類
+  ごとの色は site.css で自作した。
 
 ### Future work
 

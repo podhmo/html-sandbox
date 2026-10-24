@@ -22,6 +22,15 @@ fn blocks(bs : Array[@tinymarkdown.Block]) -> Array[@el.Node] {
       Paragraph(text) => @picoel.p(inlines(text))
       List(items) => @picoel.list(items.map(it => @picoel.li(inlines(it.text))))
       Quote(children) => @picoel.blockquote(blocks(children))
+      Alert(kind~, children~) =>
+        @el.el(@el.blockquote, [
+          @el.Attr(@el.class, "markdown-alert markdown-alert-\{kind}"),
+          @el.el(@el.p, [
+            @el.Attr(@el.class, "markdown-alert-title"),
+            @picoel.text(alert_title(kind)),
+          ]),
+          ..blocks(children),
+        ])
       Table(header~, rows~) => {
         let cells = (row : Array[String]) => [ for c in row => inlines(c) ]
         @picoel.table(cells(header), [ for r in rows => cells(r) ])
@@ -29,6 +38,19 @@ fn blocks(bs : Array[@tinymarkdown.Block]) -> Array[@el.Node] {
       CodeBlock(code, ..) => @picoel.pre(code)
     }
   })
+}
+
+///|
+/// alert_title is the heading text of an alert block — the kind with its
+/// first letter capitalized, as GitHub writes it.
+fn alert_title(kind : String) -> String {
+  match kind {
+    "note" => "Note"
+    "tip" => "Tip"
+    "important" => "Important"
+    "warning" => "Warning"
+    _ => "Caution"
+  }
 }
 
 ///|

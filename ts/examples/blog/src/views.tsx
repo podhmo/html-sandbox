@@ -194,6 +194,13 @@ function Blocks({ blocks, link }: { blocks: Block[]; link: Linker }) {
             return <List items={b.items} link={link} />;
           case "quote":
             return <blockquote><Blocks blocks={b.children} link={link} /></blockquote>;
+          case "alert":
+            return (
+              <blockquote class={`markdown-alert markdown-alert-${b.alert}`}>
+                <p class="markdown-alert-title">{alertTitle(b.alert)}</p>
+                <Blocks blocks={b.children} link={link} />
+              </blockquote>
+            );
           case "table":
             // pico's overflow-auto lets a wide table scroll sideways.
             return (
@@ -214,6 +221,12 @@ function Blocks({ blocks, link }: { blocks: Block[]; link: Linker }) {
       })}
     </>
   );
+}
+
+// alertTitle is the heading text of an alert block — the kind with its
+// first letter capitalized, as GitHub writes it.
+function alertTitle(kind: string): string {
+  return kind.charAt(0).toUpperCase() + kind.slice(1);
 }
 
 function List({ items, link }: { items: Item[]; link: Linker }) {

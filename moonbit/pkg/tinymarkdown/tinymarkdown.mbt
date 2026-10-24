@@ -43,6 +43,10 @@ pub extend Document with Debug::{to_repr}
 ///   Indentation counts leading spaces and tabs, one column each.
 /// - Quote is a run of consecutive lines starting with ">". The text after
 ///   ">" and one optional space is parsed again as a document.
+/// - Alert is a quote whose first line is a GitHub-style alert marker such
+///   as "[!NOTE]": the marker is taken off the content and kept as kind,
+///   the marker's lowercase type — "note", "tip", "important", "warning",
+///   or "caution". The rest is parsed again as a document, as in Quote.
 /// - Table is a run of consecutive lines starting with "|": a header row, a
 ///   delimiter row such as "| --- | --- |", and body rows. Cells are trimmed
 ///   and "\|" is unescaped to "|"; every row has as many cells as the
@@ -55,6 +59,7 @@ pub(all) enum Block {
   Paragraph(String)
   List(Array[Item])
   Quote(Array[Block])
+  Alert(kind~ : String, children~ : Array[Block])
   Table(header~ : Array[String], rows~ : Array[Array[String]])
   CodeBlock(String, info~ : String)
 } derive(Eq, Debug)
@@ -166,7 +171,13 @@ fn scan(src : String) -> Array[Flat] {
       items.clear()
     }
     if !quote.is_empty() {
-      out.push(Block(Quote(parse(quote.join("\n")).children)))
+      let kind = alert_kind(quote[0])
+      if kind != "" {
+        ignore(quote.remove(0))
+        out.push(Block(Alert(kind~, children=parse(quote.join("\n")).children)))
+      } else {
+        out.push(Block(Quote(parse(quote.join("\n")).children)))
+      }
       quote.clear()
     }
     if !table.is_empty() {
@@ -239,6 +250,53 @@ fn scan(src : String) -> Array[Flat] {
   }
   flush()
   out
+}
+
+///|
+/// alert_kind returns the lowercase type of a GitHub-style alert marker —
+/// "[!NOTE]", "[!TIP]", "[!IMPORTANT]", "[!WARNING]", or "[!CAUTION]" —
+/// or "" when line is not a marker. The marker is matched
+/// case-insensitively and must be the whole line, trailing space aside.
+fn alert_kind(line : StringView) -> String {
+  let mut end = line.length()
+  while end > 0 && (line[end - 1] == ' ' || line[end - 1] == '\t') {
+    end = end - 1
+  }
+  let line = line[0:end]
+  guard line.length() >= 4 &&
+    line[0] == '[' &&
+    line[1] == '!' &&
+    line[end - 1] == ']' else {
+    return ""
+  }
+  let inner = line[2:end - 1]
+  for kind in ["note", "tip", "important", "warning", "caution"] {
+    if ascii_eq_fold(inner, kind) {
+      return kind
+    }
+  }
+  ""
+}
+
+///|
+/// ascii_eq_fold compares two views ignoring ASCII letter case.
+fn ascii_eq_fold(a : StringView, b : StringView) -> Bool {
+  guard a.length() == b.length() else { return false }
+  for i = 0; i < a.length(); i = i + 1 {
+    if ascii_lower(a[i]) != ascii_lower(b[i]) {
+      return false
+    }
+  }
+  true
+}
+
+///|
+fn ascii_lower(c : UInt16) -> UInt16 {
+  if c >= 'A' && c <= 'Z' {
+    c + 32
+  } else {
+    c
+  }
 }
 
 ///|
