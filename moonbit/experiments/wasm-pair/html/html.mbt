@@ -36,6 +36,17 @@ fn block(j : Json) -> @el.Node? {
     { "t": "list", "items": Array(items), .. } => Some(list(items))
     { "t": "quote", "children": Array(cs), .. } =>
       Some(@picoel.blockquote(cs.filter_map(block)))
+    { "t": "alert", "kind": String(kind), "children": Array(cs), .. } =>
+      Some(
+        @el.el(@el.blockquote, [
+          @el.Attr(@el.class, "markdown-alert markdown-alert-\{kind}"),
+          @el.el(@el.p, [
+            @el.Attr(@el.class, "markdown-alert-title"),
+            @picoel.text(alert_title(kind)),
+          ]),
+          ..cs.filter_map(block),
+        ]),
+      )
     { "t": "table", "header": Array(h), "rows": Array(rows), .. } => {
       let cells = (row : Array[Json]) => row.map(inlines)
       let rows = rows.map(r => {
@@ -48,6 +59,17 @@ fn block(j : Json) -> @el.Node? {
     }
     { "t": "code", "text": String(code), .. } => Some(@picoel.pre(code))
     _ => None
+  }
+}
+
+///|
+fn alert_title(kind : String) -> String {
+  match kind {
+    "note" => "Note"
+    "tip" => "Tip"
+    "important" => "Important"
+    "warning" => "Warning"
+    _ => "Caution"
   }
 }
 

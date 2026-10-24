@@ -255,7 +255,7 @@ fn scan(src : String) -> Array[Flat] {
 ///|
 /// alert_kind returns the lowercase type of a GitHub-style alert marker —
 /// "[!NOTE]", "[!TIP]", "[!IMPORTANT]", "[!WARNING]", or "[!CAUTION]" —
-/// or "" when line is not a marker. The marker is matched
+/// or "" when line is not a marker. The marker is matched ASCII
 /// case-insensitively and must be the whole line, trailing space aside.
 fn alert_kind(line : StringView) -> String {
   let mut end = line.length()

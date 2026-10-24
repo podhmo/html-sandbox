@@ -401,6 +401,11 @@ test "alerts" {
       [Quote([Paragraph("[!HINT]\ny")])],
     ),
     (
+      "a non-ASCII marker keeps the quote",
+      "> [!TİP]\n> y",
+      [Quote([Paragraph("[!TİP]\ny")])],
+    ),
+    (
       "nested alert",
       "> a\n>\n> > [!NOTE]\n> > b",
       [Quote([Paragraph("a"), Alert(kind="note", children=[Paragraph("b")])])],

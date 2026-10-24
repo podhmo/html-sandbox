@@ -264,6 +264,10 @@ func TestAlerts(t *testing.T) {
 			Document{Children: []Block{Quote{Children: []Block{
 				Paragraph{Text: "[!HINT]\ny"},
 			}}}}},
+		{"a non-ASCII marker keeps the quote", "> [!T\u0130P]\n> y",
+			Document{Children: []Block{Quote{Children: []Block{
+				Paragraph{Text: "[!T\u0130P]\ny"},
+			}}}}},
 		{"nested alert", "> a\n>\n> > [!NOTE]\n> > b",
 			Document{Children: []Block{Quote{Children: []Block{
 				Paragraph{Text: "a"},

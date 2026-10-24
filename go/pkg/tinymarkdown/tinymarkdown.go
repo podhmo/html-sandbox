@@ -207,18 +207,34 @@ func scan(src string) []Block {
 
 // alertKind returns the lowercase type of a GitHub-style alert marker —
 // "[!NOTE]", "[!TIP]", "[!IMPORTANT]", "[!WARNING]", or "[!CAUTION]" —
-// or "" when line is not a marker. The marker is matched case-insensitively
-// and must be the whole line, trailing space aside.
+// or "" when line is not a marker. The marker is matched ASCII
+// case-insensitively and must be the whole line, trailing space aside.
 func alertKind(line string) string {
 	line = strings.TrimRight(line, " \t")
 	if len(line) < 4 || !strings.HasPrefix(line, "[!") || !strings.HasSuffix(line, "]") {
 		return ""
 	}
-	switch kind := strings.ToLower(line[2 : len(line)-1]); kind {
+	switch kind := asciiLower(line[2 : len(line)-1]); kind {
 	case "note", "tip", "important", "warning", "caution":
 		return kind
 	}
 	return ""
+}
+
+// asciiLower lowercases s when it is all ASCII letters, "" otherwise —
+// non-ASCII bytes never fold, so "[!TİP]" is not a marker.
+func asciiLower(s string) string {
+	var b strings.Builder
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		if c >= 'A' && c <= 'Z' {
+			c += 'a' - 'A'
+		} else if c < 'a' || c > 'z' {
+			return ""
+		}
+		b.WriteByte(c)
+	}
+	return b.String()
 }
 
 // rawItem is a list item as scan reads it, kept flat until nestItems builds
