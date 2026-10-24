@@ -15,11 +15,14 @@
     ta.style.position = "fixed";
     ta.style.opacity = "0";
     document.body.append(ta);
+    // ta.select() steals focus; put it back so Enter re-triggers the copy.
+    const active = document.activeElement;
     ta.select();
     try {
       if (!document.execCommand("copy")) throw new Error("copy failed");
     } finally {
       ta.remove();
+      if (active instanceof HTMLElement) active.focus();
     }
   };
 
