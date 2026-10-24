@@ -70,6 +70,11 @@ fn blocks(bs : Array[@tinymarkdown.Block]) -> Js {
       Paragraph(text) => object("paragraph", [("text", of_string(text))])
       List(items) => object("list", [("items", list_items(items))])
       Quote(children) => object("quote", [("children", blocks(children))])
+      Alert(kind~, children~) =>
+        object("alert", [
+          ("alert", of_string(kind)),
+          ("children", blocks(children)),
+        ])
       Table(header~, rows~) =>
         object("table", [
           ("header", strings(header)),

@@ -81,6 +81,10 @@ func dump(w io.Writer, bs []tinymarkdown.Block, depth int) error {
 			if _, err = fmt.Fprintf(w, "%squote\n", indent); err == nil {
 				err = dump(w, b.Children, depth+1)
 			}
+		case tinymarkdown.Alert:
+			if _, err = fmt.Fprintf(w, "%salert %q\n", indent, b.Kind); err == nil {
+				err = dump(w, b.Children, depth+1)
+			}
 		case tinymarkdown.Table:
 			if _, err = fmt.Fprintf(w, "%stable %q\n", indent, b.Header); err == nil {
 				for _, r := range b.Rows {

@@ -58,6 +58,15 @@ type Quote struct {
 	Children []Block
 }
 
+// Alert is a quote whose first line is a GitHub-style alert marker such as
+// "[!NOTE]": the marker is taken off the content and kept as Kind, the
+// marker's lowercase type — "note", "tip", "important", "warning", or
+// "caution". The rest is parsed again as a document, as in Quote.
+type Alert struct {
+	Kind     string
+	Children []Block
+}
+
 // Table is a run of consecutive lines starting with "|": a header row, a
 // delimiter row such as "| --- | --- |", and body rows. Cells hold their
 // text with surrounding spaces trimmed and "\|" unescaped to "|"; inline
@@ -81,6 +90,7 @@ func (Section) block()   {}
 func (Paragraph) block() {}
 func (List) block()      {}
 func (Quote) block()     {}
+func (Alert) block()     {}
 func (Table) block()     {}
 func (CodeBlock) block() {}
 
@@ -120,7 +130,11 @@ func scan(src string) []Block {
 			items = nil
 		}
 		if len(quote) > 0 {
-			out = append(out, Quote{Children: Parse(strings.Join(quote, "\n")).Children})
+			if kind := alertKind(quote[0]); kind != "" {
+				out = append(out, Alert{Kind: kind, Children: Parse(strings.Join(quote[1:], "\n")).Children})
+			} else {
+				out = append(out, Quote{Children: Parse(strings.Join(quote, "\n")).Children})
+			}
 			quote = nil
 		}
 		if len(table) > 0 {
@@ -189,6 +203,38 @@ func scan(src string) []Block {
 	}
 	flush()
 	return out
+}
+
+// alertKind returns the lowercase type of a GitHub-style alert marker —
+// "[!NOTE]", "[!TIP]", "[!IMPORTANT]", "[!WARNING]", or "[!CAUTION]" —
+// or "" when line is not a marker. The marker is matched ASCII
+// case-insensitively and must be the whole line, trailing space aside.
+func alertKind(line string) string {
+	line = strings.TrimRight(line, " \t")
+	if len(line) < 4 || !strings.HasPrefix(line, "[!") || !strings.HasSuffix(line, "]") {
+		return ""
+	}
+	switch kind := asciiLower(line[2 : len(line)-1]); kind {
+	case "note", "tip", "important", "warning", "caution":
+		return kind
+	}
+	return ""
+}
+
+// asciiLower lowercases s when it is all ASCII letters, "" otherwise —
+// non-ASCII bytes never fold, so "[!TİP]" is not a marker.
+func asciiLower(s string) string {
+	var b strings.Builder
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		if c >= 'A' && c <= 'Z' {
+			c += 'a' - 'A'
+		} else if c < 'a' || c > 'z' {
+			return ""
+		}
+		b.WriteByte(c)
+	}
+	return b.String()
 }
 
 // rawItem is a list item as scan reads it, kept flat until nestItems builds

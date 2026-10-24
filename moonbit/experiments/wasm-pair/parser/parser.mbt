@@ -23,6 +23,12 @@ fn block(b : @tinymarkdown.Block) -> Json {
     List(items) => { "t": "list", "items": Json::array(items.map(item)) }
     Quote(children) =>
       { "t": "quote", "children": Json::array(children.map(block)) }
+    Alert(kind~, children~) =>
+      {
+        "t": "alert",
+        "kind": Json(kind),
+        "children": Json::array(children.map(block)),
+      }
     Table(header~, rows~) =>
       {
         "t": "table",

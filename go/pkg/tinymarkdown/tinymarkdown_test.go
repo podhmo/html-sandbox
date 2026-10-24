@@ -232,6 +232,56 @@ func TestQuotes(t *testing.T) {
 	})
 }
 
+func TestAlerts(t *testing.T) {
+	run(t, []testCase{
+		{"note alert", "> [!NOTE]\n> hello",
+			Document{Children: []Block{Alert{Kind: "note", Children: []Block{Paragraph{Text: "hello"}}}}}},
+		{"every kind", "> [!NOTE]\n> n\n\n> [!TIP]\n> t\n\n> [!IMPORTANT]\n> i\n\n> [!WARNING]\n> w\n\n> [!CAUTION]\n> c",
+			Document{Children: []Block{
+				Alert{Kind: "note", Children: []Block{Paragraph{Text: "n"}}},
+				Alert{Kind: "tip", Children: []Block{Paragraph{Text: "t"}}},
+				Alert{Kind: "important", Children: []Block{Paragraph{Text: "i"}}},
+				Alert{Kind: "warning", Children: []Block{Paragraph{Text: "w"}}},
+				Alert{Kind: "caution", Children: []Block{Paragraph{Text: "c"}}},
+			}}},
+		{"the marker is case-insensitive", "> [!warning]\n> w",
+			Document{Children: []Block{Alert{Kind: "warning", Children: []Block{Paragraph{Text: "w"}}}}}},
+		{"a marker alone has no children", "> [!TIP]",
+			Document{Children: []Block{Alert{Kind: "tip"}}}},
+		{"blocks inside an alert", "> [!NOTE]\n> - x\n>   y",
+			Document{Children: []Block{Alert{Kind: "note", Children: []Block{
+				List{Items: items("x\ny")},
+			}}}}},
+		{"a marker only leads the quote", "> a\n> [!NOTE]\n> b",
+			Document{Children: []Block{Quote{Children: []Block{
+				Paragraph{Text: "a\n[!NOTE]\nb"},
+			}}}}},
+		{"trailing text keeps the quote", "> [!NOTE] x\n> y",
+			Document{Children: []Block{Quote{Children: []Block{
+				Paragraph{Text: "[!NOTE] x\ny"},
+			}}}}},
+		{"an unknown marker keeps the quote", "> [!HINT]\n> y",
+			Document{Children: []Block{Quote{Children: []Block{
+				Paragraph{Text: "[!HINT]\ny"},
+			}}}}},
+		{"a non-ASCII marker keeps the quote", "> [!T\u0130P]\n> y",
+			Document{Children: []Block{Quote{Children: []Block{
+				Paragraph{Text: "[!T\u0130P]\ny"},
+			}}}}},
+		{"nested alert", "> a\n>\n> > [!NOTE]\n> > b",
+			Document{Children: []Block{Quote{Children: []Block{
+				Paragraph{Text: "a"},
+				Alert{Kind: "note", Children: []Block{Paragraph{Text: "b"}}},
+			}}}}},
+		{"alert inside a section", "# A\n> [!NOTE]\n> q",
+			Document{Children: []Block{
+				Section{Level: 1, Title: "A", Children: []Block{
+					Alert{Kind: "note", Children: []Block{Paragraph{Text: "q"}}},
+				}},
+			}}},
+	})
+}
+
 func TestTables(t *testing.T) {
 	run(t, []testCase{
 		{"table", "| a | b |\n| --- | --- |\n| 1 | `2` |\n| 3 | 4 |",

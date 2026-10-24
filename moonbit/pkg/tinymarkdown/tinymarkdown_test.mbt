@@ -351,6 +351,78 @@ test "quotes" {
 }
 
 ///|
+// The cases of TestAlerts in go/pkg/tinymarkdown.
+test "alerts" {
+  run([
+    (
+      "note alert",
+      "> [!NOTE]\n> hello",
+      [Alert(kind="note", children=[Paragraph("hello")])],
+    ),
+    (
+      "every kind",
+      "> [!NOTE]\n> n\n\n> [!TIP]\n> t\n\n> [!IMPORTANT]\n> i\n\n> [!WARNING]\n> w\n\n> [!CAUTION]\n> c",
+      [
+        Alert(kind="note", children=[Paragraph("n")]),
+        Alert(kind="tip", children=[Paragraph("t")]),
+        Alert(kind="important", children=[Paragraph("i")]),
+        Alert(kind="warning", children=[Paragraph("w")]),
+        Alert(kind="caution", children=[Paragraph("c")]),
+      ],
+    ),
+    (
+      "the marker is case-insensitive",
+      "> [!warning]\n> w",
+      [Alert(kind="warning", children=[Paragraph("w")])],
+    ),
+    (
+      "a marker alone has no children",
+      "> [!TIP]",
+      [Alert(kind="tip", children=[])],
+    ),
+    (
+      "blocks inside an alert",
+      "> [!NOTE]\n> - x\n>   y",
+      [Alert(kind="note", children=[List(items(["x\ny"]))])],
+    ),
+    (
+      "a marker only leads the quote",
+      "> a\n> [!NOTE]\n> b",
+      [Quote([Paragraph("a\n[!NOTE]\nb")])],
+    ),
+    (
+      "trailing text keeps the quote",
+      "> [!NOTE] x\n> y",
+      [Quote([Paragraph("[!NOTE] x\ny")])],
+    ),
+    (
+      "an unknown marker keeps the quote",
+      "> [!HINT]\n> y",
+      [Quote([Paragraph("[!HINT]\ny")])],
+    ),
+    (
+      "a non-ASCII marker keeps the quote",
+      "> [!TİP]\n> y",
+      [Quote([Paragraph("[!TİP]\ny")])],
+    ),
+    (
+      "nested alert",
+      "> a\n>\n> > [!NOTE]\n> > b",
+      [Quote([Paragraph("a"), Alert(kind="note", children=[Paragraph("b")])])],
+    ),
+    (
+      "alert inside a section",
+      "# A\n> [!NOTE]\n> q",
+      [
+        Section(level=1, title="A", children=[
+          Alert(kind="note", children=[Paragraph("q")]),
+        ]),
+      ],
+    ),
+  ])
+}
+
+///|
 // The cases of TestTables in go/pkg/tinymarkdown.
 test "tables" {
   run([

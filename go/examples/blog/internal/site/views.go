@@ -264,6 +264,13 @@ func renderBlocks(bs []tinymarkdown.Block, link linker) []pe.Node {
 			out = append(out, renderList(b.Items, link))
 		case tinymarkdown.Quote:
 			out = append(out, pe.Blockquote(renderBlocks(b.Children, link)...))
+		case tinymarkdown.Alert:
+			title := el.El(el.P, el.Attr(el.Class, "markdown-alert-title"), pe.Text(alertTitle(b.Kind)))
+			children := append([]pe.Node{
+				el.Attr(el.Class, "markdown-alert markdown-alert-"+b.Kind),
+				title,
+			}, renderBlocks(b.Children, link)...)
+			out = append(out, el.El(el.Blockquote, children...))
 		case tinymarkdown.Table:
 			cells := func(row []string) [][]pe.Node {
 				out := make([][]pe.Node, 0, len(row))
@@ -288,6 +295,12 @@ func renderBlocks(bs []tinymarkdown.Block, link linker) []pe.Node {
 		}
 	}
 	return out
+}
+
+// alertTitle is the heading text of an alert block — the kind with its
+// first letter capitalized, as GitHub writes it.
+func alertTitle(kind string) string {
+	return strings.ToUpper(kind[:1]) + kind[1:]
 }
 
 // renderList renders items as a list, with the children of an item as a

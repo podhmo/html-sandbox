@@ -18,6 +18,7 @@ pub(all) enum Block {
   Paragraph(String)
   List(Array[Item])
   Quote(Array[Block])
+  Alert(kind~ : String, children~ : Array[Block])
   Table(header~ : Array[String], rows~ : Array[Array[String]])
   CodeBlock(String, info~ : String)
 } derive(Eq, @debug.Debug)
