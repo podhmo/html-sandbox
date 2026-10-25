@@ -70,12 +70,12 @@ second line<ul><li>[x] child</li></ul></li>`; !strings.Contains(body, want) {
 	}
 
 	_, body = get(t, h, "/docs/ja/design")
-	if want := `<h2>Use <code>el</code></h2><ul><li>run <code>go test</code></li><li><code>a ` + "`" + ` b</code></li></ul>`; !strings.Contains(body, want) {
+	if want := `<h2 id="use-el">Use <code>el</code><a class="heading-permalink" href="#use-el" aria-label="permalink"> #</a></h2><ul><li>run <code>go test</code></li><li><code>a ` + "`" + ` b</code></li></ul>`; !strings.Contains(body, want) {
 		t.Errorf("design: body does not contain %q", want)
 	}
 
 	_, body = get(t, h, "/docs/notes")
-	if !strings.Contains(body, `<h1>docs/notes.md</h1><p>no heading</p>`) {
+	if !strings.Contains(body, `<h1 id="docsnotesmd">docs/notes.md<a class="heading-permalink" href="#docsnotesmd" aria-label="permalink"> #</a></h1><p>no heading</p>`) {
 		t.Error("notes: want the file path as <h1>")
 	}
 

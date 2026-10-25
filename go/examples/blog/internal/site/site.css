@@ -67,6 +67,15 @@ article li {
   line-height: 1.4;
 }
 
+/* Every section heading carries a permalink. It stays a small muted "#",
+   so it can be long-pressed and copied on a phone, where nothing hovers. */
+article .heading-permalink {
+  margin-inline-start: 0.4em;
+  font-size: 0.8em;
+  color: var(--pico-muted-color);
+  text-decoration: none;
+}
+
 /* In the list cards, the hgroup margin would double the card's bottom
    padding. */
 article > hgroup:last-child {

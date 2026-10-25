@@ -189,3 +189,44 @@ test "nav item" {
   }
   assert_true(s.nav_item(src, "") is None)
 }
+
+///|
+test "slugify" {
+  let cases = [
+    ("Hello World", "hello-world"),
+    ("ABC", "abc"),
+    ("a-b_c", "a-b_c"),
+    ("日本語", "日本語"),
+    ("日本語 の 見出し", "日本語-の-見出し"),
+    ("日本語　の　見出し", "日本語-の-見出し"),
+    ("a\tb", "a-b"),
+    ("a  b", "a--b"),
+    ("日本語、の。見出し", "日本語の見出し"),
+    ("テスト・検証", "テスト検証"),
+    ("😀 Emoji", "-emoji"),
+    ("Café", "café"),
+    ("Hello 世界！", "hello-世界"),
+    ("`code` と **強調**", "code-と-強調"),
+    ("123", "123"),
+    ("!!!", ""),
+    ("", ""),
+    (" a ", "-a-"),
+  ]
+  for c in cases {
+    let (title, want) = c
+    assert_eq(slugify(title), want, msg=title)
+  }
+}
+
+///|
+test "anchor id dedup" {
+  let gen = AnchorIds::new()
+  assert_eq(gen.id("Hello"), "hello")
+  assert_eq(gen.id("Hello"), "hello-1")
+  assert_eq(gen.id("Hello"), "hello-2")
+  assert_eq(gen.id("foo"), "foo")
+  assert_eq(gen.id("foo"), "foo-1")
+  assert_eq(gen.id("foo-1"), "foo-1-1")
+  assert_eq(gen.id("!!!"), "sec")
+  assert_eq(gen.id("???"), "sec-1")
+}

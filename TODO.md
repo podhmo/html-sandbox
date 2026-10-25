@@ -103,7 +103,7 @@
   libelf を持たずにビルドされていること、moon 側では `perf record` に `--sample-cpu` を
   付けずパーサがヘッダの `[cpu]` を必須にしていることの 2 つだった
   （[issue #52](https://github.com/podhmo/html-sandbox/issues/52)）。
-- [ ] **記事のセクションに `id` を付けて `#` リンクが届くようにする**: 今は
+- [x] **記事のセクションに `id` を付けて `#` リンクが届くようにする**: 今は
   tinymarkdown の `Section` が `<section>` だけを出すので、`#見出し` への
   フラグメントリンクがどこにも届かない（`prev` / `next` の値にも `#` 付きの
   URL を書ける）。見出しから id を作る規則（GitHub 式のスラッグ化など）を
@@ -137,6 +137,13 @@
   前後リンク）に相当するものもまだない。
 
 ### Future work
+
+- [ ] **見出しの `{#id}` 記法で明示的な id を付けられるようにする**: 自動
+  スラッグ化（issue #69）はタイトルから id を作るので、タイトルの変更や
+  翻訳で id が揺れる。Pandoc 式の `## 見出し {#my-id}` を tinymarkdown の
+  構文拡張として入れると、表示と独立した安定した id が書ける
+  （[issue #69](https://github.com/podhmo/html-sandbox/issues/69) の
+  コメントで先送りに決めた）。
 
 - [ ] **```svg ブロックの中身をサニタイズする**: ```svg フェンスのブロックは
   中身をそのまま HTML に書くので、`<script>` や `on*` 属性、`foreignObject`
