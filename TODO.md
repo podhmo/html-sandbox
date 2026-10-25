@@ -147,7 +147,7 @@
   先に上の「ts 版のブログが front matter の `prev` と `next` で起動
   できない」を直す必要がある。
 - [x] **tinymarkdown の記事を最新の状態に合わせる**: 「tinymarkdown で
-  書けること」([記事](posts/2026-10-15-tinymarkdown.md)) が、見出しの id と
+  書けること」([記事](slops/2026-10-15-tinymarkdown.md)) が、見出しの id と
   permalink、字下げしたフェンスの dedent、リンクの解決規則、インラインコードと
   表の細かい規則、`svg` の生マークアップ、`/preview` を説明していなかった。
   現在の実装に合わせて追記した。
@@ -200,7 +200,7 @@
     （[探索メモ](docs/sketch/ja/moonbit-workers-adapter.md)）。
 
 - [ ] **記事に図を載せられるようにする**: [同じ wasm をブラウザーと Worker で
-  動かしたい](posts/2026-10-21-moonbit-browser.md)のように、ブラウザー、Worker、
+  動かしたい](slops/2026-10-21-moonbit-browser.md)のように、ブラウザー、Worker、
   workerd、wasm の関係を図で示したくなる。図をテキストのまま Markdown に書き、
   ページでは図として見せたい。tinymarkdown のコードブロックは言語名を持つ
   ようになり（`CodeBlock(String, info~)`）、\`\`\`svg フェンスのブロックは
@@ -210,7 +210,7 @@
 
 - [-] **記事に画像を載せられるようにする**: バンドルの `.svg` メンバーが
   `image/svg+xml` で配信され、ページでは `<img>` として表示されるようになった
-  （[バンドルの例](posts/2026-10-22-bundle-demo.md)）。`![]()` の画像記法と
+  （[バンドルの例](slops/2026-10-22-bundle-demo.md)）。`![]()` の画像記法と
   `data:` URI は未対応、メンバーはテキストしか持てないので PNG/JPEG など
   バイナリー画像は載せられない。置き場所（リポジトリに入れて埋め込む、R2 など
   外に置く）と、tinymarkdown の画像の記法から決める。

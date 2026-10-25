@@ -13,3 +13,4 @@ pkg/http/wasm/integration/.wrangler/
 examples/blog/posts/embedded.mbt
 examples/blog/repodocs/embedded.mbt
 examples/blog/assets/embedded.mbt
+examples/blog/slops/embedded.mbt

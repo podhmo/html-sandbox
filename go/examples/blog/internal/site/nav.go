@@ -64,11 +64,8 @@ func (st *site) navItem(source, value string) *navItem {
 func (st *site) pageTitle(href string) string {
 	p, _, _ := strings.Cut(href, "?")
 	p, _, _ = strings.Cut(p, "#")
-	if slug, ok := strings.CutPrefix(p, "/posts/"); ok && slug != "" && !strings.Contains(slug, "/") {
-		if post, ok := st.bySlug[slug]; ok {
-			return post.Title
-		}
-		return ""
+	if post, ok := st.bySlug[p]; ok {
+		return post.Title
 	}
 	if path, ok := strings.CutPrefix(p, "/docs/"); ok {
 		if d, ok := st.byPath[path]; ok {

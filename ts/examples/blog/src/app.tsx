@@ -2,7 +2,7 @@
 // site.css never reach it: Workers serves them from dist/client/ as static
 // assets, before the Worker runs.
 import { Hono, type Context } from "hono";
-import { loadDocs, loadPosts } from "./content.ts";
+import { loadDocs, loadPosts, postPath } from "./content.ts";
 import { linker } from "./links.ts";
 import { DocList, DocPage, ErrorPage, PostList, PostPage, layout, siteDescription } from "./views.tsx";
 import * as sources from "./sources.ts";
@@ -19,9 +19,9 @@ type Env = {
 // about 13 ms to 3 ms, but moved the work into requests: 9 of 25 took 18 to
 // 43 ms of CPU, against 1 of 25 (15 ms) this way. See
 // docs/sketch/ja/ts-hono-workers.md.
-const posts = loadPosts(sources.posts);
+const posts = [...loadPosts(sources.posts), ...loadPosts(sources.slops).map((p) => ({ ...p, collection: "slops" as const }))];
 const docs = loadDocs(sources.docs);
-const bySlug = new Map(posts.map((p) => [p.slug, p]));
+const bySlug = new Map(posts.map((p) => [postPath(p), p]));
 const byPath = new Map(docs.map((d) => [d.path, d]));
 
 const app = new Hono<Env>();
@@ -39,21 +39,33 @@ function markdown(c: Context<Env>, src: string) {
 }
 
 app.get("/", (c) =>
-  c.render(<PostList posts={posts} />, { description: siteDescription, url: `${c.env.BASE_URL}/`, type: "website" }),
+  c.render(<PostList posts={posts.filter((p) => !p.collection)} />, { description: siteDescription, url: `${c.env.BASE_URL}/`, type: "website" }),
 );
 
-app.get("/posts/:slug", (c) => {
-  const slug = c.req.param("slug");
-  const post = bySlug.get(slug.replace(/\.md$/, ""));
-  if (!post) return notFound(c, "Post not found.");
-  if (slug.endsWith(".md")) return markdown(c, post.markdown);
-  return c.render(<PostPage post={post} link={linker(`posts/${post.file}`, posts, docs)} />, {
-    title: post.title,
-    description: post.description,
-    url: `${c.env.BASE_URL}/posts/${post.slug}`,
-    type: "article",
+for (const collection of ["posts", "slops"] as const) {
+  app.get(`/${collection}`, (c) => c.redirect(`/${collection}/`, 307));
+  app.get(`/${collection}/`, (c) => c.render(
+    <PostList posts={posts.filter((p) => (p.collection ?? "posts") === collection)} collection={collection} />,
+    { title: collection === "slops" ? "Slops" : "Posts", description: `blog by ${collection === "slops" ? "AI" : "human"}`, url: `${c.env.BASE_URL}/${collection}/`, type: "website" },
+  ));
+  app.get(`/${collection}/:slug/:member`, (c) => {
+    const post = bySlug.get(`/${collection}/${c.req.param("slug")}`);
+    const member = post?.members?.find((m) => m.name === c.req.param("member"));
+    if (!member) return notFound(c, "Page not found.");
+    const type = member.isMarkdown ? "text/markdown; charset=utf-8" : member.name.endsWith(".svg") ? "image/svg+xml" : "text/plain; charset=utf-8";
+    return c.body(member.markdown, 200, { "Content-Type": type, "X-Content-Type-Options": "nosniff" });
   });
-});
+  app.get(`/${collection}/:slug`, (c) => {
+    const slug = c.req.param("slug");
+    const post = bySlug.get(`/${collection}/${slug.replace(/\.md$/, "")}`);
+    if (!post) return notFound(c, "Post not found.");
+    if (slug.endsWith(".md")) return markdown(c, post.markdown);
+    return c.render(<PostPage post={post} posts={posts} docs={docs} link={linker(`${collection}/${post.file}${post.members ? "/" + post.members[0].name : ""}`, posts, docs)} />, {
+      title: post.title, description: post.description,
+      url: `${c.env.BASE_URL}${postPath(post)}`, type: "article",
+    });
+  });
+}
 
 app.get("/docs", (c) => c.redirect("/docs/", 307));
 

@@ -10,24 +10,24 @@ const get = (path: string, init?: RequestInit) => app.request(path, init, env);
 
 describe("pages", () => {
   test("the post list links to every post, newest first", async () => {
-    const res = await get("/");
+    const res = await get("/slops/");
     expect(res.status).toBe(200);
     const html = await res.text();
     expect(html.startsWith("<!DOCTYPE html>")).toBe(true);
-    expect(html).toContain('<meta property="og:url" content="https://example.com/"/>');
-    const slugs = [...html.matchAll(/<a href="\/posts\/([a-z0-9-]+)">/g)].map((m) => m[1]);
+    expect(html).toContain('<meta property="og:url" content="https://example.com/slops/"/>');
+    const slugs = [...html.matchAll(/<a href="\/slops\/([a-z0-9-]+)">/g)].map((m) => m[1]);
     expect(slugs.at(-1)).toBe("hello");
   });
 
   test("a post has its title, OGP tags, and a link to its source", async () => {
-    const html = await (await get("/posts/hello")).text();
+    const html = await (await get("/slops/hello")).text();
     expect(html).toContain("<title>Hello - blog</title>");
     expect(html).toContain('<meta property="og:type" content="article"/>');
-    expect(html).toContain('<a href="/posts/hello.md" download="2026-10-14-hello.md" class="secondary">');
+    expect(html).toContain('<a href="/slops/hello.md" download="2026-10-14-hello.md" class="secondary">');
   });
 
   test("HTML in posts is escaped", async () => {
-    const html = await (await get("/posts/tinymarkdown")).text();
+    const html = await (await get("/slops/tinymarkdown")).text();
     expect(html).toContain("&lt;b&gt;これ&lt;/b&gt;");
     expect(html).not.toContain("<b>これ</b>");
   });
@@ -39,13 +39,13 @@ describe("pages", () => {
   });
 
   test("the sources are served as Markdown", async () => {
-    for (const path of ["/posts/hello.md", "/docs/TODO.md"]) {
+    for (const path of ["/slops/hello.md", "/docs/TODO.md"]) {
       const res = await get(path);
       expect(res.status).toBe(200);
       expect(res.headers.get("Content-Type")).toBe("text/markdown; charset=utf-8");
       expect(res.headers.get("X-Content-Type-Options")).toBe("nosniff");
     }
-    expect(await (await get("/posts/hello.md")).text()).toMatch(/^# Hello\n/);
+    expect(await (await get("/slops/hello.md")).text()).toMatch(/^# Hello\n/);
   });
 
   test("/docs redirects to /docs/", async () => {
@@ -121,5 +121,40 @@ describe("linker", () => {
 
   test("relative to the file's directory", () => {
     expect(linker("docs/sketch/ja/blog.md", posts, docs)("../../ja/design.md")).toBe("/docs/ja/design");
+  });
+});
+
+describe("article collections and directory bundles", () => {
+  test("the home page and posts list contain the human Gist bundle", async () => {
+    for (const path of ["/", "/posts/"]) {
+      const html = await (await get(path)).text();
+      expect(html).toContain("blog by human");
+      expect(html).toContain('href="/posts/wsl-opencode"');
+      expect(html).not.toContain('href="/slops/hello"');
+    }
+    expect((await get("/posts/hello")).status).toBe(404);
+  });
+
+  test("all three Gist files form one article with separate downloads", async () => {
+    const html = await (await get("/posts/wsl-opencode")).text();
+    expect(html).toContain('datetime="2026-10-19"');
+    for (const name of ["article1.md", "article2.md"]) {
+      expect(html).toContain(`href="/posts/wsl-opencode/${name}"`);
+      const res = await get(`/posts/wsl-opencode/${name}`);
+      expect(res.status).toBe(200);
+      expect(res.headers.get("Content-Type")).toBe("text/markdown; charset=utf-8");
+      expect(await res.text()).toMatch(/^# 【記事/);
+    }
+    expect((await get("/posts/wsl-opencode/README.md")).status).toBe(200);
+    expect((await get("/posts/wsl-opencode/missing.md")).status).toBe(404);
+  });
+
+  test("the same slug can link across collections", () => {
+    const human = loadPosts([{ file: "2026-10-19-same.md", markdown: "# Human" }]);
+    const ai = loadPosts([{ file: "2026-10-19-same.md/README.md", markdown: "# AI" }, { file: "2026-10-19-same.md/memo.md", markdown: "# Memo" }])
+      .map((p) => ({ ...p, collection: "slops" as const }));
+    const link = linker("posts/2026-10-19-same.md", [...human, ...ai], []);
+    expect(link("../slops/2026-10-19-same.md")).toBe("/slops/same");
+    expect(link("../slops/2026-10-19-same.md/memo.md")).toBe("/slops/same/memo.md");
   });
 });

@@ -57,7 +57,7 @@ describe("heading markup", () => {
       markdown: "",
     };
     const link: Linker = (u) => u;
-    const html = PostPage({ post, link }).toString();
+    const html = PostPage({ post, link, posts: [post], docs: [] }).toString();
     expect(html).toContain(
       '<h1 id="hello-script">Hello &lt;script&gt;<a class="heading-permalink" href="#hello-script" aria-label="permalink"> #</a></h1>',
     );

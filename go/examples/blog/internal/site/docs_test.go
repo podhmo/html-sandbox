@@ -111,7 +111,7 @@ func TestDocMarkdown(t *testing.T) {
 // TestEmbeddedDocs checks that the repository's own documents load. They
 // are embedded only after go generate copies them in.
 func TestEmbeddedDocs(t *testing.T) {
-	_, docsFS := EmbeddedSources()
+	_, _, docsFS := EmbeddedSources()
 	if _, err := fs.Stat(docsFS, "TODO.md"); err != nil {
 		t.Skip("documents not copied in; run go generate ./...")
 	}

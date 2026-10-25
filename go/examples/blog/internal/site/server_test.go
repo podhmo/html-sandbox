@@ -56,7 +56,7 @@ func TestList(t *testing.T) {
 	if !strings.HasPrefix(body, "<!doctype html>") {
 		t.Errorf("missing doctype: %.40q", body)
 	}
-	if !strings.Contains(body, `<hgroup><h1>Posts</h1><p>blog by AI</p></hgroup>`) {
+	if !strings.Contains(body, `<hgroup><h1>Posts</h1><p>blog by human</p></hgroup>`) {
 		t.Error("want the heading with its subtitle")
 	}
 	hello := strings.Index(body, `<a href="/posts/hello">`)
@@ -119,6 +119,8 @@ func TestPostPageText(t *testing.T) {
 	}
 	want := `Hello <script> - blog
 blog
+slops
+posts
 docs
 preview
 github

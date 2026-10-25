@@ -41,7 +41,7 @@ func newSite(posts []Post, docs []Doc) *site {
 		byMember: make(map[string]string),
 	}
 	for _, p := range posts {
-		st.bySlug[p.Slug] = p
+		st.bySlug[postPath(p)] = p
 		st.byFile[postSource(p)] = p
 		for _, m := range p.Members {
 			st.byMember[m.Source] = postPath(p) + "/" + m.Name
@@ -61,7 +61,7 @@ func newSite(posts []Post, docs []Doc) *site {
 		p := &st.posts[i]
 		p.Prev = st.navItem(p.linkBase(), p.prevRaw)
 		p.Next = st.navItem(p.linkBase(), p.nextRaw)
-		st.bySlug[p.Slug] = *p
+		st.bySlug[postPath(*p)] = *p
 		st.byFile[postSource(*p)] = *p
 	}
 	for i := range st.docs {
@@ -111,18 +111,25 @@ func (s *Server) route(w http.ResponseWriter, r *http.Request) {
 	p := r.URL.Path
 	// Redirect like ServeMux: to the cleaned path, and from a directory
 	// without its trailing slash.
-	if c := cleanPath(p); c != p || c == "/docs" {
-		if c == "/docs" {
-			c = "/docs/"
+	if c := cleanPath(p); c != p || (c == "/docs" || c == "/posts" || c == "/slops") {
+		if c == "/docs" || c == "/posts" || c == "/slops" {
+			c += "/"
 		}
 		u := url.URL{Path: c, RawQuery: r.URL.RawQuery}
 		http.Redirect(w, r, u.String(), http.StatusTemporaryRedirect)
 		return
 	}
 	slug, isPost := strings.CutPrefix(p, "/posts/")
+	collection := "posts"
+	if rest, ok := strings.CutPrefix(p, "/slops/"); ok {
+		slug, isPost, collection = rest, true, "slops"
+	}
+	r.SetPathValue("collection", collection)
 	switch {
 	case p == "/":
 		s.handleList(w, r)
+	case p == "/posts/" || p == "/slops/":
+		s.page(w, r, articleList(s.env, s.site.Load().posts, collection, p))
 	case p == "/docs/":
 		s.handleDocList(w, r)
 	case p == "/favicon.svg":
@@ -174,7 +181,7 @@ func (s *Server) handleList(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handlePost(w http.ResponseWriter, r *http.Request) {
 	st := s.site.Load()
-	p, ok := st.bySlug[r.PathValue("slug")]
+	p, ok := st.bySlug["/"+r.PathValue("collection")+"/"+r.PathValue("slug")]
 	if !ok {
 		s.renderError(w, r, http.StatusNotFound, "Post not found.", nil)
 		return
@@ -199,7 +206,7 @@ func (s *Server) handleDoc(w http.ResponseWriter, r *http.Request) {
 // handlePostMarkdown serves the source of a post — a bundle's face —
 // as linked from its page.
 func (s *Server) handlePostMarkdown(w http.ResponseWriter, r *http.Request) {
-	p, ok := s.site.Load().bySlug[r.PathValue("slug")]
+	p, ok := s.site.Load().bySlug["/"+r.PathValue("collection")+"/"+r.PathValue("slug")]
 	if !ok {
 		s.renderError(w, r, http.StatusNotFound, "Post not found.", nil)
 		return
@@ -209,7 +216,7 @@ func (s *Server) handlePostMarkdown(w http.ResponseWriter, r *http.Request) {
 
 // handlePostMember serves a file of a bundle as written.
 func (s *Server) handlePostMember(w http.ResponseWriter, r *http.Request) {
-	p, ok := s.site.Load().bySlug[r.PathValue("slug")]
+	p, ok := s.site.Load().bySlug["/"+r.PathValue("collection")+"/"+r.PathValue("slug")]
 	if ok {
 		if m, ok := memberOf(p.Members, r.PathValue("member")); ok {
 			writeMember(w, m)

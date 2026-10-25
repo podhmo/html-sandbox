@@ -11,7 +11,7 @@ import {
 // Values
 pub fn load_docs(ReadOnlyArray[(String, String)]) -> Array[Doc] raise LoadError
 
-pub fn load_posts(ReadOnlyArray[(String, String)]) -> Array[Post] raise LoadError
+pub fn load_posts(ReadOnlyArray[(String, String)], collection? : String) -> Array[Post] raise LoadError
 
 pub fn preview(String, Array[String]) -> @el.Node
 
@@ -58,6 +58,7 @@ pub struct NavItem {
 }
 
 pub struct Post {
+  collection : String
   slug : String
   file : String
   date : String

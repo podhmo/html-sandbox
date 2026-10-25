@@ -3,10 +3,11 @@
 # Worker reads (examples/blog/cloudflare/build/content): the posts and the
 # repository's documents, and files.txt, the list of them.
 #
-#   sh examples/blog/scripts/content.sh OUT POSTS_DIR REPO_DIR [PATH...]
+#   sh examples/blog/scripts/content.sh OUT POSTS_DIR SLOPS_DIR REPO_DIR [PATH...]
 #
 # The files go to OUT/posts/<name> (POSTS_DIR is the repository's posts/
-# directory) and OUT/docs/<path in the repository> (REPO_DIR is the
+# directory), OUT/slops/<name> (SLOPS_DIR), and OUT/docs/<path in the
+# repository> (REPO_DIR is the
 # repository root, and PATHs are what the repodocs embed, as embed.sh
 # takes them). OUT/files.txt lists the paths under OUT, sorted, so the
 # Worker can fetch every file: Static Assets has no API to list them.
@@ -25,17 +26,14 @@ set -eu
 
 out=$1
 posts=${2#./}
-repo=${3#./}
-shift 3
+slops=${3#./}
+repo=${4#./}
+shift 4
 script=$(dirname "$0")
 
 LC_ALL=C
 export LC_ALL
 
-if [ ! -d "$posts" ]; then
-  echo "content.sh: $posts: no such directory" >&2
-  exit 1
-fi
 if [ ! -d "$repo" ]; then
   echo "content.sh: $repo: no such directory" >&2
   exit 1
@@ -44,45 +42,29 @@ fi
 mkdir -p "$out"
 
 names=$out.names.$$
-post_names=$names.posts
 doc_names=$names.docs
 tmp=$out.tmp.$$
-trap 'rm -f "$names" "$post_names" "$doc_names"; rm -rf "$tmp"' EXIT
+trap 'rm -f "$names" "$names.posts" "$names.slops" "$doc_names"; rm -rf "$tmp"' EXIT
 
-sh "$script/list-files.sh" "$posts" >"$post_names"
 sh "$script/list-files.sh" "$repo" "$@" >"$doc_names"
-
-if [ ! -s "$post_names" ] || [ ! -s "$doc_names" ]; then
-  echo "content.sh: no posts in $posts or no documents in $repo" >&2
-  exit 1
-fi
-
-mkdir -p "$tmp/posts" "$tmp/docs"
+: >"$names"
+for collection in posts slops; do
+  case "$collection" in posts) src=$posts ;; slops) src=$slops ;; esac
+  sh "$script/list-files.sh" "$src" >"$names.$collection"
+  while IFS= read -r name; do
+    mkdir -p "$tmp/$collection/$(dirname "$name")" "$out/$collection/$(dirname "$name")"
+    cp "$src/$name" "$tmp/$collection/$name"
+    mv "$tmp/$collection/$name" "$out/$collection/$name"
+    printf '%s/%s\n' "$collection" "$name" >>"$names"
+  done <"$names.$collection"
+done
 
 while IFS= read -r name; do
-  mkdir -p "$tmp/posts/$(dirname "$name")"
-  cp "$posts/$name" "$tmp/posts/$name"
-done <"$post_names"
-
-while IFS= read -r name; do
-  mkdir -p "$tmp/docs/$(dirname "$name")"
+  mkdir -p "$tmp/docs/$(dirname "$name")" "$out/docs/$(dirname "$name")"
   cp "$repo/$name" "$tmp/docs/$name"
-done <"$doc_names"
-
-{
-  sed 's|^|posts/|' "$post_names"
-  sed 's|^|docs/|' "$doc_names"
-} | sort -u >"$names"
-
-# Rename each file into OUT, and files.txt after them.
-while IFS= read -r name; do
-  mkdir -p "$out/posts/$(dirname "$name")"
-  mv "$tmp/posts/$name" "$out/posts/$name"
-done <"$post_names"
-
-while IFS= read -r name; do
-  mkdir -p "$out/docs/$(dirname "$name")"
   mv "$tmp/docs/$name" "$out/docs/$name"
+  printf 'docs/%s\n' "$name" >>"$names"
 done <"$doc_names"
 
+sort -u -o "$names" "$names"
 mv "$names" "$out/files.txt"

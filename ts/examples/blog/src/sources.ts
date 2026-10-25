@@ -16,8 +16,12 @@ const raw = (files: Record<string, string>) =>
     .map(([path, markdown]) => ({ path: path.slice(root.length), markdown }))
     .sort((a, b) => a.path.localeCompare(b.path));
 
-export const posts = raw(import.meta.glob("../../../../posts/*.md", { query: "?raw", import: "default", eager: true })).map(
+export const posts = raw(import.meta.glob(["../../../../posts/*.md", "../../../../posts/*.md/*"], { query: "?raw", import: "default", eager: true })).map(
   ({ path, markdown }) => ({ file: path.slice("posts/".length), markdown }),
+);
+
+export const slops = raw(import.meta.glob(["../../../../slops/*.md", "../../../../slops/*.md/*"], { query: "?raw", import: "default", eager: true })).map(
+  ({ path, markdown }) => ({ file: path.slice("slops/".length), markdown }),
 );
 
 export const docs = raw(

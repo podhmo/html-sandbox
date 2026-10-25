@@ -67,12 +67,10 @@ fn Site::page_title(self : Site, href : String) -> String {
     Some(i) => p[:i].to_owned()
     None => p
   }
+  if self.by_slug.get(p) is Some(post) {
+    return post.title
+  }
   match p {
-    [.. "/posts/", .. slug] if slug != "" && !slug.contains("/") =>
-      match self.by_slug.get(slug.to_owned()) {
-        Some(post) => post.title
-        None => ""
-      }
     [.. "/docs/", .. path] =>
       match self.by_path.get(path.to_owned()) {
         Some(d) => d.title

@@ -5,7 +5,7 @@ import { jsxRenderer } from "hono/jsx-renderer";
 import { type Block, type Inline, type Item, inlines } from "../../../pkg/tinymarkdown/tinymarkdown.ts";
 import { AnchorIds, permalink } from "./anchors.tsx";
 import { type Doc, type Post, docPath, firstTitle, postPath } from "./content.ts";
-import { type Linker, noLinks } from "./links.ts";
+import { type Linker, linker, noLinks } from "./links.ts";
 import * as sources from "./sources.ts";
 
 const siteName = "blog";
@@ -60,6 +60,8 @@ export const layout = jsxRenderer(({ children, ...meta }) => {
           <Spread
             start={[
               <a href="/"><strong>{siteName}</strong></a>,
+              <a href="/slops/">slops</a>,
+              <a href="/posts/">posts</a>,
               <a href="/docs/">docs</a>,
             ]}
             end={[<a href={repoHomeURL}>github</a>]}
@@ -87,12 +89,12 @@ function Spread({ start, end }: { start: Child[]; end: Child[] }) {
 
 // PostList shows each post as a card: the title links to the post and the
 // date below it is muted by hgroup.
-export function PostList({ posts }: { posts: Post[] }) {
+export function PostList({ posts, collection = "posts" }: { posts: Post[]; collection?: "posts" | "slops" }) {
   return (
     <>
       <hgroup>
-        <h1>Posts</h1>
-        <p>blog by AI</p>
+        <h1>{collection === "slops" ? "Slops" : "Posts"}</h1>
+        <p>blog by {collection === "slops" ? "AI" : "human"}</p>
       </hgroup>
       {posts.map((p) => (
         <article>
@@ -106,11 +108,20 @@ export function PostList({ posts }: { posts: Post[] }) {
   );
 }
 
-export function PostPage({ post, link }: { post: Post; link: Linker }) {
+export function PostPage({ post, link, posts, docs }: { post: Post; link: Linker; posts: Post[]; docs: Doc[] }) {
+  const gen = new AnchorIds();
   return (
     <>
       <PageHeader info={<time datetime={post.date}>{post.date}</time>} href={`${postPath(post)}.md`} filename={post.file} />
-      <Body title={post.title} blocks={post.doc} link={link} />
+      <Body title={post.title} blocks={post.doc} link={link} gen={gen} />
+      {post.members?.slice(1).map((m) => (
+        <article>
+          <h2><a href={`${postPath(post)}/${m.name}`}><code>{m.name}</code></a></h2>
+          {m.isMarkdown
+            ? <Blocks blocks={m.doc.children} link={linker(`${post.collection ?? "posts"}/${post.file}/${m.name}`, posts, docs)} gen={gen} />
+            : m.name.endsWith(".svg") ? <img src={`${postPath(post)}/${m.name}`} alt={m.name} /> : <pre><code>{m.markdown}</code></pre>}
+        </article>
+      ))}
     </>
   );
 }
@@ -165,8 +176,7 @@ function PageHeader({ info, href, filename }: { info: Child; href: string; filen
 
 // Body is the article. When the title came from front matter only, the
 // body has no heading, so one is added.
-function Body({ title, blocks, link }: { title: string; blocks: Post["doc"]; link: Linker }) {
-  const gen = new AnchorIds();
+function Body({ title, blocks, link, gen = new AnchorIds() }: { title: string; blocks: Post["doc"]; link: Linker; gen?: AnchorIds }) {
   const id = firstTitle(blocks) === undefined ? gen.id(plainText(title)) : undefined;
   return (
     <article>

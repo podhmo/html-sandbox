@@ -90,6 +90,8 @@ test "post page text" {
     (
       #|Hello <script> - blog
       #|blog
+      #|slops
+      #|posts
       #|docs
       #|preview
       #|github
@@ -230,4 +232,45 @@ test "anchor id dedup" {
   assert_eq(gen.id("foo-1"), "foo-1-1")
   assert_eq(gen.id("!!!"), "sec")
   assert_eq(gen.id("???"), "sec-1")
+}
+
+///|
+test "collections isolate identical slugs and retain bundle links" {
+  let human = load_posts([
+    (
+      "2026-10-19-same.md/README.md", "# Human\n\n[AI](../../slops/2026-10-19-same.md)",
+    ),
+    ("2026-10-19-same.md/article.md", "# Human member"),
+  ])
+  let ai = load_posts(
+    [
+      (
+        "2026-10-19-same.md/README.md", "---\nnext: ../../posts/2026-10-19-same.md\n---\n# AI\n\n[Member](article.md)",
+      ),
+      ("2026-10-19-same.md/article.md", "# AI member"),
+    ],
+    collection="slops",
+  )
+  let s = Site(base_url="https://example.com", posts=[..human, ..ai], docs=[])
+  let home = s.render("/").body.text()
+  assert_true(home.contains("blog by human"))
+  assert_false(home.contains("href=\"/slops/same\""))
+  let list = s.render("/slops/").body.text()
+  assert_true(list.contains("blog by AI"))
+  assert_true(list.contains("href=\"/slops/same\""))
+  assert_false(list.contains("href=\"/posts/same\""))
+  let body = s.render("/slops/same").body.text()
+  assert_true(body.contains("<a href=\"/slops/same/article.md\">Member</a>"))
+  assert_true(body.contains("<a href=\"/posts/same\">Human</a>"))
+  assert_eq(s.render("/posts/same/article.md").body.text(), "# Human member")
+  assert_eq(s.render("/slops/same/article.md").body.text(), "# AI member")
+  assert_true(
+    s.render("/preview").body
+    .text()
+    .contains("slops/2026-10-19-same.md/article.md"),
+  )
+  assert_eq(
+    preview_url("slops/2026-10-19-same.md/article.md"),
+    Some("/slops/same/article.md"),
+  )
 }

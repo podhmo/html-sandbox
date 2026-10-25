@@ -6,8 +6,8 @@ fn html(status : Int32, body : String) -> Result[@compare.Fetched, String] {
 ///|
 test "default paths cover the routes the step asks for" {
   assert_eq(@compare.default_paths(), [
-    "/", "/posts/hello", "/docs/ja/design", "/docs/", "/preview", "/favicon.svg",
-    "/no-such-page",
+    "/", "/posts/", "/slops/", "/slops/hello", "/posts/wsl-opencode", "/docs/ja/design",
+    "/docs/", "/preview", "/favicon.svg", "/no-such-page",
   ])
 }
 

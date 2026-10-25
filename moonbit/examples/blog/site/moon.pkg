@@ -15,5 +15,6 @@ import {
   "podhmo/html-sandbox/pkg/el",
   "podhmo/html-sandbox/pkg/http",
   "podhmo/html-sandbox/examples/blog/posts",
+  "podhmo/html-sandbox/examples/blog/slops",
   "podhmo/html-sandbox/examples/blog/repodocs",
 } for "test"

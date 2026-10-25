@@ -54,6 +54,8 @@ fn layout(meta : PageMeta, body : Array[@el.Node]) -> @el.Node {
       @picoel.spread(
         [
           @picoel.a("/", [@picoel.strong([@picoel.text(SITE_NAME)])]),
+          @picoel.a("/slops/", [@picoel.text("slops")]),
+          @picoel.a("/posts/", [@picoel.text("posts")]),
           @picoel.a("/docs/", [@picoel.text("docs")]),
         ],
         end=[
@@ -98,16 +100,28 @@ fn ogp(meta : PageMeta) -> Array[@el.Node] {
 
 ///|
 /// post_list shows each post as a card: the title links to the post and
-/// the date below it is muted by hgroup. The heading says, muted the same
-/// way, that the posts are written by AI.
-fn Site::post_list(self : Site) -> @el.Node {
+/// the date below it is muted by hgroup. Each collection identifies its authors.
+fn Site::post_list(
+  self : Site,
+  collection~ : String = "posts",
+  list_path~ : String = "/",
+) -> @el.Node {
+  let title = if collection == "slops" { "Slops" } else { "Posts" }
+  let subtitle = if collection == "slops" {
+    "blog by AI"
+  } else {
+    "blog by human"
+  }
   let body = [
     @picoel.hgroup([
-      @picoel.h1([@picoel.text("Posts")]),
-      @picoel.p([@picoel.text("blog by AI")]),
+      @picoel.h1([@picoel.text(title)]),
+      @picoel.p([@picoel.text(subtitle)]),
     ]),
   ]
   for p in self.posts {
+    if p.collection != collection {
+      continue
+    }
     body.push(
       @picoel.article([
         @picoel.hgroup([
@@ -119,9 +133,17 @@ fn Site::post_list(self : Site) -> @el.Node {
   }
   layout(
     {
-      title: "",
-      description: SITE_DESCRIPTION,
-      url: "\{self.base_url}/",
+      title: if list_path == "/" {
+        ""
+      } else {
+        title
+      },
+      description: if list_path == "/" {
+        SITE_DESCRIPTION
+      } else {
+        subtitle
+      },
+      url: "\{self.base_url}\{list_path}",
       type_: "website",
     },
     body,
@@ -309,7 +331,7 @@ let no_links : Linker = _ => None
 
 ///|
 fn Post::page_path(self : Post) -> String {
-  "/posts/\{self.slug}"
+  "/\{self.collection}/\{self.slug}"
 }
 
 ///|

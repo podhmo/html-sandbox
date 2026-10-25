@@ -12,8 +12,8 @@ pub(all) struct Fetched {
 /// favicon, and a path that exists on neither side.
 pub fn default_paths() -> Array[String] {
   [
-    "/", "/posts/hello", "/docs/ja/design", "/docs/", "/preview", "/favicon.svg",
-    "/no-such-page",
+    "/", "/posts/", "/slops/", "/slops/hello", "/posts/wsl-opencode", "/docs/ja/design",
+    "/docs/", "/preview", "/favicon.svg", "/no-such-page",
   ]
 }
 

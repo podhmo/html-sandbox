@@ -15,6 +15,7 @@ import (
 
 // Post is one blog post loaded from a YYYY-MM-DD-slug.md file.
 type Post struct {
+	Collection  string // "slops" for AI articles; empty means "posts"
 	Slug        string
 	File        string // file name, e.g. 2026-10-14-hello.md
 	Date        time.Time
@@ -177,4 +178,27 @@ func firstParagraph(bs []tinymarkdown.Block) string {
 		}
 	}
 	return ""
+}
+
+// LoadSlops reads AI-written articles with the same format as human posts.
+func LoadSlops(fsys fs.FS) ([]Post, error) {
+	articles, err := LoadPosts(fsys)
+	if err != nil {
+		return nil, err
+	}
+	for i := range articles {
+		articles[i].Collection = "slops"
+		for j := range articles[i].Members {
+			m := &articles[i].Members[j]
+			m.Source = "slops/" + strings.TrimPrefix(m.Source, "posts/")
+		}
+	}
+	return articles, nil
+}
+
+func (p Post) collection() string {
+	if p.Collection == "slops" {
+		return "slops"
+	}
+	return "posts"
 }

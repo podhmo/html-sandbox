@@ -10,13 +10,9 @@ const REPO_HOST = "github.com"
 const REPO_PATH = "/podhmo/html-sandbox/blob/main"
 
 ///|
-/// POSTS_DIR is the directory of the repository that holds the posts.
-const POSTS_DIR = "posts"
-
-///|
 /// Post::source is the file path of the post in the repository.
 fn Post::source(self : Post) -> String {
-  "\{POSTS_DIR}/\{self.file}"
+  "\{self.collection}/\{self.file}"
 }
 
 ///|

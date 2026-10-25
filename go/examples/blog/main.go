@@ -35,7 +35,7 @@ func run() error {
 		*debug = true
 	}
 
-	postsFS, docsFS := site.EmbeddedSources()
+	postsFS, slopsFS, docsFS := site.EmbeddedSources()
 	var err error
 	if *debug {
 		if *root == "" {
@@ -51,6 +51,9 @@ func run() error {
 		if postsFS, err = fs.Sub(docsFS, "posts"); err != nil {
 			return err
 		}
+		if slopsFS, err = fs.Sub(docsFS, "slops"); err != nil {
+			return err
+		}
 		// A wrong -root would otherwise just show an empty blog.
 		if _, err := fs.Stat(postsFS, "."); err != nil {
 			return fmt.Errorf("-debug reads posts from posts/ in the parent of -root: %w", err)
@@ -61,6 +64,11 @@ func run() error {
 		if err != nil {
 			return nil, nil, err
 		}
+		slops, err := site.LoadSlops(slopsFS)
+		if err != nil {
+			return nil, nil, err
+		}
+		posts = append(posts, slops...)
 		docs, err := site.LoadDocs(docsFS)
 		if err != nil {
 			return nil, nil, err
@@ -80,6 +88,7 @@ func run() error {
 		s.EnableLiveReload()
 		err := s.Watch(context.Background(), 500*time.Millisecond, load,
 			site.Source{FS: postsFS, Paths: []string{"."}},
+			site.Source{FS: slopsFS, Paths: []string{"."}},
 			site.Source{FS: docsFS, Paths: site.DocSources},
 		)
 		if err != nil {

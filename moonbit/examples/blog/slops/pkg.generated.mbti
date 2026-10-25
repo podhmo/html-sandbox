@@ -1,0 +1,13 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "podhmo/html-sandbox/examples/blog/slops"
+
+// Values
+pub let files : ReadOnlyArray[(String, String)]
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

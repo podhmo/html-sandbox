@@ -55,6 +55,8 @@ func layout(env pageEnv, meta pageMeta, body ...pe.Node) pe.Node {
 		pe.Header(pe.Spread(
 			[]pe.Node{
 				pe.A("/", pe.Strong(pe.Text(siteName))),
+				pe.A("/slops/", pe.Text("slops")),
+				pe.A("/posts/", pe.Text("posts")),
 				pe.A("/docs/", pe.Text("docs")),
 			},
 			[]pe.Node{
@@ -91,17 +93,32 @@ func ogp(meta pageMeta) []pe.Node {
 }
 
 // postList shows each post as a card: the title links to the post and the
-// date below it is muted by hgroup. The heading says, muted the same way,
-// that the posts are written by AI.
+// date below it is muted by hgroup. Each collection identifies its authors.
 func postList(env pageEnv, posts []Post) pe.Node {
-	body := []pe.Node{pe.Hgroup(pe.H1(pe.Text("Posts")), pe.P(pe.Text("blog by AI")))}
+	return articleList(env, posts, "posts", "/")
+}
+
+func articleList(env pageEnv, posts []Post, collection, listPath string) pe.Node {
+	title, subtitle := "Posts", "blog by human"
+	if collection == "slops" {
+		title, subtitle = "Slops", "blog by AI"
+	}
+	body := []pe.Node{pe.Hgroup(pe.H1(pe.Text(title)), pe.P(pe.Text(subtitle)))}
 	for _, p := range posts {
+		if p.collection() != collection {
+			continue
+		}
 		body = append(body, pe.Article(pe.Hgroup(
 			pe.H2(pe.A(postPath(p), linkedTitle(p.Title)...)),
 			pe.P(pe.Date(p.Date)),
 		)))
 	}
-	return layout(env, pageMeta{Description: siteDescription, URL: env.BaseURL + "/", Type: "website"}, body...)
+	meta := pageMeta{Description: siteDescription, URL: env.BaseURL + listPath, Type: "website"}
+	if listPath != "/" {
+		meta.Title = title
+		meta.Description = subtitle
+	}
+	return layout(env, meta, body...)
 }
 
 func postPage(env pageEnv, st *site, p Post) pe.Node {
@@ -231,7 +248,7 @@ func relNav(prev, next *navItem) pe.Node {
 var noLinks linker = func(string) (string, bool) { return "", false }
 
 func postPath(p Post) string {
-	return "/posts/" + p.Slug
+	return "/" + p.collection() + "/" + p.Slug
 }
 
 // postMarkdownPath is where the source of p is served.

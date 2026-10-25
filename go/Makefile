@@ -35,7 +35,7 @@ check: generate
 ## clean: remove bin/ and the copied posts and documents
 clean:
 	rm -rf bin
-	find examples/blog/posts/files examples/blog/repodocs/files -mindepth 1 -maxdepth 1 ! -name .gitignore -exec rm -rf {} +
+	find examples/blog/posts/files examples/blog/slops/files examples/blog/repodocs/files -mindepth 1 -maxdepth 1 ! -name .gitignore -exec rm -rf {} +
 
 help:
 	@sed -n 's/^## //p' $(MAKEFILE_LIST)

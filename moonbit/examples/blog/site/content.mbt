@@ -27,6 +27,7 @@ pub extend LoadError with Debug::{to_repr}
 ///|
 /// Post is one blog post loaded from a YYYY-MM-DD-slug.md file.
 pub struct Post {
+  collection : String
   slug : String
   file : String // file name, e.g. 2026-10-14-hello.md
   date : String // YYYY-MM-DD
@@ -184,8 +185,9 @@ fn load_post_bundle(
   date : String,
   slug : String,
   entries : Array[(String, String)],
+  collection : String,
 ) -> Post raise LoadError {
-  let members = load_members(dir_name, "\{POSTS_DIR}/\{dir_name}", entries)
+  let members = load_members(dir_name, "\{collection}/\{dir_name}", entries)
   let face = members[0]
   let meta = face.meta
   let title = match meta {
@@ -202,6 +204,7 @@ fn load_post_bundle(
     _ => first_paragraph(face.doc.children)
   }
   {
+    collection,
     slug,
     file: dir_name,
     date,
@@ -224,6 +227,7 @@ fn load_post_bundle(
 /// content.
 pub fn load_posts(
   files : ReadOnlyArray[(String, String)],
+  collection~ : String = "posts",
 ) -> Array[Post] raise LoadError {
   let seen : Map[String, String] = Map([]) // slug -> file name
   let posts = []
@@ -279,6 +283,7 @@ pub fn load_posts(
       _ => first_paragraph(doc.children)
     }
     posts.push({
+      collection,
       slug,
       file: name,
       date,
@@ -306,7 +311,9 @@ pub fn load_posts(
       )
     }
     seen[slug] = dir_name
-    posts.push(load_post_bundle(dir_name, date, slug, bundles[dir_name]))
+    posts.push(
+      load_post_bundle(dir_name, date, slug, bundles[dir_name], collection),
+    )
   }
   posts.sort_by((a, b) => {
     let c = b.date.lexical_compare(a.date)
