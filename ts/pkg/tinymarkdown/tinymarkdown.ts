@@ -45,7 +45,9 @@ export type Alert = { kind: "alert"; alert: string; children: Block[] };
 // many cells as the header; alignment is accepted but ignored.
 export type Table = { kind: "table"; header: string[]; rows: string[][] };
 
-// CodeBlock is the verbatim content between "```" fences.
+// CodeBlock is the content between "```" fences. When the opening fence is
+// indented, each content line loses as much leading indentation as the
+// fence has, as CommonMark does.
 export type CodeBlock = { kind: "code"; code: string };
 
 // Inline is a piece of the text held by a section title, a paragraph, a

@@ -194,6 +194,14 @@ func TestCodeBlocks(t *testing.T) {
 			Document{Children: []Block{
 				Section{Level: 1, Title: "A", Children: []Block{CodeBlock{Code: "## x"}}},
 			}}},
+		{"an indented fence dedents its content", "  ```\n  a\n    b\n c\n  ```",
+			Document{Children: []Block{CodeBlock{Code: "a\n  b\nc"}}}},
+		{"a fence under a list item dedents by the fence", "1. step\n   ```sh\n   run this\n   ```",
+			Document{Children: []Block{
+				Paragraph{Text: "1. step"}, CodeBlock{Code: "run this", Info: "sh"},
+			}}},
+		{"an unclosed indented fence still dedents", "   ```\n   a",
+			Document{Children: []Block{CodeBlock{Code: "a"}}}},
 	})
 }
 

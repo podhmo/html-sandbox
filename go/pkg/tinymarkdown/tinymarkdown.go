@@ -78,9 +78,11 @@ type Table struct {
 	Rows   [][]string
 }
 
-// CodeBlock is the verbatim content between "```" fences, lines joined with
-// "\n". Info is the text after the opening fence, trimmed — usually a
-// language name such as "go" or "svg".
+// CodeBlock is the content between "```" fences, lines joined with "\n".
+// When the opening fence is indented, each content line loses as much
+// leading indentation as the fence has — all of it on a line with less —
+// as CommonMark does. Info is the text after the opening fence, trimmed —
+// usually a language name such as "go" or "svg".
 type CodeBlock struct {
 	Code string
 	Info string
@@ -148,6 +150,7 @@ func scan(src string) []Block {
 	}
 	var code []string
 	var codeInfo string
+	var codeIndent int
 	inCode := false
 	for line := range strings.SplitSeq(src, "\n") {
 		line = strings.TrimSuffix(line, "\r")
@@ -155,9 +158,9 @@ func scan(src string) []Block {
 		if inCode {
 			if trimmed == fence {
 				out = append(out, CodeBlock{Code: strings.Join(code, "\n"), Info: codeInfo})
-				code, codeInfo, inCode = nil, "", false
+				code, codeInfo, codeIndent, inCode = nil, "", 0, false
 			} else {
-				code = append(code, line)
+				code = append(code, dedent(line, codeIndent))
 			}
 			continue
 		}
@@ -165,6 +168,7 @@ func scan(src string) []Block {
 		case strings.HasPrefix(trimmed, fence):
 			flush()
 			codeInfo = strings.TrimSpace(trimmed[len(fence):])
+			codeIndent = indent(line)
 			inCode = true
 		case trimmed == "":
 			flush()
@@ -247,6 +251,17 @@ type rawItem struct {
 // indent counts the leading spaces and tabs of line.
 func indent(line string) int {
 	return len(line) - len(strings.TrimLeft(line, " \t"))
+}
+
+// dedent removes up to n leading spaces and tabs of line — all of them
+// when it has fewer than n — as CommonMark does for the content lines of
+// a fence indented n columns.
+func dedent(line string, n int) string {
+	i := 0
+	for i < n && i < len(line) && (line[i] == ' ' || line[i] == '\t') {
+		i++
+	}
+	return line[i:]
 }
 
 // nestItems turns indentation in flat into nested lists. It consumes items
