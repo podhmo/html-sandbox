@@ -218,7 +218,7 @@ test "pico only" {
   assert_false(body.contains("<style") || body.contains(" style="))
   assert_contains(body, [
     "<header class=\"container\">", "<main class=\"container\">", "<footer class=\"container\">",
-    "<ul><li><a href=\"https://github.com/podhmo/html-sandbox\">github</a></li></ul></nav></header>",
+    "<ul><li><a href=\"/preview\">preview</a></li><li><a href=\"https://github.com/podhmo/html-sandbox\">github</a></li></ul></nav></header>",
   ])
 }
 
@@ -273,8 +273,7 @@ test "post page heading" {
   ])
   let both = body(s, "/posts/both")
   assert_contains(both, [
-    "<title>FM title - blog</title>",
-    "<h1 id=\"body-heading\">Body heading<a class=\"heading-permalink\" href=\"#body-heading\" aria-label=\"permalink\"> #</a></h1>",
+    "<title>FM title - blog</title>", "<h1 id=\"body-heading\">Body heading<a class=\"heading-permalink\" href=\"#body-heading\" aria-label=\"permalink\"> #</a></h1>",
   ])
   assert_eq(both.split("<h1").count() - 1, 1)
 }
@@ -334,7 +333,8 @@ test "tables and deep headings" {
   ])
   assert_contains(body(s, "/posts/hello"), [
     [
-      "<section><h4 id=\"four\">Four<a class=\"heading-permalink\" href=\"#four\" aria-label=\"permalink\"> #</a></h4><section><h5 id=\"five\">Five<a class=\"heading-permalink\" href=\"#five\" aria-label=\"permalink\"> #</a></h5>", "<div class=\"overflow-auto\"><table><thead><tr><th>a</th><th><code>b</code></th></tr></thead>",
+      "<section><h4 id=\"four\">Four<a class=\"heading-permalink\" href=\"#four\" aria-label=\"permalink\"> #</a></h4><section><h5 id=\"five\">Five<a class=\"heading-permalink\" href=\"#five\" aria-label=\"permalink\"> #</a></h5>",
+      "<div class=\"overflow-auto\"><table><thead><tr><th>a</th><th><code>b</code></th></tr></thead>",
       "<tbody><tr><td><a href=\"#x\">x</a></td><td>&lt;i&gt;</td></tr></tbody></table></div></section></section>",
     ].join(""),
   ])
@@ -441,6 +441,15 @@ test "post markdown" {
   assert_eq(header(res, "x-content-type-options"), Some("nosniff"))
   assert_contains(body(s, "/posts/hello"), [
     "<header><nav><ul><li><time datetime=\"2026-10-14\">2026-10-14</time></li></ul><ul><li><small><a href=\"/posts/hello.md\" download=\"2026-10-14-hello.md\" class=\"secondary\">Download .md</a></small></li></ul></nav></header><article>",
+  ])
+}
+
+///|
+test "preview page" {
+  let s = new_site(test_posts)
+  assert_contains(body(s, "/preview"), [
+    "<title>Preview - blog</title>", "<textarea id=\"preview-src\"", "<script id=\"preview-data\" type=\"text/plain\">",
+    "/preview.wasm?v=", "/preview.mjs?v=", "posts/2026-10-14-hello.md", "TODO.md",
   ])
 }
 
@@ -674,8 +683,7 @@ test "post bundle page and members" {
   assert_contains(body(s, "/posts/bundle"), [
     "face body", "<h2 id=\"00-memomd\"><a href=\"/posts/bundle/00-memo.md\"><code>00-memo.md</code></a><a class=\"heading-permalink\" href=\"#00-memomd\" aria-label=\"permalink\"> #</a></h2>",
     "member body", "<h2 id=\"hellogo\"><a href=\"/posts/bundle/hello.go\"><code>hello.go</code></a><a class=\"heading-permalink\" href=\"#hellogo\" aria-label=\"permalink\"> #</a></h2>",
-    "<pre>package main",
-    "<h2 id=\"diagramsvg\"><a href=\"/posts/bundle/diagram.svg\"><code>diagram.svg</code></a><a class=\"heading-permalink\" href=\"#diagramsvg\" aria-label=\"permalink\"> #</a></h2>",
+    "<pre>package main", "<h2 id=\"diagramsvg\"><a href=\"/posts/bundle/diagram.svg\"><code>diagram.svg</code></a><a class=\"heading-permalink\" href=\"#diagramsvg\" aria-label=\"permalink\"> #</a></h2>",
     "<img src=\"/posts/bundle/diagram.svg\" alt=\"diagram.svg\">",
   ])
   // The face is the page; its heading is not a member section.
@@ -723,8 +731,7 @@ test "load doc bundle" {
     e => fail("\{e}")
   }
   assert_contains(body(s, "/docs/guide"), [
-    "face body",
-    "<h2 id=\"00-setupmd\"><a href=\"/docs/guide/00-setup.md\"><code>00-setup.md</code></a><a class=\"heading-permalink\" href=\"#00-setupmd\" aria-label=\"permalink\"> #</a></h2>",
+    "face body", "<h2 id=\"00-setupmd\"><a href=\"/docs/guide/00-setup.md\"><code>00-setup.md</code></a><a class=\"heading-permalink\" href=\"#00-setupmd\" aria-label=\"permalink\"> #</a></h2>",
     "<h2 id=\"runsh\"><a href=\"/docs/guide/run.sh\"><code>run.sh</code></a><a class=\"heading-permalink\" href=\"#runsh\" aria-label=\"permalink\"> #</a></h2>",
     "<pre>echo hi",
   ])
@@ -893,4 +900,3 @@ test "docs/blog.metadata.json errors" {
   }
   assert_true(msg.has_prefix("docs/blog.metadata.json: "), msg~)
 }
-

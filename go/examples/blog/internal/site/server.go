@@ -131,6 +131,14 @@ func (s *Server) route(w http.ResponseWriter, r *http.Request) {
 		handleSiteCSS(w, r)
 	case p == "/code-copy.js":
 		handleCodeCopyJS(w, r)
+	case p == "/preview":
+		s.handlePreview(w, r)
+	case p == "/preview.js":
+		handlePreviewJS(w, r)
+	case p == "/preview.wasm":
+		handlePreviewWasm(w, r)
+	case p == "/preview.mjs":
+		handlePreviewMJS(w, r)
 	case p == liveReloadScriptPath:
 		s.handleLiveReloadScript(w, r)
 	case p == liveReloadEventsPath:
@@ -309,6 +317,41 @@ func handleCodeCopyJS(w http.ResponseWriter, r *http.Request) {
 	h.Set("Cache-Control", "public, max-age=31536000, immutable")
 	h.Set("Content-Length", strconv.Itoa(len(codeCopyJS)))
 	w.Write(codeCopyJS)
+}
+
+// handlePreview shows the preview page: an editor that renders Markdown
+// the way the site renders it, for checking a post or document before it
+// is written. Nothing is saved.
+func (s *Server) handlePreview(w http.ResponseWriter, r *http.Request) {
+	s.page(w, r, previewPage(s.env, s.site.Load()))
+}
+
+// handlePreviewJS serves the preview page's driver script. Pages link to
+// it with a version in the query, like code-copy.js.
+func handlePreviewJS(w http.ResponseWriter, r *http.Request) {
+	h := w.Header()
+	h.Set("Content-Type", "text/javascript; charset=utf-8")
+	h.Set("Cache-Control", "public, max-age=31536000, immutable")
+	h.Set("Content-Length", strconv.Itoa(len(previewJS)))
+	w.Write(previewJS)
+}
+
+// handlePreviewWasm and handlePreviewMJS serve the preview page's
+// renderers, versioned like the scripts.
+func handlePreviewWasm(w http.ResponseWriter, r *http.Request) {
+	h := w.Header()
+	h.Set("Content-Type", "application/wasm")
+	h.Set("Cache-Control", "public, max-age=31536000, immutable")
+	h.Set("Content-Length", strconv.Itoa(len(previewWasm)))
+	w.Write(previewWasm)
+}
+
+func handlePreviewMJS(w http.ResponseWriter, r *http.Request) {
+	h := w.Header()
+	h.Set("Content-Type", "text/javascript; charset=utf-8")
+	h.Set("Cache-Control", "public, max-age=31536000, immutable")
+	h.Set("Content-Length", strconv.Itoa(len(previewMJS)))
+	w.Write(previewMJS)
 }
 
 // page renders n with status 200, or an error page if rendering fails.

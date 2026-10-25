@@ -57,7 +57,10 @@ func layout(env pageEnv, meta pageMeta, body ...pe.Node) pe.Node {
 				pe.A("/", pe.Strong(pe.Text(siteName))),
 				pe.A("/docs/", pe.Text("docs")),
 			},
-			[]pe.Node{pe.A(repoHomeURL, pe.Text("github"))},
+			[]pe.Node{
+				pe.A("/preview", pe.Text("preview")),
+				pe.A(repoHomeURL, pe.Text("github")),
+			},
 		)),
 		pe.Main(body...),
 		pe.Footer(pe.Small(pe.Text("Rendered with Wasm."))),

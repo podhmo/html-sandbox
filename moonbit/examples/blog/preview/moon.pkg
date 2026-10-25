@@ -1,0 +1,13 @@
+import {
+  "podhmo/html-sandbox/examples/blog/site",
+  "podhmo/html-sandbox/pkg/el",
+}
+
+options(
+  link: {
+    // The JS build is preview.js's fallback when the browser cannot
+    // instantiate Wasm with js-string builtins.
+    "js": { "exports": [ "render" ], "format": "esm" },
+    "wasm-gc": { "exports": [ "render" ], "use-js-builtin-string": true },
+  },
+)

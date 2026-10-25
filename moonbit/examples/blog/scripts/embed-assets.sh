@@ -1,8 +1,10 @@
 #!/bin/sh
 # embed-assets.sh writes OUT, a MoonBit source holding the Go blog's
-# site.css, favicon.svg, and code-copy.js from DIR, with the versions the
-# pages put in their URLs: the first 4 bytes of each file's SHA-256 in
-# hex, as the Go blog's siteCSSPath and codeCopyJSPath have them.
+# site.css, favicon.svg, code-copy.js, and preview.js from DIR, with the
+# versions the pages put in their URLs: the first 4 bytes of each file's
+# SHA-256 in hex, as the Go blog's siteCSSPath and codeCopyJSPath have
+# them. preview.wasm and preview.mjs contribute only their versions: they
+# are generated files served from Static Assets, not embedded here.
 #
 #   sh examples/blog/scripts/embed-assets.sh examples/blog/assets/embedded.mbt ../go/examples/blog/internal/site
 #
@@ -37,6 +39,7 @@ embed() {
   embed site_css "$dir/site.css"
   embed favicon_svg "$dir/favicon.svg"
   embed code_copy_js "$dir/code-copy.js"
+  embed preview_js "$dir/preview.js"
   echo
   echo '///|'
   echo '/// site_css_version is the first 4 bytes of the SHA-256 of site_css in hex.'
@@ -45,6 +48,18 @@ embed() {
   echo '///|'
   echo '/// code_copy_js_version is the first 4 bytes of the SHA-256 of code_copy_js in hex.'
   echo "pub let code_copy_js_version : String = \"$(sha256 "$dir/code-copy.js")\""
+  echo
+  echo '///|'
+  echo '/// preview_js_version is the first 4 bytes of the SHA-256 of preview_js in hex.'
+  echo "pub let preview_js_version : String = \"$(sha256 "$dir/preview.js")\""
+  echo
+  echo '///|'
+  echo '/// preview_wasm_version is the first 4 bytes of the SHA-256 of preview.wasm in hex.'
+  echo "pub let preview_wasm_version : String = \"$(sha256 "$dir/preview.wasm")\""
+  echo
+  echo '///|'
+  echo '/// preview_mjs_version is the first 4 bytes of the SHA-256 of preview.mjs in hex.'
+  echo "pub let preview_mjs_version : String = \"$(sha256 "$dir/preview.mjs")\""
 } >"$tmp"
 
 if cmp -s "$tmp" "$out"; then

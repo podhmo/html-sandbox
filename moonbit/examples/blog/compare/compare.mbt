@@ -8,11 +8,12 @@ pub(all) struct Fetched {
 
 ///|
 /// default_paths are the paths compared when none are given: the top
-/// page, a post, a document, the document index, the favicon, and a path
-/// that exists on neither side.
+/// page, a post, a document, the document index, the preview page, the
+/// favicon, and a path that exists on neither side.
 pub fn default_paths() -> Array[String] {
   [
-    "/", "/posts/hello", "/docs/ja/design", "/docs/", "/favicon.svg", "/no-such-page",
+    "/", "/posts/hello", "/docs/ja/design", "/docs/", "/preview", "/favicon.svg",
+    "/no-such-page",
   ]
 }
 

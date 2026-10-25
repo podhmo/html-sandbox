@@ -229,6 +229,34 @@ fn Site::page_linker(self : Site, source : String) -> Linker {
 
 ///|
 fn Site::resolver(self : Site, source : String, repo_files~ : Bool) -> Linker {
+  resolve(p => self.page_url(p), source, repo_files~)
+}
+
+///|
+/// Site::page_url is the URL the site serves the repository file at: the
+/// page of a post or document, or a member's raw file — None when the
+/// site serves nothing at p.
+fn Site::page_url(self : Site, p : String) -> String? {
+  if self.by_source.get(p) is Some(d) {
+    Some(escape(d.page_path(), fragment=false))
+  } else if self.by_file.get(p) is Some(post) {
+    Some(escape(post.page_path(), fragment=false))
+  } else if self.by_member.get(p) is Some(murl) {
+    Some(escape(murl, fragment=false))
+  } else {
+    None
+  }
+}
+
+///|
+/// resolve is the linker of the file at source whose page_url answers
+/// where a repository file is served, so the preview page's render — whose
+/// site is a list of file names — resolves links as the site does.
+fn resolve(
+  page_url : (String) -> String?,
+  source : String,
+  repo_files~ : Bool,
+) -> Linker {
   raw => {
     guard Ref::parse(raw) is Some(u) else { return None }
     if u.scheme != "" {
@@ -245,12 +273,8 @@ fn Site::resolver(self : Site, source : String, repo_files~ : Bool) -> Linker {
     if p == ".." || p.has_prefix("../") {
       return None
     }
-    let href = if self.by_source.get(p) is Some(d) {
-      escape(d.page_path(), fragment=false)
-    } else if self.by_file.get(p) is Some(post) {
-      escape(post.page_path(), fragment=false)
-    } else if self.by_member.get(p) is Some(murl) {
-      escape(murl, fragment=false)
+    let href = if page_url(p) is Some(u) {
+      u
     } else if repo_files {
       // The file on the main branch on GitHub, which redirects blob/ to
       // tree/ for directories.

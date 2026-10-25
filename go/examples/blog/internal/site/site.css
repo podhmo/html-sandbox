@@ -162,3 +162,21 @@ article .markdown-alert-caution {
   font-weight: normal;
   line-height: 1;
 }
+
+/* The preview page: editor and rendered output side by side on a wide
+   screen, stacked on a phone. */
+.preview-grid {
+  display: grid;
+  gap: var(--pico-spacing, 1rem);
+}
+@media (min-width: 768px) {
+  .preview-grid {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+#preview-src {
+  font-family: var(--pico-font-family-monospace, monospace);
+  font-size: 0.875rem;
+  min-height: 24rem;
+}

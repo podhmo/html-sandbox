@@ -6,12 +6,12 @@
 /// ... suffixes. Ids must be unique per page, so one AnchorIds covers the
 /// face document and every member section of a page.
 priv struct AnchorIds {
-  seen : Map[String, Int]
+  seen : Map[String, Int32]
 }
 
 ///|
 fn AnchorIds::new() -> AnchorIds {
-  { seen: {} }
+  { seen: {}, }
 }
 
 ///|
@@ -64,7 +64,10 @@ fn slugify(title : String) -> String {
 /// is_ascii_keeper reports whether c is an ASCII letter, digit, "-", or
 /// "_".
 fn is_ascii_keeper(c : Char) -> Bool {
-  c == '-' || c == '_' || ('0' <= c && c <= '9') || ('a' <= c && c <= 'z') ||
+  c == '-' ||
+  c == '_' ||
+  ('0' <= c && c <= '9') ||
+  ('a' <= c && c <= 'z') ||
   ('A' <= c && c <= 'Z')
 }
 
@@ -74,9 +77,9 @@ fn is_ascii_keeper(c : Char) -> Bool {
 fn to_lower(c : Char) -> Char {
   let i = c.to_int()
   if 'A' <= c && c <= 'Z' {
-    Int::unsafe_to_char(i + ('a'.to_int() - 'A'.to_int()))
+    Int32::unsafe_to_char(i + ('a'.to_int() - 'A'.to_int()))
   } else if 'Ａ' <= c && c <= 'Ｚ' {
-    Int::unsafe_to_char(i + ('ａ'.to_int() - 'Ａ'.to_int()))
+    Int32::unsafe_to_char(i + ('ａ'.to_int() - 'Ａ'.to_int()))
   } else {
     c
   }
@@ -85,7 +88,7 @@ fn to_lower(c : Char) -> Char {
 ///|
 /// drop_ranges are half-open [lo, hi) spans of code points to drop: the
 /// Unicode punctuation and symbol blocks a blog heading might hold.
-let drop_ranges : Array[(Int, Int)] = [
+let drop_ranges : Array[(Int32, Int32)] = [
   (0x00A1, 0x00C0), // Latin-1 punctuation and symbols: ¡–¿
   (0x2000, 0x2070), // general punctuation
   (0x20A0, 0x20C0), // currency symbols

@@ -56,8 +56,17 @@ const cache = new Map();
 const cacheLimit = 1024;
 let cachedBaseURL;
 
+// assetOnly lists the paths served from Static Assets without the Wasm:
+// the preview page's renderers. They are not in files.txt, so the Wasm
+// never loads them as content, and it never sees their requests either —
+// they are binary files the String-based ABI could not carry.
+const assetOnly = new Set(["/preview.wasm", "/preview.mjs"]);
+
 export default {
   async fetch(request, env) {
+    if (env.ASSETS && assetOnly.has(new URL(request.url).pathname)) {
+      return env.ASSETS.fetch(request);
+    }
     try {
       await loadContent(env);
     } catch (e) {

@@ -135,6 +135,17 @@
   `description` しか認めないので、`loadPosts` が例外で止まり
   `app.test.ts` が落ちる。Go 版と MoonBit 版の relNav（記事末の
   前後リンク）に相当するものもまだない。
+- [x] **プレビューページ `/preview` を足す**（Go 版・MoonBit 版）:
+  [issue #71](https://github.com/podhmo/html-sandbox/issues/71)。
+  ヘッダーの `preview` リンクから。textarea の Markdown をブラウザ上の
+  Wasm（site パッケージの描画を wasm-gc と js でエクスポートした
+  `preview.wasm` / `preview.mjs`）で記事と同じ形に描く。保存はせず、
+  ファイル入力で `.md` を読み込める。
+- [ ] **ts 版にも `/preview` を足す**: Go 版と MoonBit 版に足した
+  プレビューページを ts 版にも揃える（
+  [issue #71](https://github.com/podhmo/html-sandbox/issues/71)）。
+  先に上の「ts 版のブログが front matter の `prev` と `next` で起動
+  できない」を直す必要がある。
 
 ### Future work
 

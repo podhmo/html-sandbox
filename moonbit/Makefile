@@ -39,10 +39,14 @@ ASSETS := ../go/examples/blog/internal/site
 # The js build of tinymarkdown, and where the ts blog keeps it.
 TINYMARKDOWN_JS := _build/js/release/build/pkg/tinymarkdown/js/js.js
 TS_TINYMARKDOWN := ../ts/pkg/tinymarkdown/tinymarkdown.mjs
+# The preview page's renderers, built by `make preview` into the shared
+# assets dir, where they are committed like tinymarkdown.mjs.
+PREVIEW_WASM := _build/wasm-gc/release/build/$(BLOG)/preview/preview.wasm
+PREVIEW_MJS := _build/js/release/build/$(BLOG)/preview/preview.js
 # The modules under experiments/, each with its own moon.mod.
 EXPERIMENTS := $(patsubst %/moon.mod,%,$(wildcard experiments/*/moon.mod))
 
-.PHONY: embed embed-posts embed-repodocs embed-assets content build ts test check bench dev deploy compare dev-echo clean help
+.PHONY: embed embed-posts embed-repodocs embed-assets content build ts preview test check bench dev deploy compare dev-echo clean help
 
 ## embed: regenerate the embedded.mbt files: the Go blog's posts, the repository's documents, and the Go blog's site.css and favicon.svg
 # The packages' moon.pkg run the same scripts, but moon reruns them only
@@ -67,6 +71,7 @@ content:
 
 ## build: build the blog's Wasm into _build/wasm-gc/release/build/examples/blog/worker/, shrink it with wasm-opt -Oz into examples/blog/cloudflare/build/app.wasm, and fill the Static Assets directory
 build: embed-assets content
+	cp $(ASSETS)/preview.wasm $(ASSETS)/preview.mjs $(CONTENT)/
 	moon build --target wasm-gc --release $(BLOG)/worker
 	@mkdir -p $(dir $(APP_WASM))
 	$(WASM_OPT) $(WASM_OPT_FLAGS) $(WASM) -o $(APP_WASM)
@@ -76,6 +81,13 @@ build: embed-assets content
 ts:
 	moon build --target js --release pkg/tinymarkdown/js
 	cp $(TINYMARKDOWN_JS) $(TS_TINYMARKDOWN)
+
+## preview: build the preview page's renderers into the shared assets dir ($(ASSETS)): preview.wasm, which preview.js tries first, and preview.mjs, its fallback — both committed like tinymarkdown.mjs
+preview:
+	moon build --target wasm-gc --release $(BLOG)/preview
+	moon build --target js --release $(BLOG)/preview
+	cp $(PREVIEW_WASM) $(ASSETS)/preview.wasm
+	cp $(PREVIEW_MJS) $(ASSETS)/preview.mjs
 
 ## test: run the tests, those of pkg/tinymarkdown/js on js, and the integration test of pkg/http/wasm on Node (its stub app's Wasm as moon builds it, without wasm-opt)
 test: embed
@@ -104,6 +116,8 @@ check: test
 	@git diff --exit-code -- '*.mbti' || { echo 'moon info changed the .mbti files above; add them to the commit' >&2; exit 1; }
 	$(MAKE) ts
 	@git diff --exit-code -- $(TS_TINYMARKDOWN) || { echo 'make ts changed $(TS_TINYMARKDOWN); add it to the commit' >&2; exit 1; }
+	$(MAKE) preview
+	@git diff --exit-code -- $(ASSETS)/preview.wasm $(ASSETS)/preview.mjs || { echo 'make preview changed the renderers; add them to the commit' >&2; exit 1; }
 
 ## dev: serve the Worker on localhost:PORT (default 8787), rebuilding on changes
 dev:
