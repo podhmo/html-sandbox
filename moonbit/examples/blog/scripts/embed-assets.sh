@@ -3,8 +3,8 @@
 # site.css, favicon.svg, code-copy.js, and preview.js from DIR, with the
 # versions the pages put in their URLs: the first 4 bytes of each file's
 # SHA-256 in hex, as the Go blog's siteCSSPath and codeCopyJSPath have
-# them. preview.wasm and preview.mjs contribute only their versions: they
-# are generated files served from Static Assets, not embedded here.
+# them. preview.wasm contributes only its version: it is a generated
+# file served from Static Assets, not embedded here.
 #
 #   sh examples/blog/scripts/embed-assets.sh examples/blog/assets/embedded.mbt ../go/examples/blog/internal/site
 #
@@ -56,10 +56,7 @@ embed() {
   echo '///|'
   echo '/// preview_wasm_version is the first 4 bytes of the SHA-256 of preview.wasm in hex.'
   echo "pub let preview_wasm_version : String = \"$(sha256 "$dir/preview.wasm")\""
-  echo
-  echo '///|'
-  echo '/// preview_mjs_version is the first 4 bytes of the SHA-256 of preview.mjs in hex.'
-  echo "pub let preview_mjs_version : String = \"$(sha256 "$dir/preview.mjs")\""
+
 } >"$tmp"
 
 if cmp -s "$tmp" "$out"; then

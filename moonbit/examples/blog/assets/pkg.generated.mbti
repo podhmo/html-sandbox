@@ -12,8 +12,6 @@ pub let preview_js : String
 
 pub let preview_js_version : String
 
-pub let preview_mjs_version : String
-
 pub let preview_wasm_version : String
 
 pub let site_css : String

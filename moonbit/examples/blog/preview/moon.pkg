@@ -5,9 +5,8 @@ import {
 
 options(
   link: {
-    // The JS build is preview.js's fallback when the browser cannot
-    // instantiate Wasm with js-string builtins.
-    "js": { "exports": [ "render" ], "format": "esm" },
+    // The browser loads this Wasm with js-string builtins, as
+    // experiments/browser-render proved; there is no JS fallback.
     "wasm-gc": { "exports": [ "render" ], "use-js-builtin-string": true },
   },
 )

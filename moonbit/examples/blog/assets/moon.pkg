@@ -1,7 +1,7 @@
 // The Go blog's site.css, favicon.svg, code-copy.js, and preview.js,
 // embedded by ../scripts/embed-assets.sh into embedded.mbt, which is
-// generated and ignored by git. preview.wasm and preview.mjs are only
-// hashed, for the versions the preview page puts in their URLs.
+// generated and ignored by git. preview.wasm is only hashed, for the
+// version the preview page puts in its URL.
 rule(
   name: "embed-assets",
   command: "sh examples/blog/scripts/embed-assets.sh $output ../go/examples/blog/internal/site",
@@ -15,7 +15,6 @@ dev_build(
     "../../../../go/examples/blog/internal/site/code-copy.js",
     "../../../../go/examples/blog/internal/site/preview.js",
     "../../../../go/examples/blog/internal/site/preview.wasm",
-    "../../../../go/examples/blog/internal/site/preview.mjs",
   ],
   output: "embedded.mbt",
 )

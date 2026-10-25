@@ -146,9 +146,9 @@ func TestPreview(t *testing.T) {
 	for _, want := range []string{
 		`<title>Preview - blog</title>`,
 		`<textarea id="preview-src"`,
-		`<script id="preview-data" type="text/plain">`,
-		"/preview.wasm?v=",
-		"/preview.mjs?v=",
+		`<script id="preview-data" type="text/plain"`,
+		`data-wasm="/preview.wasm?v=`,
+		`data-files="`,
 		"posts/2026-10-14-hello.md",
 	} {
 		if !strings.Contains(body, want) {

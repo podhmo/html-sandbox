@@ -35,21 +35,16 @@ func (st *site) previewFiles() []string {
 }
 
 // previewPage is the editor page: the textarea preview-src is rendered
-// into preview-out by preview.js, which reads the renderers' URLs and the
-// site's file list from preview-data (one per line: the Wasm's URL, the
-// JS build's URL, then the files).
+// into preview-out by preview.js, which reads the renderer's URL and the
+// site's file list from preview-data's data-* attributes (attribute
+// values are escaped when written, so a file's name cannot inject
+// markup).
 func previewPage(env pageEnv, st *site) pe.Node {
 	meta := pageMeta{
 		Title:       "Preview",
 		Description: "Markdown rendered the way this site renders it. Nothing is saved.",
 		URL:         env.BaseURL + "/preview",
 		Type:        "website",
-	}
-	var data strings.Builder
-	data.WriteString(previewWasmPath + "\n")
-	data.WriteString(previewMJSPath + "\n")
-	for _, f := range st.previewFiles() {
-		data.WriteString(f + "\n")
 	}
 	return layout(env, meta,
 		pe.H1(pe.Text("Preview")),
@@ -73,7 +68,8 @@ func previewPage(env pageEnv, st *site) pe.Node {
 		el.El(el.Script,
 			el.Attr(el.ID, "preview-data"),
 			el.Attr(el.Type, "text/plain"),
-			el.Raw(data.String())),
+			el.Attr(el.AttrName("data-wasm"), previewWasmPath),
+			el.Attr(el.AttrName("data-files"), strings.Join(st.previewFiles(), "\n"))),
 		pe.Script(previewJSPath),
 	)
 }

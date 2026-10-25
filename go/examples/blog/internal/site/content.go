@@ -46,22 +46,18 @@ var codeCopyJSPath = func() string {
 //go:embed preview.js
 var previewJS []byte
 
-// previewWasm and previewMJS render Markdown on the preview page: the
-// site's own rendering, compiled by the moonbit side to Wasm (tried
-// first) and to JS as the fallback. They are generated files, committed
-// like tinymarkdown.mjs — `make -C moonbit preview` rebuilds them.
+// previewWasm renders Markdown on the preview page: the site's own
+// rendering, compiled by the moonbit side to Wasm. It is a generated
+// file, committed like tinymarkdown.mjs — `make -C moonbit preview`
+// rebuilds it.
 //
 //go:embed preview.wasm
 var previewWasm []byte
 
-//go:embed preview.mjs
-var previewMJS []byte
-
-// previewJSPath, previewWasmPath, and previewMJSPath carry hashes of
-// their files, like siteCSSPath.
+// previewJSPath and previewWasmPath carry hashes of their files, like
+// siteCSSPath.
 var previewJSPath = "/preview.js?v=" + versionOf(previewJS)
 var previewWasmPath = "/preview.wasm?v=" + versionOf(previewWasm)
-var previewMJSPath = "/preview.mjs?v=" + versionOf(previewMJS)
 
 // versionOf is the first 4 bytes of b's SHA-256 in hex, as siteCSSPath
 // uses it.

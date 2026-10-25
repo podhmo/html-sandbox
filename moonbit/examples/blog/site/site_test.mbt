@@ -448,8 +448,9 @@ test "post markdown" {
 test "preview page" {
   let s = new_site(test_posts)
   assert_contains(body(s, "/preview"), [
-    "<title>Preview - blog</title>", "<textarea id=\"preview-src\"", "<script id=\"preview-data\" type=\"text/plain\">",
-    "/preview.wasm?v=", "/preview.mjs?v=", "posts/2026-10-14-hello.md", "TODO.md",
+    "<title>Preview - blog</title>", "<textarea id=\"preview-src\"", "<script id=\"preview-data\" type=\"text/plain\"",
+    "data-wasm=\"/preview.wasm?v=", "data-files=\"", "posts/2026-10-14-hello.md",
+    "TODO.md",
   ])
 }
 

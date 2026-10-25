@@ -137,8 +137,6 @@ func (s *Server) route(w http.ResponseWriter, r *http.Request) {
 		handlePreviewJS(w, r)
 	case p == "/preview.wasm":
 		handlePreviewWasm(w, r)
-	case p == "/preview.mjs":
-		handlePreviewMJS(w, r)
 	case p == liveReloadScriptPath:
 		s.handleLiveReloadScript(w, r)
 	case p == liveReloadEventsPath:
@@ -336,22 +334,14 @@ func handlePreviewJS(w http.ResponseWriter, r *http.Request) {
 	w.Write(previewJS)
 }
 
-// handlePreviewWasm and handlePreviewMJS serve the preview page's
-// renderers, versioned like the scripts.
+// handlePreviewWasm serves the preview page's renderer, versioned like
+// the scripts.
 func handlePreviewWasm(w http.ResponseWriter, r *http.Request) {
 	h := w.Header()
 	h.Set("Content-Type", "application/wasm")
 	h.Set("Cache-Control", "public, max-age=31536000, immutable")
 	h.Set("Content-Length", strconv.Itoa(len(previewWasm)))
 	w.Write(previewWasm)
-}
-
-func handlePreviewMJS(w http.ResponseWriter, r *http.Request) {
-	h := w.Header()
-	h.Set("Content-Type", "text/javascript; charset=utf-8")
-	h.Set("Cache-Control", "public, max-age=31536000, immutable")
-	h.Set("Content-Length", strconv.Itoa(len(previewMJS)))
-	w.Write(previewMJS)
 }
 
 // page renders n with status 200, or an error page if rendering fails.

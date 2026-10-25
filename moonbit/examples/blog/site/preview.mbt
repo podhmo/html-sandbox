@@ -139,21 +139,16 @@ pub fn preview(src : String, files : Array[String]) -> @el.Node {
 
 ///|
 /// Site::preview_page is the editor page: the textarea preview-src is
-/// rendered into preview-out by preview.js, which reads the renderers'
-/// URLs and the site's file list from preview-data (one per line: the
-/// Wasm's URL, the JS build's URL, then the files).
+/// rendered into preview-out by preview.js, which reads the renderer's
+/// URL and the site's file list from preview-data's data-* attributes
+/// (attribute values are escaped when written, so a file's name cannot
+/// inject markup).
 fn Site::preview_page(self : Site) -> @el.Node {
   let meta = PageMeta::{
     title: "Preview",
     description: "Markdown rendered the way this site renders it. Nothing is saved.",
     url: "\{self.base_url}/preview",
     type_: "website",
-  }
-  let data = StringBuilder()
-  data.write_string("/preview.wasm?v=\{@assets.preview_wasm_version}\n")
-  data.write_string("/preview.mjs?v=\{@assets.preview_mjs_version}\n")
-  for f in self.preview_files() {
-    data.write_string("\{f}\n")
   }
   layout(meta, [
     @picoel.h1([@picoel.text("Preview")]),
@@ -184,7 +179,11 @@ fn Site::preview_page(self : Site) -> @el.Node {
     @el.el(@el.script, [
       @el.Attr(@el.id, "preview-data"),
       @el.Attr(@el.type_attr, "text/plain"),
-      @el.Raw(data.to_string()),
+      @el.Attr(
+        @el.AttrName("data-wasm"),
+        "/preview.wasm?v=\{@assets.preview_wasm_version}",
+      ),
+      @el.Attr(@el.AttrName("data-files"), self.preview_files().join("\n")),
     ]),
     @picoel.script(preview_js_path()),
   ])
