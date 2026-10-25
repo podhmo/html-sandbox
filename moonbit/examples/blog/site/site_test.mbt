@@ -226,7 +226,7 @@ test "pico only" {
 test "post" {
   assert_contains(body(new_site(test_posts), "/posts/hello"), [
     "<title>Hello &lt;script&gt; - blog</title>", "<time datetime=\"2026-10-14\">2026-10-14</time>",
-    "<section><h1>Hello &lt;script&gt;</h1><p>first</p><section><h2>Points</h2><ul><li>one<ul><li>one.1</li></ul></li><li>two</li></ul><pre>x := &lt;1&gt;</pre></section></section>",
+    "<section><h1 id=\"hello-script\">Hello &lt;script&gt;<a class=\"heading-permalink\" href=\"#hello-script\" aria-label=\"permalink\"> #</a></h1><p>first</p><section><h2 id=\"points\">Points<a class=\"heading-permalink\" href=\"#points\" aria-label=\"permalink\"> #</a></h2><ul><li>one<ul><li>one.1</li></ul></li><li>two</li></ul><pre>x := &lt;1&gt;</pre></section></section>",
   ])
 }
 
@@ -273,9 +273,10 @@ test "post page heading" {
   ])
   let both = body(s, "/posts/both")
   assert_contains(both, [
-    "<title>FM title - blog</title>", "<h1>Body heading</h1>",
+    "<title>FM title - blog</title>",
+    "<h1 id=\"body-heading\">Body heading<a class=\"heading-permalink\" href=\"#body-heading\" aria-label=\"permalink\"> #</a></h1>",
   ])
-  assert_eq(both.split("<h1>").count() - 1, 1)
+  assert_eq(both.split("<h1").count() - 1, 1)
 }
 
 ///|
@@ -333,7 +334,7 @@ test "tables and deep headings" {
   ])
   assert_contains(body(s, "/posts/hello"), [
     [
-      "<section><h4>Four</h4><section><h5>Five</h5>", "<div class=\"overflow-auto\"><table><thead><tr><th>a</th><th><code>b</code></th></tr></thead>",
+      "<section><h4 id=\"four\">Four<a class=\"heading-permalink\" href=\"#four\" aria-label=\"permalink\"> #</a></h4><section><h5 id=\"five\">Five<a class=\"heading-permalink\" href=\"#five\" aria-label=\"permalink\"> #</a></h5>", "<div class=\"overflow-auto\"><table><thead><tr><th>a</th><th><code>b</code></th></tr></thead>",
       "<tbody><tr><td><a href=\"#x\">x</a></td><td>&lt;i&gt;</td></tr></tbody></table></div></section></section>",
     ].join(""),
   ])
@@ -367,7 +368,8 @@ test "links in pages" {
     ),
   ])
   assert_contains(body(s, "/posts/hello"), [
-    "<h1>Hello <a href=\"https://x.test\"><code>x</code></a></h1>", "<li><a href=\"/docs/ja/design\">design</a></li>",
+    "<h1 id=\"hello-x\">Hello <a href=\"https://x.test\"><code>x</code></a><a class=\"heading-permalink\" href=\"#hello-x\" aria-label=\"permalink\"> #</a></h1>",
+    "<li><a href=\"/docs/ja/design\">design</a></li>",
     // The URL holds "(" so this is no link at all.
      "<p>[bad](javascript:alert(1)) <a href=\"#a\">ok</a></p>",
   ])
@@ -383,7 +385,7 @@ test "links in pages" {
 test "the embedded posts and documents load" {
   let s = embedded_site()
   assert_contains(body(s, "/"), ["<a href=\"/posts/hello\">"])
-  assert_contains(body(s, "/posts/hello"), ["<h1>Hello</h1>"])
+  assert_contains(body(s, "/posts/hello"), ["<h1 id=\"hello\">Hello"])
 }
 
 ///|
@@ -410,7 +412,7 @@ test "doc pages" {
     "<blockquote><p>note</p></blockquote>",
   ])
   assert_contains(body(s, "/docs/ja/design"), [
-    "<h2>Use <code>el</code></h2><ul><li>run <code>go test</code></li><li><code>a ` b</code></li></ul>",
+    "<h2 id=\"use-el\">Use <code>el</code><a class=\"heading-permalink\" href=\"#use-el\" aria-label=\"permalink\"> #</a></h2><ul><li>run <code>go test</code></li><li><code>a ` b</code></li></ul>",
     "<ul><li><small><a href=\"/docs/ja/design.md\" download=\"design.md\" class=\"secondary\">Download .md</a></small></li></ul></nav></header><article>",
   ])
   assert_contains(body(s, "/docs/notes"), [
@@ -670,9 +672,10 @@ test "load post bundle errors" {
 test "post bundle page and members" {
   let s = new_site(test_bundle)
   assert_contains(body(s, "/posts/bundle"), [
-    "face body", "<h2><a href=\"/posts/bundle/00-memo.md\"><code>00-memo.md</code></a></h2>",
-    "member body", "<h2><a href=\"/posts/bundle/hello.go\"><code>hello.go</code></a></h2>",
-    "<pre>package main", "<h2><a href=\"/posts/bundle/diagram.svg\"><code>diagram.svg</code></a></h2>",
+    "face body", "<h2 id=\"00-memomd\"><a href=\"/posts/bundle/00-memo.md\"><code>00-memo.md</code></a><a class=\"heading-permalink\" href=\"#00-memomd\" aria-label=\"permalink\"> #</a></h2>",
+    "member body", "<h2 id=\"hellogo\"><a href=\"/posts/bundle/hello.go\"><code>hello.go</code></a><a class=\"heading-permalink\" href=\"#hellogo\" aria-label=\"permalink\"> #</a></h2>",
+    "<pre>package main",
+    "<h2 id=\"diagramsvg\"><a href=\"/posts/bundle/diagram.svg\"><code>diagram.svg</code></a><a class=\"heading-permalink\" href=\"#diagramsvg\" aria-label=\"permalink\"> #</a></h2>",
     "<img src=\"/posts/bundle/diagram.svg\" alt=\"diagram.svg\">",
   ])
   // The face is the page; its heading is not a member section.
@@ -720,8 +723,10 @@ test "load doc bundle" {
     e => fail("\{e}")
   }
   assert_contains(body(s, "/docs/guide"), [
-    "face body", "<h2><a href=\"/docs/guide/00-setup.md\"><code>00-setup.md</code></a></h2>",
-    "<h2><a href=\"/docs/guide/run.sh\"><code>run.sh</code></a></h2>", "<pre>echo hi",
+    "face body",
+    "<h2 id=\"00-setupmd\"><a href=\"/docs/guide/00-setup.md\"><code>00-setup.md</code></a><a class=\"heading-permalink\" href=\"#00-setupmd\" aria-label=\"permalink\"> #</a></h2>",
+    "<h2 id=\"runsh\"><a href=\"/docs/guide/run.sh\"><code>run.sh</code></a><a class=\"heading-permalink\" href=\"#runsh\" aria-label=\"permalink\"> #</a></h2>",
+    "<pre>echo hi",
   ])
   let res = s.render("/docs/guide/00-setup.md")
   assert_eq(res.status, 200)
@@ -769,7 +774,7 @@ test "doc bundle with non-markdown face" {
   )
   assert_true(
     page.contains(
-      "<h2><a href=\"/docs/x/01-note.md\"><code>01-note.md</code></a></h2>",
+      "<h2 id=\"01-notemd\"><a href=\"/docs/x/01-note.md\"><code>01-note.md</code></a><a class=\"heading-permalink\" href=\"#01-notemd\" aria-label=\"permalink\"> #</a></h2>",
     ),
     msg="companion section missing",
   )
@@ -888,3 +893,4 @@ test "docs/blog.metadata.json errors" {
   }
   assert_true(msg.has_prefix("docs/blog.metadata.json: "), msg~)
 }
+

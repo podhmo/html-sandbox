@@ -100,7 +100,7 @@ func TestPost(t *testing.T) {
 	for _, want := range []string{
 		`<title>Hello &lt;script&gt; - blog</title>`,
 		`<time datetime="2026-10-14">2026-10-14</time>`,
-		`<section><h1>Hello &lt;script&gt;</h1><p>first</p><section><h2>Points</h2><ul><li>one<ul><li>one.1</li></ul></li><li>two</li></ul><pre>x := &lt;1&gt;</pre></section></section>`,
+		`<section><h1 id="hello-script">Hello &lt;script&gt;<a class="heading-permalink" href="#hello-script" aria-label="permalink"> #</a></h1><p>first</p><section><h2 id="points">Points<a class="heading-permalink" href="#points" aria-label="permalink"> #</a></h2><ul><li>one<ul><li>one.1</li></ul></li><li>two</li></ul><pre>x := &lt;1&gt;</pre></section></section>`,
 	} {
 		if !strings.Contains(body, want) {
 			t.Errorf("body does not contain %q", want)
@@ -258,7 +258,7 @@ func TestPostPageHeading(t *testing.T) {
 	if !strings.Contains(body, "<title>FM title - blog</title>") {
 		t.Error("both: title should come from front matter")
 	}
-	if strings.Count(body, "<h1>") != 1 || !strings.Contains(body, "<h1>Body heading</h1>") {
+	if strings.Count(body, "<h1") != 1 || !strings.Contains(body, `<h1 id="body-heading">Body heading`) {
 		t.Error("both: want exactly the body heading as <h1>")
 	}
 }
@@ -382,7 +382,7 @@ func TestTablesAndDeepHeadings(t *testing.T) {
 		"2026-10-14-hello.md": file("# Hello\n#### Four\n##### Five\n| a | `b` |\n| --- | --- |\n| [x](#x) | <i> |"),
 	})
 	_, body := get(t, h, "/posts/hello")
-	want := `<section><h4>Four</h4><section><h5>Five</h5>` +
+	want := `<section><h4 id="four">Four<a class="heading-permalink" href="#four" aria-label="permalink"> #</a></h4><section><h5 id="five">Five<a class="heading-permalink" href="#five" aria-label="permalink"> #</a></h5>` +
 		`<div class="overflow-auto"><table><thead><tr><th>a</th><th><code>b</code></th></tr></thead>` +
 		`<tbody><tr><td><a href="#x">x</a></td><td>&lt;i&gt;</td></tr></tbody></table></div></section></section>`
 	if !strings.Contains(body, want) {

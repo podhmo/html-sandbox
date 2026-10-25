@@ -76,11 +76,11 @@ func TestPostBundlePage(t *testing.T) {
 	h := newTestServer(t, bundlePosts)
 	_, body := get(t, h, "/posts/bundle")
 	for _, want := range []string{
-		`<h2><a href="/posts/bundle/00-intro.md"><code>00-intro.md</code></a></h2>`,
-		`<h2><a href="/posts/bundle/main.go"><code>main.go</code></a></h2>`,
+		`<h2 id="00-intromd"><a href="/posts/bundle/00-intro.md"><code>00-intro.md</code></a><a class="heading-permalink" href="#00-intromd" aria-label="permalink"> #</a></h2>`,
+		`<h2 id="maingo"><a href="/posts/bundle/main.go"><code>main.go</code></a><a class="heading-permalink" href="#maingo" aria-label="permalink"> #</a></h2>`,
 		`<pre>package main`,
 		`<a href="/posts/bundle/main.go">code</a>`,
-		`<h2><a href="/posts/bundle/icon.svg"><code>icon.svg</code></a></h2>`,
+		`<h2 id="iconsvg"><a href="/posts/bundle/icon.svg"><code>icon.svg</code></a><a class="heading-permalink" href="#iconsvg" aria-label="permalink"> #</a></h2>`,
 		`<img src="/posts/bundle/icon.svg" alt="icon.svg">`,
 	} {
 		if !strings.Contains(body, want) {
@@ -177,7 +177,7 @@ func TestDocBundleMemberRaw(t *testing.T) {
 		t.Errorf("face member raw: status %d", res.StatusCode)
 	}
 	_, body = get(t, h, "/docs/guide")
-	if want := `<h2><a href="/docs/guide/setup.sh"><code>setup.sh</code></a></h2>`; !strings.Contains(body, want) {
+	if want := `<h2 id="setupsh"><a href="/docs/guide/setup.sh"><code>setup.sh</code></a><a class="heading-permalink" href="#setupsh" aria-label="permalink"> #</a></h2>`; !strings.Contains(body, want) {
 		t.Errorf("page does not contain %q", want)
 	}
 	res, _ = get(t, h, "/docs/plain/memo.md")
@@ -223,7 +223,7 @@ func TestDocBundleNonMarkdownFace(t *testing.T) {
 	if !strings.Contains(body, "<pre>echo hi") {
 		t.Errorf("non-markdown face must render as a pre block")
 	}
-	if !strings.Contains(body, `<h2><a href="/docs/x/01-note.md"><code>01-note.md</code></a></h2>`) {
+	if !strings.Contains(body, `<h2 id="01-notemd"><a href="/docs/x/01-note.md"><code>01-note.md</code></a><a class="heading-permalink" href="#01-notemd" aria-label="permalink"> #</a></h2>`) {
 		t.Errorf("companion section missing")
 	}
 }

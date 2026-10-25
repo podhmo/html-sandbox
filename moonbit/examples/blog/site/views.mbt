@@ -128,12 +128,13 @@ fn Site::post_list(self : Site) -> @el.Node {
 ///|
 fn Site::post_page(self : Site, p : Post) -> @el.Node {
   let link = self.linker(p.link_base())
+  let gen = AnchorIds::new()
   let body = []
   if first_title(p.doc) is None {
     // The title came from front matter only, so the body has no heading.
     body.push(@picoel.h1(render_inlines(@tinymarkdown.inlines(p.title), link)))
   }
-  body.push_iter(render_face(link, p.members, p.doc).iter())
+  body.push_iter(render_face(link, p.members, p.doc, gen).iter())
   let meta = PageMeta::{
     title: p.title,
     description: p.description,
@@ -146,7 +147,7 @@ fn Site::post_page(self : Site, p : Post) -> @el.Node {
   ]
   for i = 1; i < p.members.length(); i = i + 1 {
     let m = p.members[i]
-    page.push(member_section(self.linker(m.source), p.page_path(), m))
+    page.push(member_section(self.linker(m.source), p.page_path(), m, gen))
   }
   match rel_nav(p.prev_nav, p.next_nav) {
     Some(nav) => page.push(nav)
@@ -182,11 +183,12 @@ fn Site::doc_list(self : Site) -> @el.Node {
 ///|
 fn Site::doc_page(self : Site, d : Doc) -> @el.Node {
   let link = self.linker(d.link_base())
+  let gen = AnchorIds::new()
   let body = []
   if first_title(d.doc) is None {
     body.push(@picoel.h1(render_inlines(@tinymarkdown.inlines(d.title), link)))
   }
-  body.push_iter(render_face(link, d.members, d.doc).iter())
+  body.push_iter(render_face(link, d.members, d.doc, gen).iter())
   let meta = PageMeta::{
     title: d.title,
     description: d.description,
@@ -203,7 +205,7 @@ fn Site::doc_page(self : Site, d : Doc) -> @el.Node {
   ]
   for i = 1; i < d.members.length(); i = i + 1 {
     let m = d.members[i]
-    page.push(member_section(self.linker(m.source), d.page_path(), m))
+    page.push(member_section(self.linker(m.source), d.page_path(), m, gen))
   }
   match rel_nav(d.prev_nav, d.next_nav) {
     Some(nav) => page.push(nav)
@@ -219,11 +221,12 @@ fn render_face(
   link : Linker,
   members : Array[Member],
   doc : @tinymarkdown.Document,
+  gen : AnchorIds,
 ) -> Array[@el.Node] {
   if !members.is_empty() && !members[0].is_markdown {
     return [@picoel.pre(members[0].raw)]
   }
-  render_blocks(doc.children, link)
+  render_blocks(doc.children, link, gen)
 }
 
 ///|
@@ -231,12 +234,22 @@ fn render_face(
 /// article headed by its file name, which links to the raw file served
 /// at <page>/<name>. A .md member renders as Markdown, an .svg member
 /// shows as an image, and any other member is shown as a pre block.
-fn member_section(link : Linker, base : String, m : Member) -> @el.Node {
+fn member_section(
+  link : Linker,
+  base : String,
+  m : Member,
+  gen : AnchorIds,
+) -> @el.Node {
+  let id = gen.id(m.name)
   let body = [
-    @picoel.h2([@picoel.a("\{base}/\{m.name}", [@picoel.code(m.name)])]),
+    @el.el(@el.h2, [
+      @el.Attr(@el.id, id),
+      @picoel.a("\{base}/\{m.name}", [@picoel.code(m.name)]),
+      permalink(id),
+    ]),
   ]
   if m.is_markdown {
-    body.push_iter(render_blocks(m.doc.children, link).iter())
+    body.push_iter(render_blocks(m.doc.children, link, gen).iter())
   } else if m.is_svg {
     body.push(
       @el.el(@el.img, [
@@ -340,14 +353,20 @@ fn error_page(status : Int32, message : String) -> @el.Node {
 }
 
 ///|
-fn heading(level : Int32, children : Array[@el.Node]) -> @el.Node {
-  match level {
-    1 => @picoel.h1(children)
-    2 => @picoel.h2(children)
-    3 => @picoel.h3(children)
-    4 => @picoel.h4(children)
-    _ => @picoel.h5(children)
+/// heading returns the heading element of level anchored at id.
+fn heading(level : Int32, id : String, children : Array[@el.Node]) -> @el.Node {
+  let tag = match level {
+    1 => @el.h1
+    2 => @el.h2
+    3 => @el.h3
+    4 => @el.h4
+    _ => @el.h5
   }
+  @el.el(tag, [
+    @el.Attr(@el.id, id),
+    ..children,
+    permalink(id),
+  ])
 }
 
 ///|
@@ -357,17 +376,23 @@ fn heading(level : Int32, children : Array[@el.Node]) -> @el.Node {
 fn render_blocks(
   bs : Array[@tinymarkdown.Block],
   link : Linker,
+  gen : AnchorIds,
 ) -> Array[@el.Node] {
   let inlines = (s : String) => render_inlines(@tinymarkdown.inlines(s), link)
   bs.map(b => {
     match b {
-      Section(level~, title~, children~) =>
+      Section(level~, title~, children~) => {
+        let id = gen.id(plain_text(title))
         @picoel.section(
-          [heading(level, inlines(title)), ..render_blocks(children, link)],
+          [
+            heading(level, id, inlines(title)),
+            ..render_blocks(children, link, gen),
+          ],
         )
+      }
       Paragraph(text) => @picoel.p(inlines(text))
       List(items) => render_list(items, link)
-      Quote(children) => @picoel.blockquote(render_blocks(children, link))
+      Quote(children) => @picoel.blockquote(render_blocks(children, link, gen))
       Alert(kind~, children~) =>
         @el.el(
           @el.blockquote,
@@ -377,7 +402,7 @@ fn render_blocks(
               @el.Attr(@el.class, "markdown-alert-title"),
               @picoel.text(alert_title(kind)),
             ]),
-            ..render_blocks(children, link),
+            ..render_blocks(children, link, gen),
           ],
         )
       Table(header~, rows~) => {

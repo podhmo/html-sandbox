@@ -61,7 +61,7 @@ func TestLinksInPages(t *testing.T) {
 	})
 	_, body := get(t, h, "/posts/hello")
 	for _, want := range []string{
-		`<h1>Hello <a href="https://x.test"><code>x</code></a></h1>`,
+		`<h1 id="hello-x">Hello <a href="https://x.test"><code>x</code></a><a class="heading-permalink" href="#hello-x" aria-label="permalink"> #</a></h1>`,
 		`<li><a href="/docs/ja/design">design</a></li>`,
 		// The URL holds "(" so this is no link at all.
 		`<p>[bad](javascript:alert(1)) <a href="#a">ok</a></p>`,

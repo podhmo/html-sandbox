@@ -103,12 +103,13 @@ func postList(env pageEnv, posts []Post) pe.Node {
 
 func postPage(env pageEnv, st *site, p Post) pe.Node {
 	link := st.linker(p.linkBase())
+	gen := newAnchorIDs()
 	var body []pe.Node
 	if _, ok := firstTitle(p.Doc); !ok {
 		// The title came from front matter only, so the body has no heading.
 		body = append(body, pe.H1(renderInlines(tinymarkdown.Inlines(p.Title), link)...))
 	}
-	body = append(body, renderFace(link, p.Members, p.Doc)...)
+	body = append(body, renderFace(link, p.Members, p.Doc, gen)...)
 	meta := pageMeta{
 		Title:       p.Title,
 		Description: p.Description,
@@ -117,7 +118,7 @@ func postPage(env pageEnv, st *site, p Post) pe.Node {
 	}
 	page := []pe.Node{pageHeader(pe.Date(p.Date), postMarkdownPath(p), p.File), pe.Article(body...)}
 	for _, m := range sectionMembers(p.Members) {
-		page = append(page, memberSection(st.linker(m.Source), postPath(p), m))
+		page = append(page, memberSection(st.linker(m.Source), postPath(p), m, gen))
 	}
 	if nav := relNav(p.Prev, p.Next); nav != nil {
 		page = append(page, nav)
@@ -127,11 +128,11 @@ func postPage(env pageEnv, st *site, p Post) pe.Node {
 
 // renderFace renders the page body: the face member's document, or its raw
 // text in a pre block when the face is not a Markdown file.
-func renderFace(link linker, ms []Member, doc tinymarkdown.Document) []pe.Node {
+func renderFace(link linker, ms []Member, doc tinymarkdown.Document, gen *anchorIDs) []pe.Node {
 	if len(ms) > 0 && !ms[0].Markdown {
 		return []pe.Node{pe.Pre(ms[0].Raw)}
 	}
-	return renderBlocks(doc.Children, link)
+	return renderBlocks(doc.Children, link, gen)
 }
 
 // sectionMembers returns the members of ms shown as sections: every member but
@@ -147,11 +148,12 @@ func sectionMembers(ms []Member) []Member {
 // headed by its file name, which links to the raw file served under the
 // page's URL. Markdown members render their document, an SVG member shows
 // as an image, and other members render as a pre block.
-func memberSection(link linker, base string, m Member) pe.Node {
-	body := []pe.Node{pe.H2(pe.A(base+"/"+m.Name, pe.Code(m.Name)))}
+func memberSection(link linker, base string, m Member, gen *anchorIDs) pe.Node {
+	id := gen.id(m.Name)
+	body := []pe.Node{el.El(el.H2, el.Attr(el.ID, id), pe.A(base+"/"+m.Name, pe.Code(m.Name)), permalink(id))}
 	switch {
 	case m.Markdown:
-		body = append(body, renderBlocks(m.Doc.Children, link)...)
+		body = append(body, renderBlocks(m.Doc.Children, link, gen)...)
 	case m.SVG:
 		body = append(body, el.El(el.Img,
 			el.Attr(el.Src, base+"/"+m.Name), el.Attr(el.Alt, m.Name)))
@@ -177,15 +179,16 @@ func docList(env pageEnv, docs []Doc) pe.Node {
 
 func docPage(env pageEnv, st *site, d Doc) pe.Node {
 	link := st.linker(d.linkBase())
+	gen := newAnchorIDs()
 	var body []pe.Node
 	if _, ok := firstTitle(d.Doc); !ok {
 		body = append(body, pe.H1(renderInlines(tinymarkdown.Inlines(d.Title), link)...))
 	}
-	body = append(body, renderFace(link, d.Members, d.Doc)...)
+	body = append(body, renderFace(link, d.Members, d.Doc, gen)...)
 	meta := pageMeta{Title: d.Title, Description: d.Description, URL: env.BaseURL + docPath(d), Type: "article"}
 	page := []pe.Node{pageHeader(pe.Small(pe.Text(d.Source)), docMarkdownPath(d), path.Base(d.Source)), pe.Article(body...)}
 	for _, m := range sectionMembers(d.Members) {
-		page = append(page, memberSection(st.linker(m.Source), docPath(d), m))
+		page = append(page, memberSection(st.linker(m.Source), docPath(d), m, gen))
 	}
 	if nav := relNav(d.Prev, d.Next); nav != nil {
 		page = append(page, nav)
@@ -246,30 +249,35 @@ func errorPage(env pageEnv, status int, message string) pe.Node {
 	)
 }
 
-var headings = [...]func(...pe.Node) pe.Node{1: pe.H1, 2: pe.H2, 3: pe.H3, 4: pe.H4, 5: pe.H5}
+// headingTags maps a section level to its heading tag.
+var headingTags = [...]el.Tag{1: el.H1, 2: el.H2, 3: el.H3, 4: el.H4, 5: el.H5}
 
 // renderBlocks converts the Markdown tree into nodes. Every piece of text
 // goes through pe.Text, so HTML in posts is escaped. link resolves the URLs
-// of links.
-func renderBlocks(bs []tinymarkdown.Block, link linker) []pe.Node {
+// of links. gen assigns each section's heading its anchor id.
+func renderBlocks(bs []tinymarkdown.Block, link linker, gen *anchorIDs) []pe.Node {
 	out := make([]pe.Node, 0, len(bs))
 	for _, b := range bs {
 		switch b := b.(type) {
 		case tinymarkdown.Section:
-			children := append([]pe.Node{headings[b.Level](renderInlines(tinymarkdown.Inlines(b.Title), link)...)}, renderBlocks(b.Children, link)...)
+			id := gen.id(plainText(b.Title))
+			head := append([]pe.Node{
+				el.Attr(el.ID, id),
+			}, renderInlines(tinymarkdown.Inlines(b.Title), link)...)
+			children := append([]pe.Node{el.El(headingTags[b.Level], append(head, permalink(id))...)}, renderBlocks(b.Children, link, gen)...)
 			out = append(out, pe.Section(children...))
 		case tinymarkdown.Paragraph:
 			out = append(out, pe.P(renderInlines(tinymarkdown.Inlines(b.Text), link)...))
 		case tinymarkdown.List:
 			out = append(out, renderList(b.Items, link))
 		case tinymarkdown.Quote:
-			out = append(out, pe.Blockquote(renderBlocks(b.Children, link)...))
+			out = append(out, pe.Blockquote(renderBlocks(b.Children, link, gen)...))
 		case tinymarkdown.Alert:
 			title := el.El(el.P, el.Attr(el.Class, "markdown-alert-title"), pe.Text(alertTitle(b.Kind)))
 			children := append([]pe.Node{
 				el.Attr(el.Class, "markdown-alert markdown-alert-"+b.Kind),
 				title,
-			}, renderBlocks(b.Children, link)...)
+			}, renderBlocks(b.Children, link, gen)...)
 			out = append(out, el.El(el.Blockquote, children...))
 		case tinymarkdown.Table:
 			cells := func(row []string) [][]pe.Node {

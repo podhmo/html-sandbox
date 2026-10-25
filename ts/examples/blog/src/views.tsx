@@ -3,6 +3,7 @@
 import type { Child } from "hono/jsx";
 import { jsxRenderer } from "hono/jsx-renderer";
 import { type Block, type Inline, type Item, inlines } from "../../../pkg/tinymarkdown/tinymarkdown.ts";
+import { AnchorIds, permalink } from "./anchors.tsx";
 import { type Doc, type Post, docPath, firstTitle, postPath } from "./content.ts";
 import { type Linker, noLinks } from "./links.ts";
 import * as sources from "./sources.ts";
@@ -168,24 +169,25 @@ function Body({ title, blocks, link }: { title: string; blocks: Post["doc"]; lin
   return (
     <article>
       {firstTitle(blocks) === undefined && <h1><Inlines text={title} link={link} /></h1>}
-      <Blocks blocks={blocks.children} link={link} />
+      <Blocks blocks={blocks.children} link={link} gen={new AnchorIds()} />
     </article>
   );
 }
 
 // Blocks renders the Markdown tree. hono/jsx escapes every string, so HTML
-// in posts shows as text.
-function Blocks({ blocks, link }: { blocks: Block[]; link: Linker }) {
+// in posts shows as text. gen assigns each section heading its anchor id.
+function Blocks({ blocks, link, gen }: { blocks: Block[]; link: Linker; gen: AnchorIds }) {
   return (
     <>
       {blocks.map((b) => {
         switch (b.kind) {
           case "section": {
             const H = `h${b.level}` as "h1";
+            const id = gen.id(plainText(b.title));
             return (
               <section>
-                <H><Inlines text={b.title} link={link} /></H>
-                <Blocks blocks={b.children} link={link} />
+                <H id={id}><Inlines text={b.title} link={link} />{permalink(id)}</H>
+                <Blocks blocks={b.children} link={link} gen={gen} />
               </section>
             );
           }
@@ -194,12 +196,12 @@ function Blocks({ blocks, link }: { blocks: Block[]; link: Linker }) {
           case "list":
             return <List items={b.items} link={link} />;
           case "quote":
-            return <blockquote><Blocks blocks={b.children} link={link} /></blockquote>;
+            return <blockquote><Blocks blocks={b.children} link={link} gen={gen} /></blockquote>;
           case "alert":
             return (
               <blockquote class={`markdown-alert markdown-alert-${b.alert}`}>
                 <p class="markdown-alert-title">{alertTitle(b.alert)}</p>
-                <Blocks blocks={b.children} link={link} />
+                <Blocks blocks={b.children} link={link} gen={gen} />
               </blockquote>
             );
           case "table":
