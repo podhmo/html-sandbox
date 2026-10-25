@@ -35,3 +35,17 @@ The first human article is a bundle imported from
 Its date, 2026-10-19, is the Gist creation date in Asia/Tokyo
 (`2026-10-18T22:40:01Z`). The three source files are retained separately;
 only the face receives title front matter from the Gist description.
+
+## Testing
+
+With the Go and MoonBit toolchains, Node.js 24 or later, and the TypeScript
+dependencies installed (`npm ci --prefix ts`), run every maintained
+implementation's tests from the repository root:
+
+```sh
+make test
+```
+
+This runs `make -C go test`, `make -C moonbit test` (including the JS parser
+and Node integration tests), and `npm --prefix ts test`. Run `make test-go`,
+`make test-moonbit`, or `make test-ts` to select one implementation.
