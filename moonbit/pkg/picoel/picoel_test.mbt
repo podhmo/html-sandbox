@@ -55,7 +55,7 @@ test "elements" {
       @picoel.blockquote([@picoel.p([t("q")])]),
       "<blockquote><p>q</p></blockquote>",
     ),
-    (@picoel.pre("x := <1>"), "<pre>x := &lt;1&gt;</pre>"),
+    (@picoel.pre("x := <1>"), "<pre><code>x := &lt;1&gt;</code></pre>"),
     (
       @picoel.section([@picoel.h4([t("d")]), @picoel.h5([t("e")])]),
       "<section><h4>d</h4><h5>e</h5></section>",

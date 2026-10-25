@@ -226,7 +226,7 @@ test "pico only" {
 test "post" {
   assert_contains(body(new_site(test_posts), "/posts/hello"), [
     "<title>Hello &lt;script&gt; - blog</title>", "<time datetime=\"2026-10-14\">2026-10-14</time>",
-    "<section><h1 id=\"hello-script\">Hello &lt;script&gt;<a class=\"heading-permalink\" href=\"#hello-script\" aria-label=\"permalink\"> #</a></h1><p>first</p><section><h2 id=\"points\">Points<a class=\"heading-permalink\" href=\"#points\" aria-label=\"permalink\"> #</a></h2><ul><li>one<ul><li>one.1</li></ul></li><li>two</li></ul><pre>x := &lt;1&gt;</pre></section></section>",
+    "<section><h1 id=\"hello-script\">Hello &lt;script&gt;<a class=\"heading-permalink\" href=\"#hello-script\" aria-label=\"permalink\"> #</a></h1><p>first</p><section><h2 id=\"points\">Points<a class=\"heading-permalink\" href=\"#points\" aria-label=\"permalink\"> #</a></h2><ul><li>one<ul><li>one.1</li></ul></li><li>two</li></ul><pre><code>x := &lt;1&gt;</code></pre></section></section>",
   ])
 }
 
@@ -243,7 +243,7 @@ test "svg code block" {
     msg="a ```svg block must render as markup, not a pre block",
   )
   assert_true(
-    body.contains("<pre>&lt;svg/&gt;</pre>"),
+    body.contains("<pre><code>&lt;svg/&gt;</code></pre>"),
     msg="a non-svg block must stay an escaped pre block",
   )
 }
@@ -684,7 +684,7 @@ test "post bundle page and members" {
   assert_contains(body(s, "/posts/bundle"), [
     "face body", "<h2 id=\"00-memomd\"><a href=\"/posts/bundle/00-memo.md\"><code>00-memo.md</code></a><a class=\"heading-permalink\" href=\"#00-memomd\" aria-label=\"permalink\"> #</a></h2>",
     "member body", "<h2 id=\"hellogo\"><a href=\"/posts/bundle/hello.go\"><code>hello.go</code></a><a class=\"heading-permalink\" href=\"#hellogo\" aria-label=\"permalink\"> #</a></h2>",
-    "<pre>package main", "<h2 id=\"diagramsvg\"><a href=\"/posts/bundle/diagram.svg\"><code>diagram.svg</code></a><a class=\"heading-permalink\" href=\"#diagramsvg\" aria-label=\"permalink\"> #</a></h2>",
+    "<pre><code>package main", "<h2 id=\"diagramsvg\"><a href=\"/posts/bundle/diagram.svg\"><code>diagram.svg</code></a><a class=\"heading-permalink\" href=\"#diagramsvg\" aria-label=\"permalink\"> #</a></h2>",
     "<img src=\"/posts/bundle/diagram.svg\" alt=\"diagram.svg\">",
   ])
   // The face is the page; its heading is not a member section.
@@ -734,7 +734,7 @@ test "load doc bundle" {
   assert_contains(body(s, "/docs/guide"), [
     "face body", "<h2 id=\"00-setupmd\"><a href=\"/docs/guide/00-setup.md\"><code>00-setup.md</code></a><a class=\"heading-permalink\" href=\"#00-setupmd\" aria-label=\"permalink\"> #</a></h2>",
     "<h2 id=\"runsh\"><a href=\"/docs/guide/run.sh\"><code>run.sh</code></a><a class=\"heading-permalink\" href=\"#runsh\" aria-label=\"permalink\"> #</a></h2>",
-    "<pre>echo hi",
+    "<pre><code>echo hi",
   ])
   let res = s.render("/docs/guide/00-setup.md")
   assert_eq(res.status, 200)
@@ -777,7 +777,7 @@ test "doc bundle with non-markdown face" {
   }
   let page = body(s, "/docs/x")
   assert_true(
-    page.contains("<pre>echo hi"),
+    page.contains("<pre><code>echo hi"),
     msg="non-markdown face must render as a pre block",
   )
   assert_true(

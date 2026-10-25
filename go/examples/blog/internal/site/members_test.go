@@ -78,7 +78,7 @@ func TestPostBundlePage(t *testing.T) {
 	for _, want := range []string{
 		`<h2 id="00-intromd"><a href="/posts/bundle/00-intro.md"><code>00-intro.md</code></a><a class="heading-permalink" href="#00-intromd" aria-label="permalink"> #</a></h2>`,
 		`<h2 id="maingo"><a href="/posts/bundle/main.go"><code>main.go</code></a><a class="heading-permalink" href="#maingo" aria-label="permalink"> #</a></h2>`,
-		`<pre>package main`,
+		`<pre><code>package main`,
 		`<a href="/posts/bundle/main.go">code</a>`,
 		`<h2 id="iconsvg"><a href="/posts/bundle/icon.svg"><code>icon.svg</code></a><a class="heading-permalink" href="#iconsvg" aria-label="permalink"> #</a></h2>`,
 		`<img src="/posts/bundle/icon.svg" alt="icon.svg">`,
@@ -220,7 +220,7 @@ func TestDocBundleNonMarkdownFace(t *testing.T) {
 	if res.StatusCode != http.StatusOK {
 		t.Fatalf("status %d", res.StatusCode)
 	}
-	if !strings.Contains(body, "<pre>echo hi") {
+	if !strings.Contains(body, "<pre><code>echo hi") {
 		t.Errorf("non-markdown face must render as a pre block")
 	}
 	if !strings.Contains(body, `<h2 id="01-notemd"><a href="/docs/x/01-note.md"><code>01-note.md</code></a><a class="heading-permalink" href="#01-notemd" aria-label="permalink"> #</a></h2>`) {

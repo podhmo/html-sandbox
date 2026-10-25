@@ -43,7 +43,7 @@ func TestElements(t *testing.T) {
 		{Article(Hgroup(H2(Text("t")), P(Date(d)))), `<article><hgroup><h2>t</h2><p><time datetime="2026-10-14">2026-10-14</time></p></hgroup></article>`},
 		{Section(H1(Text("a")), H3(Text("b"))), `<section><h1>a</h1><h3>b</h3></section>`},
 		{Blockquote(P(Text("q"))), `<blockquote><p>q</p></blockquote>`},
-		{Pre("x := <1>"), `<pre>x := &lt;1&gt;</pre>`},
+		{Pre("x := <1>"), `<pre><code>x := &lt;1&gt;</code></pre>`},
 		{Section(H4(Text("d")), H5(Text("e"))), `<section><h4>d</h4><h5>e</h5></section>`},
 		{Table([][]Node{{Text("a")}, {Code("b")}}, [][][]Node{{{Text("1")}, nil}}),
 			`<div class="overflow-auto"><table><thead><tr><th>a</th><th><code>b</code></th></tr></thead><tbody><tr><td>1</td><td></td></tr></tbody></table></div>`},

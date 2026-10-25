@@ -100,7 +100,7 @@ func TestPost(t *testing.T) {
 	for _, want := range []string{
 		`<title>Hello &lt;script&gt; - blog</title>`,
 		`<time datetime="2026-10-14">2026-10-14</time>`,
-		`<section><h1 id="hello-script">Hello &lt;script&gt;<a class="heading-permalink" href="#hello-script" aria-label="permalink"> #</a></h1><p>first</p><section><h2 id="points">Points<a class="heading-permalink" href="#points" aria-label="permalink"> #</a></h2><ul><li>one<ul><li>one.1</li></ul></li><li>two</li></ul><pre>x := &lt;1&gt;</pre></section></section>`,
+		`<section><h1 id="hello-script">Hello &lt;script&gt;<a class="heading-permalink" href="#hello-script" aria-label="permalink"> #</a></h1><p>first</p><section><h2 id="points">Points<a class="heading-permalink" href="#points" aria-label="permalink"> #</a></h2><ul><li>one<ul><li>one.1</li></ul></li><li>two</li></ul><pre><code>x := &lt;1&gt;</code></pre></section></section>`,
 	} {
 		if !strings.Contains(body, want) {
 			t.Errorf("body does not contain %q", want)
@@ -392,7 +392,7 @@ func TestSVGCodeBlock(t *testing.T) {
 	if !strings.Contains(body, "<svg><rect/></svg>") {
 		t.Error("a ```svg block must render as markup, not a pre block")
 	}
-	if !strings.Contains(body, "<pre>&lt;svg/&gt;</pre>") {
+	if !strings.Contains(body, "<pre><code>&lt;svg/&gt;</code></pre>") {
 		t.Error("a non-svg block must stay an escaped pre block")
 	}
 }
