@@ -322,6 +322,46 @@ VTracerでは曲線近似を含むベクター化ができるため、今回の�
 </svg>
 ```
 
+そしてLLMの一発描き。
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <g>
+    <ellipse cx="102" cy="118" rx="56" ry="48" fill="#9a6a43"/>
+    <ellipse cx="100" cy="122" rx="36" ry="30" fill="#e8d3b0"/>
+    <ellipse cx="154" cy="128" rx="24" ry="14" fill="#7b5236" transform="rotate(20 154 128)"/>
+    <ellipse cx="150" cy="128" rx="18" ry="10" fill="#b98a5c" transform="rotate(20 150 128)"/>
+
+    <circle cx="100" cy="78" r="38" fill="#b98a5c"/>
+
+    <circle cx="73" cy="51" r="13" fill="#6b4730"/>
+    <circle cx="127" cy="51" r="13" fill="#6b4730"/>
+    <circle cx="73" cy="53" r="7" fill="#efdcbc"/>
+    <circle cx="127" cy="53" r="7" fill="#efdcbc"/>
+
+    <ellipse cx="83" cy="79" rx="15" ry="18" fill="#4a3429"/>
+    <ellipse cx="117" cy="79" rx="15" ry="18" fill="#4a3429"/>
+    <ellipse cx="100" cy="92" rx="22" ry="16" fill="#f3e6cf"/>
+    <ellipse cx="100" cy="67" rx="20" ry="10" fill="#e7d0ad"/>
+
+    <circle cx="85" cy="77" r="5" fill="#111"/>
+    <circle cx="115" cy="77" r="5" fill="#111"/>
+    <circle cx="87" cy="75" r="1.8" fill="#fff"/>
+    <circle cx="117" cy="75" r="1.8" fill="#fff"/>
+
+    <ellipse cx="100" cy="87" rx="6" ry="4.5" fill="#2d211c"/>
+    <path d="M94 93 Q100 98 106 93" fill="none" stroke="#2d211c" stroke-width="2.2" stroke-linecap="round"/>
+
+    <rect x="60" y="146" width="16" height="30" rx="8" fill="#4a3429"/>
+    <rect x="82" y="146" width="16" height="30" rx="8" fill="#4a3429"/>
+    <rect x="108" y="146" width="16" height="30" rx="8" fill="#4a3429"/>
+    <rect x="130" y="146" width="16" height="30" rx="8" fill="#4a3429"/>
+
+    <path d="M63 111 C74 98, 86 100, 96 111" fill="none" stroke="#5f3f2c" stroke-width="8" stroke-linecap="round"/>
+  </g>
+</svg>
+```
+
 ---
 
 ### 実験環境と成果物
@@ -337,3 +377,8 @@ VTracerでは曲線近似を含むベクター化ができるため、今回の�
 これらの数字は今回の画像と変換設定によるもので、一般的なSVG変換の性能を示すものではない。
 
 実験結果と未実行部分を分けて整理するタヌキ作成の動機を短く整理する変換処理の実装手順を具体化する
+
+
+## 参考
+
+- https://x.com/podhmo/status/2114392268874580409?s=20
