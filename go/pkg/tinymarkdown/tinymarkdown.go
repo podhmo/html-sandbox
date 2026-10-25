@@ -1,6 +1,6 @@
 // Package tinymarkdown parses a tiny subset of Markdown into a pure-data tree.
 //
-// Supported: headings "#" to "#####" (which open nested sections), "- "
+// Supported: headings "#" to "#####" (which open nested sections), "- " or "* "
 // list items (which may continue on indented lines and nest by
 // indentation), paragraphs, "> "
 // quotes, "|" tables, and code blocks fenced by exactly "```". Anything else
@@ -35,16 +35,16 @@ type Paragraph struct {
 	Text string
 }
 
-// List is a run of consecutive "- " lines. Each item is nested under the
-// nearest item above it whose "- " is indented less, as "b" is under "a" in
+// List is a run of consecutive "- " or "* " lines. Each item is nested under the
+// nearest item above it whose marker is indented less, as "b" is under "a" in
 // "- a\n  - b"; with no such item, it is at the top level. Indentation
 // counts leading spaces and tabs, one column each.
 type List struct {
 	Items []Item
 }
 
-// Item is a list item: the text after "- " and the items nested under it.
-// Indented lines that follow an item without "- " continue its text,
+// Item is a list item: the text after the "- " or "* " marker, with nested items.
+// Indented lines that follow an item without a list marker continue its text,
 // joined with "\n".
 type Item struct {
 	Text     string
@@ -186,7 +186,7 @@ func scan(src string) []Block {
 			}
 			rest := line[strings.IndexByte(line, '>')+1:]
 			quote = append(quote, strings.TrimPrefix(rest, " "))
-		case strings.HasPrefix(trimmed, "- "):
+		case strings.HasPrefix(trimmed, "- ") || strings.HasPrefix(trimmed, "* "):
 			if len(para) > 0 || len(quote) > 0 || len(table) > 0 {
 				flush()
 			}

@@ -514,3 +514,50 @@ test "tables" {
     ),
   ])
 }
+
+///|
+test "asterisk lists" {
+  let cases : Array[(String, String, Array[@tinymarkdown.Block])] = [
+    ("asterisk items", "* a\n*   b  \n* c", [List(items(["a", "b", "c"]))]),
+    ("mixed markers", "- a\n* b\n- c", [List(items(["a", "b", "c"]))]),
+    (
+      "mixed nested markers and continuation",
+      "* a\n  - b\n    * c\n      more\n* d",
+      [
+        List([
+          {
+            text: "a",
+            children: [{ text: "b", children: items(["c\nmore"]), }],
+          },
+          { text: "d", children: [], },
+        ]),
+      ],
+    ),
+    (
+      "paragraph boundaries",
+      "intro\n* a\nafter",
+      [Paragraph("intro"), List(items(["a"])), Paragraph("after")],
+    ),
+    (
+      "blank lines split asterisk lists",
+      "* a\n\n* b",
+      [List(items(["a"])), List(items(["b"]))],
+    ),
+    (
+      "asterisk list in a quote",
+      "> * a\n>   * b",
+      [Quote([List([{ text: "a", children: items(["b"]), }])])],
+    ),
+    (
+      "asterisks without a space stay text",
+      "*word\n**bold**\n***",
+      [Paragraph("*word\n**bold**\n***")],
+    ),
+    (
+      "fenced asterisks stay code",
+      "```\n* code\n```",
+      [CodeBlock("* code", info="")],
+    ),
+  ]
+  run(cases)
+}

@@ -168,3 +168,10 @@ test("the home page shows slops with collection links in order", async () => {
   expect(html).toContain('<a href="/">slops</a></li><li><a href="/posts/">posts</a></li><li><a href="/docs/">docs</a>');
   expect(html).not.toContain('<strong>blog</strong>');
 });
+
+
+test("the human Gist article renders asterisk bullets as lists", async () => {
+  const html = await (await get("/posts/wsl-opencode")).text();
+  expect(html).toContain("<ul><li>**選定理由**:");
+  expect(html).not.toContain("<p>* **選定理由**:");
+});

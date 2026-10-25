@@ -5,7 +5,7 @@
 // are there too: moonbit/pkg/tinymarkdown's, and those of the objects in
 // moonbit/pkg/tinymarkdown/js.
 //
-// Supported: headings "#" to "#####" (which open nested sections), "- "
+// Supported: headings "#" to "#####" (which open nested sections), "- " or "* "
 // list items (which may continue on indented lines and nest by
 // indentation), paragraphs, "> " quotes, "|" tables, and code blocks fenced
 // by exactly "```". Anything else is treated as paragraph text. Block
@@ -23,12 +23,12 @@ export type Section = { kind: "section"; level: number; title: string; children:
 // Paragraph is a run of consecutive non-blank lines, joined with "\n".
 export type Paragraph = { kind: "paragraph"; text: string };
 
-// List is a run of consecutive "- " lines. Each item is nested under the
-// nearest item above it whose "- " is indented less.
+// List is a run of consecutive "- " or "* " lines. Each item is nested under the
+// nearest item above it whose marker is indented less.
 export type List = { kind: "list"; items: Item[] };
 
-// Item is a list item: the text after "- " and the items nested under it.
-// Indented lines that follow an item without "- " continue its text.
+// Item is a list item: the text after the "- " or "* " marker, with nested items.
+// Indented lines that follow an item without a list marker continue its text.
 export type Item = { text: string; children: Item[] };
 
 // Quote is a run of lines starting with ">", whose content is parsed again

@@ -335,3 +335,18 @@ func TestTables(t *testing.T) {
 			Document{Children: []Block{List{Items: items("x")}, Table{Header: []string{"a"}}}}},
 	})
 }
+
+func TestAsteriskLists(t *testing.T) {
+	run(t, []testCase{
+		{"asterisk items", "* a\n*   b  \n* c", Document{Children: []Block{List{Items: items("a", "b", "c")}}}},
+		{"mixed markers", "- a\n* b\n- c", Document{Children: []Block{List{Items: items("a", "b", "c")}}}},
+		{"mixed nested markers and continuation", "* a\n  - b\n    * c\n      more\n* d", Document{Children: []Block{List{Items: []Item{
+			{Text: "a", Children: []Item{{Text: "b", Children: items("c\nmore")}}}, {Text: "d"},
+		}}}}},
+		{"paragraph boundaries", "intro\n* a\nafter", Document{Children: []Block{Paragraph{Text: "intro"}, List{Items: items("a")}, Paragraph{Text: "after"}}}},
+		{"blank lines split asterisk lists", "* a\n\n* b", Document{Children: []Block{List{Items: items("a")}, List{Items: items("b")}}}},
+		{"asterisk list in a quote", "> * a\n>   * b", Document{Children: []Block{Quote{Children: []Block{List{Items: []Item{{Text: "a", Children: items("b")}}}}}}}},
+		{"asterisks without a space stay text", "*word\n**bold**\n***", Document{Children: []Block{Paragraph{Text: "*word\n**bold**\n***"}}}},
+		{"fenced asterisks stay code", "```\n* code\n```", Document{Children: []Block{CodeBlock{Code: "* code"}}}},
+	})
+}

@@ -2,7 +2,7 @@
 // tree. It is a port of go/pkg/tinymarkdown and keeps its behavior,
 // including the cases its tests pin down.
 //
-// Supported: headings "#" to "#####" (which open nested sections), "- "
+// Supported: headings "#" to "#####" (which open nested sections), "- " or "* "
 // list items (which may continue on indented lines and nest by
 // indentation), paragraphs, "> "
 // quotes, "|" tables, and code blocks fenced by exactly "```". Anything else
@@ -37,8 +37,8 @@ pub extend Document with Debug::{to_repr}
 /// - Section is a heading together with everything up to the next heading
 ///   of the same or a shallower level (level is 1..5).
 /// - Paragraph is a run of consecutive non-blank lines, joined with "\n".
-/// - List is a run of consecutive "- " lines. Each item is nested under the
-///   nearest item above it whose "- " is indented less, as "b" is under "a"
+/// - List is a run of consecutive "- " or "* " lines. Each item is nested under the
+///   nearest item above it whose marker is indented less, as "b" is under "a"
 ///   in "- a\n  - b"; with no such item, it is at the top level.
 ///   Indentation counts leading spaces and tabs, one column each.
 /// - Quote is a run of consecutive lines starting with ">". The text after
@@ -75,8 +75,8 @@ pub extend Block with Eq::{not_equal, equal}
 pub extend Block with Debug::{to_repr}
 
 ///|
-/// Item is a list item: the text after "- " and the items nested under it.
-/// Indented lines that follow an item without "- " continue its text,
+/// Item is a list item: the text after the "- " or "* " marker, with nested items.
+/// Indented lines that follow an item without a list marker continue its text,
 /// joined with "\n".
 pub(all) struct Item {
   text : String
@@ -232,7 +232,7 @@ fn scan(src : String) -> Array[Flat] {
       }
       let rest = line[line.find(">").unwrap() + 1:]
       quote.push(rest.strip_prefix(" ").unwrap_or(rest).to_owned())
-    } else if trimmed is [.. "- ", .. rest] {
+    } else if trimmed is ([.. "- ", .. rest] | [.. "* ", .. rest]) {
       if !para.is_empty() || !quote.is_empty() || !table.is_empty() {
         flush()
       }
