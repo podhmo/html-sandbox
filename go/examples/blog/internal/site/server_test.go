@@ -46,7 +46,7 @@ var testPosts = fstest.MapFS{
 }
 
 func TestList(t *testing.T) {
-	res, body := get(t, newTestServer(t, testPosts), "/")
+	res, body := get(t, newTestServer(t, testPosts), "/posts/")
 	if res.StatusCode != http.StatusOK {
 		t.Fatalf("status %d", res.StatusCode)
 	}
@@ -56,7 +56,7 @@ func TestList(t *testing.T) {
 	if !strings.HasPrefix(body, "<!doctype html>") {
 		t.Errorf("missing doctype: %.40q", body)
 	}
-	if !strings.Contains(body, `<hgroup><h1>Posts</h1><p>blog by AI</p></hgroup>`) {
+	if !strings.Contains(body, `<hgroup><h1>Posts</h1><p>blog by human</p></hgroup>`) {
 		t.Error("want the heading with its subtitle")
 	}
 	hello := strings.Index(body, `<a href="/posts/hello">`)
@@ -118,7 +118,8 @@ func TestPostPageText(t *testing.T) {
 		t.Fatal(err)
 	}
 	want := `Hello <script> - blog
-blog
+slops
+posts
 docs
 preview
 github
@@ -415,7 +416,7 @@ func TestMarkdownInTitles(t *testing.T) {
 		"2026-10-14-t.md":  file("# Put `x` on [Workers](https://example.com/)\nUse `go` and [docs](https://example.com/docs)."),
 		"2026-10-13-fm.md": file("---\ntitle: Run `go test`\n---\nbody"),
 	})
-	_, body := get(t, h, "/")
+	_, body := get(t, h, "/posts/")
 	for _, want := range []string{
 		`<a href="/posts/t">Put <code>x</code> on Workers</a>`,
 		`<a href="/posts/fm">Run <code>go test</code></a>`,

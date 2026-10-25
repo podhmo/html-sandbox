@@ -141,7 +141,7 @@ func TestWatch(t *testing.T) {
 	}
 
 	write("2026-10-15-b.md", "# Second")
-	waitFor("/", "Second")
+	waitFor("/posts/", "Second")
 	select {
 	case <-events:
 	case <-time.After(3 * time.Second):
@@ -151,12 +151,12 @@ func TestWatch(t *testing.T) {
 	// A broken file keeps the previous content.
 	write("bad name.md", "# Bad")
 	time.Sleep(100 * time.Millisecond)
-	if _, body := get(t, s, "/"); !strings.Contains(body, "Second") {
+	if _, body := get(t, s, "/posts/"); !strings.Contains(body, "Second") {
 		t.Error("previous content should stay after a failed reload")
 	}
 	if err := os.Remove(filepath.Join(dir, "bad name.md")); err != nil {
 		t.Fatal(err)
 	}
 	write("2026-10-16-c.md", "# Third")
-	waitFor("/", "Third")
+	waitFor("/posts/", "Third")
 }

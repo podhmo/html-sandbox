@@ -10,6 +10,9 @@ let base_url : Ref[String] = Ref("")
 let post_files : Ref[Array[(String, String)]] = Ref([])
 
 ///|
+let slop_files : Ref[Array[(String, String)]] = Ref([])
+
+///|
 let doc_files : Ref[Array[(String, String)]] = Ref([])
 
 ///|
@@ -46,10 +49,14 @@ pub fn file(n : Int32) -> Int32 {
   }
   if name.has_prefix("posts/") {
     put(post_files, name[6:].to_owned(), src)
+  } else if name.has_prefix("slops/") {
+    put(slop_files, name[6:].to_owned(), src)
   } else if name.has_prefix("docs/") {
     put(doc_files, name[5:].to_owned(), src)
   } else {
-    return @wasm.write_error("\{name}: want a path under posts/ or docs/")
+    return @wasm.write_error(
+      "\{name}: want a path under posts/, slops/ or docs/",
+    )
   }
   0
 }
@@ -71,14 +78,22 @@ fn load(base : String) -> Result[@site.Site, String] {
 ///|
 /// load_site builds the site from the files the host passed to file.
 fn load_site(base : String) -> @site.Site raise @site.LoadError {
-  if post_files.val.is_empty() && doc_files.val.is_empty() {
+  if post_files.val.is_empty() &&
+    slop_files.val.is_empty() &&
+    doc_files.val.is_empty() {
     raise @site.LoadError(
       message="no content loaded: the host must call file for each asset",
     )
   }
   @site.Site(
     base_url=base,
-    posts=@site.load_posts(ReadOnlyArray::from_array(post_files.val)),
+    posts=[
+      ..@site.load_posts(ReadOnlyArray::from_array(post_files.val)),
+      ..@site.load_posts(
+        ReadOnlyArray::from_array(slop_files.val),
+        collection="slops",
+      ),
+    ],
     docs=@site.load_docs(ReadOnlyArray::from_array(doc_files.val)),
   )
 }

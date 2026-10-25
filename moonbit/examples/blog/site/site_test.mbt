@@ -68,7 +68,10 @@ fn new_site(
 fn embedded_site() -> @site.Site raise @site.LoadError {
   @site.Site(
     base_url="https://example.com",
-    posts=@site.load_posts(@posts.files),
+    posts=[
+      ..@site.load_posts(@posts.files),
+      ..@site.load_posts(@slops.files, collection="slops"),
+    ],
     docs=@site.load_docs(@repodocs.files),
   )
 }
@@ -185,12 +188,14 @@ test "load posts front matter" {
 
 ///|
 test "list" {
-  let res = new_site(test_posts).render("/")
+  let res = new_site(test_posts).render("/posts/")
   assert_eq(res.status, 200)
   assert_eq(header(res, "content-type"), Some("text/html; charset=utf-8"))
   assert_true(res.body.text().has_prefix("<!doctype html>\n"))
   assert_true(
-    res.body.text().contains("<hgroup><h1>Posts</h1><p>blog by AI</p></hgroup>"),
+    res.body
+    .text()
+    .contains("<hgroup><h1>Posts</h1><p>blog by human</p></hgroup>"),
     msg="want the heading with its subtitle",
   )
   let hello = res.body.text().find("<a href=\"/posts/hello\">")
@@ -348,7 +353,7 @@ test "markdown in titles" {
     ),
     ("2026-10-13-fm.md", "---\ntitle: Run `go test`\n---\nbody"),
   ])
-  assert_contains(body(s, "/"), [
+  assert_contains(body(s, "/posts/"), [
     "<a href=\"/posts/t\">Put <code>x</code> on Workers</a>", "<a href=\"/posts/fm\">Run <code>go test</code></a>",
   ])
   assert_contains(body(s, "/posts/t"), [
@@ -384,8 +389,8 @@ test "links in pages" {
 ///|
 test "the embedded posts and documents load" {
   let s = embedded_site()
-  assert_contains(body(s, "/"), ["<a href=\"/posts/hello\">"])
-  assert_contains(body(s, "/posts/hello"), ["<h1 id=\"hello\">Hello"])
+  assert_contains(body(s, "/slops/"), ["<a href=\"/slops/hello\">"])
+  assert_contains(body(s, "/slops/hello"), ["<h1 id=\"hello\">Hello"])
 }
 
 ///|
@@ -537,7 +542,6 @@ test "more not found pages" {
     ("/posts/hello/extra", "Page not found."),
     ("/posts/nope.md", "Post not found."),
     ("/posts/hello/extra.md", "Page not found."),
-    ("/posts/", "Page not found."),
   ]
   for (path, message) in cases {
     let res = s.render(path)

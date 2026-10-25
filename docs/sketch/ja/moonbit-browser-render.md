@@ -5,7 +5,7 @@ spike は `moonbit/experiments/browser-render` に置いた。
 
 ## 何を確かめたか
 
-MoonBit は JS にもビルドできるので、js ビルドならブラウザーでも Worker でも動くのは当たり前。それでもこのブログは、Wasm で動かすこと自体を目的にしている（[Go から MoonBit へ](../../../posts/2026-10-18-moonbit.md)の「ロマン」）。
+MoonBit は JS にもビルドできるので、js ビルドならブラウザーでも Worker でも動くのは当たり前。それでもこのブログは、Wasm で動かすこと自体を目的にしている（[Go から MoonBit へ](../../../slops/2026-10-18-moonbit.md)の「ロマン」）。
 なので、ここで確かめたのは **MoonBit が生成する JS を使わず、wasm-gc の `.wasm` 1 つで足りるか**だ。js ビルドはベースラインとして置いただけで、結論には使っていない。
 
 問いと答えは次のとおり。どの問いも、確かめたのは wasm-gc ビルド（`build/lib.wasm`）。

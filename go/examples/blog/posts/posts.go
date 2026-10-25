@@ -9,7 +9,7 @@ import (
 	"io/fs"
 )
 
-//go:generate sh -c "find files -mindepth 1 -maxdepth 1 ! -name .gitignore -exec rm -rf {} + && cp -R ../../../../posts/*.md files/"
+//go:generate sh generate.sh
 
 //go:embed all:files
 var files embed.FS

@@ -31,6 +31,7 @@ WRANGLER ?= npx wrangler@4
 GO_URL ?= http://localhost:8080
 MOONBIT_URL ?= http://localhost:$(PORT)
 POSTS := ../posts
+SLOPS := ../slops
 # The repository's own documents, as the Go blog's repodocs embeds them,
 # docs/blog.metadata.json, which orders them, included.
 DOCS := ../TODO.md ../docs
@@ -45,7 +46,7 @@ PREVIEW_WASM := _build/wasm-gc/release/build/$(BLOG)/preview/preview.wasm
 # The modules under experiments/, each with its own moon.mod.
 EXPERIMENTS := $(patsubst %/moon.mod,%,$(wildcard experiments/*/moon.mod))
 
-.PHONY: embed embed-posts embed-repodocs embed-assets content build ts preview test check bench dev deploy compare dev-echo clean help
+.PHONY: embed embed-slops embed-posts embed-repodocs embed-assets content build ts preview test check bench dev deploy compare dev-echo clean help
 
 ## embed: regenerate the embedded.mbt files: the Go blog's posts, the repository's documents, and the Go blog's site.css and favicon.svg
 # The packages' moon.pkg run the same scripts, but moon reruns them only
@@ -53,7 +54,10 @@ EXPERIMENTS := $(patsubst %/moon.mod,%,$(wildcard experiments/*/moon.mod))
 # catches edits and subdirectories too. The posts and documents are only
 # for the tests now: the Worker reads them from Static Assets, which
 # `content` fills.
-embed: embed-posts embed-repodocs embed-assets
+embed: embed-slops embed-posts embed-repodocs embed-assets
+
+embed-slops:
+	sh $(BLOG)/scripts/embed.sh $(BLOG)/slops/embedded.mbt $(SLOPS)
 
 embed-posts:
 	sh $(BLOG)/scripts/embed.sh $(BLOG)/posts/embedded.mbt $(POSTS)
@@ -66,7 +70,7 @@ embed-assets:
 
 ## content: copy the posts and the documents, and write files.txt, into examples/blog/cloudflare/build/content, the Static Assets directory the Worker reads
 content:
-	sh $(BLOG)/scripts/content.sh $(CONTENT) $(POSTS) .. $(DOCS)
+	sh $(BLOG)/scripts/content.sh $(CONTENT) $(POSTS) $(SLOPS) .. $(DOCS)
 
 ## build: build the blog's Wasm into _build/wasm-gc/release/build/examples/blog/worker/, shrink it with wasm-opt -Oz into examples/blog/cloudflare/build/app.wasm, and fill the Static Assets directory
 build: embed-assets content
@@ -134,7 +138,7 @@ dev-echo:
 
 ## clean: remove the build output (experiments/ have their own make clean)
 clean:
-	rm -rf _build $(BLOG)/cloudflare/build $(BLOG)/posts/embedded.mbt $(BLOG)/repodocs/embedded.mbt $(BLOG)/assets/embedded.mbt
+	rm -rf _build $(BLOG)/cloudflare/build $(BLOG)/posts/embedded.mbt $(BLOG)/slops/embedded.mbt $(BLOG)/repodocs/embedded.mbt $(BLOG)/assets/embedded.mbt
 
 help:
 	@sed -n 's/^## //p' $(MAKEFILE_LIST)

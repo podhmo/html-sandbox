@@ -12,6 +12,12 @@ body > header {
   opacity: 0.95;
 }
 
+/* The collection links can push the utility links onto another row. */
+body > header nav {
+  flex-wrap: wrap;
+  column-gap: 1rem;
+}
+
 /* pico pads both with a full block spacing, so their gaps add up. Set the
    padding itself: overriding the variable would also shrink the article
    cards inside main. */

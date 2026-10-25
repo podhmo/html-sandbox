@@ -11,6 +11,7 @@ import (
 
 	"github.com/podhmo/html-sandbox/go/examples/blog/posts"
 	"github.com/podhmo/html-sandbox/go/examples/blog/repodocs"
+	"github.com/podhmo/html-sandbox/go/examples/blog/slops"
 )
 
 //go:embed favicon.svg
@@ -68,6 +69,6 @@ func versionOf(b []byte) string {
 
 // EmbeddedSources returns the posts and documents built into the binary.
 // Every entry point serves these unless told to read files from disk.
-func EmbeddedSources() (postsFS, docsFS fs.FS) {
-	return posts.FS, repodocs.FS
+func EmbeddedSources() (postsFS, slopsFS, docsFS fs.FS) {
+	return posts.FS, slops.FS, repodocs.FS
 }

@@ -29,7 +29,12 @@ export function linker(source: string, posts: Post[], docs: Doc[]): Linker {
     if (!u.pathname.startsWith("/repo/")) return undefined;
     const p = decodeURIComponent(u.pathname.slice("/repo/".length));
     const doc = docs.find((d) => d.source === p);
-    const post = posts.find((post) => `posts/${post.file}` === p);
+    const post = posts.find((post) => `${post.collection ?? "posts"}/${post.file}` === p);
+    for (const article of posts) {
+      const base = `${article.collection ?? "posts"}/${article.file}/`;
+      const member = article.members?.find((m) => base + m.name === p);
+      if (member) return `${postPath(article)}/${member.name}${u.hash}`;
+    }
     if (doc) return docPath(doc) + u.hash;
     if (post) return postPath(post) + u.hash;
     return `${repoURL}/${p}`.replace(/\/$/, "") + u.search + u.hash;

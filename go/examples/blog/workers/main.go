@@ -27,11 +27,16 @@ func main() {
 }
 
 func newHandler() (http.Handler, error) {
-	postsFS, docsFS := site.EmbeddedSources()
+	postsFS, slopsFS, docsFS := site.EmbeddedSources()
 	posts, err := site.LoadPosts(postsFS)
 	if err != nil {
 		return nil, err
 	}
+	slops, err := site.LoadSlops(slopsFS)
+	if err != nil {
+		return nil, err
+	}
+	posts = append(posts, slops...)
 	docs, err := site.LoadDocs(docsFS)
 	if err != nil {
 		return nil, err

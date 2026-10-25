@@ -52,7 +52,7 @@ pub fn Site::Site(
   let by_slug = Map([])
   let by_file = Map([])
   for p in posts {
-    by_slug[p.slug] = p
+    by_slug[p.page_path()] = p
     by_file[p.source()] = p
   }
   let by_path = Map([])
@@ -108,10 +108,10 @@ pub fn Site::handle(self : Site, req : @http.Request) -> @http.Response {
   // without its trailing slash.
   let path = req.path
   let c = clean_path(path)
-  if c != path || c == "/docs" {
+  if c != path || c == "/docs" || c == "/posts" || c == "/slops" {
     return redirect(
-      if c == "/docs" {
-        "/docs/"
+      if c == "/docs" || c == "/posts" || c == "/slops" {
+        "\{c}/"
       } else {
         c
       },
@@ -137,7 +137,11 @@ fn Site::new_router(self : Site) -> @http.Router {
   let r = @http.Router(decoded_path=true, not_found=_ => {
     not_found("Page not found.")
   })
-  r.handle("GET /{$}", _ => page(200, self.post_list()))
+  r.handle("GET /{$}", _ => page(200, self.post_list(collection="slops")))
+  r.handle("GET /posts/{$}", _ => page(200, self.post_list(list_path="/posts/")))
+  r.handle("GET /slops/{$}", _ => {
+    page(200, self.post_list(collection="slops", list_path="/slops/"))
+  })
   r.handle("GET /docs/{$}", _ => page(200, self.doc_list()))
   // Pages link to it without a version, so it is cached for a day.
   r.handle("GET /favicon.svg", _ => {
@@ -176,34 +180,36 @@ fn Site::new_router(self : Site) -> @http.Router {
   })
   // A pattern cannot end in ".md" after a wildcard, so the handlers look
   // at the suffix.
-  r.handle("GET /posts/{slug}", req => {
-    let slug = req.param("slug")
-    match slug {
-      [.. s, .. ".md"] =>
-        match self.by_slug.get(s.to_owned()) {
-          Some(p) => markdown(p.markdown)
-          None => not_found("Post not found.")
-        }
-      _ =>
-        match self.by_slug.get(slug) {
-          Some(p) => page(200, self.post_page(p))
-          None => not_found("Post not found.")
-        }
-    }
-  })
-  // /posts/<slug>/<member> serves the raw member of a bundle.
-  r.handle("GET /posts/{slug}/{member}", req => {
-    let slug = req.param("slug")
-    let name = req.param("member")
-    match self.by_slug.get(slug) {
-      Some(p) =>
-        match member_of(p.members, name) {
-          Some(m) => raw_member(m)
-          None => not_found("Page not found.")
-        }
-      None => not_found("Page not found.")
-    }
-  })
+  for collection in ["posts", "slops"] {
+    r.handle("GET /\{collection}/{slug}", req => {
+      let slug = req.param("slug")
+      match slug {
+        [.. s, .. ".md"] =>
+          match self.by_slug.get("/\{collection}/\{s}") {
+            Some(p) => markdown(p.markdown)
+            None => not_found("Post not found.")
+          }
+        _ =>
+          match self.by_slug.get("/\{collection}/\{slug}") {
+            Some(p) => page(200, self.post_page(p))
+            None => not_found("Post not found.")
+          }
+      }
+    })
+    // /posts/<slug>/<member> serves the raw member of a bundle.
+    r.handle("GET /\{collection}/{slug}/{member}", req => {
+      let slug = req.param("slug")
+      let name = req.param("member")
+      match self.by_slug.get("/\{collection}/\{slug}") {
+        Some(p) =>
+          match member_of(p.members, name) {
+            Some(m) => raw_member(m)
+            None => not_found("Page not found.")
+          }
+        None => not_found("Page not found.")
+      }
+    })
+  }
   r.handle("GET /docs/{path...}", req => {
     let path = req.param("path")
     // /docs/<p>/<member> serves the raw member of a bundle at /docs/<p>.

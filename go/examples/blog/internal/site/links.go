@@ -10,12 +10,12 @@ import (
 // are linked to: the main branch on GitHub.
 var repoURL = url.URL{Scheme: "https", Host: "github.com", Path: "/podhmo/html-sandbox/blob/main"}
 
-// postsDir is the directory of the repository that holds the posts.
+// postsDir is the default collection used by the post parser.
 const postsDir = "posts"
 
 // postSource is the file path of p in the repository.
 func postSource(p Post) string {
-	return postsDir + "/" + p.File
+	return p.collection() + "/" + p.File
 }
 
 // linker resolves the URL of a Markdown link, as written in the file at

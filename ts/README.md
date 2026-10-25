@@ -56,3 +56,14 @@ npm run deploy   # build, and wrangler deploy
 
 `npm run dev` picks up edits to the posts and documents, `TODO.md` too, on
 the next request. There is no Makefile: npm scripts are enough.
+
+### Article collections
+
+The shared repository content has three directories: `slops/` for
+AI-written articles, `posts/` for human-written articles, and `docs/` for
+repository documents. `/` shows AI articles; `/posts/` and `/slops/` have
+separate lists and article URLs. Both article collections accept dated
+Markdown files and flat directory bundles named `YYYY-MM-DD-slug.md/`.
+A bundle uses `README.md` as its face and keeps its other files as sections
+and individual downloads. See the root [README](../README.md) for the
+content contract.

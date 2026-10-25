@@ -38,7 +38,8 @@ fn Site::preview_files(self : Site) -> Array[String] {
 /// serve (a post file not named like one, a member in a subdirectory, a
 /// file outside the documents' roots) is not a URL.
 fn preview_url(source : String) -> String? {
-  if source.strip_prefix("\{POSTS_DIR}/") is Some(name) {
+  let collection = if source.has_prefix("slops/") { "slops" } else { "posts" }
+  if source.strip_prefix("\{collection}/") is Some(name) {
     let (dir, file) = match name.find("/") {
       None => (name, None)
       Some(i) => (name[:i], Some(name[i + 1:]))
@@ -48,8 +49,8 @@ fn preview_url(source : String) -> String? {
     }
     guard post_name(dir.to_owned()) is Some((_, slug)) else { return None }
     match file {
-      None => Some("/posts/\{slug}")
-      Some(f) => Some("/posts/\{slug}/\{f}")
+      None => Some("/\{collection}/\{slug}")
+      Some(f) => Some("/\{collection}/\{slug}/\{f}")
     }
   } else {
     // The documents live at doc_sources: TODO.md and everything under

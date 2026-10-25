@@ -5,6 +5,8 @@ import { split } from "../../../pkg/tinyfrontmatter/tinyfrontmatter.ts";
 
 // Post is one blog post loaded from a YYYY-MM-DD-slug.md file.
 export type Post = {
+  collection?: "posts" | "slops";
+  members?: Member[];
   slug: string;
   file: string; // file name, e.g. 2026-10-14-hello.md
   date: string; // YYYY-MM-DD
@@ -25,13 +27,47 @@ export type Doc = {
   markdown: string;
 };
 
-const frontMatterKeys = ["title", "description"];
+export type Member = {
+  name: string;
+  markdown: string;
+  doc: Document;
+  isMarkdown: boolean;
+};
+
+const frontMatterKeys = ["title", "description", "prev", "next"];
 const postName = /^(\d{4}-\d{2}-\d{2})-([a-z0-9]+(?:-[a-z0-9]+)*)\.md$/;
 
 // loadPosts parses every post, newest first. Like the Go blog, it throws on
 // a bad file name, a duplicate slug, a missing title, or an unknown front
 // matter key, so a broken post stops the Worker instead of hiding.
+// Bundles use README.md as the face, or the first member in name order.
+// Keep the members separate for rendering and source downloads.
 export function loadPosts(files: { file: string; markdown: string }[]): Post[] {
+  const singles: { file: string; markdown: string }[] = [];
+  const bundles = new Map<string, Member[]>();
+  for (const { file, markdown } of files) {
+    const slash = file.indexOf("/");
+    if (slash < 0) { singles.push({ file, markdown }); continue; }
+    const dir = file.slice(0, slash), name = file.slice(slash + 1);
+    if (!postName.test(dir)) continue;
+    if (name.includes("/")) throw new Error(`${file}: bundles are flat`);
+    const isMarkdown = name.endsWith(".md");
+    const fm = isMarkdown ? split(markdown) : { meta: {}, body: "" };
+    for (const key of Object.keys(fm.meta ?? {})) {
+      if (!frontMatterKeys.includes(key)) throw new Error(`${file}: unknown front matter key "${key}"`);
+    }
+    const members = bundles.get(dir) ?? [];
+    members.push({ name, markdown, doc: parse(fm.body), isMarkdown });
+    bundles.set(dir, members);
+  }
+  for (const [file, members] of bundles) {
+    members.sort((a, b) => Number(b.name === "README.md") - Number(a.name === "README.md") || a.name.localeCompare(b.name));
+    singles.push({ file, markdown: members[0].markdown });
+  }
+  return loadSinglePosts(singles).map((p) => ({ ...p, members: bundles.get(p.file) }));
+}
+
+function loadSinglePosts(files: { file: string; markdown: string }[]): Post[] {
   const seen = new Map<string, string>();
   const posts = files.map(({ file, markdown }) => {
     const m = postName.exec(file);
@@ -100,5 +136,5 @@ function firstParagraph(bs: Block[]): string {
   return "";
 }
 
-export const postPath = (p: Post) => `/posts/${p.slug}`;
+export const postPath = (p: Post) => `/${p.collection ?? "posts"}/${p.slug}`;
 export const docPath = (d: Doc) => `/docs/${d.path}`;

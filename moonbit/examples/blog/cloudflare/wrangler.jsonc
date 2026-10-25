@@ -13,7 +13,7 @@
     // writes embedded.mbt there.
     "watch_dir": [
       "../../../pkg", "../site", "../worker", "../scripts",
-      "../../../../posts", "../../../../TODO.md",
+      "../../../../posts", "../../../../slops", "../../../../TODO.md",
       "../../../../go/examples/blog/internal/site", "../../../../docs"
     ]
   },
