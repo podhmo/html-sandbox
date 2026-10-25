@@ -84,7 +84,7 @@ func TestPicoOnly(t *testing.T) {
 	}
 	for _, want := range []string{
 		`<header class="container">`, `<main class="container">`, `<footer class="container">`,
-		`<ul><li><a href="https://github.com/podhmo/html-sandbox">github</a></li></ul></nav></header>`,
+		`<ul><li><a href="/preview">preview</a></li><li><a href="https://github.com/podhmo/html-sandbox">github</a></li></ul></nav></header>`,
 	} {
 		if !strings.Contains(body, want) {
 			t.Errorf("body does not contain %q", want)
@@ -120,6 +120,7 @@ func TestPostPageText(t *testing.T) {
 	want := `Hello <script> - blog
 blog
 docs
+preview
 github
 2026-10-14
 Download .md
@@ -134,6 +135,25 @@ Rendered with Wasm.
 `
 	if got := b.String(); got != want {
 		t.Errorf("got\n%s\nwant\n%s", got, want)
+	}
+}
+
+func TestPreview(t *testing.T) {
+	res, body := get(t, newTestServer(t, testPosts), "/preview")
+	if res.StatusCode != http.StatusOK {
+		t.Fatalf("status %d", res.StatusCode)
+	}
+	for _, want := range []string{
+		`<title>Preview - blog</title>`,
+		`<textarea id="preview-src"`,
+		`<script id="preview-data" type="text/plain"`,
+		`data-wasm="/preview.wasm?v=`,
+		`data-files="`,
+		"posts/2026-10-14-hello.md",
+	} {
+		if !strings.Contains(body, want) {
+			t.Errorf("body does not contain %q", want)
+		}
 	}
 }
 

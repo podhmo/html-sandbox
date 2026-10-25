@@ -56,7 +56,10 @@ fn layout(meta : PageMeta, body : Array[@el.Node]) -> @el.Node {
           @picoel.a("/", [@picoel.strong([@picoel.text(SITE_NAME)])]),
           @picoel.a("/docs/", [@picoel.text("docs")]),
         ],
-        end=[@picoel.a(REPO_HOME_URL, [@picoel.text("github")])],
+        end=[
+          @picoel.a("/preview", [@picoel.text("preview")]),
+          @picoel.a(REPO_HOME_URL, [@picoel.text("github")]),
+        ],
       ),
     ]),
     @picoel.main_(body),
@@ -133,7 +136,9 @@ fn Site::post_page(self : Site, p : Post) -> @el.Node {
   if first_title(p.doc) is None {
     // The title came from front matter only, so the body has no heading.
     let id = gen.id(plain_text(p.title))
-    body.push(heading(1, id, render_inlines(@tinymarkdown.inlines(p.title), link)))
+    body.push(
+      heading(1, id, render_inlines(@tinymarkdown.inlines(p.title), link)),
+    )
   }
   body.push_iter(render_face(link, p.members, p.doc, gen).iter())
   let meta = PageMeta::{
@@ -188,7 +193,9 @@ fn Site::doc_page(self : Site, d : Doc) -> @el.Node {
   let body = []
   if first_title(d.doc) is None {
     let id = gen.id(plain_text(d.title))
-    body.push(heading(1, id, render_inlines(@tinymarkdown.inlines(d.title), link)))
+    body.push(
+      heading(1, id, render_inlines(@tinymarkdown.inlines(d.title), link)),
+    )
   }
   body.push_iter(render_face(link, d.members, d.doc, gen).iter())
   let meta = PageMeta::{
@@ -364,11 +371,7 @@ fn heading(level : Int32, id : String, children : Array[@el.Node]) -> @el.Node {
     4 => @el.h4
     _ => @el.h5
   }
-  @el.el(tag, [
-    @el.Attr(@el.id, id),
-    ..children,
-    permalink(id),
-  ])
+  @el.el(tag, [@el.Attr(@el.id, id), ..children, permalink(id)])
 }
 
 ///|

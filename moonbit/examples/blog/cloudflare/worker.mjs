@@ -56,8 +56,29 @@ const cache = new Map();
 const cacheLimit = 1024;
 let cachedBaseURL;
 
+// assetOnly lists the paths served from Static Assets without the Wasm:
+// the preview page's renderer. It is not in files.txt, so the Wasm never
+// loads it as content, and it never sees its requests either — it is a
+// binary file the String-based ABI could not carry. Only GET and HEAD go
+// there, like the site's own routing, and the path is decoded first so
+// that an escaped spelling (/preview%2Ewasm) finds its file too.
+const assetOnly = new Set(["/preview.wasm"]);
+
 export default {
   async fetch(request, env) {
+    let decodedPath;
+    try {
+      decodedPath = decodeURIComponent(new URL(request.url).pathname);
+    } catch {
+      decodedPath = "";
+    }
+    if (
+      env.ASSETS &&
+      (request.method === "GET" || request.method === "HEAD") &&
+      assetOnly.has(decodedPath)
+    ) {
+      return env.ASSETS.fetch(request);
+    }
     try {
       await loadContent(env);
     } catch (e) {

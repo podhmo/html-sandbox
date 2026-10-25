@@ -7,11 +7,11 @@ import {
 }
 
 // Values
-pub fn handle(Int, (@http.Request) -> @http.Response) -> Int
+pub fn handle(Int32, (@http.Request) -> @http.Response) -> Int32
 
-pub fn read_file(Int) -> (String, String) raise FileError
+pub fn read_file(Int32) -> (String, String) raise FileError
 
-pub fn write_error(String) -> Int
+pub fn write_error(String) -> Int32
 
 // Errors
 pub(all) suberror FileError {

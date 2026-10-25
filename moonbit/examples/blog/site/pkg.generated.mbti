@@ -3,6 +3,7 @@ package "podhmo/html-sandbox/examples/blog/site"
 
 import {
   "moonbitlang/core/debug",
+  "podhmo/html-sandbox/pkg/el",
   "podhmo/html-sandbox/pkg/http",
   "podhmo/html-sandbox/pkg/tinymarkdown",
 }
@@ -11,6 +12,8 @@ import {
 pub fn load_docs(ReadOnlyArray[(String, String)]) -> Array[Doc] raise LoadError
 
 pub fn load_posts(ReadOnlyArray[(String, String)]) -> Array[Post] raise LoadError
+
+pub fn preview(String, Array[String]) -> @el.Node
 
 // Errors
 pub(all) suberror LoadError {

@@ -41,6 +41,31 @@ var codeCopyJSPath = func() string {
 	return "/code-copy.js?v=" + hex.EncodeToString(sum[:4])
 }()
 
+// previewJS runs the preview page's renderer.
+//
+//go:embed preview.js
+var previewJS []byte
+
+// previewWasm renders Markdown on the preview page: the site's own
+// rendering, compiled by the moonbit side to Wasm. It is a generated
+// file, committed like tinymarkdown.mjs — `make -C moonbit preview`
+// rebuilds it.
+//
+//go:embed preview.wasm
+var previewWasm []byte
+
+// previewJSPath and previewWasmPath carry hashes of their files, like
+// siteCSSPath.
+var previewJSPath = "/preview.js?v=" + versionOf(previewJS)
+var previewWasmPath = "/preview.wasm?v=" + versionOf(previewWasm)
+
+// versionOf is the first 4 bytes of b's SHA-256 in hex, as siteCSSPath
+// uses it.
+func versionOf(b []byte) string {
+	sum := sha256.Sum256(b)
+	return hex.EncodeToString(sum[:4])
+}
+
 // EmbeddedSources returns the posts and documents built into the binary.
 // Every entry point serves these unless told to read files from disk.
 func EmbeddedSources() (postsFS, docsFS fs.FS) {

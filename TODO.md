@@ -135,6 +135,17 @@
   `description` しか認めないので、`loadPosts` が例外で止まり
   `app.test.ts` が落ちる。Go 版と MoonBit 版の relNav（記事末の
   前後リンク）に相当するものもまだない。
+- [x] **プレビューページ `/preview` を足す**（Go 版・MoonBit 版）:
+  [issue #71](https://github.com/podhmo/html-sandbox/issues/71)。
+  ヘッダーの `preview` リンクから。textarea の Markdown をブラウザ上の
+  Wasm（site パッケージの描画を wasm-gc でエクスポートした
+  `preview.wasm`）で記事と同じ形に描く。保存はせず、
+  ファイル入力で `.md` を読み込める。
+- [ ] **ts 版にも `/preview` を足す**: Go 版と MoonBit 版に足した
+  プレビューページを ts 版にも揃える（
+  [issue #71](https://github.com/podhmo/html-sandbox/issues/71)）。
+  先に上の「ts 版のブログが front matter の `prev` と `next` で起動
+  できない」を直す必要がある。
 
 ### Future work
 
@@ -149,7 +160,11 @@
   中身をそのまま HTML に書くので、`<script>` や `on*` 属性、`foreignObject`
   経由でブログと同じオリジンのスクリプトが動く。今は記事の作者=自分なので
   意図どおりだが、要素/属性の allowlist 方式のサニタイザーを Go と MoonBit
-  に同じ形で入れると安心（Devin Review SEC finding 由来）。
+  に同じ形で入れると安心（Devin Review SEC finding 由来）。なお
+  `/preview` は textarea の任意入力をそのまま描くので、他人が用意した
+  Markdown を貼ると被害者のブラウザーでスクリプトが動きうる（
+  [PR #77](https://github.com/podhmo/html-sandbox/pull/77) の
+  Devin Review でも指摘）。
 
 - [x] **MoonBit の Workers 用アダプターを最適な形に磨く**: 今のアダプター
   （`moonbit/cloudflare/worker.mjs`（当時は `moonbit/workers/`）と `moonbit/worker` の export、host の

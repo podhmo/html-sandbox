@@ -74,17 +74,17 @@ pub fn Request::query(Self) -> Values
 pub fn Request::text(Self) -> String
 
 pub struct Response {
-  status : Int
+  status : Int32
   headers : Headers
   body : Body
 }
-pub fn Response::Response(Int, headers? : Headers, body? : Body) -> Self
+pub fn Response::Response(Int32, headers? : Headers, body? : Body) -> Self
 pub fn Response::header(Self, String, value~ : String) -> Unit
-pub fn Response::html(Int, String) -> Self
-pub fn Response::json(Int, Json) -> Self
-pub fn Response::redirect(Int, String) -> Self
-pub fn Response::text(Int, String) -> Self
-pub fn Response::typed(Int, String, Body) -> Self
+pub fn Response::html(Int32, String) -> Self
+pub fn Response::json(Int32, Json) -> Self
+pub fn Response::redirect(Int32, String) -> Self
+pub fn Response::text(Int32, String) -> Self
+pub fn Response::typed(Int32, String, Body) -> Self
 
 pub struct Router {
   decoded_path : Bool

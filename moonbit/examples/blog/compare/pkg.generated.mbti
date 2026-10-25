@@ -2,9 +2,9 @@
 package "podhmo/html-sandbox/examples/blog/compare"
 
 // Values
-pub fn body_diff(String, moonbit~ : String, max_lines? : Int) -> String
+pub fn body_diff(String, moonbit~ : String, max_lines? : Int32) -> String
 
-pub fn compare(String, go~ : Result[Fetched, String], moonbit~ : Result[Fetched, String], max_lines? : Int) -> Report
+pub fn compare(String, go~ : Result[Fetched, String], moonbit~ : Result[Fetched, String], max_lines? : Int32) -> Report
 
 pub fn default_paths() -> Array[String]
 
@@ -16,7 +16,7 @@ pub fn summary(Array[Report]) -> String
 
 // Types and methods
 pub(all) struct Fetched {
-  status : Int
+  status : Int32
   content_type : String
   body : String
 }

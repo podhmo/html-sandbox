@@ -163,6 +163,17 @@ fn Site::new_router(self : Site) -> @http.Router {
       Text(@assets.code_copy_js),
     )..header("cache-control", value="public, max-age=31536000, immutable")
   })
+  // The preview page's own script, served like the copy-button's. Its
+  // renderer (/preview.wasm) is a generated binary file; the host serves
+  // it from Static Assets.
+  r.handle("GET /preview", _ => page(200, self.preview_page()))
+  r.handle("GET /preview.js", _ => {
+    @http.Response::typed(
+      200,
+      "text/javascript; charset=utf-8",
+      Text(@assets.preview_js),
+    )..header("cache-control", value="public, max-age=31536000, immutable")
+  })
   // A pattern cannot end in ".md" after a wildcard, so the handlers look
   // at the suffix.
   r.handle("GET /posts/{slug}", req => {

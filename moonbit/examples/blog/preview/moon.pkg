@@ -1,0 +1,12 @@
+import {
+  "podhmo/html-sandbox/examples/blog/site",
+  "podhmo/html-sandbox/pkg/el",
+}
+
+options(
+  link: {
+    // The browser loads this Wasm with js-string builtins, as
+    // experiments/browser-render proved; there is no JS fallback.
+    "wasm-gc": { "exports": [ "render" ], "use-js-builtin-string": true },
+  },
+)
