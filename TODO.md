@@ -152,6 +152,11 @@
   （[issue #80](https://github.com/podhmo/html-sandbox/issues/80)）。
   site.css で余白を足すのではなく、Go・MoonBit・ts の描画を
   `<pre><code>` に変えて pico の既定の padding に任せる。
+- [x] **tinymarkdown の記事を最新の状態に合わせる**: 「tinymarkdown で
+  書けること」([記事](posts/2026-10-15-tinymarkdown.md)) が、見出しの id と
+  permalink、字下げしたフェンスの dedent、リンクの解決規則、インラインコードと
+  表の細かい規則、`svg` の生マークアップ、`/preview` を説明していなかった。
+  現在の実装に合わせて追記した。
 
 ### Future work
 
