@@ -24,3 +24,11 @@ test "inlines builds the TS port's Inline[]" {
     ),
   )
 }
+
+///|
+test "asterisk and mixed lists reach the TS parser" {
+  assert_eq(
+    stringify(@js.parse("* a\n  - b\n    * c\n* d")),
+    stringify(@js.parse("- a\n  - b\n    - c\n- d")),
+  )
+}

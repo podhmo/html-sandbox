@@ -145,7 +145,7 @@ links to a file on GitHub. The same keys work on documents (`TODO.md`,
 The body supports a tiny subset of Markdown:
 
 - `#` to `#####` headings, which open nested sections
-- `- ` list items (no nesting); indented lines continue the item above
+- `- ` or `* ` list items, nested by indentation; indented continuation lines extend the item above
 - paragraphs
 - `>` quotes, whose content is Markdown again
 - tables of `|` rows with a `| --- |` delimiter row as the second line
