@@ -293,6 +293,21 @@ test "code blocks" {
       "# A\n```\n## x\n```",
       [Section(level=1, title="A", children=[CodeBlock("## x", info="")])],
     ),
+    (
+      "an indented fence dedents its content",
+      "  ```\n  a\n    b\n c\n  ```",
+      [CodeBlock("a\n  b\nc", info="")],
+    ),
+    (
+      "a fence under a list item dedents by the fence",
+      "1. step\n   ```sh\n   run this\n   ```",
+      [Paragraph("1. step"), CodeBlock("run this", info="sh")],
+    ),
+    (
+      "an unclosed indented fence still dedents",
+      "   ```\n   a",
+      [CodeBlock("a", info="")],
+    ),
   ])
 }
 

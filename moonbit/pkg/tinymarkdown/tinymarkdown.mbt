@@ -51,9 +51,11 @@ pub extend Document with Debug::{to_repr}
 ///   delimiter row such as "| --- | --- |", and body rows. Cells are trimmed
 ///   and "\|" is unescaped to "|"; every row has as many cells as the
 ///   header. Column alignment is accepted but ignored.
-/// - CodeBlock is the verbatim content between "```" fences, lines joined
-///   with "\n". info is the text after the opening fence, trimmed —
-///   usually a language name such as "go" or "svg".
+/// - CodeBlock is the content between "```" fences, lines joined with
+///   "\n". When the opening fence is indented, each content line loses as
+///   much leading indentation as the fence has — all of it on a line with
+///   less — as CommonMark does. info is the text after the opening fence,
+///   trimmed — usually a language name such as "go" or "svg".
 pub(all) enum Block {
   Section(level~ : Int32, title~ : String, children~ : Array[Block])
   Paragraph(String)
@@ -191,6 +193,7 @@ fn scan(src : String) -> Array[Flat] {
 
   let code : Array[StringView] = []
   let mut code_info : StringView = ""
+  let mut code_indent = 0
   let mut in_code = false
   for raw in src.split("\n") {
     // line stays a view: only the lines that are kept are copied to a String.
@@ -201,15 +204,17 @@ fn scan(src : String) -> Array[Flat] {
         out.push(Block(CodeBlock(code.join("\n"), info=code_info.to_owned())))
         code.clear()
         code_info = ""
+        code_indent = 0
         in_code = false
       } else {
-        code.push(line)
+        code.push(dedent(line, code_indent))
       }
       continue
     }
     if trimmed.has_prefix(FENCE) {
       flush()
       code_info = trim_space(trimmed[FENCE.length():])
+      code_indent = indent(line)
       in_code = true
     } else if trimmed == "" {
       flush()
@@ -316,6 +321,18 @@ fn indent(line : StringView) -> Int32 {
     i = i + 1
   }
   i
+}
+
+///|
+/// dedent removes up to n leading spaces and tabs of line — all of them
+/// when it has fewer than n — as CommonMark does for the content lines of
+/// a fence indented n columns.
+fn dedent(line : StringView, n : Int32) -> StringView {
+  let mut i = 0
+  while i < n && i < line.length() && (line[i] == ' ' || line[i] == '\t') {
+    i = i + 1
+  }
+  line[i:]
 }
 
 ///|
