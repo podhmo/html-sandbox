@@ -164,14 +164,18 @@ article .markdown-alert-caution {
 }
 
 /* The preview page: editor and rendered output side by side on a wide
-   screen, stacked on a phone. */
+   screen, stacked on a phone. The tracks are minmax(0, 1fr), not 1fr:
+   an auto/1fr minimum is the content's min-content size, so a long <pre>
+   line or a wide table would blow the column (and the textarea sharing
+   it) past the viewport. */
 .preview-grid {
   display: grid;
   gap: var(--pico-spacing, 1rem);
+  grid-template-columns: minmax(0, 1fr);
 }
 @media (min-width: 768px) {
   .preview-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     align-items: start;
   }
 }
