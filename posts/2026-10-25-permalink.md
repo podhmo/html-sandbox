@@ -2,6 +2,7 @@
 title: 見出しに id と permalink を付けた
 description: セクションの見出しすべてに id を振って、末尾に常時表示の # リンクを置くようにした。id の決め方は GitHub 風を目指したのだが、3 言語で同じ規則を書く都合で、結果的には GitLab 式のカテゴリー判定に落ち着いた。
 prev: 2026-10-24-alerts.md
+next: 2026-10-25-preview.md
 ---
 
 見出しの右に `#` リンクを付けた（[issue #69](https://github.com/podhmo/html-sandbox/issues/69)）。この記事の見出しにも付いているはずなので、試しに長押しや右クリックしてみてほしい。スマホだと hover が効かないので、常時表示の `#` を選んでいる。GitHub 流の「hover したら出る」はモバイルで届かない。
