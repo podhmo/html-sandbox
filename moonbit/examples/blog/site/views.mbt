@@ -53,8 +53,7 @@ fn layout(meta : PageMeta, body : Array[@el.Node]) -> @el.Node {
     @picoel.header([
       @picoel.spread(
         [
-          @picoel.a("/", [@picoel.strong([@picoel.text(SITE_NAME)])]),
-          @picoel.a("/slops/", [@picoel.text("slops")]),
+          @picoel.a("/", [@picoel.text("slops")]),
           @picoel.a("/posts/", [@picoel.text("posts")]),
           @picoel.a("/docs/", [@picoel.text("docs")]),
         ],

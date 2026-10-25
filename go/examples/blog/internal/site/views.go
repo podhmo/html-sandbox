@@ -54,8 +54,7 @@ func layout(env pageEnv, meta pageMeta, body ...pe.Node) pe.Node {
 	return pe.Document("ja", head,
 		pe.Header(pe.Spread(
 			[]pe.Node{
-				pe.A("/", pe.Strong(pe.Text(siteName))),
-				pe.A("/slops/", pe.Text("slops")),
+				pe.A("/", pe.Text("slops")),
 				pe.A("/posts/", pe.Text("posts")),
 				pe.A("/docs/", pe.Text("docs")),
 			},
@@ -95,7 +94,7 @@ func ogp(meta pageMeta) []pe.Node {
 // postList shows each post as a card: the title links to the post and the
 // date below it is muted by hgroup. Each collection identifies its authors.
 func postList(env pageEnv, posts []Post) pe.Node {
-	return articleList(env, posts, "posts", "/")
+	return articleList(env, posts, "slops", "/")
 }
 
 func articleList(env pageEnv, posts []Post, collection, listPath string) pe.Node {

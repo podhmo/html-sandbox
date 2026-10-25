@@ -137,7 +137,7 @@ fn Site::new_router(self : Site) -> @http.Router {
   let r = @http.Router(decoded_path=true, not_found=_ => {
     not_found("Page not found.")
   })
-  r.handle("GET /{$}", _ => page(200, self.post_list()))
+  r.handle("GET /{$}", _ => page(200, self.post_list(collection="slops")))
   r.handle("GET /posts/{$}", _ => page(200, self.post_list(list_path="/posts/")))
   r.handle("GET /slops/{$}", _ => {
     page(200, self.post_list(collection="slops", list_path="/slops/"))

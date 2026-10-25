@@ -21,7 +21,7 @@ Shared across implementations:
 ## Articles
 
 The header links to three collections: `slops` (blog by AI), `posts`
-(blog by human), and `docs` (repository documents). `/` shows human posts;
+(blog by human), and `docs` (repository documents). `/` shows AI articles;
 `/posts/` and `/slops/` show their respective lists. The same slug can be
 used independently in the two article collections.
 

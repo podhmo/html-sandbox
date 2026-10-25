@@ -59,8 +59,7 @@ export const layout = jsxRenderer(({ children, ...meta }) => {
         <header class="container">
           <Spread
             start={[
-              <a href="/"><strong>{siteName}</strong></a>,
-              <a href="/slops/">slops</a>,
+              <a href="/">slops</a>,
               <a href="/posts/">posts</a>,
               <a href="/docs/">docs</a>,
             ]}

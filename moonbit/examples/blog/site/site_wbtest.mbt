@@ -89,7 +89,6 @@ test "post page text" {
     got,
     (
       #|Hello <script> - blog
-      #|blog
       #|slops
       #|posts
       #|docs
@@ -253,8 +252,9 @@ test "collections isolate identical slugs and retain bundle links" {
   )
   let s = Site(base_url="https://example.com", posts=[..human, ..ai], docs=[])
   let home = s.render("/").body.text()
-  assert_true(home.contains("blog by human"))
-  assert_false(home.contains("href=\"/slops/same\""))
+  assert_true(home.contains("blog by AI"))
+  assert_true(home.contains("href=\"/slops/same\""))
+  assert_false(home.contains("href=\"/posts/same\""))
   let list = s.render("/slops/").body.text()
   assert_true(list.contains("blog by AI"))
   assert_true(list.contains("href=\"/slops/same\""))

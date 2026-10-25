@@ -188,7 +188,7 @@ test "load posts front matter" {
 
 ///|
 test "list" {
-  let res = new_site(test_posts).render("/")
+  let res = new_site(test_posts).render("/posts/")
   assert_eq(res.status, 200)
   assert_eq(header(res, "content-type"), Some("text/html; charset=utf-8"))
   assert_true(res.body.text().has_prefix("<!doctype html>\n"))
@@ -353,7 +353,7 @@ test "markdown in titles" {
     ),
     ("2026-10-13-fm.md", "---\ntitle: Run `go test`\n---\nbody"),
   ])
-  assert_contains(body(s, "/"), [
+  assert_contains(body(s, "/posts/"), [
     "<a href=\"/posts/t\">Put <code>x</code> on Workers</a>", "<a href=\"/posts/fm\">Run <code>go test</code></a>",
   ])
   assert_contains(body(s, "/posts/t"), [

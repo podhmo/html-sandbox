@@ -39,7 +39,7 @@ function markdown(c: Context<Env>, src: string) {
 }
 
 app.get("/", (c) =>
-  c.render(<PostList posts={posts.filter((p) => !p.collection)} />, { description: siteDescription, url: `${c.env.BASE_URL}/`, type: "website" }),
+  c.render(<PostList posts={posts.filter((p) => p.collection === "slops")} collection="slops" />, { description: siteDescription, url: `${c.env.BASE_URL}/`, type: "website" }),
 );
 
 for (const collection of ["posts", "slops"] as const) {

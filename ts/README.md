@@ -61,7 +61,7 @@ the next request. There is no Makefile: npm scripts are enough.
 
 The shared repository content has three directories: `slops/` for
 AI-written articles, `posts/` for human-written articles, and `docs/` for
-repository documents. `/` shows human posts; `/posts/` and `/slops/` have
+repository documents. `/` shows AI articles; `/posts/` and `/slops/` have
 separate lists and article URLs. Both article collections accept dated
 Markdown files and flat directory bundles named `YYYY-MM-DD-slug.md/`.
 A bundle uses `README.md` as its face and keeps its other files as sections

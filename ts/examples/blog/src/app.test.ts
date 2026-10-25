@@ -125,8 +125,8 @@ describe("linker", () => {
 });
 
 describe("article collections and directory bundles", () => {
-  test("the home page and posts list contain the human Gist bundle", async () => {
-    for (const path of ["/", "/posts/"]) {
+  test("the posts list contains the human Gist bundle", async () => {
+    for (const path of ["/posts/"]) {
       const html = await (await get(path)).text();
       expect(html).toContain("blog by human");
       expect(html).toContain('href="/posts/wsl-opencode"');
@@ -157,4 +157,14 @@ describe("article collections and directory bundles", () => {
     expect(link("../slops/2026-10-19-same.md")).toBe("/slops/same");
     expect(link("../slops/2026-10-19-same.md/memo.md")).toBe("/slops/same/memo.md");
   });
+});
+
+
+test("the home page shows slops with collection links in order", async () => {
+  const html = await (await get("/")).text();
+  expect(html).toContain("blog by AI");
+  expect(html).toContain('href="/slops/hello"');
+  expect(html).not.toContain('href="/posts/wsl-opencode"');
+  expect(html).toContain('<a href="/">slops</a></li><li><a href="/posts/">posts</a></li><li><a href="/docs/">docs</a>');
+  expect(html).not.toContain('<strong>blog</strong>');
 });

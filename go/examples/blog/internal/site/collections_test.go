@@ -26,7 +26,7 @@ func TestArticleCollections(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, tc := range []struct{ path, want, absent string }{
-		{"/", "blog by human", `<a href="/slops/same">`},
+		{"/", "blog by AI", `<a href="/posts/same">`},
 		{"/posts/", `<a href="/posts/same">Human</a>`, `<a href="/slops/same">`},
 		{"/slops/", `<a href="/slops/same">AI</a>`, `<a href="/posts/same">`},
 		{"/posts/same", `<a href="/slops/same">AI</a>`, "AI member"},
