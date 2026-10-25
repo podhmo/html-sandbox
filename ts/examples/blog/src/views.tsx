@@ -166,10 +166,12 @@ function PageHeader({ info, href, filename }: { info: Child; href: string; filen
 // Body is the article. When the title came from front matter only, the
 // body has no heading, so one is added.
 function Body({ title, blocks, link }: { title: string; blocks: Post["doc"]; link: Linker }) {
+  const gen = new AnchorIds();
+  const id = firstTitle(blocks) === undefined ? gen.id(plainText(title)) : undefined;
   return (
     <article>
-      {firstTitle(blocks) === undefined && <h1><Inlines text={title} link={link} /></h1>}
-      <Blocks blocks={blocks.children} link={link} gen={new AnchorIds()} />
+      {id !== undefined && <h1 id={id}><Inlines text={title} link={link} />{permalink(id)}</h1>}
+      <Blocks blocks={blocks.children} link={link} gen={gen} />
     </article>
   );
 }

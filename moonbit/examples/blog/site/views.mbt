@@ -132,7 +132,8 @@ fn Site::post_page(self : Site, p : Post) -> @el.Node {
   let body = []
   if first_title(p.doc) is None {
     // The title came from front matter only, so the body has no heading.
-    body.push(@picoel.h1(render_inlines(@tinymarkdown.inlines(p.title), link)))
+    let id = gen.id(plain_text(p.title))
+    body.push(heading(1, id, render_inlines(@tinymarkdown.inlines(p.title), link)))
   }
   body.push_iter(render_face(link, p.members, p.doc, gen).iter())
   let meta = PageMeta::{
@@ -186,7 +187,8 @@ fn Site::doc_page(self : Site, d : Doc) -> @el.Node {
   let gen = AnchorIds::new()
   let body = []
   if first_title(d.doc) is None {
-    body.push(@picoel.h1(render_inlines(@tinymarkdown.inlines(d.title), link)))
+    let id = gen.id(plain_text(d.title))
+    body.push(heading(1, id, render_inlines(@tinymarkdown.inlines(d.title), link)))
   }
   body.push_iter(render_face(link, d.members, d.doc, gen).iter())
   let meta = PageMeta::{

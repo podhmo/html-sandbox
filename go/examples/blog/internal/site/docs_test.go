@@ -75,7 +75,7 @@ second line<ul><li>[x] child</li></ul></li>`; !strings.Contains(body, want) {
 	}
 
 	_, body = get(t, h, "/docs/notes")
-	if !strings.Contains(body, `<h1>docs/notes.md</h1><p>no heading</p>`) {
+	if !strings.Contains(body, `<h1 id="docsnotesmd">docs/notes.md<a class="heading-permalink" href="#docsnotesmd" aria-label="permalink"> #</a></h1><p>no heading</p>`) {
 		t.Error("notes: want the file path as <h1>")
 	}
 

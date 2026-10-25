@@ -107,7 +107,9 @@ func postPage(env pageEnv, st *site, p Post) pe.Node {
 	var body []pe.Node
 	if _, ok := firstTitle(p.Doc); !ok {
 		// The title came from front matter only, so the body has no heading.
-		body = append(body, pe.H1(renderInlines(tinymarkdown.Inlines(p.Title), link)...))
+		id := gen.id(plainText(p.Title))
+		head := append([]pe.Node{el.Attr(el.ID, id)}, renderInlines(tinymarkdown.Inlines(p.Title), link)...)
+		body = append(body, el.El(el.H1, append(head, permalink(id))...))
 	}
 	body = append(body, renderFace(link, p.Members, p.Doc, gen)...)
 	meta := pageMeta{
@@ -182,7 +184,9 @@ func docPage(env pageEnv, st *site, d Doc) pe.Node {
 	gen := newAnchorIDs()
 	var body []pe.Node
 	if _, ok := firstTitle(d.Doc); !ok {
-		body = append(body, pe.H1(renderInlines(tinymarkdown.Inlines(d.Title), link)...))
+		id := gen.id(plainText(d.Title))
+		head := append([]pe.Node{el.Attr(el.ID, id)}, renderInlines(tinymarkdown.Inlines(d.Title), link)...)
+		body = append(body, el.El(el.H1, append(head, permalink(id))...))
 	}
 	body = append(body, renderFace(link, d.Members, d.Doc, gen)...)
 	meta := pageMeta{Title: d.Title, Description: d.Description, URL: env.BaseURL + docPath(d), Type: "article"}

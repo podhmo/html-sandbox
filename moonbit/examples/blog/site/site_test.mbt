@@ -269,7 +269,7 @@ test "post page heading" {
   ])
   assert_contains(body(s, "/posts/fm"), [
     "<title>From &lt;FM&gt; - blog</title>", "<meta name=\"description\" content=\"Short &amp; sweet\">",
-    "<h1>From &lt;FM&gt;</h1><p>body</p>",
+    "<h1 id=\"from-fm\">From &lt;FM&gt;<a class=\"heading-permalink\" href=\"#from-fm\" aria-label=\"permalink\"> #</a></h1><p>body</p>",
   ])
   let both = body(s, "/posts/both")
   assert_contains(both, [
@@ -356,7 +356,7 @@ test "markdown in titles" {
     "<meta name=\"description\" content=\"Use go and docs.\">",
   ])
   assert_contains(body(s, "/posts/fm"), [
-    "<title>Run go test - blog</title>", "<h1>Run <code>go test</code></h1>",
+    "<title>Run go test - blog</title>", "<h1 id=\"run-go-test\">Run <code>go test</code><a class=\"heading-permalink\" href=\"#run-go-test\" aria-label=\"permalink\"> #</a></h1>",
   ])
 }
 
@@ -416,7 +416,7 @@ test "doc pages" {
     "<ul><li><small><a href=\"/docs/ja/design.md\" download=\"design.md\" class=\"secondary\">Download .md</a></small></li></ul></nav></header><article>",
   ])
   assert_contains(body(s, "/docs/notes"), [
-    "<h1>docs/notes.md</h1><p>no heading</p>",
+    "<h1 id=\"docsnotesmd\">docs/notes.md<a class=\"heading-permalink\" href=\"#docsnotesmd\" aria-label=\"permalink\"> #</a></h1><p>no heading</p>",
   ])
   for p in ["/docs/nope", "/docs/image", "/docs/image.svg"] {
     assert_contains(body(s, p, want=404), ["Document not found."])

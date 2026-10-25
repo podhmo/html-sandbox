@@ -248,7 +248,7 @@ func TestPostPageHeading(t *testing.T) {
 	for _, want := range []string{
 		`<title>From &lt;FM&gt; - blog</title>`,
 		`<meta name="description" content="Short &amp; sweet">`,
-		`<h1>From &lt;FM&gt;</h1><p>body</p>`,
+		`<h1 id="from-fm">From &lt;FM&gt;<a class="heading-permalink" href="#from-fm" aria-label="permalink"> #</a></h1><p>body</p>`,
 	} {
 		if !strings.Contains(body, want) {
 			t.Errorf("fm: body does not contain %q", want)
@@ -417,7 +417,7 @@ func TestMarkdownInTitles(t *testing.T) {
 	_, body = get(t, h, "/posts/fm")
 	for _, want := range []string{
 		`<title>Run go test - blog</title>`,
-		`<h1>Run <code>go test</code></h1>`,
+		`<h1 id="run-go-test">Run <code>go test</code><a class="heading-permalink" href="#run-go-test" aria-label="permalink"> #</a></h1>`,
 	} {
 		if !strings.Contains(body, want) {
 			t.Errorf("fm: body does not contain %q", want)
