@@ -146,6 +146,12 @@
   [issue #71](https://github.com/podhmo/html-sandbox/issues/71)）。
   先に上の「ts 版のブログが front matter の `prev` と `next` で起動
   できない」を直す必要がある。
+- [x] **コードブロックに padding を付ける**: 記事の `<pre>` はコードを
+  `<code>` 要素ではなく直接持つので、pico の `pre > code` の padding が
+  効かず、本文が枠に密着している
+  （[issue #80](https://github.com/podhmo/html-sandbox/issues/80)）。
+  site.css で余白を足すのではなく、Go・MoonBit・ts の描画を
+  `<pre><code>` に変えて pico の既定の padding に任せる。
 
 ### Future work
 

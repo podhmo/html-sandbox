@@ -234,9 +234,10 @@ pub fn table(
 }
 
 ///|
-/// pre is preformatted text such as a code block.
+/// pre is a code block. The text goes inside a code child: pico pads that
+/// child, and without one the text would touch the block's edges.
 pub fn pre(text : String) -> @el.Node {
-  @el.el(@el.pre, [@el.Text(text)])
+  @el.el(@el.pre, [@el.el(@el.code, [@el.Text(text)])])
 }
 
 ///|

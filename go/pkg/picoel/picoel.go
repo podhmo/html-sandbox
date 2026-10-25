@@ -190,9 +190,10 @@ func Table(header [][]Node, rows [][][]Node) Node {
 	return el.El(el.Div, el.Attr(el.Class, "overflow-auto"), el.El(el.Table, parts...))
 }
 
-// Pre is preformatted text such as a code block.
+// Pre is a code block. The text goes inside a code child: pico pads that
+// child, and without one the text would touch the block's edges.
 func Pre(text string) Node {
-	return el.El(el.Pre, el.Text(text))
+	return el.El(el.Pre, Code(text))
 }
 
 // Code is a fragment of code inside text.

@@ -221,7 +221,7 @@ function Blocks({ blocks, link, gen }: { blocks: Block[]; link: Linker; gen: Anc
               </div>
             );
           case "code":
-            return <pre>{b.code}</pre>;
+            return <pre><code>{b.code}</code></pre>;
         }
       })}
     </>
