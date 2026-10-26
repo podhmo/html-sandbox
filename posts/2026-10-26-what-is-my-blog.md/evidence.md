@@ -13,6 +13,7 @@ README の骨子を点検するための資料。相対リンクはこのバン�
 - docs と TODO をブログで配信する理由は、本人が GitHub と往復せずに読める利便性。読者への開示や AI への引き継ぎを、配信の主目的として付け足さない。
 - バンドルに欲しいのは、主本文から分けた補足、別の説明、表現の選択肢を一緒に置くこと。実験一式の再実行性を第一の動機とする初稿の読み方は強すぎた。
 - 画像の一般的な投稿機能は、当面の実装意欲が低い。SVG を試した事実だけで、画像対応全体を欲し始めたとは判断しない。
+- 管理画面・タグ・集客・収益化は、本人が関心を持っていない領域。初稿の「関心は未確認」という留保は撤回する。ブログ内検索はこの分類から分け、未採用の実験として扱う。
 - 技術上の問いには、Workers の構成、MoonBit の Wasm のサイズ、制約に対するコーディングエージェントの対応、小さな構文と標準ライブラリで用が足りる範囲がある。TypeScript 版は実用的な構成との対照になる。
 - 自作や実験の保存をそれ自体の信条にはしない。実験コードは記事に対応する時点の記録として置く程度の意味もあり、楽しかった実験すべてが記事になるわけでもない。執筆の手軽さを上位に置く。
 
@@ -54,6 +55,7 @@ TODO の運用規則は LLM にとっての可読性も考慮している。た�
 
 ## 実験の題材と技術上の観察
 
+- ブログ内検索。[Issue #41](https://github.com/podhmo/html-sandbox/issues/41)は文書の検索という題材を挙げ、[Draft PR #62](https://github.com/podhmo/html-sandbox/pull/62)はブラウザー側で全文検索の索引を作る実験を記録している。2026-10-26 の確認時点で PR は OPEN・Draft、未マージ。対象は Go 版のみで、MoonBit・TypeScript 版には移植していない。main にないことを、試していない証拠にはしない。
 - HTML のデータ構造と描画の分離。[Go の Node](../../go/pkg/el/node.go)と[Renderer](../../go/pkg/el/render.go)、[MoonBit の Node](../../moonbit/pkg/el/node.mbt)と[描画](../../moonbit/pkg/el/render.mbt)に、データと描画を分ける設計がある。表示だけでなく plain text にも出せ、構造を比較できる。
 - 小さな Markdown を自分で扱うこと。[Go](../../go/pkg/tinymarkdown/tinymarkdown.go)、[MoonBit](../../moonbit/pkg/tinymarkdown/tinymarkdown.mbt)、[インライン解析](../../moonbit/pkg/tinymarkdown/inline.mbt)、[front matter](../../go/pkg/tinyfrontmatter/tinyfrontmatter.go)を小さい構造として持つ。GitHub 風のアラートなど、記事で使いたいものから機能が増える。
 - 実行環境ごとの動作の違い。[TinyGo の探索](../../docs/sketch/ja/blog-tinygo-workers.md)、[MoonBit の探索](../../docs/sketch/ja/moonbit-workers-wasm.md)、[ブラウザーの探索](../../docs/sketch/ja/moonbit-browser-render.md)、[Wasm 同士の接続](../../docs/sketch/ja/moonbit-wasm-pair.md)がある。「動いた」で終わらず、何が同じで、どこが違ったのかが次の問いになる。
@@ -79,5 +81,5 @@ TODO の運用規則は LLM にとっての可読性も考慮している。た�
 
 - 聞き取りで明らかになった動機と、実装上できることを区別する。可能な使い道を、そのまま本人が欲しがっていた理由にしない。
 - 動かなくなった記事の扱いは用途で分ける。一般的な手順としての価値と、本人が当時抱いた問いを残す価値を、一律の基準にまとめない。
-- SEO、収益化、コメント、検索、タグへの関心は今回も確定していない。不在だけで不要と書かない。
+- ブログ内検索を、読者を集めるための検索流入対策と混同しない。未マージの実験と、本人の関心の外にある管理・集客機能も区別する。
 - 本人が語り方や予定まで含めて引き受けられる完成稿になったかは、骨子の内容が詳しくなったことだけでは決まらない。
