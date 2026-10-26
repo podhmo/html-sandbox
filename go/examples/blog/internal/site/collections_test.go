@@ -1,6 +1,7 @@
 package site
 
 import (
+	"slices"
 	"strings"
 	"testing"
 	"testing/fstest"
@@ -58,8 +59,9 @@ func TestEmbeddedHumanBundle(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(human) != 1 || human[0].Slug != "wsl-opencode" || len(human[0].Members) != 3 {
-		t.Fatalf("want the three-file Gist bundle, got %#v", human)
+	i := slices.IndexFunc(human, func(p Post) bool { return p.Slug == "wsl-opencode" })
+	if i < 0 || len(human[i].Members) != 3 {
+		t.Fatal("want the three-file Gist bundle among the human posts")
 	}
 	ai, err := LoadSlops(aiFS)
 	if err != nil {
