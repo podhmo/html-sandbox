@@ -1,0 +1,22 @@
+{
+  "name": "pkg-graph",
+  "version": "1.0.0",
+  "description": "Render the MoonBit package graph with mermaid, beautiful-mermaid, and d2",
+  "scripts": {
+    "graph": "node scripts/extract-graph.mjs",
+    "mermaid": "node scripts/render-mermaid.mjs",
+    "beautiful": "node scripts/render-beautiful-mermaid.mjs",
+    "d2": "node scripts/render-d2.mjs",
+    "svg": "node scripts/render-mermaid.mjs && node scripts/render-beautiful-mermaid.mjs && node scripts/render-d2.mjs && node scripts/measure.mjs",
+    "measure": "node scripts/measure.mjs"
+  },
+  "license": "MIT",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@mermaid-js/layout-elk": "^1.0.1",
+    "beautiful-mermaid": "^1.1.3",
+    "mermaid": "^12.2.0",
+    "puppeteer": "^25.16.0"
+  }
+}
