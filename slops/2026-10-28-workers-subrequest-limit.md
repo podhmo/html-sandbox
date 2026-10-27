@@ -102,13 +102,18 @@ Wasm のコードは変えていないので、Wasm の大きさも `make dev` �
 
 報告を読み直して直したところもある。調査レポートへの追記で、JSON を選ばなかった理由が「記事の束には画像など文字列でないファイルも入りうる」になっていた。けれども束は PNG や JPEG のようなバイナリーのファイルを扱わない。理由を「文字列への変換を挟まずに切り出せる」に書き直した。あわせて、`files.txt` のことを書いたままだった古い[Wasm のレポート](../docs/sketch/ja/moonbit-workers-wasm.md)に、その後の変更を注記した。
 
+## 本番で確かめたこと
+
+手元の `wrangler dev` は上限を課さないので、失敗そのものは手元では再現できなかった。そこで、修正をユーザーが `make -C moonbit deploy` で配備したあと、本番の https://blog.podhmo.workers.dev/ を確かめた。トップページ、`/posts/`、`/slops/`、`/posts/why-ai-novel-is-bored`、`/posts/why-ai-novel-is-bored/article1.md`（`text/markdown`）、`/docs/`、`/preview.wasm`（`application/wasm`）が 200 を返し、存在しないパスは 404 を返した。この記事自身のページも表示された。
+
+修正前はトップページから上限のエラーを返していたので、直ったと言ってよい。ただし、新しい isolate の最初のリクエストを狙って何度も打ち分けたわけではない。
+
 ## 確かめていないこと
 
-- 本番で直ったかどうか。手元の `wrangler dev` は上限を課さないので、失敗そのものは手元で再現できない。配備してから確かめる。
 - `make -s check` は最後まで通らなかった。`moon info` が、コミット済みの `.mbti` ファイル6つを書き換えるためだ（`Int32` が `Int` になる）。サブエージェントは、修正を退避した HEAD でも同じ6ファイルが同じように書き換わることを確かめている。この手元の moon のツールチェーンと、`.mbti` を生成したときのものが合っていないためで、今回の修正とは関係がない。それより前のテストや検査は通っている。
 
 ## 残ること
 
-- `make -C moonbit deploy` で配備し、https://blog.podhmo.workers.dev/ が表示されることを確かめてから issue #92 を閉じる。
+- issue #92 を閉じる。
 - `content.bin` は今 600 KB 余りで、Static Assets のファイル1つの上限は 25 MiB だ。それに近づく前に分け方を考える。
 - `.mbti` の書き換えは、moon のツールチェーンを揃えて解消する。

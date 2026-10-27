@@ -268,4 +268,4 @@ Too many subrequests by single Worker invocation. To configure this limit, refer
 ### 残ること
 
 - `content.bin` は 1 ファイルなので、25 MiB の上限に近づいたら分ける必要がある。今は約 630 KB。
-- 本番で直ったかは、デプロイしてから確かめる。
+- ~~本番で直ったかは、デプロイしてから確かめる。~~ 修正を `make -C moonbit deploy` したあと、`https://blog.podhmo.workers.dev` のトップページ、`/posts/`、`/slops/`、`/posts/why-ai-novel-is-bored`、`/posts/why-ai-novel-is-bored/article1.md`（`text/markdown`）、`/docs/`、`/preview.wasm`（`application/wasm`）が 200 を返し、存在しないパスは 404 を返した。新しい isolate の最初のリクエストを狙って打ち分けたわけではないが、修正前はトップページが subrequest の上限のエラーを返していた。
