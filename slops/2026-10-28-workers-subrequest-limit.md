@@ -108,12 +108,31 @@ Wasm のコードは変えていないので、Wasm の大きさも `make dev` �
 
 修正前はトップページから上限のエラーを返していたので、直ったと言ってよい。ただし、新しい isolate の最初のリクエストを狙って何度も打ち分けたわけではない。
 
-## 確かめていないこと
+## その後：PR にまとめる
 
-- `make -s check` は最後まで通らなかった。`moon info` が、コミット済みの `.mbti` ファイル6つを書き換えるためだ（`Int32` が `Int` になる）。サブエージェントは、修正を退避した HEAD でも同じ6ファイルが同じように書き換わることを確かめている。この手元の moon のツールチェーンと、`.mbti` を生成したときのものが合っていないためで、今回の修正とは関係がない。それより前のテストや検査は通っている。
+修正と記録は、いったん main に直接コミットしていた。ユーザーの指示で、それらを `fix-workers-subrequest-limit` ブランチに移して [PR #93](https://github.com/podhmo/html-sandbox/pull/93) にした。手元の main は `origin/main` に戻した。PR の本文に "Fixes #92" と書いたので、マージで issue #92 も閉じた。
+
+## その後：`make -s check` は moon の版の問題だった
+
+サブエージェントの報告では、`make -s check` が `moon info` で止まっていた。コミット済みの `.mbti` ファイル6つで、`Int32` が `Int` に書き換わるためだ。修正を退避した状態でも同じだったので、今回の修正とは関係がない。
+
+ユーザーが「moon のバージョンの問題かもな」と `moon upgrade` すると、moon 0.1.20261012 / moonc v0.10.15 が moon 0.1.20261023 / moonc v0.10.17 になり、`.mbti` の書き換えは出なくなった。手元の版が古かったのが原因だった。
+
+代わりに、新しいコンパイラで生成物が変わり、`make -s check` は次の2か所で止まった。
+
+- `make ts` が生成する `ts/pkg/tinymarkdown/tinymarkdown.mjs`
+- `make preview` が作るプレビュー用の `preview.wasm`（58,972 バイトから 59,077 バイトに）
+
+もう一つ、新しい moon では `moon check` も `pkg.generated.mbti` を書き出すようになっていた。`moonbit/experiments/` の下に、これまでなかった `.mbti` が17個できた。1つ消して `moon check` をかけると作り直されたので、`moon check` が書いていることを確かめられた。experiments の `.mbti` はこれまで管理していなかったので、`.gitignore` で無視することにした。
+
+生成し直した2つのファイルと `.gitignore` の変更は、subrequest の修正とは混ぜず、main から切った別の [PR #94](https://github.com/podhmo/html-sandbox/pull/94) にした。これで `make -s check` は最後まで通り、`make test-go` も通った。
+
+`make test-ts` は 73 件中 2 件が失敗した。古い `tinymarkdown.mjs` に戻しても同じ2件が落ちたので、生成し直したことは原因ではない。失敗の中身は、ts のテストが wsl-opencode の記事の古い本文を期待していることだった。記事を直したコミットのあとで、期待値が古いまま残ったらしい。リポジトリの決まりに従って TODO.md に記録し、ここでは直していない。
+
+#93 と #94 は、どちらもマージされた。
 
 ## 残ること
 
-- issue #92 を閉じる。
 - `content.bin` は今 600 KB 余りで、Static Assets のファイル1つの上限は 25 MiB だ。それに近づく前に分け方を考える。
-- `.mbti` の書き換えは、moon のツールチェーンを揃えて解消する。
+- 本番は #93 の修正のコードで配備したもので、#94 で作り直した `preview.wasm` はまだ入っていない。main と揃えるには、もう一度 `make -C moonbit deploy` をする。
+- ts のテストの期待値を、wsl-opencode の記事の今の本文に合わせる（TODO.md に記録済み）。
