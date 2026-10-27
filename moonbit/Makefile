@@ -15,8 +15,8 @@ BLOG := examples/blog
 WASM := _build/wasm-gc/release/build/$(BLOG)/worker/worker.wasm
 # What the Worker imports: WASM after wasm-opt -Oz.
 APP_WASM := $(BLOG)/cloudflare/build/app.wasm
-# The posts and documents the Worker reads through Static Assets, and
-# files.txt, the list of them; wrangler uploads this directory.
+# The Static Assets directory wrangler uploads: content.bin, the posts and
+# documents packed into the one file the Worker reads, and preview.wasm.
 CONTENT := $(BLOG)/cloudflare/build/content
 # binaryen's wasm-opt, which comes with moon. -all would also enable
 # features V8 cannot load yet, so only the ones moon's output uses.
@@ -68,7 +68,7 @@ embed-repodocs:
 embed-assets:
 	sh $(BLOG)/scripts/embed-assets.sh $(BLOG)/assets/embedded.mbt $(ASSETS)
 
-## content: copy the posts and the documents, and write files.txt, into examples/blog/cloudflare/build/content, the Static Assets directory the Worker reads
+## content: pack the posts and the documents into examples/blog/cloudflare/build/content/content.bin, the one Static Assets file the Worker reads
 content:
 	sh $(BLOG)/scripts/content.sh $(CONTENT) $(POSTS) $(SLOPS) .. $(DOCS)
 
