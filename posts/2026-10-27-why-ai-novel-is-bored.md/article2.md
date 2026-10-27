@@ -21,27 +21,23 @@ AIを使って書かれた素人の小説を読んでいると、物語の足取
 しかし、その第2話の本文を開いてみると、新しい街の光景を描く前に、前回の裏切りの場面が再び詳細な情景や心理の描写ブロックとして丸ごと展開されていたりする。さらに第3話でも、別の人物と話す場面で同じ裏切りの光景が新たな描写の塊として再現される。
 
 ```svg
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 170" width="500" height="170" role="img" aria-label="出来事の進行と描写ブロックの反復">
-  <g fill="none" stroke="currentColor" stroke-width="1.5">
-    <path d="M40 45h420m-6-6 6 6-6 6"/>
-    <circle cx="80" cy="45" r="4" fill="currentColor"/>
-    <circle cx="240" cy="45" r="4" fill="currentColor"/>
-    <circle cx="400" cy="45" r="4" fill="currentColor"/>
-    <rect x="40" y="75" width="80" height="34" rx="4"/>
-    <rect x="180" y="75" width="120" height="34" rx="4"/>
-    <rect x="340" y="75" width="120" height="34" rx="4"/>
-    <path d="M80 49v26m160-26v26m160-26v26"/>
-    <path d="M240 109v20c0 6-12 12-160 12" stroke-dasharray="3 3"/>
-    <path d="M400 109v30c0 6-12 12-320 12" stroke-dasharray="3 3"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 240" width="520" height="240" role="img" aria-label="出来事は裏切り、移動、遭遇と進むのに、本文は各話の冒頭で裏切りの場面へ戻る">
+  <g stroke="currentColor" fill="none">
+    <path d="M60 50V200H500" stroke-width="1"/>
+    <path d="M206 50V200M352 50V200" stroke-width="0.5" stroke-dasharray="2 4"/>
+    <path d="M60 170H206V130H352V90H500" stroke-width="9" opacity="0.15"/>
+    <path d="M60 170H260V130H352V170H400V90H500" stroke-width="2.5"/>
   </g>
-  <g fill="currentColor" font-size="11" text-anchor="middle">
-    <text x="80" y="32">出来事1（裏切り）</text>
-    <text x="240" y="32">出来事2（移動）</text>
-    <text x="400" y="32">出来事3（遭遇）</text>
-    <text x="80" y="96">出来事1を描写</text>
-    <text x="240" y="96">出来事1を再描写</text>
-    <text x="400" y="96">出来事1を再描写</text>
-    <text x="240" y="158">描写ブロックが過去の出来事へ戻り続ける</text>
+  <g fill="currentColor" font-size="11">
+    <text x="54" y="174" text-anchor="end">裏切り</text>
+    <text x="54" y="134" text-anchor="end">移動</text>
+    <text x="54" y="94" text-anchor="end">遭遇</text>
+    <g text-anchor="middle">
+      <text x="133" y="216">第1話</text><text x="279" y="216">第2話</text><text x="426" y="216">第3話</text>
+      <text x="280" y="234">本文を読み進める位置 →</text>
+    </g>
+    <text x="64" y="42">作中の時間 ↑</text>
+    <text x="500" y="42" text-anchor="end" opacity="0.7">太線：本文が描いている場面　灰色の帯：起きた出来事の順</text>
   </g>
 </svg>
 ```
@@ -106,20 +102,27 @@ AIを使って書かれた素人の小説を読んでいると、物語の足取
 小説の文章というものは、独立した部品の組み合わせではない。一見すると無駄に見える再描写の段落であっても、それは後続の文章の空気感、時間の経過の感覚、登場人物の感情の余熱と複雑に絡み合っている。
 
 ```svg
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 160" width="500" height="160" role="img" aria-label="描写を削ることで生じる連鎖的な修正の連鎖">
-  <g fill="none" stroke="currentColor" stroke-width="1.5">
-    <rect x="20" y="30" width="120" height="40" rx="4"/>
-    <rect x="180" y="30" width="120" height="40" rx="4" stroke-dasharray="3 3"/>
-    <rect x="340" y="30" width="140" height="40" rx="4"/>
-    <path d="M140 50h40m120 0h40"/>
-    <path d="M240 70v30c0 8 10 12 170 12v-42" stroke-dasharray="2 2"/>
-    <path d="M232 22l16 16m0-16l-16 16" stroke="currentColor" stroke-width="2"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-20 0 540 160" width="540" height="160" role="img" aria-label="再描写の段落をひとつ削ると、その後ろの段落にも書き直しが要る範囲が広がる">
+  <g fill="currentColor" font-size="11">
+    <text x="50" y="44" text-anchor="end">削る前</text>
+    <text x="50" y="104" text-anchor="end">削ったあと</text>
   </g>
-  <g fill="currentColor" font-size="11" text-anchor="middle">
-    <text x="80" y="54">第1話の描写</text>
-    <text x="240" y="54">再描写ブロック（削除）</text>
-    <text x="410" y="54">直後の重い決断の台詞</text>
-    <text x="325" y="130">削ると台詞の説得力が崩壊し、全面的な書き直しを強いられる</text>
+  <g stroke="currentColor" stroke-width="1" fill="none">
+    <rect x="60" y="30" width="50" height="20"/><rect x="114" y="30" width="70" height="20"/>
+    <rect x="188" y="30" width="90" height="20" stroke-dasharray="4 3"/>
+    <rect x="282" y="30" width="40" height="20"/><rect x="326" y="30" width="60" height="20"/><rect x="390" y="30" width="50" height="20"/><rect x="444" y="30" width="56" height="20"/>
+    <rect x="60" y="90" width="50" height="20"/><rect x="114" y="90" width="70" height="20"/>
+    <rect x="188" y="90" width="40" height="20" fill="currentColor" fill-opacity="0.45"/>
+    <rect x="232" y="90" width="60" height="20" fill="currentColor" fill-opacity="0.3"/>
+    <rect x="296" y="90" width="50" height="20" fill="currentColor" fill-opacity="0.18"/>
+    <rect x="350" y="90" width="56" height="20" fill="currentColor" fill-opacity="0.08"/>
+  </g>
+  <g fill="currentColor" font-size="10">
+    <text x="233" y="24" text-anchor="middle">削る再描写の段落</text>
+    <text x="302" y="24" text-anchor="middle">台詞</text>
+    <text x="208" y="84" text-anchor="middle">台詞</text>
+    <path d="M188 118v6H406v-6" fill="none" stroke="currentColor"/>
+    <text x="297" y="140" text-anchor="middle">台詞の調子や場面の終わり方まで直しが要る（塗りが強いほど大きく）</text>
   </g>
 </svg>
 ```

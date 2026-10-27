@@ -29,22 +29,32 @@ AIを道具として用いて書かれた小説において、読者が覚える
 それに加えて、より深刻なのは品質の劣化だ。入力される文章が長大になればなるほど、モデルは過去の文脈を均一に保持できなくなり、中盤の情報を見落としたり、指示に従わなくなったり、後半に進むにつれて文章の密度や語彙の豊かさが目に見えて崩れていく。
 
 ```svg
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 180" width="500" height="180" role="img" aria-label="コンテキスト増大による品質劣化と分割生成への移行">
-  <g fill="none" stroke="currentColor" stroke-width="1.5">
-    <rect x="30" y="30" width="180" height="110" rx="4"/>
-    <path d="M210 85h60m-6-6 6 6-6 6"/>
-    <rect x="270" y="25" width="200" height="34" rx="4"/>
-    <rect x="270" y="68" width="200" height="34" rx="4"/>
-    <rect x="270" y="111" width="200" height="34" rx="4"/>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 170" width="520" height="170" role="img" aria-label="一度に全部を生成すると後ろほど品質が薄れ、章ごとに分けると品質は保てるが毎回前提情報を渡すことになる">
+  <defs>
+    <linearGradient id="novel-fade">
+      <stop offset="0" stop-color="currentColor" stop-opacity="0.65"/>
+      <stop offset="1" stop-color="currentColor" stop-opacity="0.08"/>
+    </linearGradient>
+    <pattern id="novel-hatch-split" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <path d="M0 0V6" stroke="currentColor" stroke-width="1.5"/>
+    </pattern>
+  </defs>
   <g fill="currentColor" font-size="11">
-    <text x="120" y="55" text-anchor="middle">一括生成の限界</text>
-    <text x="50" y="80">- 計算コストの急増</text>
-    <text x="50" y="100">- 中間情報を見落とす</text>
-    <text x="50" y="120">- 後半ほど品質が劣化</text>
-    <text x="370" y="47" text-anchor="middle">第1話：限定した文脈で生成</text>
-    <text x="370" y="90" text-anchor="middle">第2話：限定した文脈で生成</text>
-    <text x="370" y="133" text-anchor="middle">第3話：限定した文脈で生成</text>
+    <text x="60" y="26">一度に全部を生成する</text>
+    <text x="60" y="96">章ごとに分けて生成する</text>
+  </g>
+  <rect x="60" y="34" width="440" height="22" fill="url(#novel-fade)" stroke="currentColor"/>
+  <g stroke="currentColor">
+    <rect x="60" y="104" width="16" height="22" fill="url(#novel-hatch-split)"/><rect x="76" y="104" width="64" height="22" fill="currentColor" fill-opacity="0.65"/>
+    <rect x="150" y="104" width="16" height="22" fill="url(#novel-hatch-split)"/><rect x="166" y="104" width="64" height="22" fill="currentColor" fill-opacity="0.65"/>
+    <rect x="240" y="104" width="16" height="22" fill="url(#novel-hatch-split)"/><rect x="256" y="104" width="64" height="22" fill="currentColor" fill-opacity="0.65"/>
+    <rect x="330" y="104" width="16" height="22" fill="url(#novel-hatch-split)"/><rect x="346" y="104" width="64" height="22" fill="currentColor" fill-opacity="0.65"/>
+    <rect x="420" y="104" width="16" height="22" fill="url(#novel-hatch-split)"/><rect x="436" y="104" width="64" height="22" fill="currentColor" fill-opacity="0.65"/>
+  </g>
+  <g fill="currentColor" font-size="10">
+    <text x="500" y="72" text-anchor="end">塗りの強さ：文章の質（後ろほど崩れる）</text>
+    <rect x="300" y="140" width="12" height="10" fill="url(#novel-hatch-split)" stroke="currentColor"/>
+    <text x="318" y="149">毎回渡す前提情報</text>
   </g>
 </svg>
 ```
@@ -100,19 +110,29 @@ AIを道具として用いて書かれた小説において、読者が覚える
 再描写される場面は、前話とは異なる視点から描かれたり、会話中心だったものが心理描写に変わっていたり、使われる比喩や語彙が一新されていることが多い。
 
 ```svg
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 160" width="500" height="160" role="img" aria-label="文字列類似度と読者の認知の乖離">
-  <g fill="none" stroke="currentColor" stroke-width="1.5">
-    <rect x="30" y="30" width="130" height="45" rx="4"/>
-    <rect x="340" y="30" width="130" height="45" rx="4"/>
-    <path d="M160 52h180"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 230" width="520" height="230" role="img" aria-label="段落同士の文字列の類似度では対角線しか光らないが、描いている出来事で比べると離れた段落同士が同じ場面だとわかる">
+  <g fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.4">
+    <path d="M40 40h160v160H40zM60 40v160M80 40v160M100 40v160M120 40v160M140 40v160M160 40v160M180 40v160M40 60h160M40 80h160M40 100h160M40 120h160M40 140h160M40 160h160M40 180h160"/>
+    <path d="M300 40h160v160H300zM320 40v160M340 40v160M360 40v160M380 40v160M400 40v160M420 40v160M440 40v160M300 60h160M300 80h160M300 100h160M300 120h160M300 140h160M300 160h160M300 180h160"/>
   </g>
-  <g fill="currentColor" font-size="11" text-anchor="middle">
-    <text x="95" y="50">第1話の描写</text>
-    <text x="95" y="66">（怒りと激しい台詞）</text>
-    <text x="405" y="50">第2話の再描写</text>
-    <text x="405" y="66">（静かな内省と夕景）</text>
-    <text x="250" y="45">文字列の類似度：極めて低い（検出不能）</text>
-    <text x="250" y="75">読者の認知：完全に同じ場面の再体験（冗長）</text>
+  <g fill="currentColor" fill-opacity="0.7">
+    <rect x="40" y="40" width="20" height="20"/><rect x="60" y="60" width="20" height="20"/><rect x="80" y="80" width="20" height="20"/><rect x="100" y="100" width="20" height="20"/><rect x="120" y="120" width="20" height="20"/><rect x="140" y="140" width="20" height="20"/><rect x="160" y="160" width="20" height="20"/><rect x="180" y="180" width="20" height="20"/>
+    <rect x="300" y="40" width="20" height="20"/><rect x="320" y="60" width="20" height="20"/><rect x="340" y="80" width="20" height="20"/><rect x="360" y="100" width="20" height="20"/><rect x="380" y="120" width="20" height="20"/><rect x="400" y="140" width="20" height="20"/><rect x="420" y="160" width="20" height="20"/><rect x="440" y="180" width="20" height="20"/>
+  </g>
+  <g fill="currentColor" fill-opacity="0.7">
+    <rect x="360" y="40" width="20" height="20"/><rect x="420" y="40" width="20" height="20"/>
+    <rect x="300" y="100" width="20" height="20"/><rect x="420" y="100" width="20" height="20"/>
+    <rect x="300" y="160" width="20" height="20"/><rect x="360" y="160" width="20" height="20"/>
+  </g>
+  <g fill="currentColor" font-size="12" text-anchor="middle">
+    <text x="120" y="24">文字列の似かた</text>
+    <text x="380" y="24">描いている出来事</text>
+    <text x="120" y="220" font-size="10">対角線（自分自身）しか光らない</text>
+    <text x="380" y="220" font-size="10">第1・4・7段落が同じ裏切りの場面</text>
+  </g>
+  <g fill="currentColor" font-size="9" text-anchor="middle" opacity="0.7">
+    <text x="50" y="36">1</text><text x="110" y="36">4</text><text x="170" y="36">7</text>
+    <text x="310" y="36">1</text><text x="370" y="36">4</text><text x="430" y="36">7</text>
   </g>
 </svg>
 ```

@@ -35,26 +35,20 @@
 しかし、一対一の恋愛小説だけは、この衝突の着地点がまったく違う方向へと着地する。
 
 ```svg
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 170" width="500" height="170" role="img" aria-label="恋愛小説において再描写が反芻として機能する構造">
-  <g fill="none" stroke="currentColor" stroke-width="1.5">
-    <rect x="20" y="40" width="110" height="50" rx="4"/>
-    <path d="M130 65h60m-6-6 6 6-6 6"/>
-    <rect x="190" y="20" width="130" height="36" rx="4"/>
-    <rect x="190" y="70" width="130" height="36" rx="4"/>
-    <rect x="190" y="120" width="130" height="36" rx="4"/>
-    <path d="M160 65v-32h30m-30 64h30"/>
-    <path d="M320 38h40m-6-6 6 6-6 6m-34 46h40m-6-6 6 6-6 6m-34 46h40m-6-6 6 6-6 6"/>
-    <rect x="360" y="30" width="120" height="100" rx="4"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 215" width="520" height="215" role="img" aria-label="同じ戻り方でも、冒険ものでは読者の期待から外れて足踏みになり、一対一の恋愛ものでは期待と重なって反芻になる">
+  <g stroke="currentColor" fill="none">
+    <path d="M30 30V160H240M280 30V160H490" stroke-width="1"/>
+    <path d="M30 150H70V120H110V90H150V60H240" stroke-width="9" opacity="0.15"/>
+    <path d="M280 150H335V120H350V150H370V120H400V150H425V120H490" stroke-width="9" opacity="0.15"/>
+    <path d="M30 150H85V120H100V150H120V90H150V150H175V60H240" stroke-width="2"/>
+    <path d="M280 150H335V120H350V150H370V120H400V150H425V120H490" stroke-width="2"/>
   </g>
-  <g fill="currentColor" font-size="11" text-anchor="middle">
-    <text x="75" y="62">たった一度の</text>
-    <text x="75" y="78">接触・視線</text>
-    <text x="255" y="42">その場の動揺</text>
-    <text x="255" y="92">帰宅後の反芻</text>
-    <text x="255" y="142">翌日の引きずり</text>
-    <text x="420" y="72">読者が受け取る印象：</text>
-    <text x="420" y="92">「相手のことで頭が</text>
-    <text x="420" y="110">一杯になっている」</text>
+  <g fill="currentColor" font-size="12" text-anchor="middle">
+    <text x="135" y="20">冒険もの：出来事が次々起きる</text>
+    <text x="385" y="20">一対一の恋愛もの：出来事が少ない</text>
+    <text x="135" y="182" font-size="11">線が帯から落ちる＝足踏み</text>
+    <text x="385" y="182" font-size="11">線が帯に重なる＝反芻</text>
+    <text x="260" y="206" font-size="10" opacity="0.7">太線：本文が描いている時点　灰色の帯：読者が期待する動き</text>
   </g>
 </svg>
 ```

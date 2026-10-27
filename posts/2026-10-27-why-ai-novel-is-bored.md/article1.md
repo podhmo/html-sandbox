@@ -31,21 +31,24 @@ AIを使って書かれた小説を読んでいると、たまに不思議な引
 ここで言う「描写のかたまり」というのは、段落や章の区切りとは必ずしも一致しない。ある場面の情景や登場人物の心理を、まとまった分量を使って読者の頭の中に立ち上げようとする、文章のひとまとまりのことだ。
 
 ```svg
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 200" width="500" height="200" role="img" aria-label="ひとつの出来事に対して複数の描写ブロックがぶら下がっている様子">
-  <g fill="none" stroke="currentColor" stroke-width="1.5">
-    <rect x="20" y="75" width="110" height="50" rx="6"/>
-    <path d="M130 100h70m-6-6 6 6-6 6"/>
-    <rect x="200" y="20" width="160" height="38" rx="6"/>
-    <rect x="200" y="81" width="160" height="38" rx="6"/>
-    <rect x="200" y="142" width="160" height="38" rx="6"/>
-    <path d="M165 100v-61h35m-35 122h35"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 250" width="520" height="250" role="img" aria-label="読み進めても作中の時間が第1話の出来事へ何度も戻る様子">
+  <g stroke="currentColor" fill="none">
+    <path d="M60 30V200H500" stroke-width="1"/>
+    <path d="M148 30V200M236 30V200M324 30V200M412 30V200" stroke-width="0.5" stroke-dasharray="2 4"/>
+    <path d="M60 170H148V130H236V90H324V50H500" stroke-width="9" opacity="0.15"/>
+    <path d="M60 170H190V130H250V170H280V90H340V50H412V170H452V50H500" stroke-width="2.5"/>
   </g>
-  <g fill="currentColor" font-size="12" text-anchor="middle">
-    <text x="75" y="96">一度だけの</text>
-    <text x="75" y="114">出来事</text>
-    <text x="280" y="44">第1話：現場のくわしい描写</text>
-    <text x="280" y="105">第2話：冒頭でのくわしい再描写</text>
-    <text x="280" y="166">第5話：悩む場面でのくわしい再描写</text>
+  <g fill="currentColor" font-size="11">
+    <text x="54" y="174" text-anchor="end">裏切り</text>
+    <text x="54" y="134" text-anchor="end">移動</text>
+    <text x="54" y="94" text-anchor="end">遭遇</text>
+    <text x="54" y="54" text-anchor="end">決断</text>
+    <g text-anchor="middle">
+      <text x="104" y="216">第1話</text><text x="192" y="216">第2話</text><text x="280" y="216">第3話</text><text x="368" y="216">第4話</text><text x="456" y="216">第5話</text>
+      <text x="280" y="240">本文を読み進める位置 →</text>
+    </g>
+    <text x="64" y="22">作中の時間 ↑</text>
+    <text x="330" y="40" opacity="0.7">灰色の帯：出来事の順に進んだ場合</text>
   </g>
 </svg>
 ```
@@ -100,27 +103,43 @@ AIを使って書かれた小説を読んでいると、たまに不思議な引
 ところが、AI側からすると、プロンプトに書かれた情報は「守るべきルール」であると同時に、「今から書く文章のテーマや材料」に見えてしまうんじゃないか。
 
 ```svg
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 240" width="500" height="240" role="img" aria-label="設定が毎回の本文へ漏れ出してしまう流れ">
-  <g fill="none" stroke="currentColor" stroke-width="1.5">
-    <rect x="20" y="20" width="150" height="46" rx="6"/>
-    <path d="M95 66v144m0-80h75m-6-6 6 6-6 6m-69 80h75m-6-6 6 6-6 6m-75-160h75m-6-6 6 6-6 6"/>
-    <rect x="170" y="44" width="130" height="36" rx="6"/>
-    <rect x="170" y="112" width="130" height="36" rx="6"/>
-    <rect x="170" y="180" width="130" height="36" rx="6"/>
-    <path d="M300 62h50m-6-6 6 6-6 6m-44 68h50m-6-6 6 6-6 6m-44 68h50m-6-6 6 6-6 6"/>
-    <rect x="350" y="44" width="130" height="36" rx="6"/>
-    <rect x="350" y="112" width="130" height="36" rx="6"/>
-    <rect x="350" y="180" width="130" height="36" rx="6"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 230" width="520" height="230" role="img" aria-label="各話の分量のうち、既に描いた場面の再描写と設定の言い直しが占める割合と、一行の言及で済ませた場合の長さの違い">
+  <defs>
+    <pattern id="novel-hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <path d="M0 0V6" stroke="currentColor" stroke-width="1.5"/>
+    </pattern>
+  </defs>
+  <g fill="currentColor" font-size="11">
+    <text x="70" y="22" font-size="12">再描写をそのまま書いた場合</text>
+    <text x="50" y="47" text-anchor="end">第1話</text>
+    <text x="50" y="71" text-anchor="end">第2話</text>
+    <text x="50" y="95" text-anchor="end">第3話</text>
+    <text x="70" y="137" font-size="12">一行の言及で済ませた場合</text>
+    <text x="50" y="162" text-anchor="end">第1話</text>
+    <text x="50" y="186" text-anchor="end">第2話</text>
+    <text x="50" y="210" text-anchor="end">第3話</text>
   </g>
-  <g fill="currentColor" font-size="11" text-anchor="middle">
-    <text x="95" y="40">共通の設定情報</text>
-    <text x="95" y="55">（性格や過去の事件）</text>
-    <text x="235" y="66">第1話を生成</text>
-    <text x="235" y="134">第2話を生成</text>
-    <text x="235" y="202">第3話を生成</text>
-    <text x="415" y="66">性格を詳しく描写</text>
-    <text x="415" y="134">同じ性格をまた描写</text>
-    <text x="415" y="202">同じ性格をまた描写</text>
+  <g stroke="currentColor" stroke-width="1">
+    <rect x="70" y="35" width="200" height="16" fill="currentColor" fill-opacity="0.55"/>
+    <rect x="70" y="59" width="40" height="16" fill="url(#novel-hatch)"/>
+    <rect x="110" y="59" width="150" height="16" fill="currentColor" fill-opacity="0.55"/>
+    <rect x="260" y="59" width="180" height="16" fill="none"/>
+    <rect x="70" y="83" width="40" height="16" fill="url(#novel-hatch)"/>
+    <rect x="110" y="83" width="110" height="16" fill="currentColor" fill-opacity="0.55"/>
+    <rect x="220" y="83" width="180" height="16" fill="none"/>
+    <rect x="70" y="150" width="200" height="16" fill="currentColor" fill-opacity="0.55"/>
+    <rect x="70" y="174" width="4" height="16" fill="currentColor" fill-opacity="0.55"/>
+    <rect x="74" y="174" width="180" height="16" fill="none"/>
+    <rect x="70" y="198" width="4" height="16" fill="currentColor" fill-opacity="0.55"/>
+    <rect x="74" y="198" width="180" height="16" fill="none"/>
+  </g>
+  <g font-size="10" fill="currentColor">
+    <rect x="300" y="146" width="12" height="10" fill="currentColor" fill-opacity="0.55" stroke="currentColor"/>
+    <text x="318" y="155">裏切りの場面</text>
+    <rect x="300" y="164" width="12" height="10" fill="url(#novel-hatch)" stroke="currentColor"/>
+    <text x="318" y="173">性格・設定の言い直し</text>
+    <rect x="300" y="182" width="12" height="10" fill="none" stroke="currentColor"/>
+    <text x="318" y="191">その話で新しく起きること</text>
   </g>
 </svg>
 ```
@@ -171,22 +190,22 @@ AIを使って書かれた小説を読んでいると、たまに不思議な引
 けれど小説の文章には、そんな便利な境界線がない。章とか段落で区切られてはいるけれど、文章の意味や読者の気持ちの盛り上がりは、前後の文脈と毛細血管みたいに細かくつながり合っている。
 
 ```svg
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 170" width="500" height="170" role="img" aria-label="文章同士の見えないつながり">
-  <g fill="none" stroke="currentColor" stroke-width="1.5">
-    <rect x="25" y="35" width="125" height="44" rx="6"/>
-    <rect x="187" y="35" width="125" height="44" rx="6"/>
-    <rect x="350" y="35" width="125" height="44" rx="6"/>
-    <path d="M150 57h37m-6-6 6 6-6 6m125 0h37m-6-6 6 6-6 6"/>
-    <path d="M87 79v35c0 10 20 18 163 18s163-8 163-18V79" stroke-dasharray="3 3"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 220" width="520" height="220" role="img" aria-label="再描写を削ると台詞は早く来るが、そこまでに溜まる重みも減ってしまう">
+  <g stroke="currentColor" fill="none">
+    <path d="M50 20V180H500" stroke-width="1"/>
+    <rect x="200" y="20" width="130" height="160" fill="currentColor" fill-opacity="0.08" stroke="none"/>
+    <path d="M50 170C120 150 170 125 200 112C250 90 300 55 330 40" stroke-width="2.5"/>
   </g>
-  <g fill="currentColor" font-size="11" text-anchor="middle">
-    <text x="87" y="55">第1話の裏切り</text>
-    <text x="87" y="69">（くわしい描写）</text>
-    <text x="250" y="55">第2話の再描写</text>
-    <text x="250" y="69">（重複している）</text>
-    <text x="412" y="55">直後の決断の台詞</text>
-    <text x="412" y="69">（重みのある一言）</text>
-    <text x="250" y="125">感情の空気感やため息の長さを支える見えない糸</text>
+  <g fill="currentColor">
+    <circle cx="330" cy="40" r="5"/>
+    <circle cx="200" cy="112" r="5" fill="none" stroke="currentColor" stroke-width="2"/>
+  </g>
+  <g fill="currentColor" font-size="11">
+    <text x="340" y="44">台詞（再描写を読んだあと）</text>
+    <text x="210" y="134">台詞（再描写を削ると、ここで来る）</text>
+    <text x="265" y="172" text-anchor="middle" opacity="0.7">再描写の区間</text>
+    <text x="56" y="16">読者の中に溜まっている重み ↑</text>
+    <text x="500" y="198" text-anchor="end">本文を読み進める位置 →</text>
   </g>
 </svg>
 ```
