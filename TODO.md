@@ -50,7 +50,7 @@
   [issue #71](https://github.com/podhmo/html-sandbox/issues/71)）。
   先に上の「ts 版のブログが front matter の `prev` と `next` で起動
   できない」を直す必要がある。
-- [ ] **`TestEmbeddedHumanBundle` が posts の記事追加で落ちる**:
+- [x] **`TestEmbeddedHumanBundle` が posts の記事追加で落ちる**:
   go/examples/blog/internal/site/collections_test.go が posts を
   wsl-opencode の1件だけと決め打ちしているので、
   posts/2026-10-27-why-ai-novel-is-bored.md を足した 2bcf887 から
