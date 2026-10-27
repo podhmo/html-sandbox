@@ -58,8 +58,17 @@ func TestEmbeddedHumanBundle(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(human) != 1 || human[0].Slug != "wsl-opencode" || len(human[0].Members) != 3 {
-		t.Fatalf("want the three-file Gist bundle, got %#v", human)
+	// Other human posts may be added later; look up the Gist bundle by slug.
+	var slugs []string
+	var bundle *Post
+	for i := range human {
+		slugs = append(slugs, human[i].Slug)
+		if human[i].Slug == "wsl-opencode" {
+			bundle = &human[i]
+		}
+	}
+	if bundle == nil || len(bundle.Members) != 3 {
+		t.Fatalf("want the three-file Gist bundle wsl-opencode among human posts, got %v", slugs)
 	}
 	ai, err := LoadSlops(aiFS)
 	if err != nil {
