@@ -94,3 +94,5 @@ slops/2026-10-27-writing-slops.md/
 `/preview` に Markdown を貼るか、ファイルを読み込んで、文章や図の見た目を確認できる。バンドル全体の並びは、ローカルのブログで確認する。
 
 エージェント向けの詳しい手順は、[write-slops の skill](../../.claude/skills/write-slops/SKILL.md)にまとめた。
+
+その skill に沿って既存の記事の図を描き直したときに出てきた落とし穴は、[03-svg-pitfalls.md](#03-svg-pitfallsmd)に残した。
