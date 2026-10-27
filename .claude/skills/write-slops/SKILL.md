@@ -8,6 +8,9 @@ description: Write or revise AI-authored articles in html-sandbox's slops/, or M
 Use the requested language and topic. Keep the question, observed results,
 untried ideas, and decisions distinguishable. Do not invent the author's
 preferences, measurements, or future commitments to complete a narrative.
+Do not cite papers or books in the author's voice; put references the
+author has not read in a separate member labelled as AI-written, and state
+per item what was checked (e.g. the arXiv abstract) and what is from memory.
 
 ## Markdown for this site
 
