@@ -7,17 +7,14 @@ import { wasmApp, toResponse } from "../../../pkg/http/wasm/adapter.mjs";
 
 const app = wasmApp(wasm);
 
-// assetURL is the URL to ask the ASSETS binding for path, a path under
-// build/content. The binding ignores the host, and each segment is escaped
-// so that a name with "#" or "?" still finds its file.
-function assetURL(path) {
-  return new URL(path.split("/").map(encodeURIComponent).join("/"), "https://assets.local");
-}
-
-// loadContent reads the Static Assets once per isolate: files.txt lists
-// them (the build makes it), and each file goes to the Wasm, which builds
-// the site from them on the first request. A failure is not kept, so the
-// next request tries again.
+// loadContent reads the content once per isolate: content.bin, which the
+// build packs from the posts and documents (see ../scripts/content.sh),
+// goes to the Wasm file by file, and the Wasm builds the site from them on
+// the first request. It is one fetch through the ASSETS binding however
+// many posts there are: each fetch counts toward the subrequest limit (50
+// per invocation on the Workers Free plan), which one fetch per file
+// passed once there were 50 files. A failure is not kept, so the next
+// request tries again.
 let loading;
 
 function loadContent(env) {
@@ -33,18 +30,34 @@ function loadContent(env) {
 
 async function fetchContent(env) {
   if (!env.ASSETS) throw new Error("the ASSETS binding is not configured");
-  const list = await env.ASSETS.fetch(assetURL("/files.txt"));
-  if (!list.ok) throw new Error(`files.txt: ${list.status} ${list.statusText}`);
-  const names = (await list.text()).split("\n").filter((name) => name !== "");
-  if (names.length === 0) throw new Error("files.txt lists no files");
-  const contents = await Promise.all(
-    names.map(async (name) => {
-      const res = await env.ASSETS.fetch(assetURL(`/${name}`));
-      if (!res.ok) throw new Error(`${name}: ${res.status} ${res.statusText}`);
-      return new Uint8Array(await res.arrayBuffer());
-    }),
-  );
-  app.load(names.map((name, i) => [name, contents[i]]));
+  // The binding ignores the host.
+  const res = await env.ASSETS.fetch(new URL("/content.bin", "https://assets.local"));
+  if (!res.ok) throw new Error(`content.bin: ${res.status} ${res.statusText}`);
+  const files = unpack(new Uint8Array(await res.arrayBuffer()));
+  if (files.length === 0) throw new Error("content.bin holds no files");
+  app.load(files);
+}
+
+// unpack splits content.bin into [name, content] pairs: each file is a
+// header line "<size> <name>\n" followed by its <size> bytes. The contents
+// are views into data, not copies.
+function unpack(data) {
+  const decoder = new TextDecoder("utf-8", { fatal: true });
+  const files = [];
+  let pos = 0;
+  while (pos < data.length) {
+    const eol = data.indexOf(10, pos);
+    if (eol < 0) throw new Error(`content.bin: no header at byte ${pos}`);
+    const header = decoder.decode(data.subarray(pos, eol));
+    const m = /^(\d+) (.+)$/.exec(header);
+    if (!m) throw new Error(`content.bin: bad header at byte ${pos}: ${JSON.stringify(header)}`);
+    const start = eol + 1;
+    const end = start + Number(m[1]);
+    if (end > data.length) throw new Error(`content.bin: ${m[2]} is cut short`);
+    files.push([m[2], data.subarray(start, end)]);
+    pos = end;
+  }
+  return files;
 }
 
 // cache holds the 200 responses to GET and HEAD by path, for this isolate.
@@ -57,7 +70,7 @@ const cacheLimit = 1024;
 let cachedBaseURL;
 
 // assetOnly lists the paths served from Static Assets without the Wasm:
-// the preview page's renderer. It is not in files.txt, so the Wasm never
+// the preview page's renderer. It is not in content.bin, so the Wasm never
 // loads it as content, and it never sees its requests either — it is a
 // binary file the String-based ABI could not carry. Only GET and HEAD go
 // there, like the site's own routing, and the path is decoded first so

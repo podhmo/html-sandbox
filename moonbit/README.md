@@ -71,7 +71,7 @@ as in `../go`.
   each post and document the host loads from Static Assets, and `serve`
   hands the request to `Site::handle` through `http/wasm`
 - `cloudflare` — the Cloudflare Worker that runs it, in JS: `worker.mjs`
-  loads `build/content` through the `ASSETS` binding once per isolate and
+  loads `build/content/content.bin` through the `ASSETS` binding once per isolate and
   runs the Wasm with `http/wasm/adapter.mjs`, keeping each 200 response to
   GET and HEAD by path for the rest of the isolate's life, and
   `wrangler.jsonc` builds it and uploads the content as Static Assets
@@ -101,7 +101,7 @@ own echo, leaving the tools' output). To work on one part, run
 moon directly (`moon test -p podhmo/html-sandbox/pkg/http`).
 
 ```sh
-make build    # the blog's Wasm, into _build/wasm-gc/release/build/examples/blog/worker/worker.wasm, and after wasm-opt -Oz into examples/blog/cloudflare/build/app.wasm; also copies the posts and documents into examples/blog/cloudflare/build/content
+make build    # the blog's Wasm, into _build/wasm-gc/release/build/examples/blog/worker/worker.wasm, and after wasm-opt -Oz into examples/blog/cloudflare/build/app.wasm; also packs the posts and documents into examples/blog/cloudflare/build/content/content.bin
 make test     # moon test, and the integration test of pkg/http/wasm on Node through adapter.mjs
 make -s check # before every commit: make test, moon fmt --check, moon check (wasm-gc, native, and in experiments/), moon info
 ```
@@ -112,13 +112,19 @@ native only (async's I/O is native only), so the CLI and its dependency
 stay out of the Wasm.
 
 MoonBit has no `go:embed`, and the Worker does not need one: `make build`
-runs `examples/blog/scripts/content.sh`, which copies the posts and the
-documents into `examples/blog/cloudflare/build/content/` (ignored by git)
-and writes `files.txt`, the sorted list of them. `worker.mjs` fetches
-every file listed there through the `ASSETS` binding on the isolate's
-first request. Because Static Assets has no API to list its files, the
-build makes the list, and a post added to `posts/` reaches the site with
-the same `make dev` or `make deploy` as before.
+runs `examples/blog/scripts/content.sh`, which packs the posts and the
+documents into one file, `examples/blog/cloudflare/build/content/content.bin`
+(ignored by git): for each file, a header line `<size> <name>` and then
+its bytes. `worker.mjs` fetches it through the `ASSETS` binding on the
+isolate's first request and hands the files to the Wasm one by one. One
+file means one fetch however many posts there are: each `ASSETS` fetch
+counts as a subrequest, which the Workers Free plan caps at 50 per
+invocation, and fetching each file on its own failed with "Too many
+subrequests" once there were 50 files (#92). It also needs no list of
+files, which Static Assets has no API for, and a post added to `posts/`
+reaches the site with the same `make dev` or `make deploy` as before. A
+Static Assets file may be at most 25 MiB, so `content.bin` has to be split
+before the posts and documents reach that.
 
 The tests and the spikes in `experiments/` still use `embed.sh`, which
 writes the posts into `posts/embedded.mbt`, and `TODO.md` and
@@ -144,13 +150,13 @@ make dev            # or: make dev PORT=8798, if the Go Worker uses 8787
 Then open <http://localhost:8787>. wrangler's build command runs
 `make build`, which writes the Wasm, shrunk by `wasm-opt -Oz`, to
 `examples/blog/cloudflare/build/app.wasm` and the posts and documents to
-`examples/blog/cloudflare/build/content/`, ignored by git, and `wrangler dev`
+`examples/blog/cloudflare/build/content/content.bin`, ignored by git, and `wrangler dev`
 rebuilds when `pkg/`, `examples/blog/site/`, `examples/blog/worker/`, the
 scripts under `examples/blog/scripts/`, the posts in `posts/`, `TODO.md`,
 or the documents in `docs/` change. The content is
-Static Assets: they are uploaded with the Worker, and the Worker reads
-them through `env.ASSETS` on the first request, so a request never gets
-one of those files directly.
+Static Assets: it is uploaded with the Worker, and the Worker reads it
+through `env.ASSETS` on the first request, so a request never gets
+`content.bin` directly.
 
 ## Comparing with the Go blog
 

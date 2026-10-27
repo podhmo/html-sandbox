@@ -13,7 +13,7 @@
 # and names are relative to BASE.
 #
 # Both embed.sh, which writes the files into MoonBit sources, and
-# content.sh, which copies them into the Static Assets directory, take the
+# content.sh, which packs them into the Static Assets file, take the
 # same files this way.
 set -eu
 

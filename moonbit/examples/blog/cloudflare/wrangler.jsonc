@@ -23,9 +23,11 @@
     "BASE_URL": "https://blog.podhmo.workers.dev"
   },
   "assets": {
-    // The posts and the repository's documents, which `make build` copies
-    // into build/content together with files.txt, the list of them. The
-    // Worker reads them through env.ASSETS; nothing is served directly.
+    // build/content/content.bin, the posts and the repository's documents
+    // that `make build` packs into one file, and preview.wasm. The Worker
+    // reads content.bin through env.ASSETS with one fetch, as each fetch
+    // counts toward the subrequest limit (50 on the Free plan), and passes
+    // preview.wasm through; nothing is served directly.
     "directory": "./build/content",
     "binding": "ASSETS",
     // Every request goes through the Worker as before, so the routes and

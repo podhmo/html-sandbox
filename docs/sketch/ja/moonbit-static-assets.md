@@ -214,4 +214,58 @@ Node.js 24 で、`worker.mjs` と同じ順序（`load` してから `call`）を
 - `build/content/` を直接書き換えたときに、`wrangler dev` が isolate を作り直さずに反映するか。`posts/` や `docs/` を変えたときは `watch_dir` がビルドを起こすので反映される。
 - アセットのファイル名に日本語などが入ったときの扱い（今の文章のファイル名は ASCII だけ）。
 - 本番の Workers で、`ASSETS` からの 34 ファイルの取得がどのくらいかかるか。無料プランの CPU 時間の上限（10 ms）に対して、`Site` の組み立てがどこまで食うかも本番では測っていない。
-- `ASSETS` への 34 回の取得が subrequest の上限（無料プランで 50）に数えられるか。数えられるなら、記事と文書が増えると最初のリクエストが失敗しうる。
+- ~~`ASSETS` への 34 回の取得が subrequest の上限（無料プランで 50）に数えられるか。数えられるなら、記事と文書が増えると最初のリクエストが失敗しうる。~~ 数えられた。下の「追記: subrequest の上限」を参照。
+
+## 追記: subrequest の上限（#92）
+
+### 問い
+
+`ASSETS` バインディングへの `fetch` は subrequest の上限に数えられるか。数えられるなら、記事と文書が増えたときにどうするか。
+
+### 答え
+
+数えられる。記事と文書をビルド時に 1 つのファイル `content.bin` にまとめ、Worker は最初のリクエストでそれを 1 回だけ取得するようにした。取得の回数は記事の数によらず 1 回になる。
+
+### どう確かめたか
+
+**本番で失敗した。** #89 をマージしたあとに `make -C moonbit deploy` したところ、`https://blog.podhmo.workers.dev/` が次を返した。
+
+```
+Too many subrequests by single Worker invocation. To configure this limit, refer to https://developers.cloudflare.com/workers/wrangler/configuration/#limits
+```
+
+そのときの `worker.mjs` は、`files.txt` と、そこに並ぶファイルを 1 つずつ `ASSETS` から取得していた。各コミットでの内容のファイル数（`list-files.sh` で数えた）と、最初のリクエストでの取得回数（`files.txt` を含む）は次のとおり。
+
+| コミット | ファイル数 | 取得回数 |
+| --- | --- | --- |
+| ea2a55c (#87) | 42 | 43 |
+| 79c2958 (#88) | 45 | 46 |
+| 46a1c67 (#89) | 53 | 54 |
+
+50 を超えたのは #89 からで、失敗が始まった時期と合う。ほかに subrequest を出すコードはないので、`ASSETS` への取得が数えられていたことになる。
+
+**Cloudflare のドキュメント**（2026-10-27 に読んだ）。
+
+- [Workers の Limits](https://developers.cloudflare.com/workers/platform/limits/): subrequest は "any request a Worker makes using the Fetch API or to Cloudflare services like R2, KV, or D1"。1 回の呼び出しあたり Free で 50、Paid で 10,000（最大 1000 万）。Static Assets のファイルは 1 つ 25 MiB まで、Worker のバージョンあたり Free で 20,000 ファイルまで。
+- [Wrangler の設定の `limits`](https://developers.cloudflare.com/workers/wrangler/configuration/#limits): `subrequests` は "defaults to 50 for free accounts"、"The free account maximum is 50"。また "Limits are only enforced when deployed to Cloudflare's network, not in local development"。
+- [Static Assets のバインディング](https://developers.cloudflare.com/workers/static-assets/binding/) と [Billing and limitations](https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/): `ASSETS` への `fetch` が subrequest に数えられるかどうかは書かれていない。[Service bindings](https://developers.cloudflare.com/workers/runtime-apis/bindings/service-bindings/) には "Each request to a Worker via a Service binding counts toward your subrequest limit" とある。`ASSETS` も `Fetcher` のバインディングなので、同じ扱いと考えるのが自然で、本番の失敗とも合う。
+
+**手元での確認。** `wrangler dev` は上限を課さない（上のドキュメントのとおり）ので、上限で失敗するかどうかは手元では再現できない。代わりに、一時的に `env.ASSETS.fetch` を数えるコードを `worker.mjs` に足して `make dev PORT=8798` で動かし、リクエストごとの取得回数を出した（確認のあとで外した）。
+
+- 新しい isolate の最初のリクエスト（`/`）: 1 回（`content.bin`）
+- 続く `/posts/`、`/slops/`、`/posts/why-ai-novel-is-bored`、`/posts/why-ai-novel-is-bored/article1.md`、`/docs/`: 0 回
+- `/preview.wasm`: 1 回（これまでどおり `ASSETS` へそのまま渡す）
+
+`content.bin` を `worker.mjs` の `unpack` で分けると、53 ファイルの名前が前の `files.txt` と同じ順で一致し、中身も元のファイルとバイト単位で一致した。Go 版と `make compare` で比べると、トップページと各一覧からリンクされた 44 パスと `article1.md` が一致した（`/preview.wasm` は比較ツールがバイナリを UTF-8 として読めずに両側でエラーになるので、`cmp` で元のファイルと同じことを確かめた）。
+
+### 選ばなかった案
+
+- **`limits.subrequests` を上げる。** Free の最大が 50 なので上げられない。Paid にしても、記事が増えるたびに上限へ近づく形は変わらない。
+- **ページごとに必要なファイルだけ取得する。** トップページや一覧はすべての記事のタイトルと日付を要るので、最初のリクエストで結局すべてを読むことになる。
+- **Wasm に埋め込み直す。** 記事を足すたびに Wasm が太るのを避けるために外へ出したので、戻す理由がない。
+- **JSON にまとめる。** 今の記事や文書はどれも UTF-8 のテキストなので、JSON でも運べる。ただ、Wasm に渡すのはもともとファイルごとの `Uint8Array` なので、`<size> <name>\n` のヘッダーと中身のバイト列を並べる形のほうが、文字列への変換と戻しを挟まずに切り出すだけで済む。束はバイナリーのファイルを扱わないので、バイナリーのためにこの形を選んだわけではない。
+
+### 残ること
+
+- `content.bin` は 1 ファイルなので、25 MiB の上限に近づいたら分ける必要がある。今は約 630 KB。
+- ~~本番で直ったかは、デプロイしてから確かめる。~~ 修正を `make -C moonbit deploy` したあと、`https://blog.podhmo.workers.dev` のトップページ、`/posts/`、`/slops/`、`/posts/why-ai-novel-is-bored`、`/posts/why-ai-novel-is-bored/article1.md`（`text/markdown`）、`/docs/`、`/preview.wasm`（`application/wasm`）が 200 を返し、存在しないパスは 404 を返した。新しい isolate の最初のリクエストを狙って打ち分けたわけではないが、修正前はトップページが subrequest の上限のエラーを返していた。

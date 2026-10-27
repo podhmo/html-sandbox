@@ -337,6 +337,7 @@ Go 版の `pkg/el` を `moonbit/el` に移植した。`picoel` はまだ。
 2026-10-22 に、記事と文書を Wasm の外に出した。詳しい設計、実装、つまずいた点は[別のレポート](moonbit-static-assets.md)に書いた。ここには、サイズと時間の変化だけを残す。
 
 - 記事と文書は `examples/blog/cloudflare/build/content/` にコピーし、`wrangler.jsonc` の `assets` でアップロードする。Worker は `ASSETS` から `files.txt` と全部のファイルを初回リクエストで読み、`file(n)` で Wasm に渡す。
+  - 後日の注記: ファイルごとの取得が subrequest の上限（無料プランで 50）を超えて本番で失敗したので、#92 の修正で全部を 1 つの `content.bin` にまとめ、1 回の取得で読むようにした。`files.txt` はもうない。経緯は [Static Assets のレポート](moonbit-static-assets.md)の「追記: subrequest の上限（#92）」にある。
 - テストと `experiments/` は、今までどおり `embed.sh` の埋め込みを使う。
 
 | ビルド（2026-10-22、投稿 10 本・12 ファイル、文書 21） | 変更前 | 変更後 |
@@ -346,7 +347,7 @@ Go 版の `pkg/el` を `moonbit/el` に移植した。`picoel` はまだ。
 | Total Upload | 605.23 KiB（gzip 195.43 KiB） | 144.55 KiB（gzip 63.56 KiB） |
 
 - `wrangler deploy --dry-run` はアセットを `Read 41 files` と数えるが（34 ファイルと 7 ディレクトリ）、Total Upload には入らない。
-- 記事を 1 本足しても `app.wasm` はバイト単位で変わらない（SHA-256 が同じ）。`wrangler dev` を動かしたまま足すと 20 秒ほどで反映され、消すと `files.txt` から外れて 404 に戻る。
+- 記事を 1 本足しても `app.wasm` はバイト単位で変わらない（SHA-256 が同じ）。`wrangler dev` を動かしたまま足すと 20 秒ほどで反映され、消すと `files.txt` から外れて 404 に戻る（今は `content.bin` から外れる）。
 - 比較は、Go 版（`-debug`）と 62 パスで `0 of 62 paths differ`。
 
 時間（Node.js 24 で `load` してから `call`、33 ファイル、約 396 KB）:
