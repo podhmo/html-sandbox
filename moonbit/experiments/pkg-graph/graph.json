@@ -1,0 +1,317 @@
+{
+  "project": "podhmo/html-sandbox",
+  "generatedBy": "moon tree --package --json, annotated with moon ide outline",
+  "moonVersion": "moon 0.1.20261012 (748b63c 2026-10-12)",
+  "packages": [
+    {
+      "name": "examples/blog/assets",
+      "kind": "generated",
+      "files": 1,
+      "testFiles": 0,
+      "declarations": 8,
+      "public": 8
+    },
+    {
+      "name": "examples/blog/compare",
+      "kind": "application",
+      "files": 1,
+      "testFiles": 1,
+      "declarations": 9,
+      "public": 7
+    },
+    {
+      "name": "examples/blog/compare/cmd",
+      "kind": "application",
+      "files": 1,
+      "testFiles": 0,
+      "declarations": 3,
+      "public": 0
+    },
+    {
+      "name": "examples/blog/posts",
+      "kind": "generated",
+      "files": 1,
+      "testFiles": 0,
+      "declarations": 4,
+      "public": 1
+    },
+    {
+      "name": "examples/blog/preview",
+      "kind": "application",
+      "files": 1,
+      "testFiles": 1,
+      "declarations": 1,
+      "public": 1
+    },
+    {
+      "name": "examples/blog/repodocs",
+      "kind": "generated",
+      "files": 1,
+      "testFiles": 1,
+      "declarations": 22,
+      "public": 1
+    },
+    {
+      "name": "examples/blog/site",
+      "kind": "application",
+      "files": 7,
+      "testFiles": 2,
+      "declarations": 115,
+      "public": 14
+    },
+    {
+      "name": "examples/blog/slops",
+      "kind": "generated",
+      "files": 1,
+      "testFiles": 1,
+      "declarations": 18,
+      "public": 1
+    },
+    {
+      "name": "examples/blog/worker",
+      "kind": "application",
+      "files": 1,
+      "testFiles": 0,
+      "declarations": 11,
+      "public": 2
+    },
+    {
+      "name": "pkg/el",
+      "kind": "library",
+      "files": 4,
+      "testFiles": 2,
+      "declarations": 80,
+      "public": 71
+    },
+    {
+      "name": "pkg/http",
+      "kind": "library",
+      "files": 6,
+      "testFiles": 1,
+      "declarations": 49,
+      "public": 42
+    },
+    {
+      "name": "pkg/http/wasm",
+      "kind": "library",
+      "files": 2,
+      "testFiles": 2,
+      "declarations": 18,
+      "public": 7
+    },
+    {
+      "name": "pkg/http/wasm/integration",
+      "kind": "library",
+      "files": 1,
+      "testFiles": 0,
+      "declarations": 8,
+      "public": 2
+    },
+    {
+      "name": "pkg/picoel",
+      "kind": "library",
+      "files": 1,
+      "testFiles": 1,
+      "declarations": 37,
+      "public": 35
+    },
+    {
+      "name": "pkg/tinyfrontmatter",
+      "kind": "library",
+      "files": 1,
+      "testFiles": 1,
+      "declarations": 10,
+      "public": 5
+    },
+    {
+      "name": "pkg/tinymarkdown",
+      "kind": "library",
+      "files": 2,
+      "testFiles": 3,
+      "declarations": 39,
+      "public": 14
+    },
+    {
+      "name": "pkg/tinymarkdown/js",
+      "kind": "library",
+      "files": 1,
+      "testFiles": 1,
+      "declarations": 15,
+      "public": 3
+    }
+  ],
+  "edges": [
+    {
+      "from": "examples/blog/compare/cmd",
+      "to": "examples/blog/compare",
+      "kinds": [
+        "source"
+      ]
+    },
+    {
+      "from": "examples/blog/preview",
+      "to": "examples/blog/site",
+      "kinds": [
+        "source"
+      ]
+    },
+    {
+      "from": "examples/blog/preview",
+      "to": "pkg/el",
+      "kinds": [
+        "source"
+      ]
+    },
+    {
+      "from": "examples/blog/site",
+      "to": "examples/blog/assets",
+      "kinds": [
+        "source"
+      ]
+    },
+    {
+      "from": "examples/blog/site",
+      "to": "examples/blog/posts",
+      "kinds": [
+        "blackbox-test"
+      ]
+    },
+    {
+      "from": "examples/blog/site",
+      "to": "examples/blog/repodocs",
+      "kinds": [
+        "blackbox-test"
+      ]
+    },
+    {
+      "from": "examples/blog/site",
+      "to": "examples/blog/slops",
+      "kinds": [
+        "blackbox-test"
+      ]
+    },
+    {
+      "from": "examples/blog/site",
+      "to": "pkg/el",
+      "kinds": [
+        "blackbox-test",
+        "source"
+      ]
+    },
+    {
+      "from": "examples/blog/site",
+      "to": "pkg/http",
+      "kinds": [
+        "blackbox-test",
+        "source"
+      ]
+    },
+    {
+      "from": "examples/blog/site",
+      "to": "pkg/picoel",
+      "kinds": [
+        "source"
+      ]
+    },
+    {
+      "from": "examples/blog/site",
+      "to": "pkg/tinyfrontmatter",
+      "kinds": [
+        "source"
+      ]
+    },
+    {
+      "from": "examples/blog/site",
+      "to": "pkg/tinymarkdown",
+      "kinds": [
+        "source"
+      ]
+    },
+    {
+      "from": "examples/blog/worker",
+      "to": "examples/blog/site",
+      "kinds": [
+        "source"
+      ]
+    },
+    {
+      "from": "examples/blog/worker",
+      "to": "pkg/http",
+      "kinds": [
+        "source"
+      ]
+    },
+    {
+      "from": "examples/blog/worker",
+      "to": "pkg/http/wasm",
+      "kinds": [
+        "source"
+      ]
+    },
+    {
+      "from": "pkg/http/wasm",
+      "to": "pkg/http",
+      "kinds": [
+        "source"
+      ]
+    },
+    {
+      "from": "pkg/http/wasm/integration",
+      "to": "pkg/http",
+      "kinds": [
+        "source"
+      ]
+    },
+    {
+      "from": "pkg/http/wasm/integration",
+      "to": "pkg/http/wasm",
+      "kinds": [
+        "source"
+      ]
+    },
+    {
+      "from": "pkg/picoel",
+      "to": "pkg/el",
+      "kinds": [
+        "source"
+      ]
+    },
+    {
+      "from": "pkg/tinymarkdown",
+      "to": "examples/blog/repodocs",
+      "kinds": [
+        "blackbox-test"
+      ]
+    },
+    {
+      "from": "pkg/tinymarkdown/js",
+      "to": "pkg/tinymarkdown",
+      "kinds": [
+        "source"
+      ]
+    }
+  ],
+  "external": [
+    {
+      "from": "examples/blog/compare/cmd",
+      "to": "moonbitlang/async",
+      "kinds": [
+        "source"
+      ]
+    },
+    {
+      "from": "examples/blog/compare/cmd",
+      "to": "moonbitlang/async/http",
+      "kinds": [
+        "source"
+      ]
+    },
+    {
+      "from": "examples/blog/compare/cmd",
+      "to": "moonbitlang/async/stdio",
+      "kinds": [
+        "source"
+      ]
+    }
+  ]
+}

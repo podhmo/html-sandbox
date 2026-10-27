@@ -1,0 +1,29 @@
+<!doctype html>
+<!-- Opened by scripts/render-mermaid.mjs over a local HTTP server, so
+     that the ES modules below can be imported from node_modules. -->
+<meta charset="utf-8" />
+<title>pkg-graph mermaid renderer</title>
+<body>
+  <div id="out"></div>
+  <script type="module">
+    import mermaid from "/node_modules/mermaid/dist/mermaid.esm.min.mjs";
+    import elkLayouts from "/node_modules/@mermaid-js/layout-elk/dist/mermaid-layout-elk.esm.min.mjs";
+
+    mermaid.registerLayoutLoaders(elkLayouts);
+
+    let n = 0;
+    window.renderDiagram = async (code, layout) => {
+      mermaid.initialize({
+        startOnLoad: false,
+        layout,
+        theme: "default",
+        securityLevel: "loose",
+        fontFamily: "Inter, Helvetica, Arial, sans-serif",
+        flowchart: { htmlLabels: true, useMaxWidth: false, curve: "basis" },
+      });
+      const { svg } = await mermaid.render(`diagram-${n++}`, code);
+      return svg;
+    };
+    window.ready = true;
+  </script>
+</body>
