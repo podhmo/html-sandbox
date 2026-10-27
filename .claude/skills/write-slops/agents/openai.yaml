@@ -1,0 +1,4 @@
+interface:
+  display_name: "Write slops articles"
+  short_description: "Write blog Markdown, SVG, and article bundles"
+  default_prompt: "Use $write-slops to write an AI-authored article for slops with Markdown suitable for this blog and its preview."

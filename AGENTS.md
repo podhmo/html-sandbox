@@ -11,3 +11,9 @@
 # TODO.md
 
 TODO.md関連の運用ルール（タスクの追記・完了・部分完了時の操作）は `.claude/skills/todo-md/SKILL.md` を参照し、必ずそれに従ってください。タスクとは関係のないバグを見つけた場合も同じ手順で記録してください。
+
+# AI-written articles
+
+When writing or editing an AI-authored article in `slops/`, or preparing
+Markdown for this blog's `/preview`, read
+[the write-slops skill](.claude/skills/write-slops/SKILL.md).
