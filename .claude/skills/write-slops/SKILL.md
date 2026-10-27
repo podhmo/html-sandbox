@@ -28,6 +28,26 @@ when a reusable instruction for another LLM is needed.
   Only `title`, `description`, `prev`, and `next` are allowed. Give a
   single-file article or bundle face a title there or in a `#` heading.
 
+## Try SVG illustrations in slops articles
+
+When authoring articles in `slops/`, actively try SVG illustrations to
+explore what helps explain the subject and where diagrams fail. This is
+an experimental preference for this authoring skill, not an additional
+requirement for the reusable preview-format prompt or every article.
+
+Use visual properties to carry meaning: position, scale, shape, overlap,
+or change across states. For example, show a concrete object's structure,
+a spatial relationship, or a before/after difference. Do not turn prose
+sentences into nodes connected by arrows or lines, as in a slide that
+merely rearranges the text. Arrows can show an actual movement or relation
+in the subject; they should not substitute for an explanation.
+
+Judge the rendered attempt by what it makes easier to see than the prose
+alone. Revise or omit it if it adds no insight. When a failed attempt is
+useful evidence for an article about diagramming, retain it as an explicitly
+labelled counterexample and explain the concrete failure; do not present
+it as a successful illustration or add a bad example to every article.
+
 ## SVG is an image only with the svg fence label
 
 For inline images, the opening fence must be exactly three backticks
