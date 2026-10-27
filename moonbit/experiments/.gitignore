@@ -4,3 +4,7 @@ build/
 .wrangler/
 .gen/
 __pycache__/
+
+# moon check writes these since moon 0.1.20261023; the experiments do not
+# track their interfaces.
+pkg.generated.mbti

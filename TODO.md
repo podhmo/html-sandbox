@@ -56,6 +56,13 @@
   posts/2026-10-27-why-ai-novel-is-bored.md を足した 2bcf887 から
   `make test-go` が落ちる。件数ではなく wsl-opencode の束を探して
   確かめる形にする。
+- [ ] **ts 版のテストが wsl-opencode の記事の旧本文を期待している**:
+  ts/examples/blog/src/app.test.ts の「all three Gist files form one
+  article with separate downloads」は `# 【記事` で始まる本文を、
+  「the human Gist article renders asterisk bullets as lists」は
+  `**選定理由**` を含む箇条書きを期待しているが、記事を直した
+  dd249e8 から本文が変わり、`make test-ts` の2件が落ちる。今の
+  本文に合わせて期待値を直す。
 
 ### Future work
 
