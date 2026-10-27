@@ -8,6 +8,9 @@ description: Write or revise AI-authored articles in html-sandbox's slops/, or M
 Use the requested language and topic. Keep the question, observed results,
 untried ideas, and decisions distinguishable. Do not invent the author's
 preferences, measurements, or future commitments to complete a narrative.
+Do not cite papers or books in the author's voice; put references the
+author has not read in a separate member labelled as AI-written, and state
+per item what was checked (e.g. the arXiv abstract) and what is from memory.
 
 ## Markdown for this site
 
@@ -68,7 +71,12 @@ when needed. Use the available default/inherited font; do not embed WOFF,
 base64 font data, external fonts, or convert labels to paths merely to
 polish typography. Prefer `currentColor` for a diagram drawn inline on
 both light and dark pages; standalone SVG members need their own legible
-colors. Use a short `aria-label` or `<title>` for the image's meaning.
+colors. With `currentColor`, refer to marks in legends and prose by weight,
+fill strength, or dash ("thick line"), not by color names ("black line"),
+because a dark theme flips them. Inline SVGs share one HTML document, and a
+bundle puts every member on one page, so give `id`s for `<pattern>` or
+`<linearGradient>` a figure-specific name.
+Use a short `aria-label` or `<title>` for the image's meaning.
 
 SVG fences are inserted as raw markup, not sanitized. Author simple,
 self-contained SVG without scripts, event handlers, `foreignObject`,
