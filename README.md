@@ -38,14 +38,13 @@ only the face receives title front matter from the Gist description.
 
 ## Testing
 
-With the Go and MoonBit toolchains, Node.js 24 or later, and the TypeScript
-dependencies installed (`npm ci --prefix ts`), run every maintained
-implementation's tests from the repository root:
+With the Go and MoonBit toolchains and Node.js 24 or later, run every
+maintained implementation's tests from the repository root:
 
 ```sh
 make test
 ```
 
-This runs `make -C go test`, `make -C moonbit test` (including the JS parser
-and Node integration tests), and `npm --prefix ts test`. Run `make test-go`,
-`make test-moonbit`, or `make test-ts` to select one implementation.
+This runs `make -C go test` and `make -C moonbit test` (including the JS
+parser and Node integration tests). Run `make test-go` or
+`make test-moonbit` to select one implementation.

@@ -1,6 +1,5 @@
-// tinymarkdown for the ts blog (../../../../ts): parse and inlines, built
-// for the js target, returning plain JS objects in the shape of the types
-// in ts/pkg/tinymarkdown/tinymarkdown.ts. `make ts` copies the build there.
+// tinymarkdown for the js target: parse and inlines, returning plain JS
+// objects for a JS/TS host to consume.
 
 ///|
 /// Js is a JS value: what parse and inlines return.

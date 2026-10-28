@@ -1,5 +1,5 @@
 # Build steps for the MoonBit blog in examples/blog, on the libraries in
-# pkg/, and for the js build of tinymarkdown that the ts blog uses. The Wasm is built by moon, then run by the Worker in
+# pkg/. The Wasm is built by moon, then run by the Worker in
 # examples/blog/cloudflare/ through wrangler, whose build command runs moon
 # again. Run `make help` for the targets.
 #
@@ -37,16 +37,13 @@ SLOPS := ../slops
 DOCS := ../TODO.md ../docs
 # The Go blog's site.css and favicon.svg.
 ASSETS := ../go/examples/blog/internal/site
-# The js build of tinymarkdown, and where the ts blog keeps it.
-TINYMARKDOWN_JS := _build/js/release/build/pkg/tinymarkdown/js/js.js
-TS_TINYMARKDOWN := ../ts/pkg/tinymarkdown/tinymarkdown.mjs
 # The preview page's renderer, built by `make preview` into the shared
-# assets dir, where it is committed like tinymarkdown.mjs.
+# assets dir, where it is committed.
 PREVIEW_WASM := _build/wasm-gc/release/build/$(BLOG)/preview/preview.wasm
 # The modules under experiments/, each with its own moon.mod.
 EXPERIMENTS := $(patsubst %/moon.mod,%,$(wildcard experiments/*/moon.mod))
 
-.PHONY: embed embed-slops embed-posts embed-repodocs embed-assets content build ts preview test check bench dev deploy compare dev-echo clean help
+.PHONY: embed embed-slops embed-posts embed-repodocs embed-assets content build preview test check bench dev deploy compare dev-echo clean help
 
 ## embed: regenerate the embedded.mbt files: the Go blog's posts, the repository's documents, and the Go blog's site.css and favicon.svg
 # The packages' moon.pkg run the same scripts, but moon reruns them only
@@ -80,12 +77,7 @@ build: embed-assets content
 	$(WASM_OPT) $(WASM_OPT_FLAGS) $(WASM) -o $(APP_WASM)
 	@ls -l $(WASM) $(APP_WASM)
 
-## ts: build pkg/tinymarkdown/js for js into ../ts/pkg/tinymarkdown/tinymarkdown.mjs, which is committed
-ts:
-	moon build --target js --release pkg/tinymarkdown/js
-	cp $(TINYMARKDOWN_JS) $(TS_TINYMARKDOWN)
-
-## preview: build the preview page's renderer into the shared assets dir ($(ASSETS)): preview.wasm, committed like tinymarkdown.mjs
+## preview: build the preview page's renderer into the shared assets dir ($(ASSETS)): preview.wasm, committed
 preview:
 	moon build --target wasm-gc --release $(BLOG)/preview
 	cp $(PREVIEW_WASM) $(ASSETS)/preview.wasm
@@ -105,7 +97,7 @@ bench:
 		echo "== $$t: pkg/el =="; moon bench pkg/el --target $$t || exit 1; \
 	done
 
-## check: what to run before every commit (test, then moon fmt, moon check on wasm-gc and native, moon check in experiments/, moon info, and ts)
+## check: what to run before every commit (test, then moon fmt, moon check on wasm-gc and native, moon check in experiments/, moon info, and preview)
 # moon info has no --check; it rewrites the .mbti files, and git diff fails
 # when they differ from what is staged.
 check: test
@@ -115,8 +107,6 @@ check: test
 	for d in $(EXPERIMENTS); do (cd $$d && moon check) || exit 1; done
 	moon info
 	@git diff --exit-code -- '*.mbti' || { echo 'moon info changed the .mbti files above; add them to the commit' >&2; exit 1; }
-	$(MAKE) ts
-	@git diff --exit-code -- $(TS_TINYMARKDOWN) || { echo 'make ts changed $(TS_TINYMARKDOWN); add it to the commit' >&2; exit 1; }
 	$(MAKE) preview
 	@git diff --exit-code -- $(ASSETS)/preview.wasm || { echo 'make preview changed the renderer; add it to the commit' >&2; exit 1; }
 

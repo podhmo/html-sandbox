@@ -38,31 +38,12 @@
   libelf を持たずにビルドされていること、moon 側では `perf record` に `--sample-cpu` を
   付けずパーサがヘッダの `[cpu]` を必須にしていることの 2 つだった
   （[issue #52](https://github.com/podhmo/html-sandbox/issues/52)）。
-- [ ] **ts 版のブログが front matter の `prev` と `next` で起動できない**:
-  記事が `prev:` / `next:` を持つようになったが（
-  [docs/sketch/ja/blog.md](docs/sketch/ja/blog.md)）、ts 版の
-  `frontMatterKeys`（ts/examples/blog/src/content.ts）は `title` と
-  `description` しか認めないので、`loadPosts` が例外で止まり
-  `app.test.ts` が落ちる。Go 版と MoonBit 版の relNav（記事末の
-  前後リンク）に相当するものもまだない。
-- [ ] **ts 版にも `/preview` を足す**: Go 版と MoonBit 版に足した
-  プレビューページを ts 版にも揃える（
-  [issue #71](https://github.com/podhmo/html-sandbox/issues/71)）。
-  先に上の「ts 版のブログが front matter の `prev` と `next` で起動
-  できない」を直す必要がある。
 - [x] **`TestEmbeddedHumanBundle` が posts の記事追加で落ちる**:
   go/examples/blog/internal/site/collections_test.go が posts を
   wsl-opencode の1件だけと決め打ちしているので、
   posts/2026-10-27-why-ai-novel-is-bored.md を足した 2bcf887 から
   `make test-go` が落ちる。件数ではなく wsl-opencode の束を探して
   確かめる形にする。
-- [ ] **ts 版のテストが wsl-opencode の記事の旧本文を期待している**:
-  ts/examples/blog/src/app.test.ts の「all three Gist files form one
-  article with separate downloads」は `# 【記事` で始まる本文を、
-  「the human Gist article renders asterisk bullets as lists」は
-  `**選定理由**` を含む箇条書きを期待しているが、記事を直した
-  dd249e8 から本文が変わり、`make test-ts` の2件が落ちる。今の
-  本文に合わせて期待値を直す。
 
 ### Future work
 
