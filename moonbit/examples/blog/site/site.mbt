@@ -178,6 +178,15 @@ fn Site::new_router(self : Site) -> @http.Router {
       Text(@assets.preview_js),
     )..header("cache-control", value="public, max-age=31536000, immutable")
   })
+  // The listen page and its script, served like the preview page's.
+  r.handle("GET /listen", _ => page(200, self.listen_page()))
+  r.handle("GET /listen.js", _ => {
+    @http.Response::typed(
+      200,
+      "text/javascript; charset=utf-8",
+      Text(@assets.listen_js),
+    )..header("cache-control", value="public, max-age=31536000, immutable")
+  })
   // A pattern cannot end in ".md" after a wildcard, so the handlers look
   // at the suffix.
   for collection in ["posts", "slops"] {

@@ -223,7 +223,7 @@ test "pico only" {
   assert_false(body.contains("<style") || body.contains(" style="))
   assert_contains(body, [
     "<header class=\"container\">", "<main class=\"container\">", "<footer class=\"container\">",
-    "<ul><li><a href=\"/preview\">preview</a></li><li><a href=\"https://github.com/podhmo/html-sandbox\">github</a></li></ul></nav></header>",
+    "<ul><li><details class=\"dropdown\"><summary role=\"link\">more tools</summary><ul dir=\"rtl\"><li><a href=\"/preview\">preview</a></li><li><a href=\"/listen\">listen</a></li></ul></details></li><li><a href=\"https://github.com/podhmo/html-sandbox\">github</a></li></ul></nav></header>",
   ])
 }
 
@@ -457,6 +457,20 @@ test "preview page" {
     "data-wasm=\"/preview.wasm?v=", "data-files=\"", "posts/2026-10-14-hello.md",
     "TODO.md",
   ])
+}
+
+///|
+test "listen page" {
+  let s = new_site(test_posts)
+  assert_contains(body(s, "/listen"), [
+    "<title>Listen - blog</title>", "<input type=\"search\" id=\"listen-pick\" list=\"listen-files\"",
+    "<option value=\"posts/2026-10-14-hello.md\" label=\"Hello &lt;script&gt;\" data-href=\"/posts/hello\"></option>",
+    "<select id=\"listen-voice\"></select>", "<input type=\"range\" id=\"listen-rate\" min=\"0.5\" max=\"3\" step=\"0.1\" value=\"1\">",
+    "<textarea id=\"listen-src\"", "data-wasm=\"/preview.wasm?v=", "<script src=\"/listen.js?v=",
+  ])
+  let res = s.render("/listen.js")
+  assert_eq(res.status, 200)
+  assert_eq(header(res, "content-type"), Some("text/javascript; charset=utf-8"))
 }
 
 ///|

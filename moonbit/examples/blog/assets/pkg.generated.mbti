@@ -8,6 +8,10 @@ pub let code_copy_js_version : String
 
 pub let favicon_svg : String
 
+pub let listen_js : String
+
+pub let listen_js_version : String
+
 pub let preview_js : String
 
 pub let preview_js_version : String

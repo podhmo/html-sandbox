@@ -57,14 +57,32 @@ fn layout(meta : PageMeta, body : Array[@el.Node]) -> @el.Node {
           @picoel.a("/posts/", [@picoel.text("posts")]),
           @picoel.a("/docs/", [@picoel.text("docs")]),
         ],
-        end=[
-          @picoel.a("/preview", [@picoel.text("preview")]),
-          @picoel.a(REPO_HOME_URL, [@picoel.text("github")]),
-        ],
+        end=[more_tools(), @picoel.a(REPO_HOME_URL, [@picoel.text("github")])],
       ),
     ]),
     @picoel.main_(body),
     @picoel.footer([@picoel.small([@picoel.text("Rendered with Wasm.")])]),
+  ])
+}
+
+///|
+/// more_tools is the header's dropdown of the pages that work on text in
+/// the browser: preview and listen. pico draws a details.dropdown in a nav
+/// as a menu; role="link" draws its summary like the links beside it
+/// rather than as a form field, and dir="rtl" opens it toward the left,
+/// from the right edge.
+fn more_tools() -> @el.Node {
+  @el.el(@el.Tag("details"), [
+    @el.Attr(@el.class, "dropdown"),
+    @el.el(@el.Tag("summary"), [
+      @el.Attr(@el.AttrName("role"), "link"),
+      @picoel.text("more tools"),
+    ]),
+    @el.el(@el.ul, [
+      @el.Attr(@el.AttrName("dir"), "rtl"),
+      @picoel.li([@picoel.a("/preview", [@picoel.text("preview")])]),
+      @picoel.li([@picoel.a("/listen", [@picoel.text("listen")])]),
+    ]),
   ])
 }
 

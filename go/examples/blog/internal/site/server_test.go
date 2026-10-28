@@ -84,7 +84,7 @@ func TestPicoOnly(t *testing.T) {
 	}
 	for _, want := range []string{
 		`<header class="container">`, `<main class="container">`, `<footer class="container">`,
-		`<ul><li><a href="/preview">preview</a></li><li><a href="https://github.com/podhmo/html-sandbox">github</a></li></ul></nav></header>`,
+		`<ul><li><details class="dropdown"><summary role="link">more tools</summary><ul dir="rtl"><li><a href="/preview">preview</a></li><li><a href="/listen">listen</a></li></ul></details></li><li><a href="https://github.com/podhmo/html-sandbox">github</a></li></ul></nav></header>`,
 	} {
 		if !strings.Contains(body, want) {
 			t.Errorf("body does not contain %q", want)
@@ -121,7 +121,9 @@ func TestPostPageText(t *testing.T) {
 slops
 posts
 docs
+more tools
 preview
+listen
 github
 2026-10-14
 Download .md
@@ -155,6 +157,34 @@ func TestPreview(t *testing.T) {
 		if !strings.Contains(body, want) {
 			t.Errorf("body does not contain %q", want)
 		}
+	}
+}
+
+func TestListen(t *testing.T) {
+	res, body := get(t, newTestServer(t, testPosts), "/listen")
+	if res.StatusCode != http.StatusOK {
+		t.Fatalf("status %d", res.StatusCode)
+	}
+	for _, want := range []string{
+		`<title>Listen - blog</title>`,
+		`<input type="search" id="listen-pick" list="listen-files"`,
+		`<option value="posts/2026-10-14-hello.md" label="Hello &lt;script&gt;" data-href="/posts/hello"></option>`,
+		`<select id="listen-voice"></select>`,
+		`<input type="range" id="listen-rate" min="0.5" max="3" step="0.1" value="1">`,
+		`<textarea id="listen-src"`,
+		`data-wasm="/preview.wasm?v=`,
+		`<script src="` + listenJSPath + `"`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Errorf("body does not contain %q", want)
+		}
+	}
+	res, body = get(t, newTestServer(t, testPosts), listenJSPath)
+	if res.StatusCode != http.StatusOK || body != string(listenJS) {
+		t.Errorf("status %d, body %.40q", res.StatusCode, body)
+	}
+	if ct := res.Header.Get("Content-Type"); ct != "text/javascript; charset=utf-8" {
+		t.Errorf("Content-Type %q", ct)
 	}
 }
 

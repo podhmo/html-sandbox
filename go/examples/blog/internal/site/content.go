@@ -60,6 +60,14 @@ var previewWasm []byte
 var previewJSPath = "/preview.js?v=" + versionOf(previewJS)
 var previewWasmPath = "/preview.wasm?v=" + versionOf(previewWasm)
 
+// listenJS runs the listen page's player.
+//
+//go:embed listen.js
+var listenJS []byte
+
+// listenJSPath carries a hash of listenJS, like siteCSSPath.
+var listenJSPath = "/listen.js?v=" + versionOf(listenJS)
+
 // versionOf is the first 4 bytes of b's SHA-256 in hex, as siteCSSPath
 // uses it.
 func versionOf(b []byte) string {

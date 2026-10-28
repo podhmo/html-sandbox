@@ -144,6 +144,10 @@ func (s *Server) route(w http.ResponseWriter, r *http.Request) {
 		handlePreviewJS(w, r)
 	case p == "/preview.wasm":
 		handlePreviewWasm(w, r)
+	case p == "/listen":
+		s.handleListen(w, r)
+	case p == "/listen.js":
+		handleListenJS(w, r)
 	case p == liveReloadScriptPath:
 		s.handleLiveReloadScript(w, r)
 	case p == liveReloadEventsPath:
@@ -349,6 +353,22 @@ func handlePreviewWasm(w http.ResponseWriter, r *http.Request) {
 	h.Set("Cache-Control", "public, max-age=31536000, immutable")
 	h.Set("Content-Length", strconv.Itoa(len(previewWasm)))
 	w.Write(previewWasm)
+}
+
+// handleListen shows the listen page: articles, or pasted Markdown, read
+// aloud by the browser's speech synthesis. Nothing is saved.
+func (s *Server) handleListen(w http.ResponseWriter, r *http.Request) {
+	s.page(w, r, listenPage(s.env, s.site.Load()))
+}
+
+// handleListenJS serves the listen page's player script, versioned like
+// the other scripts.
+func handleListenJS(w http.ResponseWriter, r *http.Request) {
+	h := w.Header()
+	h.Set("Content-Type", "text/javascript; charset=utf-8")
+	h.Set("Cache-Control", "public, max-age=31536000, immutable")
+	h.Set("Content-Length", strconv.Itoa(len(listenJS)))
+	w.Write(listenJS)
 }
 
 // page renders n with status 200, or an error page if rendering fails.

@@ -190,3 +190,17 @@ article .markdown-alert-caution {
   font-size: 0.875rem;
   min-height: 24rem;
 }
+
+/* The listen page: the block being read is marked at its leading edge,
+   and the sentence being read is highlighted where the browser has the
+   CSS Custom Highlight API. */
+.listen-current {
+  box-shadow: -0.5rem 0 0 -0.25rem var(--pico-primary);
+}
+::highlight(listen) {
+  background-color: var(--pico-mark-background-color);
+  color: var(--pico-mark-color);
+}
+#listen-out {
+  cursor: pointer;
+}

@@ -92,7 +92,9 @@ test "post page text" {
       #|slops
       #|posts
       #|docs
+      #|more tools
       #|preview
+      #|listen
       #|github
       #|2026-10-14
       #|Download .md
