@@ -17,13 +17,6 @@
   spike（`moonbit/experiments/wasm-fetch`）では Node と `wrangler dev` で動いた。これをライブラリに取り込み、
   本番の Workers で確かめる。上の Static Assets の TODO の「文章を Wasm にどう渡すか」とつながる。
   [探索メモ](docs/sketch/ja/moonbit-workers-http.md)の「ライブラリとして出すときに考えること」を参照。
-- [ ] **MoonBit 版のブログで、記事と文書の解析を isolate の起動時に移す**: 今は
-  最初のリクエストで解析している（`worker.mbt` の `Ref(None)`）。ts 版では、起動時に
-  解析すると Startup Time は 3 ms から約 13 ms に増えたが、新しい isolate に当たった
-  リクエストの CPU 時間は 18〜43 ms から 0〜3 ms に減った（[探索メモ](docs/sketch/ja/ts-hono-workers.md)の「デプロイ」）。
-  MoonBit 版でも同じことが起きるかを確かめる。
-  - 完了の条件: `make compare` で Go 版と一致したまま、Startup Time と `wrangler tail` の
-    `cpuTime` を、今の形と比べて[調査メモ](docs/sketch/ja/moonbit-workers-wasm.md)に記録する。
 - [-] **Go と MoonBit の `pkg/el` と `pkg/tinymarkdown` に profiler をかけて速くする**:
   profiler で 2 つのパッケージの重いところを見て、確保と走査を直す。まず Go 版から
   （[調査メモ](docs/sketch/ja/profiling.md)、[issue #39](https://github.com/podhmo/html-sandbox/issues/39)）。
