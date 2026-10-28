@@ -223,7 +223,7 @@ test "pico only" {
   assert_false(body.contains("<style") || body.contains(" style="))
   assert_contains(body, [
     "<header class=\"container\">", "<main class=\"container\">", "<footer class=\"container\">",
-    "<ul><li><details class=\"dropdown\"><summary role=\"link\">more tools</summary><ul dir=\"rtl\"><li><a href=\"/preview\">preview</a></li><li><a href=\"/listen\">listen</a></li></ul></details></li><li><a href=\"https://github.com/podhmo/html-sandbox\">github</a></li></ul></nav></header>",
+    "<ul><li><details class=\"dropdown\"><summary role=\"link\">more tools</summary><ul><li><a href=\"/preview\">preview</a></li><li><a href=\"/listen\">listen</a></li></ul></details></li><li><a href=\"https://github.com/podhmo/html-sandbox\">github</a></li></ul></nav></header>",
   ])
 }
 

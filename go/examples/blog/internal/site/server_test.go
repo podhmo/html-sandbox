@@ -84,7 +84,7 @@ func TestPicoOnly(t *testing.T) {
 	}
 	for _, want := range []string{
 		`<header class="container">`, `<main class="container">`, `<footer class="container">`,
-		`<ul><li><details class="dropdown"><summary role="link">more tools</summary><ul dir="rtl"><li><a href="/preview">preview</a></li><li><a href="/listen">listen</a></li></ul></details></li><li><a href="https://github.com/podhmo/html-sandbox">github</a></li></ul></nav></header>`,
+		`<ul><li><details class="dropdown"><summary role="link">more tools</summary><ul><li><a href="/preview">preview</a></li><li><a href="/listen">listen</a></li></ul></details></li><li><a href="https://github.com/podhmo/html-sandbox">github</a></li></ul></nav></header>`,
 	} {
 		if !strings.Contains(body, want) {
 			t.Errorf("body does not contain %q", want)

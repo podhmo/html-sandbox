@@ -169,6 +169,18 @@ article .markdown-alert-caution {
   line-height: 1;
 }
 
+/* The header's "more tools" menu, opened under the right edge of its
+   summary, with its items aligned to the left. pico lays a dropdown in a
+   nav out inline, and Chrome and Firefox place an absolute box inside an
+   inline one differently; inline-block places it the same in both. */
+body > header details.dropdown {
+  display: inline-block;
+}
+body > header details.dropdown > summary + ul {
+  right: 0;
+  left: auto;
+}
+
 /* The preview page: editor and rendered output side by side on a wide
    screen, stacked on a phone. The tracks are minmax(0, 1fr), not 1fr:
    an auto/1fr minimum is the content's min-content size, so a long <pre>

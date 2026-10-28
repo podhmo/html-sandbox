@@ -70,15 +70,14 @@ func layout(env pageEnv, meta pageMeta, body ...pe.Node) pe.Node {
 
 // moreTools is the header's dropdown of the pages that work on text in
 // the browser: preview and listen. pico draws a details.dropdown in a nav
-// as a menu; role="link" draws its summary like the links beside it
-// rather than as a form field, and dir="rtl" opens it toward the left,
-// from the right edge.
+// as a menu, and role="link" draws its summary like the links beside it
+// rather than as a form field. site.css opens the menu under the
+// summary's right edge.
 func moreTools() pe.Node {
 	return el.El(el.Tag("details"),
 		el.Attr(el.Class, "dropdown"),
 		el.El(el.Tag("summary"), el.Attr(el.AttrName("role"), "link"), pe.Text("more tools")),
 		el.El(el.Ul,
-			el.Attr(el.AttrName("dir"), "rtl"),
 			pe.Li(pe.A("/preview", pe.Text("preview"))),
 			pe.Li(pe.A("/listen", pe.Text("listen")))))
 }

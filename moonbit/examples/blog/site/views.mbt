@@ -68,9 +68,9 @@ fn layout(meta : PageMeta, body : Array[@el.Node]) -> @el.Node {
 ///|
 /// more_tools is the header's dropdown of the pages that work on text in
 /// the browser: preview and listen. pico draws a details.dropdown in a nav
-/// as a menu; role="link" draws its summary like the links beside it
-/// rather than as a form field, and dir="rtl" opens it toward the left,
-/// from the right edge.
+/// as a menu, and role="link" draws its summary like the links beside it
+/// rather than as a form field. site.css opens the menu under the
+/// summary's right edge.
 fn more_tools() -> @el.Node {
   @el.el(@el.Tag("details"), [
     @el.Attr(@el.class, "dropdown"),
@@ -79,7 +79,6 @@ fn more_tools() -> @el.Node {
       @picoel.text("more tools"),
     ]),
     @el.el(@el.ul, [
-      @el.Attr(@el.AttrName("dir"), "rtl"),
       @picoel.li([@picoel.a("/preview", [@picoel.text("preview")])]),
       @picoel.li([@picoel.a("/listen", [@picoel.text("listen")])]),
     ]),
