@@ -31,12 +31,6 @@
   libelf を持たずにビルドされていること、moon 側では `perf record` に `--sample-cpu` を
   付けずパーサがヘッダの `[cpu]` を必須にしていることの 2 つだった
   （[issue #52](https://github.com/podhmo/html-sandbox/issues/52)）。
-- [x] **`TestEmbeddedHumanBundle` が posts の記事追加で落ちる**:
-  go/examples/blog/internal/site/collections_test.go が posts を
-  wsl-opencode の1件だけと決め打ちしているので、
-  posts/2026-10-27-why-ai-novel-is-bored.md を足した 2bcf887 から
-  `make test-go` が落ちる。件数ではなく wsl-opencode の束を探して
-  確かめる形にする。
 
 ### Future work
 
