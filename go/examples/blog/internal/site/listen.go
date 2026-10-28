@@ -12,24 +12,24 @@ import (
 	pe "github.com/podhmo/html-sandbox/go/pkg/picoel"
 )
 
-// listenChoices is the datalist of the pages to read: each post's and
-// document's repository path, labeled with its title, and the page's URL
-// in data-href, where listen.js fetches the articles from.
+// listenChoices is the list of the pages to read: a link to each post's
+// and document's page, named by its repository path, which listen.js
+// narrows by a fuzzy match on the path, with its title beside it.
 func (st *site) listenChoices() pe.Node {
-	option := func(source, title, href string) pe.Node {
-		return el.El(el.Tag("option"),
-			el.Attr(el.Value, source),
-			el.Attr(el.AttrName("label"), plainText(title)),
-			el.Attr(el.AttrName("data-href"), href))
+	choice := func(source, title, href string) pe.Node {
+		return pe.Li(
+			el.El(el.A, el.Attr(el.Href, href), el.Attr(el.AttrName("data-source"), source), pe.Text(source)),
+			pe.Text(" "),
+			pe.Small(pe.Text(plainText(title))))
 	}
 	list := []pe.Node{el.Attr(el.ID, "listen-files")}
 	for _, p := range st.posts {
-		list = append(list, option(postSource(p), p.Title, postPath(p)))
+		list = append(list, choice(postSource(p), p.Title, postPath(p)))
 	}
 	for _, d := range st.docs {
-		list = append(list, option(d.Source, d.Title, docPath(d)))
+		list = append(list, choice(d.Source, d.Title, docPath(d)))
 	}
-	return el.El(el.Tag("datalist"), list...)
+	return el.El(el.Ul, list...)
 }
 
 // listenKnob is a slider for one of the speech's settings, with its
@@ -70,13 +70,14 @@ func listenPage(env pageEnv, st *site) pe.Node {
 	return layout(env, meta,
 		pe.H1(pe.Text("Listen")),
 		pe.P(pe.Text(description+" Click a paragraph to read from there.")),
-		pe.P(
+		el.El(el.Div,
+			el.Attr(el.Class, "listen-picker"),
 			el.El(el.Input,
 				el.Attr(el.Type, "search"),
 				el.Attr(el.ID, "listen-pick"),
-				el.Attr(el.AttrName("list"), "listen-files"),
-				el.Attr(el.AttrName("placeholder"), "slops/..."),
-				el.Attr(el.AttrName("aria-label"), "the page to read")),
+				el.Attr(el.AttrName("autocomplete"), "off"),
+				el.Attr(el.AttrName("placeholder"), "file name, e.g. moonbit wasm"),
+				el.Attr(el.AttrName("aria-label"), "the file to read")),
 			st.listenChoices(),
 		),
 		el.El(el.Tag("details"),

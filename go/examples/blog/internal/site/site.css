@@ -201,6 +201,36 @@ article .markdown-alert-caution {
   background-color: var(--pico-mark-background-color);
   color: var(--pico-mark-color);
 }
+/* The file picker: the matches drop down over the page below the input. */
+.listen-picker {
+  position: relative;
+}
+#listen-files {
+  position: absolute;
+  z-index: 2;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: calc(var(--pico-spacing, 1rem) * -0.75);
+  padding: 0.25rem 0;
+  max-height: 22rem;
+  overflow-y: auto;
+  background: var(--pico-dropdown-background-color);
+  border: var(--pico-border-width) solid var(--pico-dropdown-border-color);
+  border-radius: var(--pico-border-radius);
+  box-shadow: var(--pico-dropdown-box-shadow);
+}
+#listen-files li {
+  list-style: none;
+  margin: 0;
+  padding: 0.25rem 0.75rem;
+}
+#listen-files li.active {
+  background: var(--pico-dropdown-hover-background-color);
+}
+#listen-files mark {
+  padding: 0;
+}
 #listen-out {
   cursor: pointer;
 }

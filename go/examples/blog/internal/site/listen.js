@@ -2,7 +2,9 @@
  * speech synthesis (the Web Speech API), one sentence at a time: long
  * utterances may stop midway in some browsers, and a sentence is what the
  * page highlights. #listen-out is filled either with the articles of a
- * page of this site, picked from #listen-files, or with Markdown pasted
+ * page of this site, picked from #listen-files by a fuzzy match on its
+ * file path (titles are mostly Japanese, awkward to type to narrow a
+ * list), or with Markdown pasted
  * into #listen-src, rendered by the preview page's renderer (whose URL
  * and file list ride on #listen-data's data-* attributes, as on the
  * preview page). Nothing is saved. */
@@ -41,12 +43,10 @@ const say = (text) => {
 
 // ---- What to read
 
-async function load(path) {
-  const opt = [...choices.options].find((o) => o.value === path);
-  if (!opt) return;
+async function load(path, href) {
   stop();
   say(`loading ${path}`);
-  const res = await fetch(opt.dataset.href);
+  const res = await fetch(href);
   if (!res.ok) {
     say(`could not load ${path}: ${res.status}`);
     return;
@@ -74,7 +74,113 @@ async function renderPasted() {
   out.innerHTML = render(src.value, files);
 }
 
-pick.addEventListener("change", () => load(pick.value));
+// ---- Picking a file, like fzf: every word of the query must appear in
+// the path in order, not necessarily together. #listen-files lists every
+// page as a link (so it works without this script); the best matches are
+// kept in it, in order, and the rest taken out.
+
+const SHOWN = 10;
+const items = [...choices.querySelectorAll("a")].map((a) => ({
+  a,
+  li: a.closest("li"),
+  path: a.dataset.source,
+}));
+let shown = [];
+let active = 0;
+
+// match scores how well the words of q match path, with the indexes of
+// the matched characters, or is null when one of them does not match.
+// Characters matched in a row and those right after a separator count
+// more; a later match in the path is preferred, so that the file name,
+// not the directory, takes the highlight.
+function match(path, q) {
+  const lower = path.toLowerCase();
+  let score = 0;
+  const at = [];
+  for (const word of q.toLowerCase().split(/\s+/).filter(Boolean)) {
+    // The word as it is wins; otherwise its characters are taken from
+    // the end.
+    const whole = lower.lastIndexOf(word);
+    const hits = whole >= 0 ? [...word].map((_, k) => whole + k) : [];
+    for (let k = word.length - 1, i = lower.length; whole < 0 && k >= 0; k--) {
+      i = lower.lastIndexOf(word[k], i - 1);
+      if (i < 0) return null;
+      hits.unshift(i);
+    }
+    hits.forEach((h, k) => {
+      score += 1;
+      if (k > 0 && hits[k - 1] === h - 1) score += 2;
+      if (h === 0 || "/-_.".includes(path[h - 1])) score += 3;
+    });
+    at.push(...hits);
+  }
+  return { score, at: new Set(at) };
+}
+
+function highlight(path, at) {
+  return [...path].map((c, i) => {
+    if (!at.has(i)) return c;
+    const m = document.createElement("mark");
+    m.textContent = c;
+    return m;
+  });
+}
+
+function filter() {
+  const q = pick.value.trim();
+  // sort is stable, so equal scores keep the site's order.
+  const found = items
+    .map((it) => ({ it, m: match(it.path, q) }))
+    .filter((x) => x.m)
+    .sort((x, y) => y.m.score - x.m.score)
+    .slice(0, SHOWN);
+  for (const { it, m } of found) it.a.replaceChildren(...highlight(it.path, m.at));
+  shown = found.map((x) => x.it);
+  choices.replaceChildren(...shown.map((it) => it.li));
+  active = 0;
+  showActive();
+  choices.hidden = false;
+}
+
+function showActive() {
+  shown.forEach((it, i) => it.li.classList.toggle("active", i === active));
+  shown[active]?.li.scrollIntoView({ block: "nearest" });
+}
+
+function choose(it) {
+  if (!it) return;
+  pick.value = it.path;
+  choices.hidden = true;
+  load(it.path, it.a.href);
+}
+
+choices.hidden = true;
+pick.addEventListener("input", filter);
+pick.addEventListener("focus", filter);
+pick.addEventListener("blur", () => {
+  choices.hidden = true;
+});
+pick.addEventListener("keydown", (e) => {
+  if (e.isComposing) return;
+  const keys = {
+    ArrowDown: () => active = Math.min(active + 1, shown.length - 1),
+    ArrowUp: () => active = Math.max(active - 1, 0),
+    Enter: () => choose(shown[active]),
+    Escape: () => choices.hidden = true,
+  };
+  if (!keys[e.key]) return;
+  e.preventDefault();
+  keys[e.key]();
+  showActive();
+});
+// Keep the focus in the input, so that clicking a choice is not a blur.
+choices.addEventListener("mousedown", (e) => e.preventDefault());
+choices.addEventListener("click", (e) => {
+  const a = e.target.closest("a");
+  if (!a) return;
+  e.preventDefault();
+  choose(items.find((it) => it.a === a));
+});
 src.addEventListener("input", renderPasted);
 
 // ---- Sentences

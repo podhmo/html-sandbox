@@ -463,8 +463,8 @@ test "preview page" {
 test "listen page" {
   let s = new_site(test_posts)
   assert_contains(body(s, "/listen"), [
-    "<title>Listen - blog</title>", "<input type=\"search\" id=\"listen-pick\" list=\"listen-files\"",
-    "<option value=\"posts/2026-10-14-hello.md\" label=\"Hello &lt;script&gt;\" data-href=\"/posts/hello\"></option>",
+    "<title>Listen - blog</title>", "<input type=\"search\" id=\"listen-pick\" autocomplete=\"off\"",
+    "<ul id=\"listen-files\"><li><a href=\"/posts/hello\" data-source=\"posts/2026-10-14-hello.md\">posts/2026-10-14-hello.md</a> <small>Hello &lt;script&gt;</small></li>",
     "<select id=\"listen-voice\"></select>", "<input type=\"range\" id=\"listen-rate\" min=\"0.5\" max=\"3\" step=\"0.1\" value=\"1\">",
     "<textarea id=\"listen-src\"", "data-wasm=\"/preview.wasm?v=", "<script src=\"/listen.js?v=",
   ])

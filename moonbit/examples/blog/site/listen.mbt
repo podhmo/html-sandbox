@@ -4,26 +4,31 @@
 // preview page's renderer.
 
 ///|
-/// Site::listen_choices is the datalist of the pages to read: each post's
-/// and document's repository path, labeled with its title, and the page's
-/// URL in data-href, where listen.js fetches the articles from.
+/// Site::listen_choices is the list of the pages to read: a link to each
+/// post's and document's page, named by its repository path, which
+/// listen.js narrows by a fuzzy match on the path, with its title beside
+/// it.
 fn Site::listen_choices(self : Site) -> @el.Node {
-  fn option(source : String, title : String, href : String) -> @el.Node {
-    @el.el(@el.Tag("option"), [
-      @el.Attr(@el.value, source),
-      @el.Attr(@el.AttrName("label"), plain_text(title)),
-      @el.Attr(@el.AttrName("data-href"), href),
+  fn choice(source : String, title : String, href : String) -> @el.Node {
+    @picoel.li([
+      @el.el(@el.a, [
+        @el.Attr(@el.href, href),
+        @el.Attr(@el.AttrName("data-source"), source),
+        @picoel.text(source),
+      ]),
+      @picoel.text(" "),
+      @picoel.small([@picoel.text(plain_text(title))]),
     ])
   }
 
   let list = [@el.Attr(@el.id, "listen-files")]
   for p in self.posts {
-    list.push(option(p.source(), p.title, p.page_path()))
+    list.push(choice(p.source(), p.title, p.page_path()))
   }
   for d in self.docs {
-    list.push(option(d.source, d.title, d.page_path()))
+    list.push(choice(d.source, d.title, d.page_path()))
   }
-  @el.el(@el.Tag("datalist"), list)
+  @el.el(@el.ul, list)
 }
 
 ///|
@@ -82,13 +87,14 @@ fn Site::listen_page(self : Site) -> @el.Node {
     @picoel.p([
       @picoel.text("\{description} Click a paragraph to read from there."),
     ]),
-    @picoel.p([
+    @el.el(@el.div, [
+      @el.Attr(@el.class, "listen-picker"),
       @el.el(@el.input, [
         @el.Attr(@el.type_attr, "search"),
         @el.Attr(@el.id, "listen-pick"),
-        @el.Attr(@el.AttrName("list"), "listen-files"),
-        @el.Attr(@el.AttrName("placeholder"), "slops/..."),
-        @el.Attr(@el.AttrName("aria-label"), "the page to read"),
+        @el.Attr(@el.AttrName("autocomplete"), "off"),
+        @el.Attr(@el.AttrName("placeholder"), "file name, e.g. moonbit wasm"),
+        @el.Attr(@el.AttrName("aria-label"), "the file to read"),
       ]),
       self.listen_choices(),
     ]),
