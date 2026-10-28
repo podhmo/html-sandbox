@@ -173,6 +173,7 @@ func TestListen(t *testing.T) {
 		`<select id="listen-voice"></select>`,
 		`<input type="range" id="listen-rate" min="0.5" max="3" step="0.1" value="1">`,
 		`<textarea id="listen-src"`,
+		`<textarea id="listen-rules"`,
 		`data-wasm="/preview.wasm?v=`,
 		`<script src="` + listenJSPath + `"`,
 	} {

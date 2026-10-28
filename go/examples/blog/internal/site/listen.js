@@ -4,23 +4,26 @@
  * page highlights. #listen-out is filled either with the articles of a
  * page of this site, picked from #listen-files by a fuzzy match on its
  * file path (titles are mostly Japanese, awkward to type to narrow a
- * list), or with Markdown pasted
- * into #listen-src, rendered by the preview page's renderer (whose URL
- * and file list ride on #listen-data's data-* attributes, as on the
- * preview page). Nothing is saved. */
+ * list), or with Markdown pasted into #listen-src, rendered by the
+ * preview page's renderer (whose URL and file list ride on
+ * #listen-data's data-* attributes, as on the preview page). Each
+ * sentence is said as the reading rules in #listen-rules rewrite it. The
+ * settings and the rules are kept in this browser's localStorage. */
 const pick = document.getElementById("listen-pick");
 const choices = document.getElementById("listen-files");
 const src = document.getElementById("listen-src");
 const out = document.getElementById("listen-out");
 const status = document.getElementById("listen-status");
 const voice = document.getElementById("listen-voice");
+const rules = document.getElementById("listen-rules");
 const knobs = Object.fromEntries(["rate", "pitch", "volume"].map((name) => {
   const input = document.getElementById(`listen-${name}`);
   const shown = document.getElementById(`listen-${name}-out`);
-  input.addEventListener("input", () => {
+  const show = () => {
     shown.textContent = input.value;
-  });
-  return [name, input];
+  };
+  input.addEventListener("input", show);
+  return [name, { input, show }];
 }));
 const { wasm, files } = document.getElementById("listen-data").dataset;
 const synth = window.speechSynthesis;
@@ -40,6 +43,71 @@ const segmenter = "Segmenter" in Intl
 const say = (text) => {
   status.textContent = text;
 };
+
+// ---- Settings, kept in localStorage (which may be unavailable, as in
+// some private windows: then nothing is kept).
+
+const STORE = "listen-settings";
+
+function saved() {
+  try {
+    return JSON.parse(localStorage.getItem(STORE)) ?? {};
+  } catch {
+    return {};
+  }
+}
+
+function save() {
+  const settings = { voice: voice.value, rules: rules.value };
+  for (const [name, k] of Object.entries(knobs)) settings[name] = k.input.value;
+  try {
+    localStorage.setItem(STORE, JSON.stringify(settings));
+  } catch {
+    // Not kept.
+  }
+}
+
+// ---- Reading rules: one a line, "pattern => reading". An empty reading
+// is not read. /body/flags is a regular expression, whose reading may
+// use $1 and the like; anything else is matched as it is written.
+
+const DEFAULT_RULES = `# One rule a line: pattern => reading. An empty reading is not read.
+# /.../flags is a regular expression; anything else matches as written.
+# For example:  MoonBit => ムーンビット
+/\\p{Extended_Pictographic}\\uFE0F?/gu =>
+/https?:\\/\\/\\S+/g => URL
+`;
+
+let rewrites = [];
+
+function parseRules() {
+  rewrites = [];
+  const bad = [];
+  rules.value.split("\n").forEach((line, i) => {
+    const m = /^(.*?)\s*=>\s?(.*)$/.exec(line);
+    if (line.trim() === "" || line.startsWith("#")) return;
+    if (!m || m[1] === "") {
+      bad.push(i + 1);
+      return;
+    }
+    const [, pattern, reading] = m;
+    const re = /^\/(.+)\/([a-z]*)$/.exec(pattern);
+    if (!re) {
+      rewrites.push((t) => t.replaceAll(pattern, () => reading));
+      return;
+    }
+    try {
+      const flags = re[2].includes("g") ? re[2] : re[2] + "g";
+      const regexp = new RegExp(re[1], flags);
+      rewrites.push((t) => t.replace(regexp, reading));
+    } catch {
+      bad.push(i + 1);
+    }
+  });
+  say(bad.length ? `reading rules not understood, on line ${bad.join(", ")}` : "");
+}
+
+const rewrite = (text) => rewrites.reduce((t, f) => f(t), text);
 
 // ---- What to read
 
@@ -194,7 +262,7 @@ function sentences() {
     const nodes = textNodes(block);
     const text = nodes.map((n) => n.data).join("");
     for (const [start, end] of split(text)) {
-      const s = text.slice(start, end).trim();
+      const s = rewrite(text.slice(start, end)).trim();
       if (!/[\p{L}\p{N}]/u.test(s)) continue;
       list.push({ block, text: s, range: rangeOf(nodes, start, end) });
     }
@@ -217,10 +285,15 @@ function textNodes(block) {
 }
 
 // split yields [start, end) of each sentence of text.
+// A break the segmenter makes inside a word, as at the "?" of a URL's
+// query, is not one: a sentence ends in 。！？ or before a space.
 function* split(text) {
-  const parts = segmenter
-    ? [...segmenter.segment(text)].map((s) => [s.index, s.index + s.segment.length])
-    : [[0, text.length]];
+  const parts = [];
+  for (const s of segmenter ? segmenter.segment(text) : [{ index: 0, segment: text }]) {
+    const last = parts.at(-1);
+    if (last && !/[\s。！？]$/.test(text.slice(last[0], last[1]))) last[1] += s.segment.length;
+    else parts.push([s.index, s.index + s.segment.length]);
+  }
   for (let [start, end] of parts) {
     while (end - start > MAX) {
       const head = text.slice(start, start + MAX);
@@ -269,11 +342,13 @@ function listVoices() {
   if (all.length === 0) return;
   const mine = (v) => v.lang.startsWith(lang);
   const sorted = [...all.filter(mine), ...all.filter((v) => !mine(v))];
-  const chosen = voice.value;
+  const chosen = voice.value || saved().voice;
   voice.replaceChildren(...sorted.map((v) =>
     new Option(`${v.name} (${v.lang})${v.localService ? "" : " ☁"}`, v.voiceURI)
   ));
-  voice.value = chosen || (sorted.find((v) => mine(v) && v.default) ?? sorted[0]).voiceURI;
+  voice.value = chosen;
+  // A voice kept from before may be gone, and then the value is "".
+  if (!voice.value) voice.value = (sorted.find((v) => mine(v) && v.default) ?? sorted[0]).voiceURI;
 }
 
 // ---- Playing
@@ -304,9 +379,9 @@ function speakNext(id) {
   const v = synth.getVoices().find((v) => v.voiceURI === voice.value);
   if (v) u.voice = v;
   u.lang = v?.lang ?? lang;
-  u.rate = Number(knobs.rate.value);
-  u.pitch = Number(knobs.pitch.value);
-  u.volume = Number(knobs.volume.value);
+  u.rate = Number(knobs.rate.input.value);
+  u.pitch = Number(knobs.pitch.input.value);
+  u.volume = Number(knobs.volume.input.value);
   u.onend = () => {
     if (id !== run) return;
     at++;
@@ -352,5 +427,27 @@ if (!synth) {
     if (!block) return;
     const from = sentences().findIndex((s) => s.block === block);
     if (from >= 0) play(from);
+  });
+}
+
+// Settings kept from before, then saved whenever they change.
+{
+  const kept = saved();
+  for (const [name, k] of Object.entries(knobs)) {
+    if (kept[name] !== undefined) k.input.value = kept[name];
+    k.show();
+    k.input.addEventListener("change", save);
+  }
+  rules.value = kept.rules ?? DEFAULT_RULES;
+  parseRules();
+  rules.addEventListener("input", () => {
+    parseRules();
+    save();
+  });
+  voice.addEventListener("change", save);
+  button("rules-reset").addEventListener("click", () => {
+    rules.value = DEFAULT_RULES;
+    parseRules();
+    save();
   });
 }

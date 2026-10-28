@@ -231,6 +231,10 @@ article .markdown-alert-caution {
 #listen-files mark {
   padding: 0;
 }
+#listen-rules {
+  font-family: var(--pico-font-family-monospace, monospace);
+  font-size: 0.875rem;
+}
 #listen-out {
   cursor: pointer;
 }

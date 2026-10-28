@@ -59,7 +59,7 @@ func listenButton(name, label string, attrs ...pe.Node) pe.Node {
 // picked page's articles, or with the Markdown in listen-src rendered by
 // the renderer at listen-data's data-wasm, and reads it aloud.
 func listenPage(env pageEnv, st *site) pe.Node {
-	const description = "Articles read aloud by your browser's speech synthesis. Nothing is saved."
+	const description = "Articles read aloud by your browser's speech synthesis. The settings stay in this browser."
 	meta := pageMeta{
 		Title:       "Listen",
 		Description: description,
@@ -99,6 +99,15 @@ func listenPage(env pageEnv, st *site) pe.Node {
 			listenKnob("rate", "Rate", "0.5", "3", "0.1", "1"),
 			listenKnob("pitch", "Pitch", "0", "2", "0.1", "1"),
 			listenKnob("volume", "Volume", "0", "1", "0.05", "1")),
+		// listen.js fills the rules: what was kept, or its defaults.
+		el.El(el.Tag("details"),
+			el.El(el.Tag("summary"), pe.Text("Reading rules")),
+			el.El(el.Tag("textarea"),
+				el.Attr(el.ID, "listen-rules"),
+				el.Attr(el.AttrName("rows"), "6"),
+				el.Attr(el.AttrName("spellcheck"), "false"),
+				el.Attr(el.AttrName("aria-label"), "reading rules")),
+			listenButton("rules-reset", "Restore the defaults", el.Attr(el.Class, "secondary outline"))),
 		pe.P(el.El(el.Small, el.Attr(el.ID, "listen-status"))),
 		el.El(el.Div, el.Attr(el.ID, "listen-out")),
 		el.El(el.Script,

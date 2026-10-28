@@ -84,7 +84,7 @@ fn listen_button(
 /// the picked page's articles, or with the Markdown in listen-src rendered
 /// by the renderer at listen-data's data-wasm, and reads it aloud.
 fn Site::listen_page(self : Site) -> @el.Node {
-  let description = "Articles read aloud by your browser's speech synthesis. Nothing is saved."
+  let description = "Articles read aloud by your browser's speech synthesis. The settings stay in this browser."
   let meta = PageMeta::{
     title: "Listen",
     description,
@@ -131,6 +131,19 @@ fn Site::listen_page(self : Site) -> @el.Node {
       listen_knob("rate", "Rate", "0.5", "3", "0.1", "1"),
       listen_knob("pitch", "Pitch", "0", "2", "0.1", "1"),
       listen_knob("volume", "Volume", "0", "1", "0.05", "1"),
+    ]),
+    // listen.js fills the rules: what was kept, or its defaults.
+    @el.el(@el.Tag("details"), [
+      @el.el(@el.Tag("summary"), [@picoel.text("Reading rules")]),
+      @el.el(@el.Tag("textarea"), [
+        @el.Attr(@el.id, "listen-rules"),
+        @el.Attr(@el.AttrName("rows"), "6"),
+        @el.Attr(@el.AttrName("spellcheck"), "false"),
+        @el.Attr(@el.AttrName("aria-label"), "reading rules"),
+      ]),
+      listen_button("rules-reset", "Restore the defaults", attrs=[
+        @el.Attr(@el.class, "secondary outline"),
+      ]),
     ]),
     @picoel.p([@el.el(@el.small, [@el.Attr(@el.id, "listen-status")])]),
     @el.el(@el.div, [@el.Attr(@el.id, "listen-out")]),
