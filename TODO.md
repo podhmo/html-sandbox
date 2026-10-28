@@ -31,6 +31,16 @@
   libelf を持たずにビルドされていること、moon 側では `perf record` に `--sample-cpu` を
   付けずパーサがヘッダの `[cpu]` を必須にしていることの 2 つだった
   （[issue #52](https://github.com/podhmo/html-sandbox/issues/52)）。
+- [-] **記事をブラウザーの TTS で聞けるようにする（`/listen`）**: ヘッダーの `preview`
+  を `<details>` のドロップダウン `more tools`（preview と listen）にし、`/listen` でファイルパスを fuzzy に絞り込んで選ぶとそのページの記事を、
+  Markdown を貼ると `preview.wasm` で描画した DOM を、Web Speech API で文ごとに読む。
+  Go と MoonBit の両方に入れる（[issue #95](https://github.com/podhmo/html-sandbox/issues/95)）。
+  - [x] MVP: 記事の選択（ファイルパスの fuzzy 検索）、再生/一時停止/停止、声・速度・音高・音量、
+    文ごとの分割と強調表示。コードブロックは読まず、リンクはテキストだけ読み、見出しの
+    前後にも間を入れない。
+  - [x] 読みの置換規則（`パターン => 読み`、`/正規表現/` も可。初期値は絵文字を読まない、
+    URL を「URL」と読む）と、声・速度・音高・音量・規則の `localStorage` への保存。
+  - [ ] 任意: 見出しの前後や文・ブロックの間隔を設定できるようにする。
 
 ### Future work
 

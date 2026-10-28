@@ -169,6 +169,18 @@ article .markdown-alert-caution {
   line-height: 1;
 }
 
+/* The header's "more tools" menu, opened under the right edge of its
+   summary, with its items aligned to the left. pico lays a dropdown in a
+   nav out inline, and Chrome and Firefox place an absolute box inside an
+   inline one differently; inline-block places it the same in both. */
+body > header details.dropdown {
+  display: inline-block;
+}
+body > header details.dropdown > summary + ul {
+  right: 0;
+  left: auto;
+}
+
 /* The preview page: editor and rendered output side by side on a wide
    screen, stacked on a phone. The tracks are minmax(0, 1fr), not 1fr:
    an auto/1fr minimum is the content's min-content size, so a long <pre>
@@ -189,4 +201,52 @@ article .markdown-alert-caution {
   font-family: var(--pico-font-family-monospace, monospace);
   font-size: 0.875rem;
   min-height: 24rem;
+}
+
+/* The listen page: the block being read is marked at its leading edge,
+   and the sentence being read is highlighted where the browser has the
+   CSS Custom Highlight API. */
+.listen-current {
+  box-shadow: -0.5rem 0 0 -0.25rem var(--pico-primary);
+}
+::highlight(listen) {
+  background-color: var(--pico-mark-background-color);
+  color: var(--pico-mark-color);
+}
+/* The file picker: the matches drop down over the page below the input. */
+.listen-picker {
+  position: relative;
+}
+#listen-files {
+  position: absolute;
+  z-index: 2;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: calc(var(--pico-spacing, 1rem) * -0.75);
+  padding: 0.25rem 0;
+  max-height: 22rem;
+  overflow-y: auto;
+  background: var(--pico-dropdown-background-color);
+  border: var(--pico-border-width) solid var(--pico-dropdown-border-color);
+  border-radius: var(--pico-border-radius);
+  box-shadow: var(--pico-dropdown-box-shadow);
+}
+#listen-files li {
+  list-style: none;
+  margin: 0;
+  padding: 0.25rem 0.75rem;
+}
+#listen-files li.active {
+  background: var(--pico-dropdown-hover-background-color);
+}
+#listen-files mark {
+  padding: 0;
+}
+#listen-rules {
+  font-family: var(--pico-font-family-monospace, monospace);
+  font-size: 0.875rem;
+}
+#listen-out {
+  cursor: pointer;
 }
