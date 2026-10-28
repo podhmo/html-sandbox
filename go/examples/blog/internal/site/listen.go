@@ -48,12 +48,11 @@ func listenKnob(name, label, min, max, step, value string) pe.Node {
 			el.Attr(el.Value, value)))
 }
 
-// listenButton is one of the player's buttons.
-func listenButton(name, label string) pe.Node {
-	return el.El(el.Tag("button"),
-		el.Attr(el.Type, "button"),
-		el.Attr(el.ID, "listen-"+name),
-		pe.Text(label))
+// listenButton is one of the player's buttons; the attrs are added to it.
+func listenButton(name, label string, attrs ...pe.Node) pe.Node {
+	children := []pe.Node{el.Attr(el.Type, "button"), el.Attr(el.ID, "listen-"+name)}
+	children = append(children, attrs...)
+	return el.El(el.Tag("button"), append(children, pe.Text(label))...)
 }
 
 // listenPage is the player page: listen.js fills listen-out with the
@@ -86,11 +85,12 @@ func listenPage(env pageEnv, st *site) pe.Node {
 				el.Attr(el.ID, "listen-src"),
 				el.Attr(el.AttrName("rows"), "8"),
 				el.Attr(el.AttrName("aria-label"), "Markdown to read"))),
+		// Play stands out; the others are drawn as outlines.
 		el.El(el.Div,
-			el.Attr(el.AttrName("role"), "group"),
+			el.Attr(el.Class, "grid"),
 			listenButton("play", "Play"),
-			listenButton("pause", "Pause"),
-			listenButton("stop", "Stop")),
+			listenButton("pause", "Pause", el.Attr(el.Class, "outline")),
+			listenButton("stop", "Stop", el.Attr(el.Class, "outline"))),
 		el.El(el.Div,
 			el.Attr(el.Class, "grid"),
 			el.El(el.Tag("label"),

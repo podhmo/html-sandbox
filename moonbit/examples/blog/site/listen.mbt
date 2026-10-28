@@ -61,13 +61,22 @@ fn listen_knob(
 }
 
 ///|
-/// listen_button is one of the player's buttons.
-fn listen_button(name : String, label : String) -> @el.Node {
-  @el.el(@el.Tag("button"), [
-    @el.Attr(@el.type_attr, "button"),
-    @el.Attr(@el.id, "listen-\{name}"),
-    @picoel.text(label),
-  ])
+/// listen_button is one of the player's buttons; the attrs are added to
+/// it.
+fn listen_button(
+  name : String,
+  label : String,
+  attrs~ : Array[@el.Node] = [],
+) -> @el.Node {
+  @el.el(
+    @el.Tag("button"),
+    [
+      @el.Attr(@el.type_attr, "button"),
+      @el.Attr(@el.id, "listen-\{name}"),
+      ..attrs,
+      @picoel.text(label),
+    ],
+  )
 }
 
 ///|
@@ -106,11 +115,12 @@ fn Site::listen_page(self : Site) -> @el.Node {
         @el.Attr(@el.AttrName("aria-label"), "Markdown to read"),
       ]),
     ]),
+    // Play stands out; the others are drawn as outlines.
     @el.el(@el.div, [
-      @el.Attr(@el.AttrName("role"), "group"),
+      @el.Attr(@el.class, "grid"),
       listen_button("play", "Play"),
-      listen_button("pause", "Pause"),
-      listen_button("stop", "Stop"),
+      listen_button("pause", "Pause", attrs=[@el.Attr(@el.class, "outline")]),
+      listen_button("stop", "Stop", attrs=[@el.Attr(@el.class, "outline")]),
     ]),
     @el.el(@el.div, [
       @el.Attr(@el.class, "grid"),
