@@ -220,15 +220,15 @@ function textOf(block) {
 // keeps step with the speed.
 //
 //   steady    every piece the time of an average one (perPiece
-//             characters), twice that at the end of a block: the
-//             rhythm never changes.
+//             characters), with no pause anywhere: the rhythm never
+//             changes, not even at the end of a block.
 //   balanced  that time, 0.8 to 1.4 times by the piece's length, 1.5
 //             times at the end of a sentence, twice at the end of a block.
 //   length    the piece's own characters (3 at least), 1.8 times at the
 //             end of a sentence or 1.3 after a comma, with 3 characters'
 //             time more after a block and 7 after a heading.
 const PACES = {
-  steady: (item, n) => perPiece * (item.last ? 2 : 1),
+  steady: () => perPiece,
   balanced: (item, n) =>
     perPiece * Math.min(1.4, Math.max(0.8, 0.6 + 0.1 * n)) * (item.last ? 2 : item.stop ? 1.5 : 1),
   length: (item, n) =>
