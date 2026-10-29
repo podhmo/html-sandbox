@@ -2,24 +2,29 @@
  * middle of #skim-stage (RSVP, rapid serial visual presentation): each
  * block's text is cut into pieces about the size of a Japanese bunsetsu,
  * and each piece stays for as long as its characters take at the speed
- * set before starting. #skim-out is filled either with the articles of a
+ * set. #skim-out is filled either with the articles of a
  * page of this site, picked from #skim-files by a fuzzy match on its file
  * path, or with Markdown pasted into #skim-src, rendered by the preview
  * page's renderer (whose URL and file list ride on #skim-data's data-*
- * attributes, as on the preview page). The speed is kept in this
- * browser's localStorage. This script shares no code with the listen
+ * attributes, as on the preview page). The speed, and whether the
+ * pieces before and after are shown, can be set before starting and
+ * while it runs, and are kept in this browser's localStorage. This script shares no code with the listen
  * page's. */
 const pick = document.getElementById("skim-pick");
 const choices = document.getElementById("skim-files");
 const src = document.getElementById("skim-src");
 const out = document.getElementById("skim-out");
 const status = document.getElementById("skim-status");
-const cpm = document.getElementById("skim-cpm");
-const cpmShown = document.getElementById("skim-cpm-out");
+// The settings come in pairs, one on the page and one on the stage.
+const speeds = [...document.querySelectorAll('[data-setting="cpm"]')];
+const arounds = [...document.querySelectorAll('[data-setting="around"]')];
+const cpm = () => Number(speeds[0].value);
 const stage = document.getElementById("skim-stage");
 const note = document.getElementById("skim-note");
-const context = document.getElementById("skim-context");
+const prev = document.getElementById("skim-prev");
 const word = document.getElementById("skim-word");
+const next = document.getElementById("skim-next");
+const view = stage.querySelector(".skim-view");
 const progress = document.getElementById("skim-progress");
 const button = (name) => document.getElementById(`skim-${name}`);
 const { wasm, files } = document.getElementById("skim-data").dataset;
@@ -34,7 +39,7 @@ const say = (text) => {
   status.textContent = text;
 };
 
-// ---- The speed, kept in localStorage (which may be unavailable, as in
+// ---- The settings, kept in localStorage (which may be unavailable, as in
 // some private windows: then it is not kept).
 
 const STORE = "skim-settings";
@@ -49,7 +54,7 @@ function saved() {
 
 function save() {
   try {
-    localStorage.setItem(STORE, JSON.stringify({ cpm: cpm.value }));
+    localStorage.setItem(STORE, JSON.stringify({ cpm: speeds[0].value, around: arounds[0].checked }));
   } catch {
     // Not kept.
   }
@@ -173,7 +178,7 @@ function textOf(block) {
 // least) at the speed set, longer at the end of a sentence or after a
 // comma, with a pause after a block and more after a heading.
 function delay(item) {
-  let ms = Math.max([...item.text].length, 3) * 60000 / Number(cpm.value);
+  let ms = Math.max([...item.text].length, 3) * 60000 / cpm();
   if (item.stop) ms *= 1.8;
   else if (COMMA.test(item.text)) ms *= 1.3;
   if (item.last) ms += item.heading ? 700 : 300;
@@ -191,7 +196,7 @@ function loaded() {
     return;
   }
   const minutes = queue.reduce((sum, it) => sum + delay(it), 0) / 60000;
-  say(`${queue.length} pieces, about ${Math.ceil(minutes)} min at ${cpm.value} characters a minute`);
+  say(`${queue.length} pieces, about ${Math.ceil(minutes)} min at ${cpm()} characters a minute`);
 }
 
 async function load(path, href) {
@@ -337,7 +342,7 @@ let at = 0;
 let timer = null;
 
 // show puts the item at `at` in the middle, shrunk to fit the stage if it
-// is too wide, with the rest of its block before it above.
+// is too wide, between the items before and after it.
 function show() {
   const it = queue[at];
   const span = document.createElement("span");
@@ -346,9 +351,8 @@ function show() {
   const room = word.clientWidth - parseFloat(getComputedStyle(word).paddingLeft) * 2;
   const width = span.getBoundingClientRect().width;
   if (width > room) span.style.fontSize = `${100 * room / width}%`;
-  let from = at;
-  while (from > 0 && queue[from - 1].block === it.block) from--;
-  context.textContent = queue.slice(from, at).map((x) => x.text).join(" ");
+  prev.textContent = queue[at - 1]?.text ?? "";
+  next.textContent = queue[at + 1]?.text ?? "";
   progress.value = queue.length > 1 ? at / (queue.length - 1) : 1;
 }
 
@@ -421,8 +425,6 @@ function start(from = 0) {
   at = from;
   stage.hidden = false;
   document.documentElement.classList.add("skim-on");
-  // The speed is set before starting, not while it runs.
-  cpm.disabled = true;
   play();
 }
 
@@ -430,7 +432,6 @@ function close() {
   pause();
   stage.hidden = true;
   document.documentElement.classList.remove("skim-on");
-  cpm.disabled = false;
   queue[at]?.block.scrollIntoView({ block: "center" });
 }
 
@@ -465,14 +466,14 @@ button("back").addEventListener("click", () => jump(-1));
 button("forward").addEventListener("click", () => jump(1));
 button("close").addEventListener("click", close);
 
-// Tapping the piece pauses or plays; swiping it to the left goes forward
+// Tapping the view pauses or plays; swiping it to the left goes forward
 // a sentence, to the right back one, as a page is turned.
 {
   let down = null;
-  word.addEventListener("pointerdown", (e) => {
+  view.addEventListener("pointerdown", (e) => {
     down = { x: e.clientX, y: e.clientY };
   });
-  word.addEventListener("pointerup", (e) => {
+  view.addEventListener("pointerup", (e) => {
     if (!down) return;
     const dx = e.clientX - down.x;
     const dy = e.clientY - down.y;
@@ -480,18 +481,24 @@ button("close").addEventListener("click", close);
     if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) jump(dx < 0 ? 1 : -1);
     else if (Math.abs(dx) < 10 && Math.abs(dy) < 10) toggle();
   });
-  word.addEventListener("pointercancel", () => {
+  view.addEventListener("pointercancel", () => {
     down = null;
   });
 }
 
-// The keys, while the stage is shown. Space on a button is the button's.
+// The keys, while the stage is shown: Space plays or pauses, the left and
+// right arrows go back and forward a sentence, the up and down arrows
+// change the speed. Space on a button is the button's, and the arrows on
+// a slider the slider's.
 document.addEventListener("keydown", (e) => {
   if (stage.hidden || (e.key === " " && e.target.closest("button"))) return;
+  if (e.key.startsWith("Arrow") && e.target.matches?.('input[type="range"]')) return;
   const keys = {
     " ": toggle,
     ArrowLeft: () => jump(-1),
     ArrowRight: () => jump(1),
+    ArrowUp: () => setSpeed(cpm() + 50),
+    ArrowDown: () => setSpeed(cpm() - 50),
     Escape: close,
   };
   if (!keys[e.key]) return;
@@ -508,16 +515,33 @@ out.addEventListener("click", (e) => {
   if (from >= 0) start(from);
 });
 
-// The speed kept from before, then saved whenever it changes.
+// ---- Settings: the speed takes effect from the next piece. The ones
+// kept from before are put back, then saved whenever they change.
+
+function setSpeed(value) {
+  const v = Math.min(1500, Math.max(300, value));
+  for (const input of speeds) {
+    input.value = v;
+    document.getElementById(`${input.id}-out`).textContent = input.value;
+  }
+  save();
+}
+
+function setAround(on) {
+  for (const input of arounds) input.checked = on;
+  stage.classList.toggle("skim-around", on);
+  save();
+}
+
 {
-  const kept = saved().cpm;
-  if (kept !== undefined) cpm.value = kept;
-  cpmShown.textContent = cpm.value;
-  cpm.addEventListener("input", () => {
-    cpmShown.textContent = cpm.value;
-  });
-  cpm.addEventListener("change", () => {
-    save();
-    if (queue.length) loaded();
-  });
+  const kept = saved();
+  setSpeed(Number(kept.cpm ?? speeds[0].value));
+  setAround(kept.around ?? arounds[0].checked);
+  for (const input of speeds) {
+    input.addEventListener("input", () => setSpeed(Number(input.value)));
+    input.addEventListener("change", () => {
+      if (queue.length && stage.hidden) loaded();
+    });
+  }
+  for (const input of arounds) input.addEventListener("change", () => setAround(input.checked));
 }

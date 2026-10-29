@@ -50,11 +50,52 @@ fn skim_button(
 }
 
 ///|
+/// skim_speed is a slider for the speed, in characters a minute, with its
+/// value shown after the label. The page has one to set before starting
+/// and the stage one to change it while it runs; skim.js keeps them
+/// alike.
+fn skim_speed(id : String, label : String) -> @el.Node {
+  @el.el(@el.Tag("label"), [
+    @picoel.text(label),
+    @el.el(@el.Tag("output"), [
+      @el.Attr(@el.id, "\{id}-out"),
+      @picoel.text("600"),
+    ]),
+    @picoel.text("/min"),
+    @el.el(@el.input, [
+      @el.Attr(@el.type_attr, "range"),
+      @el.Attr(@el.id, id),
+      @el.Attr(@el.AttrName("data-setting"), "cpm"),
+      @el.Attr(@el.AttrName("min"), "300"),
+      @el.Attr(@el.AttrName("max"), "1500"),
+      @el.Attr(@el.AttrName("step"), "50"),
+      @el.Attr(@el.value, "600"),
+    ]),
+  ])
+}
+
+///|
+/// skim_around is a switch for showing the pieces before and after the
+/// one being shown; like skim_speed, there is one on the page and one on
+/// the stage.
+fn skim_around(id : String) -> @el.Node {
+  @el.el(@el.Tag("label"), [
+    @el.el(@el.input, [
+      @el.Attr(@el.type_attr, "checkbox"),
+      @el.Attr(@el.AttrName("role"), "switch"),
+      @el.Attr(@el.id, id),
+      @el.Attr(@el.AttrName("data-setting"), "around"),
+      @el.Attr(@el.AttrName("checked"), ""),
+    ]),
+    @picoel.text("Before and after"),
+  ])
+}
+
+///|
 /// Site::skim_page is the reader page: skim.js fills skim-out with the
 /// picked page's articles, or with the Markdown in skim-src rendered by
 /// the renderer at skim-data's data-wasm, and shows it piece by piece in
-/// skim-stage, which covers the screen while it runs. The speed is set
-/// before starting.
+/// skim-stage, which covers the screen while it runs.
 fn Site::skim_page(self : Site) -> @el.Node {
   let description = "Articles shown a few words at a time in the middle of the screen. The speed stays in this browser."
   let meta = PageMeta::{
@@ -90,38 +131,41 @@ fn Site::skim_page(self : Site) -> @el.Node {
     ]),
     @el.el(@el.div, [
       @el.Attr(@el.class, "grid"),
-      @el.el(@el.Tag("label"), [
-        @picoel.text("Characters a minute "),
-        @el.el(@el.Tag("output"), [
-          @el.Attr(@el.id, "skim-cpm-out"),
-          @picoel.text("600"),
-        ]),
-        @el.el(@el.input, [
-          @el.Attr(@el.type_attr, "range"),
-          @el.Attr(@el.id, "skim-cpm"),
-          @el.Attr(@el.AttrName("min"), "300"),
-          @el.Attr(@el.AttrName("max"), "1500"),
-          @el.Attr(@el.AttrName("step"), "50"),
-          @el.Attr(@el.value, "600"),
-        ]),
-      ]),
+      skim_speed("skim-cpm", "Speed "),
+      skim_around("skim-around"),
       skim_button("start", "Start"),
     ]),
     @picoel.p([@el.el(@el.small, [@el.Attr(@el.id, "skim-status")])]),
-    // The stage: the words just shown, the piece being shown, how far it
-    // has gone, and the controls, under the thumb. Tapping the piece
+    // The stage: the piece being shown, between the pieces before and
+    // after it (above and below on a narrow screen), how far it has gone,
+    // the settings, and the controls, under the thumb. Tapping the view
     // pauses, and swiping it goes back or forward a sentence.
     @el.el(@el.section, [
       @el.Attr(@el.id, "skim-stage"),
       @el.Attr(@el.AttrName("hidden"), ""),
       @el.Attr(@el.AttrName("aria-label"), "skim"),
       @el.el(@el.small, [@el.Attr(@el.id, "skim-note")]),
-      @el.el(@el.div, [@el.Attr(@el.id, "skim-context")]),
-      @el.el(@el.div, [@el.Attr(@el.id, "skim-word")]),
+      @el.el(@el.div, [
+        @el.Attr(@el.class, "skim-view"),
+        @el.el(@el.div, [
+          @el.Attr(@el.id, "skim-prev"),
+          @el.Attr(@el.AttrName("aria-hidden"), "true"),
+        ]),
+        @el.el(@el.div, [@el.Attr(@el.id, "skim-word")]),
+        @el.el(@el.div, [
+          @el.Attr(@el.id, "skim-next"),
+          @el.Attr(@el.AttrName("aria-hidden"), "true"),
+        ]),
+      ]),
       @el.el(@el.Tag("progress"), [
         @el.Attr(@el.id, "skim-progress"),
         @el.Attr(@el.value, "0"),
         @el.Attr(@el.AttrName("max"), "1"),
+      ]),
+      @el.el(@el.div, [
+        @el.Attr(@el.class, "skim-settings"),
+        skim_speed("skim-speed", ""),
+        skim_around("skim-around-stage"),
       ]),
       @el.el(@el.div, [
         @el.Attr(@el.class, "skim-controls"),

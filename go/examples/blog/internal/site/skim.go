@@ -40,11 +40,42 @@ func skimButton(name, label string, attrs ...pe.Node) pe.Node {
 	return el.El(el.Tag("button"), append(children, pe.Text(label))...)
 }
 
+// skimSpeed is a slider for the speed, in characters a minute, with its
+// value shown after the label. The page has one to set before starting
+// and the stage one to change it while it runs; skim.js keeps them alike.
+func skimSpeed(id, label string) pe.Node {
+	return el.El(el.Tag("label"),
+		pe.Text(label),
+		el.El(el.Tag("output"), el.Attr(el.ID, id+"-out"), pe.Text("600")),
+		pe.Text("/min"),
+		el.El(el.Input,
+			el.Attr(el.Type, "range"),
+			el.Attr(el.ID, id),
+			el.Attr(el.AttrName("data-setting"), "cpm"),
+			el.Attr(el.AttrName("min"), "300"),
+			el.Attr(el.AttrName("max"), "1500"),
+			el.Attr(el.AttrName("step"), "50"),
+			el.Attr(el.Value, "600")))
+}
+
+// skimAround is a switch for showing the pieces before and after the one
+// being shown; like skimSpeed, there is one on the page and one on the
+// stage.
+func skimAround(id string) pe.Node {
+	return el.El(el.Tag("label"),
+		el.El(el.Input,
+			el.Attr(el.Type, "checkbox"),
+			el.Attr(el.AttrName("role"), "switch"),
+			el.Attr(el.ID, id),
+			el.Attr(el.AttrName("data-setting"), "around"),
+			el.Attr(el.AttrName("checked"), "")),
+		pe.Text("Before and after"))
+}
+
 // skimPage is the reader page: skim.js fills skim-out with the picked
 // page's articles, or with the Markdown in skim-src rendered by the
 // renderer at skim-data's data-wasm, and shows it piece by piece in
-// skim-stage, which covers the screen while it runs. The speed is set
-// before starting.
+// skim-stage, which covers the screen while it runs.
 func skimPage(env pageEnv, st *site) pe.Node {
 	const description = "Articles shown a few words at a time in the middle of the screen. The speed stays in this browser."
 	meta := pageMeta{
@@ -75,29 +106,29 @@ func skimPage(env pageEnv, st *site) pe.Node {
 				el.Attr(el.AttrName("aria-label"), "Markdown to skim"))),
 		el.El(el.Div,
 			el.Attr(el.Class, "grid"),
-			el.El(el.Tag("label"),
-				pe.Text("Characters a minute "),
-				el.El(el.Tag("output"), el.Attr(el.ID, "skim-cpm-out"), pe.Text("600")),
-				el.El(el.Input,
-					el.Attr(el.Type, "range"),
-					el.Attr(el.ID, "skim-cpm"),
-					el.Attr(el.AttrName("min"), "300"),
-					el.Attr(el.AttrName("max"), "1500"),
-					el.Attr(el.AttrName("step"), "50"),
-					el.Attr(el.Value, "600"))),
+			skimSpeed("skim-cpm", "Speed "),
+			skimAround("skim-around"),
 			skimButton("start", "Start")),
 		pe.P(el.El(el.Small, el.Attr(el.ID, "skim-status"))),
-		// The stage: the words just shown, the piece being shown, how far
-		// it has gone, and the controls, under the thumb. Tapping the
-		// piece pauses, and swiping it goes back or forward a sentence.
+		// The stage: the piece being shown, between the pieces before and
+		// after it (above and below on a narrow screen), how far it has
+		// gone, the settings, and the controls, under the thumb. Tapping
+		// the view pauses, and swiping it goes back or forward a sentence.
 		el.El(el.Section,
 			el.Attr(el.ID, "skim-stage"),
 			el.Attr(el.AttrName("hidden"), ""),
 			el.Attr(el.AttrName("aria-label"), "skim"),
 			el.El(el.Small, el.Attr(el.ID, "skim-note")),
-			el.El(el.Div, el.Attr(el.ID, "skim-context")),
-			el.El(el.Div, el.Attr(el.ID, "skim-word")),
+			el.El(el.Div,
+				el.Attr(el.Class, "skim-view"),
+				el.El(el.Div, el.Attr(el.ID, "skim-prev"), el.Attr(el.AttrName("aria-hidden"), "true")),
+				el.El(el.Div, el.Attr(el.ID, "skim-word")),
+				el.El(el.Div, el.Attr(el.ID, "skim-next"), el.Attr(el.AttrName("aria-hidden"), "true"))),
 			el.El(el.Tag("progress"), el.Attr(el.ID, "skim-progress"), el.Attr(el.Value, "0"), el.Attr(el.AttrName("max"), "1")),
+			el.El(el.Div,
+				el.Attr(el.Class, "skim-settings"),
+				skimSpeed("skim-speed", ""),
+				skimAround("skim-around-stage")),
 			el.El(el.Div,
 				el.Attr(el.Class, "skim-controls"),
 				skimButton("back", "«", outline, el.Attr(el.AttrName("aria-label"), "back a sentence")),
