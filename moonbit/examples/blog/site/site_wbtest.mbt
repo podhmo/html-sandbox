@@ -95,6 +95,7 @@ test "post page text" {
       #|more tools
       #|preview
       #|listen
+      #|skim
       #|github
       #|2026-10-14
       #|Download .md

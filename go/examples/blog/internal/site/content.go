@@ -68,6 +68,14 @@ var listenJS []byte
 // listenJSPath carries a hash of listenJS, like siteCSSPath.
 var listenJSPath = "/listen.js?v=" + versionOf(listenJS)
 
+// skimJS runs the skim page's reader.
+//
+//go:embed skim.js
+var skimJS []byte
+
+// skimJSPath carries a hash of skimJS, like siteCSSPath.
+var skimJSPath = "/skim.js?v=" + versionOf(skimJS)
+
 // versionOf is the first 4 bytes of b's SHA-256 in hex, as siteCSSPath
 // uses it.
 func versionOf(b []byte) string {

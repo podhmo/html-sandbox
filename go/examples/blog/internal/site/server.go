@@ -148,6 +148,10 @@ func (s *Server) route(w http.ResponseWriter, r *http.Request) {
 		s.handleListen(w, r)
 	case p == "/listen.js":
 		handleListenJS(w, r)
+	case p == "/skim":
+		s.handleSkim(w, r)
+	case p == "/skim.js":
+		handleSkimJS(w, r)
 	case p == liveReloadScriptPath:
 		s.handleLiveReloadScript(w, r)
 	case p == liveReloadEventsPath:
@@ -369,6 +373,22 @@ func handleListenJS(w http.ResponseWriter, r *http.Request) {
 	h.Set("Cache-Control", "public, max-age=31536000, immutable")
 	h.Set("Content-Length", strconv.Itoa(len(listenJS)))
 	w.Write(listenJS)
+}
+
+// handleSkim shows the skim page: articles, or pasted Markdown, shown a
+// few words at a time. Nothing is saved.
+func (s *Server) handleSkim(w http.ResponseWriter, r *http.Request) {
+	s.page(w, r, skimPage(s.env, s.site.Load()))
+}
+
+// handleSkimJS serves the skim page's reader script, versioned like the
+// other scripts.
+func handleSkimJS(w http.ResponseWriter, r *http.Request) {
+	h := w.Header()
+	h.Set("Content-Type", "text/javascript; charset=utf-8")
+	h.Set("Cache-Control", "public, max-age=31536000, immutable")
+	h.Set("Content-Length", strconv.Itoa(len(skimJS)))
+	w.Write(skimJS)
 }
 
 // page renders n with status 200, or an error page if rendering fails.

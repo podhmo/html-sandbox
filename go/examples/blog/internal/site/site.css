@@ -250,3 +250,84 @@ body > header details.dropdown > summary + ul {
 #listen-out {
   cursor: pointer;
 }
+
+/* The skim page. While it runs, the stage covers the screen: the words
+   just shown at the top, the piece being shown in the middle, and the
+   controls at the bottom, under the thumb. */
+.skim-on body {
+  overflow: hidden;
+}
+#skim-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom));
+  background: var(--pico-background-color);
+}
+#skim-stage[hidden] {
+  display: none;
+}
+#skim-context {
+  height: 4.5em;
+  overflow: hidden;
+  color: var(--pico-muted-color);
+  font-size: 0.875rem;
+}
+#skim-word {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.5rem;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 2.4rem;
+  /* The taps and swipes are the page's, not the browser's. */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: pointer;
+}
+.skim-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+.skim-controls button {
+  flex: 1;
+  margin: 0;
+}
+#skim-files {
+  position: absolute;
+  z-index: 2;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: calc(var(--pico-spacing, 1rem) * -0.75);
+  padding: 0.25rem 0;
+  max-height: 22rem;
+  overflow-y: auto;
+  background: var(--pico-dropdown-background-color);
+  border: var(--pico-border-width) solid var(--pico-dropdown-border-color);
+  border-radius: var(--pico-border-radius);
+  box-shadow: var(--pico-dropdown-box-shadow);
+}
+.skim-picker {
+  position: relative;
+}
+#skim-files li {
+  list-style: none;
+  margin: 0;
+  padding: 0.25rem 0.75rem;
+}
+#skim-files li.active {
+  background: var(--pico-dropdown-hover-background-color);
+}
+#skim-files mark {
+  padding: 0;
+}
+#skim-out {
+  cursor: pointer;
+}

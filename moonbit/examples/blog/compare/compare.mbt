@@ -13,7 +13,7 @@ pub(all) struct Fetched {
 pub fn default_paths() -> Array[String] {
   [
     "/", "/posts/", "/slops/", "/slops/hello", "/posts/wsl-opencode", "/docs/ja/design",
-    "/docs/", "/preview", "/listen", "/favicon.svg", "/no-such-page",
+    "/docs/", "/preview", "/listen", "/skim", "/favicon.svg", "/no-such-page",
   ]
 }
 
