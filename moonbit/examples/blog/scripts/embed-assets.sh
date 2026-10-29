@@ -6,7 +6,7 @@
 # them. preview.wasm contributes only its version: it is a generated
 # file served from Static Assets, not embedded here.
 #
-#   sh examples/blog/scripts/embed-assets.sh examples/blog/assets/embedded.mbt ../go/examples/blog/internal/site
+#   sh examples/blog/scripts/embed-assets.sh examples/blog/assets/embedded.mbt ../go/examples/blog/internal/site/assets
 #
 # Like embed.sh, moon runs it through dev_build in assets/moon.pkg and the
 # Makefile runs it too, and OUT is rewritten only when its content changes.

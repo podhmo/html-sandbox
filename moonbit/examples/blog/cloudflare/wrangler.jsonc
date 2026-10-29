@@ -14,7 +14,7 @@
     "watch_dir": [
       "../../../pkg", "../site", "../worker", "../scripts",
       "../../../../posts", "../../../../slops", "../../../../TODO.md",
-      "../../../../go/examples/blog/internal/site", "../../../../docs"
+      "../../../../go/examples/blog/internal/site/assets", "../../../../docs"
     ]
   },
   "vars": {

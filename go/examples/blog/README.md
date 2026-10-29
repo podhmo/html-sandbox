@@ -9,7 +9,7 @@ pages are made of semantic elements and pico's `container` class.
 The few rules pico cannot express (a sticky site header and tighter spacing
 around `header` and `main`) and typography tuned for Japanese (leading,
 heading sizes and wrapping, list indent and leading, list cards) live in
-[`internal/site/site.css`](internal/site/site.css), which builds on pico's
+[`internal/site/assets/site.css`](internal/site/assets/site.css), which builds on pico's
 variables and is served as `/site.css?v=<hash>` after pico.
 Pages are written with `lang="ja"`, since the posts are in Japanese.
 Posts, the favicon, and the repository's own documents are embedded with
@@ -184,7 +184,7 @@ linked only for `http`, `https`, and `mailto`; others, such as
 | `main.go` | Flags and startup |
 | `repo.go` | Finding the module root and opening the repository root for `-debug` |
 | `posts/posts.go` | Embedding the posts, copied in by `go generate` |
-| `internal/site/content.go` | Embedded favicon, posts, and documents |
+| `internal/site/content.go` | Embedded assets (favicon, stylesheet, scripts), posts, and documents |
 | `internal/site/posts.go` | Loading posts from an `fs.FS` |
 | `internal/site/docs.go` | Loading repository documents |
 | `repodocs/repodocs.go` | Embedding the repository documents, copied in by `go generate` |

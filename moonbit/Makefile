@@ -36,7 +36,7 @@ SLOPS := ../slops
 # docs/blog.metadata.json, which orders them, included.
 DOCS := ../TODO.md ../docs
 # The Go blog's site.css and favicon.svg.
-ASSETS := ../go/examples/blog/internal/site
+ASSETS := ../go/examples/blog/internal/site/assets
 # The preview page's renderer, built by `make preview` into the shared
 # assets dir, where it is committed.
 PREVIEW_WASM := _build/wasm-gc/release/build/$(BLOG)/preview/preview.wasm
