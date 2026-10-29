@@ -31,7 +31,7 @@ available at `/<collection>/<slug>/<filename>`.
 
 ## Testing
 
-With the Go and MoonBit toolchains and Node.js 22 or later, run every
+With the Go and MoonBit toolchains and Node.js 24 or later, run every
 maintained implementation's tests from the repository root:
 
 ```sh
