@@ -564,7 +564,7 @@ out.addEventListener("click", (e) => {
 // kept from before are put back, then saved whenever they change.
 
 function setSpeed(value) {
-  const v = Math.min(1500, Math.max(300, value));
+  const v = Math.min(Number(speeds[0].max), Math.max(Number(speeds[0].min), value));
   for (const input of speeds) {
     input.value = v;
     document.getElementById(`${input.id}-out`).textContent = input.value;

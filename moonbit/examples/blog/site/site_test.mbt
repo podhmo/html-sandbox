@@ -481,7 +481,7 @@ test "skim page" {
   assert_contains(body(s, "/skim"), [
     "<title>Skim - blog</title>", "<input type=\"search\" id=\"skim-pick\" autocomplete=\"off\"",
     "<ul id=\"skim-files\"><li><a href=\"/posts/hello\" data-source=\"posts/2026-10-14-hello.md\">posts/2026-10-14-hello.md</a> <small>Hello &lt;script&gt;</small></li>",
-    "<textarea id=\"skim-src\"", "<label>Speed <output id=\"skim-cpm-out\">600</output>/min<input type=\"range\" id=\"skim-cpm\" data-setting=\"cpm\" min=\"300\" max=\"1500\" step=\"50\" value=\"600\"></label>",
+    "<textarea id=\"skim-src\"", "<label>Speed <output id=\"skim-cpm-out\">600</output>/min<input type=\"range\" id=\"skim-cpm\" data-setting=\"cpm\" min=\"300\" max=\"3000\" step=\"50\" value=\"600\"></label>",
     "<input type=\"checkbox\" role=\"switch\" id=\"skim-around\" data-setting=\"around\" checked=\"\">",
     "<div id=\"skim-prev\" aria-hidden=\"true\"></div><div id=\"skim-word\"></div><div id=\"skim-next\" aria-hidden=\"true\"></div>",
     "<input type=\"range\" id=\"skim-speed\" data-setting=\"cpm\"", "<input type=\"checkbox\" role=\"switch\" id=\"skim-around-stage\" data-setting=\"around\" checked=\"\">",

@@ -53,7 +53,7 @@ func skimSpeed(id, label string) pe.Node {
 			el.Attr(el.ID, id),
 			el.Attr(el.AttrName("data-setting"), "cpm"),
 			el.Attr(el.AttrName("min"), "300"),
-			el.Attr(el.AttrName("max"), "1500"),
+			el.Attr(el.AttrName("max"), "3000"),
 			el.Attr(el.AttrName("step"), "50"),
 			el.Attr(el.Value, "600")))
 }
