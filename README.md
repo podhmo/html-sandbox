@@ -28,11 +28,6 @@ A directory is one article bundle: `README.md` is its face when present,
 and each remaining file appears as a separate section. Each member is also
 available at `/<collection>/<slug>/<filename>`.
 
-The first human article is a bundle imported from
-[this Gist](https://gist.github.com/podhmo/36a33d61d3776aa76ffcc48441b980ba).
-Its date, 2026-10-19, is the Gist creation date in Asia/Tokyo
-(`2026-10-18T22:40:01Z`). The three source files are retained separately;
-only the face receives title front matter from the Gist description.
 
 ## Testing
 
