@@ -4,19 +4,19 @@
 // only hashed, for the version the preview page puts in its URL.
 rule(
   name: "embed-assets",
-  command: "sh examples/blog/scripts/embed-assets.sh $output ../go/examples/blog/internal/site",
+  command: "sh examples/blog/scripts/embed-assets.sh $output ../go/examples/blog/internal/site/assets",
 )
 
 dev_build(
   rule: "embed-assets",
   input: [
-    "../../../../go/examples/blog/internal/site/site.css",
-    "../../../../go/examples/blog/internal/site/favicon.svg",
-    "../../../../go/examples/blog/internal/site/code-copy.js",
-    "../../../../go/examples/blog/internal/site/preview.js",
-    "../../../../go/examples/blog/internal/site/listen.js",
-    "../../../../go/examples/blog/internal/site/skim.js",
-    "../../../../go/examples/blog/internal/site/preview.wasm",
+    "../../../../go/examples/blog/internal/site/assets/site.css",
+    "../../../../go/examples/blog/internal/site/assets/favicon.svg",
+    "../../../../go/examples/blog/internal/site/assets/code-copy.js",
+    "../../../../go/examples/blog/internal/site/assets/preview.js",
+    "../../../../go/examples/blog/internal/site/assets/listen.js",
+    "../../../../go/examples/blog/internal/site/assets/skim.js",
+    "../../../../go/examples/blog/internal/site/assets/preview.wasm",
   ],
   output: "embedded.mbt",
 )

@@ -14,13 +14,13 @@ import (
 	"github.com/podhmo/html-sandbox/go/examples/blog/slops"
 )
 
-//go:embed favicon.svg
+//go:embed assets/favicon.svg
 var favicon []byte
 
 // siteCSS holds the rules pico cannot express and the typography tuned
 // for Japanese, loaded after pico.
 //
-//go:embed site.css
+//go:embed assets/site.css
 var siteCSS []byte
 
 // siteCSSPath carries a hash of siteCSS, so browsers may cache it for long
@@ -33,7 +33,7 @@ var siteCSSPath = func() string {
 // codeCopyJS adds a copy-to-clipboard button to every code block, loaded
 // after the document is parsed. It is the only script a normal page serves.
 //
-//go:embed code-copy.js
+//go:embed assets/code-copy.js
 var codeCopyJS []byte
 
 // codeCopyJSPath carries a hash of codeCopyJS, like siteCSSPath.
@@ -44,7 +44,7 @@ var codeCopyJSPath = func() string {
 
 // previewJS runs the preview page's renderer.
 //
-//go:embed preview.js
+//go:embed assets/preview.js
 var previewJS []byte
 
 // previewWasm renders Markdown on the preview page: the site's own
@@ -52,7 +52,7 @@ var previewJS []byte
 // file, committed like tinymarkdown.mjs — `make -C moonbit preview`
 // rebuilds it.
 //
-//go:embed preview.wasm
+//go:embed assets/preview.wasm
 var previewWasm []byte
 
 // previewJSPath and previewWasmPath carry hashes of their files, like
@@ -62,7 +62,7 @@ var previewWasmPath = "/preview.wasm?v=" + versionOf(previewWasm)
 
 // listenJS runs the listen page's player.
 //
-//go:embed listen.js
+//go:embed assets/listen.js
 var listenJS []byte
 
 // listenJSPath carries a hash of listenJS, like siteCSSPath.
@@ -70,7 +70,7 @@ var listenJSPath = "/listen.js?v=" + versionOf(listenJS)
 
 // skimJS runs the skim page's reader.
 //
-//go:embed skim.js
+//go:embed assets/skim.js
 var skimJS []byte
 
 // skimJSPath carries a hash of skimJS, like siteCSSPath.
