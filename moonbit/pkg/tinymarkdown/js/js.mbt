@@ -80,6 +80,11 @@ fn blocks(bs : Array[@tinymarkdown.Block]) -> Js {
           ("rows", array(rows, strings)),
         ])
       CodeBlock(code, ..) => object("code", [("code", of_string(code))])
+      Details(summary~, children~) =>
+        object("details", [
+          ("summary", of_string(summary)),
+          ("children", blocks(children)),
+        ])
     }
   })
 }

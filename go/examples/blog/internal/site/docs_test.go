@@ -10,7 +10,7 @@ import (
 )
 
 var testDocs = fstest.MapFS{
-	"TODO.md":           file("# TODO\n\n> note\n\n- [ ] **task**: first line\n  second line\n  - [x] child"),
+	"TODO.md":           file("# TODO\n\n> note\n\n- [ ] **task**: first line\n  second line\n  - [x] child\n\n<details>\n<summary>answer</summary>\n\nhidden `code`\n</details>"),
 	"docs/ja/design.md": file("# Design <x>\n\nwhy\n## Use `el`\n- run `go test`\n- ``a ` b``"),
 	"docs/notes.md":     file("no heading"),
 	"docs/image.svg":    file("<svg/>"),
@@ -69,6 +69,10 @@ second line<ul><li>[x] child</li></ul></li>`; !strings.Contains(body, want) {
 		t.Errorf("TODO: body does not contain %q", want)
 	}
 
+	if want := `<details><summary>answer</summary><p>hidden <code>code</code></p></details>`; !strings.Contains(body, want) {
+		t.Errorf("TODO: body does not contain %q", want)
+	}
+
 	_, body = get(t, h, "/docs/ja/design")
 	if want := `<h2 id="use-el">Use <code>el</code><a class="heading-permalink" href="#use-el" aria-label="permalink"> #</a></h2><ul><li>run <code>go test</code></li><li><code>a ` + "`" + ` b</code></li></ul>`; !strings.Contains(body, want) {
 		t.Errorf("design: body does not contain %q", want)
@@ -90,7 +94,7 @@ second line<ul><li>[x] child</li></ul></li>`; !strings.Contains(body, want) {
 func TestDocMarkdown(t *testing.T) {
 	h := newTestServer(t, testPosts)
 	for _, c := range []struct{ path, want string }{
-		{"/docs/TODO.md", "# TODO\n\n> note\n\n- [ ] **task**: first line\n  second line\n  - [x] child"},
+		{"/docs/TODO.md", "# TODO\n\n> note\n\n- [ ] **task**: first line\n  second line\n  - [x] child\n\n<details>\n<summary>answer</summary>\n\nhidden `code`\n</details>"},
 		{"/docs/ja/design.md", "# Design <x>\n\nwhy\n## Use `el`\n- run `go test`\n- ``a ` b``"},
 	} {
 		res, body := get(t, h, c.path)

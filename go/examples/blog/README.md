@@ -153,6 +153,9 @@ The body supports a tiny subset of Markdown:
 - `` `code` `` spans and `[text](url)` links in headings, paragraphs,
   list items, and table cells (see [Links](#links))
 - code blocks fenced by exactly three backquotes (no highlighting)
+- `<details>` blocks, closed by a `</details>` line; a first
+  `<summary>...</summary>` line becomes the disclosure label and the rest
+  is Markdown again. Tags must be whole lines: `<details open>` stays text
 
 Everything else, including other inline syntax and HTML, is shown as plain,
 escaped text. Problems such as a bad file name, a duplicate slug, a missing

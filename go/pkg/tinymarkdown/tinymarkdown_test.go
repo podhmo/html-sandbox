@@ -336,6 +336,56 @@ func TestTables(t *testing.T) {
 	})
 }
 
+func TestDetails(t *testing.T) {
+	run(t, []testCase{
+		{"details", "<details>\n<summary>answer</summary>\n\nhidden\n</details>",
+			Document{Children: []Block{Details{Summary: "answer", Children: []Block{Paragraph{Text: "hidden"}}}}}},
+		{"details without a summary", "<details>\nhidden\n</details>",
+			Document{Children: []Block{Details{Children: []Block{Paragraph{Text: "hidden"}}}}}},
+		{"blocks inside details", "<details>\n<summary>s</summary>\n\n- a\n- b\n\n```\ncode\n```\n</details>",
+			Document{Children: []Block{Details{Summary: "s", Children: []Block{
+				List{Items: items("a", "b")}, CodeBlock{Code: "code"},
+			}}}}},
+		{"summary needs blank lines nowhere", "<details>\n\n<summary>s</summary>\ntext\n</details>",
+			Document{Children: []Block{Details{Summary: "s", Children: []Block{Paragraph{Text: "text"}}}}}},
+		{"a summary not first stays text", "<details>\ntext\n<summary>s</summary>\n</details>",
+			Document{Children: []Block{Details{Children: []Block{Paragraph{Text: "text\n<summary>s</summary>"}}}}}},
+		{"summary text is trimmed", "<details>\n<summary>  s  </summary>\n</details>",
+			Document{Children: []Block{Details{Summary: "s"}}}},
+		{"summary must fill the line", "<details>\n<summary>s</summary> tail\n</details>",
+			Document{Children: []Block{Details{Children: []Block{Paragraph{Text: "<summary>s</summary> tail"}}}}}},
+		{"nested details", "<details>\n<summary>outer</summary>\n\n<details>\n<summary>inner</summary>\n\ndeep\n</details>\n\n</details>",
+			Document{Children: []Block{Details{Summary: "outer", Children: []Block{
+				Details{Summary: "inner", Children: []Block{Paragraph{Text: "deep"}}},
+			}}}}},
+		{"a fence inside details keeps </details> as code", "<details>\n```\n</details>\n```\n</details>",
+			Document{Children: []Block{Details{Children: []Block{CodeBlock{Code: "</details>"}}}}}},
+		{"details ends a paragraph and a list", "p\n<details>\nx\n</details>\n- a\n<details>\ny\n</details>",
+			Document{Children: []Block{
+				Paragraph{Text: "p"}, Details{Children: []Block{Paragraph{Text: "x"}}},
+				List{Items: items("a")}, Details{Children: []Block{Paragraph{Text: "y"}}},
+			}}},
+		{"unclosed details runs to EOF", "<details>\na\n\n# b",
+			Document{Children: []Block{Details{Children: []Block{
+				Paragraph{Text: "a"}, Section{Level: 1, Title: "b"},
+			}}}}},
+		{"details inside a section", "# A\n<details>\nx\n</details>",
+			Document{Children: []Block{
+				Section{Level: 1, Title: "A", Children: []Block{Details{Children: []Block{Paragraph{Text: "x"}}}}},
+			}}},
+		{"details inside a quote", "> <details>\n> <summary>s</summary>\n>\n> x\n> </details>",
+			Document{Children: []Block{Quote{Children: []Block{
+				Details{Summary: "s", Children: []Block{Paragraph{Text: "x"}}},
+			}}}}},
+		{"<details> inside a code block is code", "```\n<details>\n```",
+			Document{Children: []Block{CodeBlock{Code: "<details>"}}}},
+		{"a tag with attributes stays a paragraph", "<details open>\nx\n</details>",
+			Document{Children: []Block{Paragraph{Text: "<details open>\nx\n</details>"}}}},
+		{"</details> alone is a paragraph", "</details>",
+			Document{Children: []Block{Paragraph{Text: "</details>"}}}},
+	})
+}
+
 func TestAsteriskLists(t *testing.T) {
 	run(t, []testCase{
 		{"asterisk items", "* a\n*   b  \n* c", Document{Children: []Block{List{Items: items("a", "b", "c")}}}},

@@ -3,8 +3,8 @@
 // Supported: headings "#" to "#####" (which open nested sections), "- " or "* "
 // list items (which may continue on indented lines and nest by
 // indentation), paragraphs, "> "
-// quotes, "|" tables, and code blocks fenced by exactly "```". Anything else
-// is treated as paragraph text.
+// quotes, "|" tables, code blocks fenced by exactly "```", and "<details>"
+// blocks. Anything else is treated as paragraph text.
 // Block parsing keeps inline syntax as text; Inlines splits out code spans
 // and links on request. See docs/sketch/ja/blog.md.
 package tinymarkdown
@@ -88,6 +88,16 @@ type CodeBlock struct {
 	Info string
 }
 
+// Details is a "<details>" line through its matching "</details>" line,
+// which may nest. A first non-blank line of the form
+// "<summary>...</summary>" is kept as Summary; the rest is parsed again as
+// a document, as in Quote. The tags are the whole line: "<details open>"
+// and the like stay paragraph text.
+type Details struct {
+	Summary  string
+	Children []Block
+}
+
 func (Section) block()   {}
 func (Paragraph) block() {}
 func (List) block()      {}
@@ -95,6 +105,7 @@ func (Quote) block()     {}
 func (Alert) block()     {}
 func (Table) block()     {}
 func (CodeBlock) block() {}
+func (Details) block()   {}
 
 const fence = "```"
 
@@ -152,6 +163,10 @@ func scan(src string) []Block {
 	var codeInfo string
 	var codeIndent int
 	inCode := false
+	var details []string
+	var detailsDepth int
+	var detailsCode bool
+	inDetails := false
 	for line := range strings.SplitSeq(src, "\n") {
 		line = strings.TrimSuffix(line, "\r")
 		trimmed := strings.TrimSpace(line)
@@ -161,6 +176,32 @@ func scan(src string) []Block {
 				code, codeInfo, codeIndent, inCode = nil, "", 0, false
 			} else {
 				code = append(code, dedent(line, codeIndent))
+			}
+			continue
+		}
+		if inDetails {
+			switch {
+			case detailsCode:
+				if trimmed == fence {
+					detailsCode = false
+				}
+				details = append(details, line)
+			case strings.HasPrefix(trimmed, fence):
+				detailsCode = true
+				details = append(details, line)
+			case trimmed == "<details>":
+				detailsDepth++
+				details = append(details, line)
+			case trimmed == "</details>":
+				detailsDepth--
+				if detailsDepth == 0 {
+					out = append(out, parseDetails(details))
+					details, inDetails = nil, false
+				} else {
+					details = append(details, line)
+				}
+			default:
+				details = append(details, line)
 			}
 			continue
 		}
@@ -191,6 +232,9 @@ func scan(src string) []Block {
 				flush()
 			}
 			items = append(items, rawItem{indent: indent(line), text: strings.TrimSpace(trimmed[2:])})
+		case trimmed == "<details>":
+			flush()
+			details, detailsDepth, detailsCode, inDetails = nil, 1, false, true
 		case len(items) > 0 && line != trimmed && (line[0] == ' ' || line[0] == '\t'):
 			// An indented line continues the item above it.
 			items[len(items)-1].text += "\n" + trimmed
@@ -205,8 +249,42 @@ func scan(src string) []Block {
 		// An unclosed fence runs to the end of the document.
 		out = append(out, CodeBlock{Code: strings.Join(code, "\n"), Info: codeInfo})
 	}
+	if inDetails {
+		// An unclosed "<details>" runs to the end of the document.
+		out = append(out, parseDetails(details))
+	}
 	flush()
 	return out
+}
+
+// parseDetails turns the lines collected between "<details>" and
+// "</details>" into a Details. A first non-blank line of the form
+// "<summary>...</summary>" is kept as Summary; the rest is parsed again as
+// a document, as in Quote.
+func parseDetails(lines []string) Details {
+	var d Details
+	for i, line := range lines {
+		if strings.TrimSpace(line) == "" {
+			continue
+		}
+		if s, ok := summaryText(line); ok {
+			d.Summary = s
+			lines = lines[i+1:]
+		}
+		break
+	}
+	d.Children = Parse(strings.Join(lines, "\n")).Children
+	return d
+}
+
+// summaryText returns the text of a "<summary>...</summary>" line, trimmed.
+func summaryText(line string) (string, bool) {
+	line = strings.TrimSpace(line)
+	inner, ok := strings.CutPrefix(line, "<summary>")
+	if !ok || !strings.HasSuffix(inner, "</summary>") || strings.Contains(inner[:len(inner)-len("</summary>")], "</summary>") {
+		return "", false
+	}
+	return strings.TrimSpace(inner[:len(inner)-len("</summary>")]), true
 }
 
 // alertKind returns the lowercase type of a GitHub-style alert marker —

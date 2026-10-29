@@ -99,6 +99,10 @@ func dump(w io.Writer, bs []tinymarkdown.Block, depth int) error {
 			} else {
 				_, err = fmt.Fprintf(w, "%scode %q\n", indent, b.Code)
 			}
+		case tinymarkdown.Details:
+			if _, err = fmt.Fprintf(w, "%sdetails %q\n", indent, b.Summary); err == nil {
+				err = dump(w, b.Children, depth+1)
+			}
 		default:
 			err = fmt.Errorf("unknown block %T", b)
 		}

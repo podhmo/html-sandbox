@@ -36,6 +36,13 @@ fn blocks(bs : Array[@tinymarkdown.Block]) -> Array[@el.Node] {
         @picoel.table(cells(header), [ for r in rows => cells(r) ])
       }
       CodeBlock(code, ..) => @picoel.pre(code)
+      Details(summary~, children~) => {
+        let body = blocks(children)
+        if summary != "" {
+          body.insert(0, @el.el(@el.Tag("summary"), inlines(summary)))
+        }
+        @el.el(@el.Tag("details"), body)
+      }
     }
   })
 }
