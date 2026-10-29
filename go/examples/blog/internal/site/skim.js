@@ -1,15 +1,15 @@
 /* The skim page's reader. It shows #skim-out a piece at a time in the
  * middle of #skim-stage (RSVP, rapid serial visual presentation): each
  * block's text is cut into pieces about the size of a Japanese bunsetsu,
- * and each piece stays for as long as its characters take at the speed
- * set. #skim-out is filled either with the articles of a
- * page of this site, picked from #skim-files by a fuzzy match on its file
- * path, or with Markdown pasted into #skim-src, rendered by the preview
- * page's renderer (whose URL and file list ride on #skim-data's data-*
- * attributes, as on the preview page). The speed, and whether the
- * pieces before and after are shown, can be set before starting and
- * while it runs, and are kept in this browser's localStorage. This script shares no code with the listen
- * page's. */
+ * by BudouX where it can be loaded, and each piece stays for as long as
+ * its characters take at the speed set. #skim-out is filled either with
+ * the articles of a page of this site, picked from #skim-files by a fuzzy
+ * match on its file path, or with Markdown pasted into #skim-src,
+ * rendered by the preview page's renderer (whose URL and file list ride
+ * on #skim-data's data-* attributes, as on the preview page). The speed,
+ * and whether the pieces before and after are shown, can be set before
+ * starting and while it runs, and are kept in this browser's
+ * localStorage. This script shares no code with the listen page's. */
 const pick = document.getElementById("skim-pick");
 const choices = document.getElementById("skim-files");
 const src = document.getElementById("skim-src");
@@ -74,17 +74,57 @@ const PAUSE = /[、。，．！？]$/;
 const STOP = /[。！？.!?]["'」』）)]*$/;
 const COMMA = /[、，,:：]$/;
 
-// pieces cuts text into pieces about the size of a bunsetsu. The word
-// segmenter's words are too small to show one at a time (含|め|て), and
-// they differ by browser, so they are put back together: hiragana-only
+// BudouX finds where Japanese breaks into phrases. Only its parser and
+// its Japanese model are loaded (about 27KB, 10KB gzipped), not the
+// package's index, which brings the models of every language. Where it
+// cannot be loaded (offline, say), phrases is null, and the word
+// segmenter's words are put together instead.
+const BUDOUX = "https://esm.sh/budoux@0.10.0";
+const phrases = Promise.all([
+  import(`${BUDOUX}/module/parser.js`),
+  import(`${BUDOUX}/module/data/models/ja.js`),
+]).then(([{ Parser }, { model }]) => new Parser(model), () => null);
+let parser = null;
+
+// pieces cuts text into pieces about the size of a bunsetsu, by BudouX's
+// phrases or, without it, the word segmenter's words.
+function pieces(text) {
+  return (parser ? byPhrases(text) : byWords(text)).flatMap(cutLong);
+}
+
+// byPhrases is BudouX's phrases of each part of text between spaces (a
+// part all in ASCII is one piece as it is), with what it leaves alone put
+// with the piece before: a particle after a space (TTS の), a counter
+// after a number (2 つ), and a closing mark or a lone hiragana.
+function byPhrases(text) {
+  const list = [];
+  for (const part of text.split(/\s+/).filter(Boolean)) {
+    const ps = /^[\x21-\x7e]+$/.test(part) ? [part] : parser.parse(part);
+    ps.forEach((p, i) => {
+      const prev = list.at(-1);
+      const spaced = i === 0;
+      const joins = prev && !PAUSE.test(prev) && (spaced
+        ? /^\p{Script=Hiragana}{1,2}[、。，．！？]?$/u.test(p) ||
+          (/^[\d.,]+$/.test(prev) && /^(\p{Script=Han}|つ)/u.test(p))
+        : (MARK.test(p) && !OPENING.test(p)) || ([...p].length === 1 && KANA.test(p)));
+      if (joins) list[list.length - 1] = prev + (spaced ? " " : "") + p;
+      else list.push(p);
+    });
+  }
+  return list;
+}
+
+// byWords puts the word segmenter's words together into pieces. The
+// words are too small to show one at a time (含|め|て), and they differ
+// by browser, so they are put back together: hiragana-only
 // words (particles, okurigana) and closing marks join the piece before
 // them, opening brackets the piece after, kanji and katakana join kanji
 // and katakana, and ASCII joins ASCII with nothing between (listen.js,
 // URLs). A piece ends at a space and after 、。！？. A particle after a
 // space joins the piece before the space (TTS の), as does a counter
 // after a number (1 本で).
-function pieces(text) {
-  if (!words) return text.split(/\s+/).filter(Boolean).flatMap(cutLong);
+function byWords(text) {
+  if (!words) return text.split(/\s+/).filter(Boolean);
   const list = [];
   let cur = "";
   let opening = "";
@@ -122,7 +162,7 @@ function pieces(text) {
   }
   cur += opening;
   end();
-  return list.flatMap(cutLong);
+  return list;
 }
 
 // cutLong cuts a piece longer than LONG after the marks that part a path
@@ -189,14 +229,16 @@ function delay(item) {
 
 let queue = [];
 
-function loaded() {
+async function loaded() {
+  parser = await phrases;
   queue = items();
   if (queue.length === 0) {
     say("nothing to skim: pick an article or paste Markdown");
     return;
   }
   const minutes = queue.reduce((sum, it) => sum + delay(it), 0) / 60000;
-  say(`${queue.length} pieces, about ${Math.ceil(minutes)} min at ${cpm()} characters a minute`);
+  const by = parser ? "BudouX" : "Intl.Segmenter";
+  say(`${queue.length} pieces (by ${by}), about ${Math.ceil(minutes)} min at ${cpm()} characters a minute`);
 }
 
 async function load(path, href) {
@@ -416,7 +458,8 @@ function pause() {
 
 const toggle = () => timer ? pause() : play();
 
-function start(from = 0) {
+async function start(from = 0) {
+  parser = await phrases;
   queue = items();
   if (queue.length === 0) {
     say("nothing to skim: pick an article or paste Markdown");
