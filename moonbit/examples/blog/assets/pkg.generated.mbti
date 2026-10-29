@@ -22,6 +22,10 @@ pub let site_css : String
 
 pub let site_css_version : String
 
+pub let skim_js : String
+
+pub let skim_js_version : String
+
 // Errors
 
 // Types and methods

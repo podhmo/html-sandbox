@@ -187,6 +187,15 @@ fn Site::new_router(self : Site) -> @http.Router {
       Text(@assets.listen_js),
     )..header("cache-control", value="public, max-age=31536000, immutable")
   })
+  // The skim page and its script, served like the listen page's.
+  r.handle("GET /skim", _ => page(200, self.skim_page()))
+  r.handle("GET /skim.js", _ => {
+    @http.Response::typed(
+      200,
+      "text/javascript; charset=utf-8",
+      Text(@assets.skim_js),
+    )..header("cache-control", value="public, max-age=31536000, immutable")
+  })
   // A pattern cannot end in ".md" after a wildcard, so the handlers look
   // at the suffix.
   for collection in ["posts", "slops"] {

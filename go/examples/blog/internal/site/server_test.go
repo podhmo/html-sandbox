@@ -84,7 +84,7 @@ func TestPicoOnly(t *testing.T) {
 	}
 	for _, want := range []string{
 		`<header class="container">`, `<main class="container">`, `<footer class="container">`,
-		`<ul><li><details class="dropdown"><summary role="link">more tools</summary><ul><li><a href="/preview">preview</a></li><li><a href="/listen">listen</a></li></ul></details></li><li><a href="https://github.com/podhmo/html-sandbox">github</a></li></ul></nav></header>`,
+		`<ul><li><details class="dropdown"><summary role="link">more tools</summary><ul><li><a href="/preview">preview</a></li><li><a href="/listen">listen</a></li><li><a href="/skim">skim</a></li></ul></details></li><li><a href="https://github.com/podhmo/html-sandbox">github</a></li></ul></nav></header>`,
 	} {
 		if !strings.Contains(body, want) {
 			t.Errorf("body does not contain %q", want)
@@ -124,6 +124,7 @@ docs
 more tools
 preview
 listen
+skim
 github
 2026-10-14
 Download .md
@@ -183,6 +184,42 @@ func TestListen(t *testing.T) {
 	}
 	res, body = get(t, newTestServer(t, testPosts), listenJSPath)
 	if res.StatusCode != http.StatusOK || body != string(listenJS) {
+		t.Errorf("status %d, body %.40q", res.StatusCode, body)
+	}
+	if ct := res.Header.Get("Content-Type"); ct != "text/javascript; charset=utf-8" {
+		t.Errorf("Content-Type %q", ct)
+	}
+}
+
+func TestSkim(t *testing.T) {
+	res, body := get(t, newTestServer(t, testPosts), "/skim")
+	if res.StatusCode != http.StatusOK {
+		t.Fatalf("status %d", res.StatusCode)
+	}
+	for _, want := range []string{
+		`<title>Skim - blog</title>`,
+		`<input type="search" id="skim-pick" autocomplete="off"`,
+		`<ul id="skim-files"><li><a href="/posts/hello" data-source="posts/2026-10-14-hello.md">posts/2026-10-14-hello.md</a> <small>Hello &lt;script&gt;</small></li>`,
+		`<textarea id="skim-src"`,
+		`<label>Speed <output id="skim-cpm-out">600</output>/min<input type="range" id="skim-cpm" data-setting="cpm" min="300" max="3000" step="50" value="600"></label>`,
+		`<label>Pace<select id="skim-pace"><option value="steady" selected="">Steady</option><option value="balanced">Balanced</option><option value="length">By length</option></select></label>`,
+		`<input type="checkbox" role="switch" id="skim-around" data-setting="around" checked="">`,
+		`<div id="skim-prev" aria-hidden="true"></div><div id="skim-word"></div><div id="skim-next" aria-hidden="true"></div>`,
+		`<input type="range" id="skim-speed" data-setting="cpm"`,
+		`<input type="checkbox" role="switch" id="skim-around-stage" data-setting="around" checked="">`,
+		`<button type="button" id="skim-start">Start</button>`,
+		`<section id="skim-stage" hidden="" aria-label="skim">`,
+		`<div class="skim-progress" aria-hidden="true"><div id="skim-progress"></div></div>`,
+		`<button type="button" id="skim-toggle">Pause</button>`,
+		`data-wasm="/preview.wasm?v=`,
+		`<script src="` + skimJSPath + `"`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Errorf("body does not contain %q", want)
+		}
+	}
+	res, body = get(t, newTestServer(t, testPosts), skimJSPath)
+	if res.StatusCode != http.StatusOK || body != string(skimJS) {
 		t.Errorf("status %d, body %.40q", res.StatusCode, body)
 	}
 	if ct := res.Header.Get("Content-Type"); ct != "text/javascript; charset=utf-8" {
