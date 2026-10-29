@@ -338,6 +338,13 @@ func renderBlocks(bs []tinymarkdown.Block, link linker, gen *anchorIDs) []pe.Nod
 			} else {
 				out = append(out, pe.Pre(b.Code))
 			}
+		case tinymarkdown.Details:
+			children := renderBlocks(b.Children, link, gen)
+			if b.Summary != "" {
+				summary := el.El(el.Tag("summary"), renderInlines(tinymarkdown.Inlines(b.Summary), link)...)
+				children = append([]pe.Node{summary}, children...)
+			}
+			out = append(out, el.El(el.Tag("details"), children...))
 		}
 	}
 	return out

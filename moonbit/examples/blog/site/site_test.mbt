@@ -13,6 +13,12 @@ let test_docs : ReadOnlyArray[(String, String)] = [
       #|- [ ] **task**: first line
       #|  second line
       #|  - [x] child
+      #|
+      #|<details>
+      #|<summary>answer</summary>
+      #|
+      #|hidden `code`
+      #|</details>
     ),
   ),
   (
@@ -414,7 +420,7 @@ test "doc pages" {
   ])
   assert_contains(body(s, "/docs/TODO"), [
     "<li>[ ] **task**: first line\nsecond line<ul><li>[x] child</li></ul></li>",
-    "<blockquote><p>note</p></blockquote>",
+    "<blockquote><p>note</p></blockquote>", "<details><summary>answer</summary><p>hidden <code>code</code></p></details>",
   ])
   assert_contains(body(s, "/docs/ja/design"), [
     "<h2 id=\"use-el\">Use <code>el</code><a class=\"heading-permalink\" href=\"#use-el\" aria-label=\"permalink\"> #</a></h2><ul><li>run <code>go test</code></li><li><code>a ` b</code></li></ul>",

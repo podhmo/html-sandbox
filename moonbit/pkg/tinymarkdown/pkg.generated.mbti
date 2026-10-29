@@ -21,6 +21,7 @@ pub(all) enum Block {
   Alert(kind~ : String, children~ : Array[Block])
   Table(header~ : Array[String], rows~ : Array[Array[String]])
   CodeBlock(String, info~ : String)
+  Details(summary~ : String, children~ : Array[Block])
 } derive(Eq, @debug.Debug)
 #deprecated
 pub fn Block::equal(Self, Self) -> Bool

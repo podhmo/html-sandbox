@@ -5,9 +5,10 @@
 // Supported: headings "#" to "#####" (which open nested sections), "- " or "* "
 // list items (which may continue on indented lines and nest by
 // indentation), paragraphs, "> "
-// quotes, "|" tables, and code blocks fenced by exactly "```". Anything else
-// is treated as paragraph text. Block parsing keeps inline syntax as text;
-// inlines splits out code spans and links on request.
+// quotes, "|" tables, code blocks fenced by exactly "```", and "<details>"
+// blocks. Anything else is treated as paragraph text. Block parsing keeps
+// inline syntax as text; inlines splits out code spans and links on
+// request.
 //
 // Go indexes strings by byte and MoonBit by UTF-16 code unit. Every
 // character the parser looks for is ASCII, so the two agree.
@@ -56,6 +57,11 @@ pub extend Document with Debug::{to_repr}
 ///   much leading indentation as the fence has — all of it on a line with
 ///   less — as CommonMark does. info is the text after the opening fence,
 ///   trimmed — usually a language name such as "go" or "svg".
+/// - Details is a "<details>" line through its matching "</details>"
+///   line, which may nest. A first non-blank line of the form
+///   "<summary>...</summary>" is kept as summary; the rest is parsed again
+///   as a document, as in Quote. The tags are the whole line:
+///   "<details open>" and the like stay paragraph text.
 pub(all) enum Block {
   Section(level~ : Int32, title~ : String, children~ : Array[Block])
   Paragraph(String)
@@ -64,6 +70,7 @@ pub(all) enum Block {
   Alert(kind~ : String, children~ : Array[Block])
   Table(header~ : Array[String], rows~ : Array[Array[String]])
   CodeBlock(String, info~ : String)
+  Details(summary~ : String, children~ : Array[Block])
 } derive(Eq, Debug)
 
 ///|
@@ -195,6 +202,10 @@ fn scan(src : String) -> Array[Flat] {
   let mut code_info : StringView = ""
   let mut code_indent = 0
   let mut in_code = false
+  let details : Array[StringView] = []
+  let mut details_depth = 0
+  let mut details_code = false
+  let mut in_details = false
   for raw in src.split("\n") {
     // line stays a view: only the lines that are kept are copied to a String.
     let line = raw.strip_suffix("\r").unwrap_or(raw)
@@ -208,6 +219,32 @@ fn scan(src : String) -> Array[Flat] {
         in_code = false
       } else {
         code.push(dedent(line, code_indent))
+      }
+      continue
+    }
+    if in_details {
+      if details_code {
+        if trimmed == FENCE {
+          details_code = false
+        }
+        details.push(line)
+      } else if trimmed.has_prefix(FENCE) {
+        details_code = true
+        details.push(line)
+      } else if trimmed == "<details>" {
+        details_depth += 1
+        details.push(line)
+      } else if trimmed == "</details>" {
+        details_depth -= 1
+        if details_depth == 0 {
+          out.push(Block(parse_details(details)))
+          details.clear()
+          in_details = false
+        } else {
+          details.push(line)
+        }
+      } else {
+        details.push(line)
       }
       continue
     }
@@ -237,6 +274,11 @@ fn scan(src : String) -> Array[Flat] {
         flush()
       }
       items.push({ indent: indent(line), text: trim_space(rest).to_owned(), })
+    } else if trimmed == "<details>" {
+      flush()
+      details_depth = 1
+      details_code = false
+      in_details = true
     } else if !items.is_empty() &&
       line.length() != trimmed.length() &&
       line[0] is (' ' | '\t') {
@@ -253,8 +295,49 @@ fn scan(src : String) -> Array[Flat] {
     // An unclosed fence runs to the end of the document.
     out.push(Block(CodeBlock(code.join("\n"), info=code_info.to_owned())))
   }
+  if in_details {
+    // An unclosed "<details>" runs to the end of the document.
+    out.push(Block(parse_details(details)))
+  }
   flush()
   out
+}
+
+///|
+/// parse_details turns the lines collected between "<details>" and
+/// "</details>" into a Details. A first non-blank line of the form
+/// "<summary>...</summary>" is kept as summary; the rest is parsed again
+/// as a document, as in Quote.
+fn parse_details(lines : Array[StringView]) -> Block {
+  let mut summary = ""
+  let mut body = lines[:]
+  for i, line in lines {
+    if trim_space(line) == "" {
+      continue
+    }
+    if summary_text(line) is Some(s) {
+      summary = s
+      body = lines[i + 1:]
+    }
+    break
+  }
+  Details(summary~, children=parse(body.join("\n")).children)
+}
+
+///|
+/// summary_text returns the text of a "<summary>...</summary>" line,
+/// trimmed.
+fn summary_text(line : StringView) -> String? {
+  let line = trim_space(line)
+  guard line.strip_prefix("<summary>") is Some(inner) &&
+    inner.has_suffix("</summary>") else {
+    return None
+  }
+  let inner = inner[:inner.length() - "</summary>".length()]
+  if inner.contains("</summary>") {
+    return None
+  }
+  Some(trim_space(inner).to_owned())
 }
 
 ///|

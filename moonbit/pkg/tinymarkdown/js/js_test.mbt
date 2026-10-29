@@ -32,3 +32,13 @@ test "asterisk and mixed lists reach the TS parser" {
     stringify(@js.parse("- a\n  - b\n    - c\n- d")),
   )
 }
+
+///|
+test "details reaches the TS parser" {
+  inspect(
+    stringify(@js.parse("<details>\n<summary>s</summary>\n\nx\n</details>")),
+    content=(
+      #|{"children":[{"kind":"details","summary":"s","children":[{"kind":"paragraph","text":"x"}]}]}
+    ),
+  )
+}

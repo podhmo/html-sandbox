@@ -58,6 +58,19 @@ fn block(j : Json) -> @el.Node? {
       Some(@picoel.table(cells(h), rows))
     }
     { "t": "code", "text": String(code), .. } => Some(@picoel.pre(code))
+    {
+      "t": "details",
+      "summary": s,
+      "children": Array(cs),
+      ..
+    } => {
+      let body = cs.filter_map(block)
+      let summary = inlines(s)
+      if !summary.is_empty() {
+        body.insert(0, @el.el(@el.Tag("summary"), summary))
+      }
+      Some(@el.el(@el.Tag("details"), body))
+    }
     _ => None
   }
 }

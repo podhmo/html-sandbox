@@ -561,3 +561,109 @@ test "asterisk lists" {
   ]
   run(cases)
 }
+
+///|
+// The cases of TestDetails in go/pkg/tinymarkdown.
+test "details" {
+  run([
+    (
+      "details",
+      "<details>\n<summary>answer</summary>\n\nhidden\n</details>",
+      [Details(summary="answer", children=[Paragraph("hidden")])],
+    ),
+    (
+      "details without a summary",
+      "<details>\nhidden\n</details>",
+      [Details(summary="", children=[Paragraph("hidden")])],
+    ),
+    (
+      "blocks inside details",
+      "<details>\n<summary>s</summary>\n\n- a\n- b\n\n```\ncode\n```\n</details>",
+      [
+        Details(summary="s", children=[
+          List(items(["a", "b"])),
+          CodeBlock("code", info=""),
+        ]),
+      ],
+    ),
+    (
+      "summary needs blank lines nowhere",
+      "<details>\n\n<summary>s</summary>\ntext\n</details>",
+      [Details(summary="s", children=[Paragraph("text")])],
+    ),
+    (
+      "a summary not first stays text",
+      "<details>\ntext\n<summary>s</summary>\n</details>",
+      [Details(summary="", children=[Paragraph("text\n<summary>s</summary>")])],
+    ),
+    (
+      "summary text is trimmed",
+      "<details>\n<summary>  s  </summary>\n</details>",
+      [Details(summary="s", children=[])],
+    ),
+    (
+      "summary must fill the line",
+      "<details>\n<summary>s</summary> tail\n</details>",
+      [Details(summary="", children=[Paragraph("<summary>s</summary> tail")])],
+    ),
+    (
+      "nested details",
+      "<details>\n<summary>outer</summary>\n\n<details>\n<summary>inner</summary>\n\ndeep\n</details>\n\n</details>",
+      [
+        Details(summary="outer", children=[
+          Details(summary="inner", children=[Paragraph("deep")]),
+        ]),
+      ],
+    ),
+    (
+      "a fence inside details keeps </details> as code",
+      "<details>\n```\n</details>\n```\n</details>",
+      [Details(summary="", children=[CodeBlock("</details>", info="")])],
+    ),
+    (
+      "details ends a paragraph and a list",
+      "p\n<details>\nx\n</details>\n- a\n<details>\ny\n</details>",
+      [
+        Paragraph("p"),
+        Details(summary="", children=[Paragraph("x")]),
+        List(items(["a"])),
+        Details(summary="", children=[Paragraph("y")]),
+      ],
+    ),
+    (
+      "unclosed details runs to EOF",
+      "<details>\na\n\n# b",
+      [
+        Details(summary="", children=[
+          Paragraph("a"),
+          Section(level=1, title="b", children=[]),
+        ]),
+      ],
+    ),
+    (
+      "details inside a section",
+      "# A\n<details>\nx\n</details>",
+      [
+        Section(level=1, title="A", children=[
+          Details(summary="", children=[Paragraph("x")]),
+        ]),
+      ],
+    ),
+    (
+      "details inside a quote",
+      "> <details>\n> <summary>s</summary>\n>\n> x\n> </details>",
+      [Quote([Details(summary="s", children=[Paragraph("x")])])],
+    ),
+    (
+      "<details> inside a code block is code",
+      "```\n<details>\n```",
+      [CodeBlock("<details>", info="")],
+    ),
+    (
+      "a tag with attributes stays a paragraph",
+      "<details open>\nx\n</details>",
+      [Paragraph("<details open>\nx\n</details>")],
+    ),
+    ("</details> alone is a paragraph", "</details>", [Paragraph("</details>")]),
+  ])
+}

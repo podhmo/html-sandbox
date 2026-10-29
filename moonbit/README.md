@@ -18,9 +18,9 @@ as in `../go`.
   styled by pico.css v2 (`document`, `header`, `main_`, `nav`, `article`,
   `table`, ...) as `el` nodes; `date` takes a `YYYY-MM-DD` string
 - `tinymarkdown` — a port of `go/pkg/tinymarkdown`: `parse(src)` into a
-  tree of sections, paragraphs, lists, quotes, tables, and code blocks, and
-  `inlines(text)` into text, code spans, and links; its tests are the Go
-  test cases
+  tree of sections, paragraphs, lists, quotes, tables, code blocks, and
+  `<details>` blocks, and `inlines(text)` into text, code spans, and links;
+  its tests are the Go test cases
 - `tinyfrontmatter` — a port of `go/pkg/tinyfrontmatter`: `split(src)`
   into the `key: value` pairs of a leading `---` block (`None` without
   one) and the rest, raising `SplitError` on a malformed block; its tests

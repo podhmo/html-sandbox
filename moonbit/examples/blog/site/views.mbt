@@ -461,6 +461,19 @@ fn render_blocks(
         } else {
           @picoel.pre(code)
         }
+      Details(summary~, children~) => {
+        let body = render_blocks(children, link, gen)
+        if summary != "" {
+          body.insert(
+            0,
+            @el.el(
+              @el.Tag("summary"),
+              render_inlines(@tinymarkdown.inlines(summary), link),
+            ),
+          )
+        }
+        @el.el(@el.Tag("details"), body)
+      }
     }
   })
 }
