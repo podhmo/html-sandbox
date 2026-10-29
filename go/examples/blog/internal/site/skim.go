@@ -72,6 +72,22 @@ func skimAround(id string) pe.Node {
 		pe.Text("Before and after"))
 }
 
+// skimPace picks how long each piece stays: steady (each the same),
+// balanced (a little longer for a long piece), or by length (in
+// proportion to its characters). skim.js reads it by its value.
+func skimPace() pe.Node {
+	option := func(value, label string, attrs ...pe.Node) pe.Node {
+		return el.El(el.Tag("option"), append([]pe.Node{el.Attr(el.Value, value)}, append(attrs, pe.Text(label))...)...)
+	}
+	return el.El(el.Tag("label"),
+		pe.Text("Pace"),
+		el.El(el.Tag("select"),
+			el.Attr(el.ID, "skim-pace"),
+			option("steady", "Steady", el.Attr(el.AttrName("selected"), "")),
+			option("balanced", "Balanced"),
+			option("length", "By length")))
+}
+
 // skimPage is the reader page: skim.js fills skim-out with the picked
 // page's articles, or with the Markdown in skim-src rendered by the
 // renderer at skim-data's data-wasm, and shows it piece by piece in
@@ -107,6 +123,7 @@ func skimPage(env pageEnv, st *site) pe.Node {
 		el.El(el.Div,
 			el.Attr(el.Class, "grid"),
 			skimSpeed("skim-cpm", "Speed "),
+			skimPace(),
 			skimAround("skim-around"),
 			skimButton("start", "Start")),
 		pe.P(el.El(el.Small, el.Attr(el.ID, "skim-status"))),

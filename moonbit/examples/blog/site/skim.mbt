@@ -92,6 +92,33 @@ fn skim_around(id : String) -> @el.Node {
 }
 
 ///|
+/// skim_pace picks how long each piece stays: steady (each the same),
+/// balanced (a little longer for a long piece), or by length (in
+/// proportion to its characters). skim.js reads it by its value.
+fn skim_pace() -> @el.Node {
+  fn option(
+    value : String,
+    label : String,
+    attrs : Array[@el.Node],
+  ) -> @el.Node {
+    @el.el(
+      @el.Tag("option"),
+      [@el.Attr(@el.value, value), ..attrs, @picoel.text(label)],
+    )
+  }
+
+  @el.el(@el.Tag("label"), [
+    @picoel.text("Pace"),
+    @el.el(@el.Tag("select"), [
+      @el.Attr(@el.id, "skim-pace"),
+      option("steady", "Steady", [@el.Attr(@el.AttrName("selected"), "")]),
+      option("balanced", "Balanced", []),
+      option("length", "By length", []),
+    ]),
+  ])
+}
+
+///|
 /// Site::skim_page is the reader page: skim.js fills skim-out with the
 /// picked page's articles, or with the Markdown in skim-src rendered by
 /// the renderer at skim-data's data-wasm, and shows it piece by piece in
@@ -132,6 +159,7 @@ fn Site::skim_page(self : Site) -> @el.Node {
     @el.el(@el.div, [
       @el.Attr(@el.class, "grid"),
       skim_speed("skim-cpm", "Speed "),
+      skim_pace(),
       skim_around("skim-around"),
       skim_button("start", "Start"),
     ]),

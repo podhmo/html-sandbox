@@ -202,6 +202,7 @@ func TestSkim(t *testing.T) {
 		`<ul id="skim-files"><li><a href="/posts/hello" data-source="posts/2026-10-14-hello.md">posts/2026-10-14-hello.md</a> <small>Hello &lt;script&gt;</small></li>`,
 		`<textarea id="skim-src"`,
 		`<label>Speed <output id="skim-cpm-out">600</output>/min<input type="range" id="skim-cpm" data-setting="cpm" min="300" max="3000" step="50" value="600"></label>`,
+		`<label>Pace<select id="skim-pace"><option value="steady" selected="">Steady</option><option value="balanced">Balanced</option><option value="length">By length</option></select></label>`,
 		`<input type="checkbox" role="switch" id="skim-around" data-setting="around" checked="">`,
 		`<div id="skim-prev" aria-hidden="true"></div><div id="skim-word"></div><div id="skim-next" aria-hidden="true"></div>`,
 		`<input type="range" id="skim-speed" data-setting="cpm"`,

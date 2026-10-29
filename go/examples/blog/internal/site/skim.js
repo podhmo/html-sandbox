@@ -18,6 +18,7 @@ const status = document.getElementById("skim-status");
 // The settings come in pairs, one on the page and one on the stage.
 const speeds = [...document.querySelectorAll('[data-setting="cpm"]')];
 const arounds = [...document.querySelectorAll('[data-setting="around"]')];
+const pace = document.getElementById("skim-pace");
 const cpm = () => Number(speeds[0].value);
 const stage = document.getElementById("skim-stage");
 const note = document.getElementById("skim-note");
@@ -54,7 +55,7 @@ function saved() {
 
 function save() {
   try {
-    localStorage.setItem(STORE, JSON.stringify({ cpm: speeds[0].value, around: arounds[0].checked }));
+    localStorage.setItem(STORE, JSON.stringify({ cpm: speeds[0].value, around: arounds[0].checked, pace: pace.value }));
   } catch {
     // Not kept.
   }
@@ -214,15 +215,38 @@ function textOf(block) {
   return text;
 }
 
-// delay is how long an item stays, in milliseconds: its characters (3 at
-// least) at the speed set, longer at the end of a sentence or after a
-// comma, with a pause after a block and more after a heading.
+// delay is how long an item stays, in milliseconds, at the speed set,
+// by the pace picked. Every pause is in characters' time, so that it
+// keeps step with the speed.
+//
+//   steady    every piece the time of an average one (perPiece
+//             characters), twice that at the end of a block: the
+//             rhythm never changes.
+//   balanced  that time, 0.8 to 1.4 times by the piece's length, 1.5
+//             times at the end of a sentence, twice at the end of a block.
+//   length    the piece's own characters (3 at least), 1.8 times at the
+//             end of a sentence or 1.3 after a comma, with 3 characters'
+//             time more after a block and 7 after a heading.
+const PACES = {
+  steady: (item, n) => perPiece * (item.last ? 2 : 1),
+  balanced: (item, n) =>
+    perPiece * Math.min(1.4, Math.max(0.8, 0.6 + 0.1 * n)) * (item.last ? 2 : item.stop ? 1.5 : 1),
+  length: (item, n) =>
+    Math.max(n, 3) * (item.stop ? 1.8 : COMMA.test(item.text) ? 1.3 : 1) +
+    (item.last ? (item.heading ? 7 : 3) : 0),
+};
+
 function delay(item) {
-  let ms = Math.max([...item.text].length, 3) * 60000 / cpm();
-  if (item.stop) ms *= 1.8;
-  else if (COMMA.test(item.text)) ms *= 1.3;
-  if (item.last) ms += item.heading ? 700 : 300;
-  return ms;
+  const chars = (PACES[pace.value] ?? PACES.steady)(item, [...item.text].length);
+  return chars * 60000 / cpm();
+}
+
+// perPiece is how many characters the pieces of queue have on average.
+let perPiece = 4;
+
+function measure() {
+  const chars = queue.reduce((sum, it) => sum + [...it.text].length, 0);
+  if (queue.length) perPiece = chars / queue.length;
 }
 
 // ---- What to show
@@ -232,6 +256,7 @@ let queue = [];
 async function loaded() {
   parser = await phrases;
   queue = items();
+  measure();
   if (queue.length === 0) {
     say("nothing to skim: pick an article or paste Markdown");
     return;
@@ -463,6 +488,7 @@ const toggle = () => timer ? pause() : play();
 async function start(from = 0) {
   parser = await phrases;
   queue = items();
+  measure();
   if (queue.length === 0) {
     say("nothing to skim: pick an article or paste Markdown");
     return;
@@ -582,6 +608,12 @@ function setAround(on) {
   const kept = saved();
   setSpeed(Number(kept.cpm ?? speeds[0].value));
   setAround(kept.around ?? arounds[0].checked);
+  pace.value = kept.pace ?? pace.value;
+  if (!pace.value) pace.value = "steady";
+  pace.addEventListener("change", () => {
+    save();
+    if (queue.length) loaded();
+  });
   for (const input of speeds) {
     input.addEventListener("input", () => setSpeed(Number(input.value)));
     input.addEventListener("change", () => {
