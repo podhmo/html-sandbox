@@ -157,10 +157,12 @@ fn Site::skim_page(self : Site) -> @el.Node {
           @el.Attr(@el.AttrName("aria-hidden"), "true"),
         ]),
       ]),
-      @el.el(@el.Tag("progress"), [
-        @el.Attr(@el.id, "skim-progress"),
-        @el.Attr(@el.value, "0"),
-        @el.Attr(@el.AttrName("max"), "1"),
+      // How far it has gone: a bar that skim.js stretches with a
+      // transform, which needs no layout, unlike a <progress>'s value.
+      @el.el(@el.div, [
+        @el.Attr(@el.class, "skim-progress"),
+        @el.Attr(@el.AttrName("aria-hidden"), "true"),
+        @el.el(@el.div, [@el.Attr(@el.id, "skim-progress")]),
       ]),
       @el.el(@el.div, [
         @el.Attr(@el.class, "skim-settings"),

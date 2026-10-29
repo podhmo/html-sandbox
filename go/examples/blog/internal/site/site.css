@@ -329,6 +329,19 @@ body > header details.dropdown > summary + ul {
   white-space: nowrap;
   font-size: 2.4rem;
 }
+.skim-progress {
+  height: 0.25rem;
+  margin: 0.5rem 0 1rem;
+  overflow: hidden;
+  border-radius: 0.125rem;
+  background: var(--pico-muted-border-color);
+}
+#skim-progress {
+  height: 100%;
+  background: var(--pico-primary-background);
+  transform: scaleX(0);
+  transform-origin: left;
+}
 .skim-settings {
   display: flex;
   align-items: center;

@@ -486,6 +486,7 @@ test "skim page" {
     "<div id=\"skim-prev\" aria-hidden=\"true\"></div><div id=\"skim-word\"></div><div id=\"skim-next\" aria-hidden=\"true\"></div>",
     "<input type=\"range\" id=\"skim-speed\" data-setting=\"cpm\"", "<input type=\"checkbox\" role=\"switch\" id=\"skim-around-stage\" data-setting=\"around\" checked=\"\">",
     "<button type=\"button\" id=\"skim-start\">Start</button>", "<section id=\"skim-stage\" hidden=\"\" aria-label=\"skim\">",
+    "<div class=\"skim-progress\" aria-hidden=\"true\"><div id=\"skim-progress\"></div></div>",
     "<button type=\"button\" id=\"skim-toggle\">Pause</button>", "data-wasm=\"/preview.wasm?v=",
     "<script src=\"/skim.js?v=",
   ])

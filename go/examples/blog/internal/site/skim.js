@@ -395,7 +395,7 @@ function show() {
   if (width > room) span.style.fontSize = `${100 * room / width}%`;
   prev.textContent = queue[at - 1]?.text ?? "";
   next.textContent = queue[at + 1]?.text ?? "";
-  progress.value = queue.length > 1 ? at / (queue.length - 1) : 1;
+  progress.style.transform = `scaleX(${queue.length > 1 ? at / (queue.length - 1) : 1})`;
 }
 
 function tick() {
@@ -413,8 +413,8 @@ function tick() {
 }
 
 // ---- Keeping the screen on while it runs. The Screen Wake Lock API is
-// there only in secure contexts (HTTPS or localhost), and the lock is let
-// go whenever the page is hidden, so it is taken again when it comes back.
+// there only in secure contexts (HTTPS or localhost). The browser lets the
+// lock go when the page is hidden, and then it pauses too (see below).
 
 let lock = null;
 
@@ -435,8 +435,10 @@ function letSleep() {
   lock = null;
 }
 
+// A hidden page pauses: its pieces would go by unseen, at whatever pace
+// the browser lets a hidden page's timers run.
 document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "visible" && timer) keepAwake();
+  if (document.visibilityState === "hidden" && timer) pause();
 });
 
 // ---- Playing

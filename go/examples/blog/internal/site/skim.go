@@ -124,7 +124,12 @@ func skimPage(env pageEnv, st *site) pe.Node {
 				el.El(el.Div, el.Attr(el.ID, "skim-prev"), el.Attr(el.AttrName("aria-hidden"), "true")),
 				el.El(el.Div, el.Attr(el.ID, "skim-word")),
 				el.El(el.Div, el.Attr(el.ID, "skim-next"), el.Attr(el.AttrName("aria-hidden"), "true"))),
-			el.El(el.Tag("progress"), el.Attr(el.ID, "skim-progress"), el.Attr(el.Value, "0"), el.Attr(el.AttrName("max"), "1")),
+			// How far it has gone: a bar that skim.js stretches with a
+			// transform, which needs no layout, unlike a <progress>'s value.
+			el.El(el.Div,
+				el.Attr(el.Class, "skim-progress"),
+				el.Attr(el.AttrName("aria-hidden"), "true"),
+				el.El(el.Div, el.Attr(el.ID, "skim-progress"))),
 			el.El(el.Div,
 				el.Attr(el.Class, "skim-settings"),
 				skimSpeed("skim-speed", ""),
