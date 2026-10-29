@@ -1,0 +1,58 @@
+# Runs the repository-wide test suite: `make test` runs the Go suite in
+# go/ (with the posts and documents copied in by go generate) and the
+# MoonBit, JS, and Node integration tests in moonbit/. The trigger shape
+# follows podhmo/minigo's go.yml and podhmo/mbtx-install's moonbit.yml.
+
+name: test
+
+on:
+  push:
+    branches: [ "main" ]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+
+# A new push to the same PR cancels the superseded run; pushes to main
+# always run to completion.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Set up Go
+      uses: actions/setup-go@v7
+      with:
+        go-version-file: 'go/go.mod'
+
+    - name: Set up Node
+      uses: actions/setup-node@v7
+      with:
+        node-version: 24
+
+    - name: Install MoonBit
+      run: |
+        curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+        echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
+
+    - name: MoonBit version
+      run: moon version
+
+    # A fresh install has no registry index, so dependencies are not
+    # found until they are fetched (same as the deploy workflow).
+    - name: Fetch MoonBit dependencies
+      run: moon update
+      working-directory: moonbit
+
+    - name: Test
+      run: make test
+
