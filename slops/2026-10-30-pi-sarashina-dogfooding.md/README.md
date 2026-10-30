@@ -8,6 +8,17 @@ prev: 2026-10-29-details.md
 
 private リポジトリ pi-lab の [PR #30](https://github.com/podhmo/pi-lab/pull/30)（private なのでリンク先は見えない）に入った作業の記録。PR に同梱されていた RESEARCH.md / NOTES.md / ARTICLE.md / TODO.md からまとめ直した。
 
+<details>
+<summary>前提知識（非開発者向け）: Sarashina / Devin CLI / pi とは</summary>
+
+- Sarashina: SB Intuitions（ソフトバンクグループ）が提供する日本語 LLM と、その API サービス。OpenAI と同じ形式（Chat Completions）で呼び出せる。今回は無料枠を使ったので、1 分あたりのリクエスト数に上限がある。この制限が記事の後半に効いてくる
+- Devin CLI: Cognition の AI エージェントのコマンドライン版。指示を受けてコードを読み書きし、コマンドを実行しながら自律的に作業する。この記事では「拡張を書いた側」であり「pi を動かして監督した側」でもある
+- pi（pi agent / pi-coding-agent）: earendil-works のコーディングエージェント。チャット風の指示でファイル編集やコマンド実行を自律的に行う。「pi パッケージ」という拡張を足すと、使える LLM の供給元（モデルプロバイダ）を追加できる
+
+つまり今回は「pi というエージェントのモデル差し口に Sarashina を繋ぐ部品を Devin に書かせ、その差し口経由で Sarashina 自身をエージェントとして働かせた」という話になる。
+
+</details>
+
 やったことは 2 段構造になっている。
 
 - 1 段目: Devin CLI に、コーディングエージェント pi（`@earendil-works/pi-coding-agent`）用の拡張パッケージ `pi-sarashina` を書かせた。Sarashina API（SB Intuitions、OpenAI Chat Completions 互換）を pi のモデルプロバイダとして登録するもの
