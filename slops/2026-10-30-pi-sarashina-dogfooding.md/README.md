@@ -24,6 +24,8 @@ private リポジトリ pi-lab の [PR #30](https://github.com/podhmo/pi-lab/pul
 - 1 段目: Devin CLI に、コーディングエージェント pi（`@earendil-works/pi-coding-agent`）用の拡張パッケージ `pi-sarashina` を書かせた。Sarashina API（SB Intuitions、OpenAI Chat Completions 互換）を pi のモデルプロバイダとして登録するもの
 - 2 段目: Devin がその拡張を pi にロードして実行し、拡張経由で Sarashina のモデル自身に Go 製の TUI グラフ描画ツール `gratui` を実装させた。拡張の受け入れテストを、拡張が繋いだモデルの実作業で行う形
 
+ちなみに Devin CLI を使ったのは、当時 devin-cli で SWE-2 が無料提供されていたから、という経緯がある。
+
 途中で挙動が見えずハマったので、実行する Devin が pi と Sarashina API の間に自作のロギングプロキシを挟んで作業を進めた。
 
 ```svg
