@@ -1,0 +1,9 @@
+# This is a comment
+A -> B
+B -> C
+# Another comment
+
+D -> E
+E -> F
+
+G  # G is isolated
