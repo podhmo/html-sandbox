@@ -11,42 +11,42 @@ private リポジトリ pi-lab の [PR #30](https://github.com/podhmo/pi-lab/pul
 やったことは 2 段構造になっている。
 
 - 1 段目: Devin CLI に、コーディングエージェント pi（`@earendil-works/pi-coding-agent`）用の拡張パッケージ `pi-sarashina` を書かせた。Sarashina API（SB Intuitions、OpenAI Chat Completions 互換）を pi のモデルプロバイダとして登録するもの
-- 2 段目: その拡張を pi にロードし、拡張経由で Sarashina のモデル自身に Go 製の TUI グラフ描画ツール `gratui` を実装させた。拡張の受け入れテストを、拡張が繋いだモデルの実作業で行う形
+- 2 段目: Devin がその拡張を pi にロードして実行し、拡張経由で Sarashina のモデル自身に Go 製の TUI グラフ描画ツール `gratui` を実装させた。拡張の受け入れテストを、拡張が繋いだモデルの実作業で行う形
 
-途中で挙動が見えずハマったので、pi と Sarashina API の間に自作のロギングプロキシを挟んで作業を進めた。
+途中で挙動が見えずハマったので、実行する Devin が pi と Sarashina API の間に自作のロギングプロキシを挟んで作業を進めた。
 
 ```svg
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 292" width="560" role="img" aria-label="作業の構造: Devin が拡張を実装し、人が pi を指示・監督し、pi は拡張をロードしてプロキシ越しに Sarashina API を呼びながら Go のファイルを書く">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 292" width="560" role="img" aria-label="作業の構造: 人は Devin に指示するだけで、Devin が拡張を実装し、pi を実行・監督する。pi は拡張をロードしてプロキシ越しに Sarashina API を呼びながら Go のファイルを書く">
   <defs>
     <marker id="fig1-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
     </marker>
   </defs>
   <rect x="20" y="20" width="110" height="40" rx="6" fill="none" stroke="currentColor" stroke-width="1.5"/>
-  <text x="75" y="44" text-anchor="middle" font-size="13" fill="currentColor">Devin CLI</text>
-  <rect x="200" y="20" width="170" height="40" rx="6" fill="none" stroke="currentColor" stroke-width="1.5"/>
-  <text x="285" y="44" text-anchor="middle" font-size="13" fill="currentColor">pi-sarashina 拡張</text>
+  <text x="75" y="44" text-anchor="middle" font-size="13" fill="currentColor">人</text>
+  <rect x="200" y="20" width="110" height="40" rx="6" fill="none" stroke="currentColor" stroke-width="1.5"/>
+  <text x="255" y="44" text-anchor="middle" font-size="13" fill="currentColor">Devin CLI</text>
+  <rect x="370" y="20" width="170" height="40" rx="6" fill="none" stroke="currentColor" stroke-width="1.5"/>
+  <text x="455" y="44" text-anchor="middle" font-size="13" fill="currentColor">pi-sarashina 拡張</text>
   <line x1="132" y1="40" x2="196" y2="40" stroke="currentColor" stroke-width="1.5" marker-end="url(#fig1-arrow)"/>
-  <text x="164" y="32" text-anchor="middle" font-size="11" fill="currentColor">実装</text>
-  <line x1="285" y1="62" x2="285" y2="124" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#fig1-arrow)"/>
-  <text x="293" y="95" font-size="11" fill="currentColor">pi -e でロード</text>
-  <rect x="20" y="130" width="130" height="44" rx="6" fill="none" stroke="currentColor" stroke-width="1.5"/>
-  <text x="85" y="156" text-anchor="middle" font-size="12" fill="currentColor">人（指示・監督）</text>
+  <text x="164" y="32" text-anchor="middle" font-size="11" fill="currentColor">指示</text>
+  <line x1="312" y1="40" x2="366" y2="40" stroke="currentColor" stroke-width="1.5" marker-end="url(#fig1-arrow)"/>
+  <text x="339" y="32" text-anchor="middle" font-size="11" fill="currentColor">実装</text>
+  <line x1="255" y1="62" x2="255" y2="124" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#fig1-arrow)"/>
+  <text x="247" y="95" text-anchor="end" font-size="11" fill="currentColor">実行・監督</text>
+  <path d="M385 62 V108 H290 V124" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#fig1-arrow)"/>
+  <text x="340" y="100" text-anchor="middle" font-size="11" fill="currentColor">pi -e でロード</text>
   <rect x="200" y="130" width="100" height="44" rx="6" fill="none" stroke="currentColor" stroke-width="1.5"/>
   <text x="250" y="156" text-anchor="middle" font-size="13" fill="currentColor">pi agent</text>
-  <rect x="350" y="130" width="130" height="44" rx="6" fill="none" stroke="currentColor" stroke-width="1.5"/>
-  <text x="415" y="156" text-anchor="middle" font-size="12" fill="currentColor">trace-proxy :8787</text>
+  <rect x="350" y="130" width="125" height="44" rx="6" fill="none" stroke="currentColor" stroke-width="1.5"/>
+  <text x="412" y="156" text-anchor="middle" font-size="12" fill="currentColor">trace-proxy :8787</text>
   <rect x="520" y="130" width="76" height="44" rx="6" fill="none" stroke="currentColor" stroke-width="1.5"/>
   <text x="558" y="150" text-anchor="middle" font-size="11" fill="currentColor">Sarashina</text>
   <text x="558" y="164" text-anchor="middle" font-size="11" fill="currentColor">API</text>
-  <line x1="152" y1="152" x2="196" y2="152" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#fig1-arrow)"/>
-  <text x="174" y="142" text-anchor="middle" font-size="11" fill="currentColor">prompt</text>
   <line x1="302" y1="152" x2="346" y2="152" stroke="currentColor" stroke-width="1.5" marker-end="url(#fig1-arrow)"/>
   <text x="324" y="142" text-anchor="middle" font-size="11" fill="currentColor">HTTP</text>
-  <line x1="482" y1="152" x2="516" y2="152" stroke="currentColor" stroke-width="1.5" marker-end="url(#fig1-arrow)"/>
-  <text x="499" y="142" text-anchor="middle" font-size="10" fill="currentColor">HTTPS</text>
-  <line x1="60" y1="128" x2="60" y2="64" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#fig1-arrow)"/>
-  <text x="66" y="100" font-size="11" fill="currentColor">指示</text>
+  <line x1="477" y1="152" x2="516" y2="152" stroke="currentColor" stroke-width="1.5" marker-end="url(#fig1-arrow)"/>
+  <text x="496" y="142" text-anchor="middle" font-size="10" fill="currentColor">HTTPS</text>
   <rect x="200" y="228" width="170" height="40" rx="6" fill="none" stroke="currentColor" stroke-width="1.5"/>
   <text x="285" y="252" text-anchor="middle" font-size="12" fill="currentColor">main.go, *.txt</text>
   <line x1="250" y1="176" x2="250" y2="222" stroke="currentColor" stroke-width="1.5" marker-end="url(#fig1-arrow)"/>
@@ -54,7 +54,7 @@ private リポジトリ pi-lab の [PR #30](https://github.com/podhmo/pi-lab/pul
 </svg>
 ```
 
-この構造で面白いのは、検証対象と検証経路が同じものを通っている点だ。「プロバイダ拡張が正しく動くか」を確かめるのに、その拡張を通してモデルをエージェントとして働かせる。結果として、書いたばかりで未検証だった 429 リトライ実装が、テストの途中で自然に実地検証されることになった（後述）。
+人が直接 pi を触るわけではない。pi へのプロンプト投入、経過の観察、ハング時の kill、再開指示という監督も Devin が行っている。この構造で面白いのは、検証対象と検証経路が同じものを通っている点だ。「プロバイダ拡張が正しく動くか」を確かめるのに、その拡張を通してモデルをエージェントとして働かせる。結果として、書いたばかりで未検証だった 429 リトライ実装が、テストの途中で自然に実地検証されることになった（後述）。
 
 ## 1 段目: pi-sarashina を作る
 
@@ -101,7 +101,7 @@ sarashina3-mini で 6 回、sarashina3.2-mini-thinking で 2 回走らせた。
 | 4 | mini | 修復指示で再起動するが、read/edit 失敗の無限ループに陥り kill |
 | 5 | mini | 「edit 禁止・全体書き直し」の指示で一応「完成」。ただし検証するとサイクル入力で無限ループ、ファイル引数・フラグ・矢印描画は全て未実装 |
 | 6 | mini | 不足を列挙して改善指示。書き直したがサイクル処理の同じバグを再現。途中でストリーム沈黙し kill |
-| 7 | thinking | 継続指示。自分でサイクル入力テストを実行 → 自分が書いた無限ループバグで自分のテストがハング（7.6 CPU 分）。プロセスを kill すると再開するが同じテストを再実行して再度ハング、を 2 回繰り返して観察打ち切り |
+| 7 | thinking | 継続指示。自分でサイクル入力テストを実行 → 自分が書いた無限ループバグで自分のテストがハング（7.6 CPU 分）。Devin がプロセスを kill すると再開するが同じテストを再実行して再度ハング、を 2 回繰り返して観察打ち切り |
 | 8 | thinking | 生成物を全削除して最初から。実質合格（下記） |
 
 ### 失敗の分類
@@ -112,7 +112,7 @@ sarashina3-mini で 6 回、sarashina3.2-mini-thinking で 2 回走らせた。
 
 ##### read/edit の無限ループ
 
-run 4 は壊れた `\n` を消そうと `edit` を連発したが、oldText がファイル上の実際のバイト列と一致せず毎回失敗した。すると `read` の offset を 1 ずつ下げながら同じ edit を数百回繰り返すループに入った（セッションの `~/.pi/agent/sessions/*.jsonl` で確認）。コンテキストは 226KB まで膨張し、30 RPM 制限に触れて 429 を連発した。pi にはツール呼び出しのループ検出がないので、監督側が止めるしかない。
+run 4 は壊れた `\n` を消そうと `edit` を連発したが、oldText がファイル上の実際のバイト列と一致せず毎回失敗した。すると `read` の offset を 1 ずつ下げながら同じ edit を数百回繰り返すループに入った（セッションの `~/.pi/agent/sessions/*.jsonl` で確認）。コンテキストは 226KB まで膨張し、30 RPM 制限に触れて 429 を連発した。pi にはツール呼び出しのループ検出がないので、実行を監督している Devin が止めるしかない。
 
 ##### SSE ストリームの途中沈黙
 
@@ -149,11 +149,11 @@ run 7 でモデルは `./gratui`（標準入力を読む自作バイナリ）を
   <line x1="310" y1="56" x2="310" y2="114" stroke="currentColor" stroke-width="1.5" marker-end="url(#fig3-arrow)"/>
   <text x="318" y="90" font-size="11" fill="currentColor">無限ループ</text>
   <line x1="268" y1="114" x2="268" y2="62" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#fig3-arrow)"/>
-  <text x="260" y="90" text-anchor="end" font-size="11" fill="currentColor">kill → 再実行（×2）</text>
+  <text x="260" y="90" text-anchor="end" font-size="11" fill="currentColor">Devin が kill → 再実行（×2）</text>
 </svg>
 ```
 
-ハングした `./gratui` だけを kill すればよく、bash ツールが `Terminated: 15` を返すと pi は即座に次のターンへ進んだ（pi 自体を殺す必要はない）。ただし再開したモデルは同じテストを再実行して再度ハングした。プロンプトに「実行確認は timeout 付きで」と入れるのは有効だった。
+ハングした `./gratui` だけを Devin が kill すればよく、bash ツールが `Terminated: 15` を返すと pi は即座に次のターンへ進んだ（pi 自体を殺す必要はない）。ただし再開したモデルは同じテストを再実行して再度ハングした。プロンプトに「実行確認は timeout 付きで」と入れるのは有効だった。
 
 ### run 8: 実質合格
 
@@ -217,7 +217,7 @@ run 7 でモデルは `./gratui`（標準入力を読む自作バイナリ）を
 
 - sarashina3-mini 単独でのエージェント実行は 6 回中 5 回が収束しなかった（残る 1 回はプロキシのバグで即死）。ソースへのエスケープ混入という破壊的編集と、失敗時に同じ操作を繰り返す癖が致命的だった
 - sarashina3.2-mini-thinking + クリーンな状態 + 「検証は timeout 付きで」の指示で実用圏内に入った。ただし thinking モデルの思考内容は暗号化されていて読めないので、「なぜ上手くいったか」の内訳はブラックボックスのまま
-- エージェント基盤として、HTTP 可視化（プロキシ）+ セッション JSONL の追跡 + ハング時の部分的 kill という監督手段が必須だった。自律動作に任せきりだと run 1 のように原因不明のまま時間を溶かす
+- エージェント基盤として、HTTP 可視化（プロキシ）+ セッション JSONL の追跡 + ハング時の部分的 kill という監督手段が必須だった。今回この監督役を担ったのも Devin で、自律動作に任せきりだと run 1 のように原因不明のまま時間を溶かす
 - 未解決: SSE ストリームが稀に途中で沈黙する問題（`httpIdleTimeoutMs` で緩和可能）、pi にツール呼び出しループ検出がない点、`.env` 非対応、cost=0 固定（無料枠前提）、モデル一覧のハードコード
 - なお main で pi が 0.85.1 → 1.3.0 に bump された後に再検証済みで、extension 本体は変更不要だった
 
