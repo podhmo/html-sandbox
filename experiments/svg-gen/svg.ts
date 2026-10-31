@@ -22,6 +22,7 @@ export interface ShapeOptions {
   dash?: string;
   opacity?: number;
   size?: number;
+  width?: number;
 }
 
 export interface BoxOptions extends ShapeOptions {
@@ -39,6 +40,7 @@ export interface TextOptions {
 export interface StrokeOptions {
   dash?: string;
   opacity?: number;
+  width?: number;
 }
 
 export interface ArrowOptions extends StrokeOptions {
@@ -77,6 +79,7 @@ const SIDES: Record<Side, (b: Shape) => Point> = {
 
 export class Canvas {
   private margin: number;
+  private backdrop: string[] = [];
   private parts: string[] = [];
   private minX = Infinity;
   private minY = Infinity;
@@ -96,10 +99,11 @@ export class Canvas {
     }
   }
 
-  private strokeAttrs({ dash, opacity }: StrokeOptions): string {
+  private strokeAttrs({ dash, opacity, width }: StrokeOptions): string {
+    const w = width != null && width !== 1.5 ? ` stroke-width="${width}"` : ` stroke-width="1.5"`;
     const d = dash ? ` stroke-dasharray="${dash}"` : "";
     const o = opacity != null ? ` opacity="${opacity}"` : "";
-    return d + o;
+    return w + d + o;
   }
 
   // Shapes return {x, y, w, h, label?}; anchors and placement read from it.
@@ -125,7 +129,7 @@ export class Canvas {
     }
     this.parts.push(
       `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}"` +
-        ` fill="none" stroke="currentColor" stroke-width="1.5"${this.strokeAttrs(o)}/>`,
+        ` fill="none" stroke="currentColor"${this.strokeAttrs(o)}/>`,
     );
     if (label != null) {
       this.labelLines(x + w / 2, y + h / 2, label, size, o.opacity);
@@ -138,7 +142,7 @@ export class Canvas {
   circle(cx: number, cy: number, r: number, { label, size = 14, ...o }: ShapeOptions = {}): Shape {
     this.parts.push(
       `<circle cx="${cx}" cy="${cy}" r="${r}"` +
-        ` fill="none" stroke="currentColor" stroke-width="1.5"${this.strokeAttrs(o)}/>`,
+        ` fill="none" stroke="currentColor"${this.strokeAttrs(o)}/>`,
     );
     if (label != null) {
       this.labelLines(cx, cy, label, size, o.opacity);
@@ -225,7 +229,7 @@ export class Canvas {
       this.cover([bx + pxn, by + pyn], [bx - pxn, by - pyn]);
       return (
         `<path d="M${bx + pxn} ${by + pyn} L${qx} ${qy} L${bx - pxn} ${by - pyn}"` +
-        ` fill="none" stroke="currentColor" stroke-width="1.5"${this.strokeAttrs(o)}/>`
+        ` fill="none" stroke="currentColor"${this.strokeAttrs(o)}/>`
       );
     };
     const headsSvg =
@@ -234,7 +238,7 @@ export class Canvas {
         : (heads === "end" || heads === "both" ? headAt(to, pts[pts.length - 2]) : "") +
           (heads === "start" || heads === "both" ? headAt(from, pts[1]) : "");
     this.parts.push(
-      `<path d="${d}" fill="none" stroke="currentColor" stroke-width="1.5"${this.strokeAttrs(o)}/>` + headsSvg,
+      `<path d="${d}" fill="none" stroke="currentColor"${this.strokeAttrs(o)}/>` + headsSvg,
     );
     this.cover(...pts);
   }
@@ -243,11 +247,32 @@ export class Canvas {
     return [(from[0] + to[0]) / 2, (from[1] + to[1]) / 2];
   }
 
+  // A low-key emphasis zone behind a shape. "wash" is a translucent
+  // currentColor fill (a grey wash in light theme, a light veil in dark
+  // theme); "ring" is a dashed enclosure; both render behind the shape
+  // so they never cover its label.
+  highlight(
+    shape: Shape,
+    { pad = 7, opacity = 0.08, mode = "wash", rx }: { pad?: number; opacity?: number; mode?: "wash" | "ring"; rx?: number } = {},
+  ): void {
+    const x = shape.x - pad;
+    const y = shape.y - pad;
+    const w = shape.w + 2 * pad;
+    const h = shape.h + 2 * pad;
+    const r = rx ?? pad + 4;
+    const el =
+      mode === "ring"
+        ? `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 3"/>`
+        : `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="currentColor" fill-opacity="${opacity}" stroke="none"/>`;
+    this.backdrop.push(el);
+    this.cover([x, y], [x + w, y + h]);
+  }
+
   line(from: Point, to: Point, { via = [], ...o }: LineOptions = {}): void {
     const pts: Point[] = [from, ...via, to];
     const d = "M" + pts.map(([x, y]) => `${x} ${y}`).join(" L");
     this.parts.push(
-      `<path d="${d}" fill="none" stroke="currentColor" stroke-width="1.5"${this.strokeAttrs(o)}/>`,
+      `<path d="${d}" fill="none" stroke="currentColor"${this.strokeAttrs(o)}/>`,
     );
     this.cover(...pts);
   }
@@ -255,7 +280,7 @@ export class Canvas {
   // path(d) is an escape hatch for curves; caller lists the covered points.
   path(d: string, covered: Point[], o: StrokeOptions = {}): void {
     this.parts.push(
-      `<path d="${d}" fill="none" stroke="currentColor" stroke-width="1.5"${this.strokeAttrs(o)}/>`,
+      `<path d="${d}" fill="none" stroke="currentColor"${this.strokeAttrs(o)}/>`,
     );
     this.cover(...covered);
   }
@@ -269,6 +294,8 @@ export class Canvas {
     const aria = label ? ` role="img" aria-label="${esc(label)}"` : "";
     return (
       `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb}"${size}${aria}>\n` +
+      this.backdrop.join("\n") +
+      (this.backdrop.length ? "\n" : "") +
       this.parts.join("\n") +
       "\n</svg>\n"
     );

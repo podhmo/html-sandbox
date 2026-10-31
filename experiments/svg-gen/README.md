@@ -19,8 +19,14 @@ gets a small throwaway generator sharing a thin helper.
   - `box(x, y, "auto", h, {label})` sizes the box to the estimated label
     width, so a label cannot outgrow its box.
   - `arrow` takes `heads: "both"` (or `"start"`/`"none"`) for
-    bidirectional edges such as request/response pairs, `midpoint` finds
-    label positions, and `label: [...]` gives multi-line box text.
+    bidirectional edges such as request/response pairs, or `split` for
+    two opposing arrows; `midpoint` finds label positions, and
+    `label: [...]` gives multi-line box text.
+  - `highlight(shape, {opacity, mode})` adds a low-key emphasis zone
+    behind a shape: a translucent currentColor "wash" (grey in light
+    theme, a light veil in dark) or a dashed "ring" — quieter than a
+    marker. `width:` on shapes/strokes and `fig-highlight.ts` compare
+    the options side by side.
   - `rightOf`/`leftOf`/`above`/`below` place shapes relative to each
     other; the canvas derives the `viewBox` from everything drawn
     (including estimated text extents), so nothing falls outside it.
