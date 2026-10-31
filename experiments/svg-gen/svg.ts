@@ -55,10 +55,18 @@ export interface ArrowOptions extends StrokeOptions {
   // split: draw two opposing arrows offset `split` px apart, instead of
   // one line — the request/response notation of sequence diagrams.
   split?: number;
+  // gap pulls the ends back this many px along the edge direction, so
+  // arrowheads stop just short of the shape they point at.
+  gap?: number;
+  gapStart?: number;
+  gapEnd?: number;
 }
 
 export interface LineOptions extends StrokeOptions {
   via?: Point[];
+  gap?: number;
+  gapStart?: number;
+  gapEnd?: number;
 }
 
 const ASCII_W = 0.55;
@@ -74,6 +82,21 @@ export function textWidth(s: string, size: number): number {
 
 const esc = (s: string | number): string =>
   String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+// Pull a polyline's ends toward its middle by `start`/`end` px.
+function trimEnds(pts: Point[], start: number, end: number): Point[] {
+  const out = pts.slice() as Point[];
+  if (start > 0 && out.length > 1) {
+    const d = Math.hypot(out[1][0] - out[0][0], out[1][1] - out[0][1]) || 1;
+    out[0] = [out[0][0] + ((out[1][0] - out[0][0]) / d) * start, out[0][1] + ((out[1][1] - out[0][1]) / d) * start];
+  }
+  const n = out.length;
+  if (end > 0 && n > 1) {
+    const d = Math.hypot(out[n - 1][0] - out[n - 2][0], out[n - 1][1] - out[n - 2][1]) || 1;
+    out[n - 1] = [out[n - 1][0] - ((out[n - 1][0] - out[n - 2][0]) / d) * end, out[n - 1][1] - ((out[n - 1][1] - out[n - 2][1]) / d) * end];
+  }
+  return out;
+}
 
 const SIDES: Record<Side, (b: Shape) => Point> = {
   n: (b) => [b.x + b.w / 2, b.y],
@@ -204,7 +227,7 @@ export class Canvas {
     return shape.y - gap - h;
   }
 
-  arrow(from: Point, to: Point, { via = [], head = 9, heads = "end", split = 0, ...o }: ArrowOptions = {}): void {
+  arrow(from: Point, to: Point, { via = [], head = 9, heads = "end", split = 0, gap = 3, gapStart, gapEnd, ...o }: ArrowOptions = {}): void {
     if (split > 0) {
       const dx = to[0] - from[0];
       const dy = to[1] - from[1];
@@ -218,17 +241,23 @@ export class Canvas {
         via: via.map((p) => shift(p, -1)),
         head,
         heads: "end",
+        gap,
+        gapStart,
+        gapEnd,
         ...o,
       });
       this.arrow(shift(to, 1), shift(from, 1), {
         via: [...via].reverse().map((p) => shift(p, 1)),
         head,
         heads: "end",
+        gap,
+        gapStart,
+        gapEnd,
         ...o,
       });
       return;
     }
-    const pts: Point[] = [from, ...via, to];
+    const pts = trimEnds([from, ...via, to], gapStart ?? gap, gapEnd ?? gap);
     const d = "M" + pts.map(([x, y]) => `${x} ${y}`).join(" L");
     // A head is an open V at `tip`, pointing along (ux, uy).
     const headAt = (tip: Point, seg: Point): string => {
@@ -249,8 +278,8 @@ export class Canvas {
     const headsSvg =
       heads === "none"
         ? ""
-        : (heads === "end" || heads === "both" ? headAt(to, pts[pts.length - 2]) : "") +
-          (heads === "start" || heads === "both" ? headAt(from, pts[1]) : "");
+        : (heads === "end" || heads === "both" ? headAt(pts[pts.length - 1], pts[pts.length - 2]) : "") +
+          (heads === "start" || heads === "both" ? headAt(pts[0], pts[1]) : "");
     this.parts.push(
       `<path d="${d}" fill="none" stroke="currentColor"${this.strokeAttrs(o)}/>` + headsSvg,
     );
@@ -282,8 +311,8 @@ export class Canvas {
     this.cover([x, y], [x + w, y + h]);
   }
 
-  line(from: Point, to: Point, { via = [], ...o }: LineOptions = {}): void {
-    const pts: Point[] = [from, ...via, to];
+  line(from: Point, to: Point, { via = [], gap = 0, gapStart, gapEnd, ...o }: LineOptions = {}): void {
+    const pts = trimEnds([from, ...via, to], gapStart ?? gap, gapEnd ?? gap);
     const d = "M" + pts.map(([x, y]) => `${x} ${y}`).join(" L");
     this.parts.push(
       `<path d="${d}" fill="none" stroke="currentColor"${this.strokeAttrs(o)}/>`,
