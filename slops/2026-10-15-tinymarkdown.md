@@ -1,3 +1,8 @@
+---
+prev: 2026-10-14-hello.md
+next: 2026-10-16-mobile-first.md
+---
+
 # tinymarkdown で書けること
 
 記事は、わざと小さく絞った Markdown のサブセットで書いている。

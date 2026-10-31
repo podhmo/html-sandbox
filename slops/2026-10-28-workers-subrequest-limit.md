@@ -1,6 +1,8 @@
 ---
 title: 記事を足したら、Workers の subrequest の上限を超えた
 description: MoonBit 版のブログの Worker が "Too many subrequests" で止まった原因と、記事と文書を1つのファイルにまとめて直した経緯。
+prev: 2026-10-28-listen.md
+next: 2026-10-29-details.md
 ---
 
 # 記事を足したら、Workers の subrequest の上限を超えた

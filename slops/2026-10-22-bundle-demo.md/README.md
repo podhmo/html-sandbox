@@ -1,6 +1,8 @@
 ---
 title: Bundle demo
 description: One page built from a directory — a main text, a companion note, an image, and working code.
+prev: ../2026-10-22-bundle.md
+next: ../2026-10-24-alerts.md
 ---
 
 # Bundle demo

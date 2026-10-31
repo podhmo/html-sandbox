@@ -1,6 +1,8 @@
 ---
 title: LLM に、このブログの Markdown で答えてもらう
 description: SVG の言語指定と記事バンドルを整理し、preview で使える記法と出力形式を伝える。
+prev: ../2026-10-27-redraw-novel-figures.md
+next: ../2026-10-28-listen.md
 ---
 
 # LLM に、このブログの Markdown で答えてもらう

@@ -1,6 +1,8 @@
 ---
 title: 箱と矢印の図を、意味を持つ図に描き直す
 description: write-slops の skill の方針で、AI 小説についての記事の図を Claude Code と一緒に描き直した記録。
+prev: 2026-10-27-pkg-graph.md
+next: 2026-10-27-writing-slops.md
 ---
 
 # 箱と矢印の図を、意味を持つ図に描き直す
