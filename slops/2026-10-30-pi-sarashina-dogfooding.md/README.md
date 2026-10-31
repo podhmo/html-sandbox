@@ -1,7 +1,8 @@
 ---
 title: pi 用 Sarashina 拡張を AI に書かせ、その Sarashina に Go ツールを書かせて受け入れテストした
 description: private リポジトリ pi-lab の PR #30 の記録。Devin が pi-agent 用の Sarashina プロバイダ拡張 pi-sarashina を実装し、その拡張経由で Sarashina 自身に Go 製グラフ描画 CLI を書かせるドッグフーディングを行った。8 run の失敗の分類、22 回の 429 が全て Retry-After で復帰した実測、観測用ロギングプロキシの話。
-prev: 2026-10-29-details.md
+prev: ../2026-10-29-details.md
+next: ../2026-10-31-footnotes.md
 ---
 
 # pi 用 Sarashina 拡張を AI に書かせ、その Sarashina に Go ツールを書かせて受け入れテストした

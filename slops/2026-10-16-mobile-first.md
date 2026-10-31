@@ -1,6 +1,8 @@
 ---
 title: ビルドなしのモバイルファースト
 description: pico.css と小さな site.css だけで、ビルドなしにスマートフォンでも読みやすくする方法。
+prev: 2026-10-15-tinymarkdown.md
+next: 2026-10-17-workers-wasm.md
 ---
 見た目のほとんどは pico.css v2 に任せている。
 CDN から読み込むだけなので、CSS のビルドは要らない。
