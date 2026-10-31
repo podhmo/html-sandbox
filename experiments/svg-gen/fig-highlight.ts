@@ -17,13 +17,7 @@ const variants: [caption: string, v: Variant][] = [
   ["wash 0.12", { mark: (s) => c.highlight(s, { opacity: 0.12 }) }],
   ["dashed ring", { mark: (s) => c.highlight(s, { mode: "ring" }) }],
   ["thick stroke", { boxOpts: { width: 2.5 } }],
-  [
-    "underline",
-    {
-      mark: (s) =>
-        c.line([s.x + 4, s.y + s.h + 8], [s.x + s.w - 4, s.y + s.h + 8], { width: 3 }),
-    },
-  ],
+  ["underlined label", { boxOpts: { underline: true } }],
 ];
 
 variants.forEach(([caption, v], i) => {

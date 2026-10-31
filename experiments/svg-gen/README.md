@@ -25,8 +25,8 @@ gets a small throwaway generator sharing a thin helper.
   - `highlight(shape, {opacity, mode})` adds a low-key emphasis zone
     behind a shape: a translucent currentColor "wash" (grey in light
     theme, a light veil in dark) or a dashed "ring" — quieter than a
-    marker. `width:` on shapes/strokes and `fig-highlight.ts` compare
-    the options side by side.
+    marker. `width:` thickens a stroke, `underline:` underlines a label,
+    and `fig-highlight.ts` compares the options side by side.
   - `rightOf`/`leftOf`/`above`/`below` place shapes relative to each
     other; the canvas derives the `viewBox` from everything drawn
     (including estimated text extents), so nothing falls outside it.

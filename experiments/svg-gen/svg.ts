@@ -23,6 +23,8 @@ export interface ShapeOptions {
   opacity?: number;
   size?: number;
   width?: number;
+  // underline the label text, not the box.
+  underline?: boolean | number;
 }
 
 export interface BoxOptions extends ShapeOptions {
@@ -35,6 +37,9 @@ export interface TextOptions {
   baseline?: "central";
   size?: number;
   opacity?: number;
+  // underline draws a stroke under the text, sized from its estimated
+  // width; `true` uses width 2, a number picks the stroke width.
+  underline?: boolean | number;
 }
 
 export interface StrokeOptions {
@@ -108,7 +113,7 @@ export class Canvas {
 
   // Shapes return {x, y, w, h, label?}; anchors and placement read from it.
   // Pass w: "auto" to size the box to its widest label line (+padX each side).
-  private labelLines(cx: number, cy: number, label: string | string[], size: number, opacity?: number): void {
+  private labelLines(cx: number, cy: number, label: string | string[], size: number, o: { opacity?: number; underline?: boolean | number } = {}): void {
     const lines = Array.isArray(label) ? label : [label];
     const lh = size * 1.3;
     lines.forEach((s, i) =>
@@ -116,7 +121,8 @@ export class Canvas {
         anchor: "middle",
         baseline: "central",
         size,
-        opacity,
+        opacity: o.opacity,
+        underline: o.underline,
       }),
     );
   }
@@ -132,7 +138,7 @@ export class Canvas {
         ` fill="none" stroke="currentColor"${this.strokeAttrs(o)}/>`,
     );
     if (label != null) {
-      this.labelLines(x + w / 2, y + h / 2, label, size, o.opacity);
+      this.labelLines(x + w / 2, y + h / 2, label, size, o);
     }
     const shape = { x, y, w, h, label };
     this.cover([x, y], [x + w, y + h]);
@@ -145,14 +151,14 @@ export class Canvas {
         ` fill="none" stroke="currentColor"${this.strokeAttrs(o)}/>`,
     );
     if (label != null) {
-      this.labelLines(cx, cy, label, size, o.opacity);
+      this.labelLines(cx, cy, label, size, o);
     }
     const shape = { x: cx - r, y: cy - r, w: 2 * r, h: 2 * r, label };
     this.cover([cx - r, cy - r], [cx + r, cy + r]);
     return shape;
   }
 
-  text(x: number, y: number, s: string | number, { anchor = "start", baseline, size = 14, opacity }: TextOptions = {}): void {
+  text(x: number, y: number, s: string | number, { anchor = "start", baseline, size = 14, opacity, underline }: TextOptions = {}): void {
     const a = anchor === "start" ? "" : ` text-anchor="${anchor}"`;
     const bl = baseline ? ` dominant-baseline="${baseline}"` : "";
     const o = opacity != null ? ` opacity="${opacity}"` : "";
@@ -162,7 +168,15 @@ export class Canvas {
     const w = textWidth(String(s), size);
     const lx = anchor === "middle" ? x - w / 2 : anchor === "end" ? x - w : x;
     const ty = baseline === "central" ? y - size / 2 : y - size;
-    this.cover([lx, ty], [lx + w, ty + size * 1.2]);
+    const by = ty + size * 1.2;
+    if (underline) {
+      const uw = underline === true ? 2 : underline;
+      this.parts.push(
+        `<path d="M${lx} ${by + 2} L${lx + w} ${by + 2}" fill="none" stroke="currentColor" stroke-width="${uw}"${o}/>`,
+      );
+      this.cover([lx, by + 2 + uw / 2]);
+    }
+    this.cover([lx, ty], [lx + w, by]);
   }
 
   anchor(shape: Shape, side: Side): Point {
