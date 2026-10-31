@@ -1,4 +1,4 @@
-# experiments/svg-gen
+# tools/svg-gen
 
 A small generator kit for hand-shaped SVG concept figures, from issue
 [#96](https://github.com/podhmo/html-sandbox/issues/96): LLMs are not

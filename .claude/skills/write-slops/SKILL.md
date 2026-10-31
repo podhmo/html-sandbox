@@ -51,6 +51,18 @@ useful evidence for an article about diagramming, retain it as an explicitly
 labelled counterexample and explain the concrete failure; do not present
 it as a successful illustration or add a bad example to every article.
 
+## Generate figures with tools/svg-gen rather than hand-writing SVG
+
+Hand-written SVG breaks in predictable ways (lines that miss their box,
+labels clipped by the viewBox). This repo keeps `tools/svg-gen`, a
+zero-dependency TypeScript kit for small concept figures: write
+`fig-<name>.ts` there, run `make -C tools/svg-gen` to emit `build/*.svg`
+and lint them with `check.ts`, then embed the output in an `svg` fence.
+Anchors and auto-sized boxes keep lines attached to shapes, so prefer it
+whenever the figure is more than a handful of elements. See
+`tools/svg-gen/README.md` and the gallery article
+`slops/2026-10-31-svg-gen-figures.md` for examples.
+
 ## SVG is an image only with the svg fence label
 
 For inline images, the opening fence must be exactly three backticks
