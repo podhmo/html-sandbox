@@ -10,7 +10,7 @@ test "parse builds the TS port's Document" {
       ),
     ),
     content=(
-      #|{"children":[{"kind":"section","level":1,"title":"A","children":[{"kind":"paragraph","text":"b"},{"kind":"list","items":[{"text":"x","children":[{"text":"y","children":[]}]}]},{"kind":"quote","children":[{"kind":"paragraph","text":"q"}]},{"kind":"alert","alert":"note","children":[{"kind":"paragraph","text":"n"}]},{"kind":"table","header":["h"],"rows":[["c"]]},{"kind":"code","code":"z"}]}]}
+      #|{"children":[{"kind":"section","level":1,"title":"A","children":[{"kind":"paragraph","text":"b"},{"kind":"list","items":[{"text":"x","children":[{"text":"y","children":[]}]}]},{"kind":"quote","children":[{"kind":"paragraph","text":"q"}]},{"kind":"alert","alert":"note","children":[{"kind":"paragraph","text":"n"}]},{"kind":"table","header":["h"],"rows":[["c"]]},{"kind":"code","code":"z"}]}],"footnotes":[]}
     ),
   )
 }
@@ -34,11 +34,21 @@ test "asterisk and mixed lists reach the TS parser" {
 }
 
 ///|
+test "footnotes reach the TS parser" {
+  inspect(
+    stringify(@js.parse("x[^a]\n\n[^a]: note")),
+    content=(
+      #|{"children":[{"kind":"paragraph","text":"x[^a]"}],"footnotes":[{"kind":"footnote","label":"a","children":[{"kind":"paragraph","text":"note"}]}]}
+    ),
+  )
+}
+
+///|
 test "details reaches the TS parser" {
   inspect(
     stringify(@js.parse("<details>\n<summary>s</summary>\n\nx\n</details>")),
     content=(
-      #|{"children":[{"kind":"details","summary":"s","children":[{"kind":"paragraph","text":"x"}]}]}
+      #|{"children":[{"kind":"details","summary":"s","children":[{"kind":"paragraph","text":"x"}]}],"footnotes":[]}
     ),
   )
 }

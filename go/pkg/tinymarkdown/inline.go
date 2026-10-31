@@ -12,6 +12,8 @@ const (
 	InlineCode
 	// InlineLink is a [text](url) link: Children and URL.
 	InlineLink
+	// InlineFootnote is a [^label] footnote reference: the label in Text.
+	InlineFootnote
 )
 
 // Inline is a piece of the text held by a Section title, a Paragraph, or a
@@ -63,6 +65,13 @@ func Link(children []Inline, url string) Inline {
 	return Inline{Kind: InlineLink, link: &linkData{Children: children, URL: url}}
 }
 
+// Footnote returns a [^label] footnote reference. The label identifies a
+// FootnoteDef of the document; resolving and numbering it is up to the
+// renderer.
+func Footnote(label string) Inline {
+	return Inline{Kind: InlineFootnote, Text: label}
+}
+
 // Inlines splits s into plain text, code spans, and links.
 //
 // As in CommonMark, a code span opens with a run of backquotes and closes
@@ -77,6 +86,11 @@ func Link(children []Inline, url string) Inline {
 // than links: a "]" inside a code span does not close the text, and a link
 // inside a code span is code. Anything that does not form a link is plain
 // text.
+//
+// A footnote reference is "[^", a label, and "]" not followed by "(": the
+// label may not be empty or hold brackets or a line break. "[^x](u)" is a
+// link whose text is "^x", not a reference. As with links, references
+// inside code spans are code and a reference inside link text is text.
 func Inlines(s string) []Inline {
 	return inlines(s, true)
 }
@@ -119,6 +133,15 @@ func inlines(s string, links bool) []Inline {
 			i = end + n
 			text = i
 		case links && s[i] == '[':
+			if label, end, ok := footnoteRef(s, i); ok {
+				if text < i {
+					out = append(out, Text(s[text:i]))
+				}
+				out = append(out, Footnote(label))
+				i = end
+				text = i
+				continue
+			}
 			label, url, end, ok := link(s, i)
 			if !ok {
 				i++
@@ -140,6 +163,24 @@ func inlines(s string, links bool) []Inline {
 		return nil
 	}
 	return out
+}
+
+// footnoteRef parses a footnote reference starting at s[i] == '['. It
+// returns the label and the index just past the closing "]", failing when
+// there is no "[^label]" here or a "(" follows — "[^x](u)" is a link.
+func footnoteRef(s string, i int) (label string, end int, ok bool) {
+	if i+1 >= len(s) || s[i+1] != '^' {
+		return "", 0, false
+	}
+	j := strings.IndexByte(s[i+2:], ']')
+	if j <= 0 {
+		return "", 0, false
+	}
+	j += i + 2
+	if strings.ContainsAny(s[i+2:j], "[\n") || (j+1 < len(s) && s[j+1] == '(') {
+		return "", 0, false
+	}
+	return s[i+2 : j], j + 1, true
 }
 
 // link parses a link starting at s[i] == '['. It returns the text, the URL,

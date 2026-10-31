@@ -140,6 +140,7 @@ fn plain_inlines(ins : Array[@tinymarkdown.Inline]) -> String {
       match i {
         Text(t) | Code(t) => sb.write_string(t)
         Link(children~, ..) => walk(children)
+        Footnote(label) => sb.write_string("[^\{label}]")
       }
     }
   }

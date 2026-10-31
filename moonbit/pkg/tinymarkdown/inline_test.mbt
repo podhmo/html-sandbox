@@ -93,5 +93,22 @@ test "inlines" {
         Link(children=[Text("b")], url="2"),
       ],
     ),
+    ("footnote", "see[^a] here", [Text("see"), Footnote("a"), Text(" here")]),
+    ("footnote only", "[^a]", [Footnote("a")]),
+    ("footnote label with a space", "[^my note]", [Footnote("my note")]),
+    (
+      "footnote before a link",
+      "[^a](u)",
+      [Link(children=[Text("^a")], url="u")],
+    ),
+    ("empty footnote is text", "[^]", [Text("[^]")]),
+    ("unclosed footnote is text", "x[^a", [Text("x[^a")]),
+    ("footnote in code is code", "`[^a]`", [Code("[^a]")]),
+    (
+      "footnote inside link text is text",
+      "[x[^a]](u)",
+      [Text("[x"), Footnote("a"), Text("](u)")],
+    ),
+    ("footnote across a line break is text", "[^a\nb]", [Text("[^a\nb]")]),
   ])
 }

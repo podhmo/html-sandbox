@@ -3,8 +3,9 @@
 // Supported: headings "#" to "#####" (which open nested sections), "- " or "* "
 // list items (which may continue on indented lines and nest by
 // indentation), paragraphs, "> "
-// quotes, "|" tables, code blocks fenced by exactly "```", and "<details>"
-// blocks. Anything else is treated as paragraph text.
+// quotes, "|" tables, code blocks fenced by exactly "```", "<details>"
+// blocks, and "[^label]" footnotes. Anything else is treated as paragraph
+// text.
 // Block parsing keeps inline syntax as text; Inlines splits out code spans
 // and links on request. See docs/sketch/ja/blog.md.
 package tinymarkdown
@@ -15,6 +16,13 @@ import "strings"
 // heading are its direct children.
 type Document struct {
 	Children []Block
+	// Footnotes holds the "[^label]: ..." definitions of the document, in
+	// roughly the order they are written — a definition inside another's
+	// body is collected before the one that holds it. Where they are
+	// written does not matter — a definition may sit anywhere, inside a
+	// quote or a details block too — and the first definition of a label
+	// wins.
+	Footnotes []FootnoteDef
 }
 
 // Block is a marker interface for block-level nodes.
@@ -98,6 +106,18 @@ type Details struct {
 	Children []Block
 }
 
+// FootnoteDef is a "[^label]: text" definition. The label is the text
+// between "[^" and "]"; it may not be empty or hold brackets or a line
+// break. The text after ":" is the start of the body; the indented lines
+// that follow — and the blank lines between them — continue it, and the
+// whole body is parsed again as a document, as in Quote. The definition
+// line must start at the first column: an indented "[^label]:" continues
+// a list item or stays paragraph text.
+type FootnoteDef struct {
+	Label    string
+	Children []Block
+}
+
 func (Section) block()   {}
 func (Paragraph) block() {}
 func (List) block()      {}
@@ -123,12 +143,40 @@ func (heading) block() {}
 // Parse parses src. It never fails: lines it does not understand become
 // paragraph text.
 func Parse(src string) Document {
-	children, _ := nest(scan(src), 0, 0)
-	return Document{Children: children}
+	notes := &footnoteSet{}
+	children, _ := nest(scan(src, notes), 0, 0)
+	return Document{Children: children, Footnotes: notes.list}
+}
+
+// parseChildren is the recursion of Parse: the blocks of src, with the
+// footnote definitions of src added to notes so that every definition of
+// the outer document is collected wherever it was written.
+func parseChildren(src string, notes *footnoteSet) []Block {
+	children, _ := nest(scan(src, notes), 0, 0)
+	return children
+}
+
+// footnoteSet collects the footnote definitions of a document as scan
+// finds them. A label already seen is not collected again: the first
+// definition wins.
+type footnoteSet struct {
+	seen map[string]bool
+	list []FootnoteDef
+}
+
+func (s *footnoteSet) add(label string, children []Block) {
+	if s.seen[label] {
+		return
+	}
+	if s.seen == nil {
+		s.seen = map[string]bool{}
+	}
+	s.seen[label] = true
+	s.list = append(s.list, FootnoteDef{Label: label, Children: children})
 }
 
 // scan splits src into a flat list of blocks, with headings as markers.
-func scan(src string) []Block {
+func scan(src string, notes *footnoteSet) []Block {
 	var out []Block
 	var para, quote, table []string
 	var items []rawItem
@@ -144,9 +192,9 @@ func scan(src string) []Block {
 		}
 		if len(quote) > 0 {
 			if kind := alertKind(quote[0]); kind != "" {
-				out = append(out, Alert{Kind: kind, Children: Parse(strings.Join(quote[1:], "\n")).Children})
+				out = append(out, Alert{Kind: kind, Children: parseChildren(strings.Join(quote[1:], "\n"), notes)})
 			} else {
-				out = append(out, Quote{Children: Parse(strings.Join(quote, "\n")).Children})
+				out = append(out, Quote{Children: parseChildren(strings.Join(quote, "\n"), notes)})
 			}
 			quote = nil
 		}
@@ -167,6 +215,9 @@ func scan(src string) []Block {
 	var detailsDepth int
 	var detailsCode bool
 	inDetails := false
+	var foot []string
+	var footLabel string
+	footBlank := 0
 	for line := range strings.SplitSeq(src, "\n") {
 		line = strings.TrimSuffix(line, "\r")
 		trimmed := strings.TrimSpace(line)
@@ -195,7 +246,7 @@ func scan(src string) []Block {
 			case trimmed == "</details>":
 				detailsDepth--
 				if detailsDepth == 0 {
-					out = append(out, parseDetails(details))
+					out = append(out, parseDetails(details, notes))
 					details, inDetails = nil, false
 				} else {
 					details = append(details, line)
@@ -205,6 +256,25 @@ func scan(src string) []Block {
 			}
 			continue
 		}
+		if foot != nil {
+			// Inside a footnote definition: an indented line continues it,
+			// and a blank line keeps it open for one more indented line.
+			switch {
+			case trimmed == "":
+				footBlank++
+				continue
+			case line[0] == ' ' || line[0] == '\t':
+				for ; footBlank > 0; footBlank-- {
+					foot = append(foot, "")
+				}
+				foot = append(foot, trimmed)
+				continue
+			default:
+				notes.add(footLabel, parseChildren(strings.Join(foot, "\n"), notes))
+				foot, footLabel, footBlank = nil, "", 0
+			}
+		}
+		label, footText, isFoot := footnoteDef(line)
 		switch {
 		case strings.HasPrefix(trimmed, fence):
 			flush()
@@ -216,6 +286,9 @@ func scan(src string) []Block {
 		case isHeading(trimmed):
 			flush()
 			out = append(out, parseHeading(trimmed))
+		case isFoot:
+			flush()
+			footLabel, foot = label, []string{footText}
 		case strings.HasPrefix(trimmed, "|"):
 			if len(para) > 0 || len(items) > 0 || len(quote) > 0 {
 				flush()
@@ -251,7 +324,11 @@ func scan(src string) []Block {
 	}
 	if inDetails {
 		// An unclosed "<details>" runs to the end of the document.
-		out = append(out, parseDetails(details))
+		out = append(out, parseDetails(details, notes))
+	}
+	if foot != nil {
+		// A footnote definition open at the end closes there.
+		notes.add(footLabel, parseChildren(strings.Join(foot, "\n"), notes))
 	}
 	flush()
 	return out
@@ -261,7 +338,7 @@ func scan(src string) []Block {
 // "</details>" into a Details. A first non-blank line of the form
 // "<summary>...</summary>" is kept as Summary; the rest is parsed again as
 // a document, as in Quote.
-func parseDetails(lines []string) Details {
+func parseDetails(lines []string, notes *footnoteSet) Details {
 	var d Details
 	for i, line := range lines {
 		if strings.TrimSpace(line) == "" {
@@ -273,8 +350,25 @@ func parseDetails(lines []string) Details {
 		}
 		break
 	}
-	d.Children = Parse(strings.Join(lines, "\n")).Children
+	d.Children = parseChildren(strings.Join(lines, "\n"), notes)
 	return d
+}
+
+// footnoteDef returns the label and the first line of the body of a
+// "[^label]: text" line, or ok == false when the line is not one. The
+// label is the non-empty, bracket-free text between "[^" and "]"; the
+// body starts after ":". The line must start at the first column.
+func footnoteDef(line string) (label, text string, ok bool) {
+	rest, ok := strings.CutPrefix(line, "[^")
+	if !ok {
+		return "", "", false
+	}
+	i := strings.IndexByte(rest, ']')
+	if i <= 0 || strings.IndexByte(rest[:i], '[') >= 0 ||
+		i+1 >= len(rest) || rest[i+1] != ':' {
+		return "", "", false
+	}
+	return rest[:i], strings.TrimSpace(rest[i+2:]), true
 }
 
 // summaryText returns the text of a "<summary>...</summary>" line, trimmed.

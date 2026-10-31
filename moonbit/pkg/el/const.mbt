@@ -82,6 +82,9 @@ pub let meta : Tag = Tag("meta")
 pub let nav : Tag = Tag("nav")
 
 ///|
+pub let ol : Tag = Tag("ol")
+
+///|
 pub let p : Tag = Tag("p")
 
 ///|
@@ -104,6 +107,9 @@ pub let strong : Tag = Tag("strong")
 
 ///|
 pub let style : Tag = Tag("style")
+
+///|
+pub let sup : Tag = Tag("sup")
 
 ///|
 pub let table : Tag = Tag("table")

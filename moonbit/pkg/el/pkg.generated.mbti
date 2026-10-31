@@ -80,6 +80,8 @@ pub let name : AttrName
 
 pub let nav : Tag
 
+pub let ol : Tag
+
 pub let p : Tag
 
 pub let pre : Tag
@@ -105,6 +107,8 @@ pub let src : AttrName
 pub let strong : Tag
 
 pub let style : Tag
+
+pub let sup : Tag
 
 pub let table : Tag
 

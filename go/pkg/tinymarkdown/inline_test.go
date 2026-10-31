@@ -42,6 +42,15 @@ func TestInlines(t *testing.T) {
 		{"nested brackets: inner link", "[a [b](c)](d)", []Inline{Text("[a "), Link([]Inline{Text("b")}, "c"), Text("](d)")}},
 		{"line break in text", "[a\nb](u)", []Inline{Link([]Inline{Text("a\nb")}, "u")}},
 		{"two links", "[a](1) [b](2)", []Inline{Link([]Inline{Text("a")}, "1"), Text(" "), Link([]Inline{Text("b")}, "2")}},
+		{"footnote", "see[^a] here", []Inline{Text("see"), Footnote("a"), Text(" here")}},
+		{"footnote only", "[^a]", []Inline{Footnote("a")}},
+		{"footnote label with a space", "[^my note]", []Inline{Footnote("my note")}},
+		{"footnote before a link", "[^a](u)", []Inline{Link([]Inline{Text("^a")}, "u")}},
+		{"empty footnote is text", "[^]", []Inline{Text("[^]")}},
+		{"unclosed footnote is text", "x[^a", []Inline{Text("x[^a")}},
+		{"footnote in code is code", "`[^a]`", []Inline{Code("[^a]")}},
+		{"footnote inside link text is text", "[x[^a]](u)", []Inline{Text("[x"), Footnote("a"), Text("](u)")}},
+		{"footnote across a line break is text", "[^a\nb]", []Inline{Text("[^a\nb]")}},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {

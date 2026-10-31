@@ -32,6 +32,7 @@ pub fn Block::to_repr(Self) -> @debug.Repr
 
 pub(all) struct Document {
   children : Array[Block]
+  footnotes : Array[FootnoteDef]
 } derive(Eq, @debug.Debug)
 #deprecated
 pub fn Document::equal(Self, Self) -> Bool
@@ -40,10 +41,22 @@ pub fn Document::not_equal(Self, Self) -> Bool
 #deprecated
 pub fn Document::to_repr(Self) -> @debug.Repr
 
+pub(all) struct FootnoteDef {
+  label : String
+  children : Array[Block]
+} derive(Eq, @debug.Debug)
+#deprecated
+pub fn FootnoteDef::equal(Self, Self) -> Bool
+#deprecated
+pub fn FootnoteDef::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn FootnoteDef::to_repr(Self) -> @debug.Repr
+
 pub(all) enum Inline {
   Text(String)
   Code(String)
   Link(children~ : Array[Inline], url~ : String)
+  Footnote(String)
 } derive(Eq, @debug.Debug)
 #deprecated
 pub fn Inline::equal(Self, Self) -> Bool

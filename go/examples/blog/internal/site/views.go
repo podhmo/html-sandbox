@@ -142,7 +142,7 @@ func postPage(env pageEnv, st *site, p Post) pe.Node {
 	if _, ok := firstTitle(p.Doc); !ok {
 		// The title came from front matter only, so the body has no heading.
 		id := gen.id(plainText(p.Title))
-		head := append([]pe.Node{el.Attr(el.ID, id)}, renderInlines(tinymarkdown.Inlines(p.Title), link)...)
+		head := append([]pe.Node{el.Attr(el.ID, id)}, renderInlines(tinymarkdown.Inlines(p.Title), link, nil)...)
 		body = append(body, el.El(el.H1, append(head, permalink(id))...))
 	}
 	body = append(body, renderFace(link, p.Members, p.Doc, gen)...)
@@ -168,7 +168,120 @@ func renderFace(link linker, ms []Member, doc tinymarkdown.Document, gen *anchor
 	if len(ms) > 0 && !ms[0].Markdown {
 		return []pe.Node{pe.Pre(ms[0].Raw)}
 	}
-	return renderBlocks(doc.Children, link, gen)
+	return renderDocument(doc, link, gen)
+}
+
+// renderDocument renders a document's blocks, followed by its footnote
+// section when a footnote reference was rendered. Each document gets its
+// own footnotes: the face and the members of a bundle number and anchor
+// theirs apart, so the same [^label] may mean a different note in each.
+func renderDocument(doc tinymarkdown.Document, link linker, gen *anchorIDs) []pe.Node {
+	fn := newFootnotes(doc, gen)
+	out := renderBlocks(doc.Children, link, gen, fn)
+	if sec := fn.section(link); sec != nil {
+		out = append(out, sec)
+	}
+	return out
+}
+
+// footnotes numbers the [^label] references of one document as they
+// render, and writes the footnote section after it. The anchors it makes
+// are prefixed by scope, an id drawn from the page's anchorIDs, so two
+// documents on one page cannot share an anchor.
+type footnotes struct {
+	gen   *anchorIDs
+	scope string // assigned lazily, only once a defined reference renders
+	defs  map[string][]tinymarkdown.Block
+	order []string       // labels in first-reference order
+	num   map[string]int // label -> its number
+	refs  map[string]int // label -> how many times it was referenced
+}
+
+func newFootnotes(doc tinymarkdown.Document, gen *anchorIDs) *footnotes {
+	defs := make(map[string][]tinymarkdown.Block, len(doc.Footnotes))
+	for _, d := range doc.Footnotes {
+		defs[d.Label] = d.Children
+	}
+	return &footnotes{gen: gen, defs: defs, num: map[string]int{}, refs: map[string]int{}}
+}
+
+// prefix is the anchor prefix of this document's footnotes, drawn from the
+// page's anchor generator so every rendered document's are distinct.
+func (f *footnotes) prefix() string {
+	if f.scope == "" {
+		f.scope = f.gen.id("fn")
+	}
+	return f.scope
+}
+
+// ref renders a [^label] reference: a superscript number, anchored so the
+// note can link back to it and linking to the note. It returns nil when
+// the label names no definition — or when f is nil, for texts rendered
+// with no footnote context — and the caller writes the source text.
+func (f *footnotes) ref(label string) pe.Node {
+	if f == nil {
+		return nil
+	}
+	if _, ok := f.defs[label]; !ok {
+		return nil
+	}
+	n, ok := f.num[label]
+	if !ok {
+		f.order = append(f.order, label)
+		n = len(f.order)
+		f.num[label] = n
+	}
+	f.refs[label]++
+	id := f.prefix() + ":ref:" + strconv.Itoa(n)
+	if k := f.refs[label]; k > 1 {
+		id += ":" + strconv.Itoa(k)
+	}
+	return el.El(el.Sup,
+		el.Attr(el.Class, "footnote-ref"),
+		el.El(el.A,
+			el.Attr(el.Href, "#"+f.prefix()+":"+strconv.Itoa(n)),
+			el.Attr(el.ID, id),
+			pe.Text(strconv.Itoa(n))))
+}
+
+// section is the footnote section of the document: an <ol> of every note
+// referenced, in the order the references appear. It returns nil when no
+// reference rendered. A reference inside a note's body registers while
+// the section renders, so the range over order is read live.
+func (f *footnotes) section(link linker) pe.Node {
+	if len(f.order) == 0 {
+		return nil
+	}
+	var items []pe.Node
+	for i := 0; i < len(f.order); i++ {
+		label := f.order[i]
+		n := i + 1
+		back := el.El(el.A,
+			el.Attr(el.Href, "#"+f.prefix()+":ref:"+strconv.Itoa(n)),
+			el.Attr(el.Class, "footnote-backref"),
+			el.Attr(el.AttrName("aria-label"), "Back to reference "+strconv.Itoa(n)),
+			pe.Text("↩︎"))
+		body := f.defs[label]
+		// The backref joins the note's last paragraph when it has one;
+		// without one it is a paragraph of its own.
+		var children []pe.Node
+		if len(body) > 0 {
+			if last, ok := body[len(body)-1].(tinymarkdown.Paragraph); ok {
+				children = renderBlocks(body[:len(body)-1], link, f.gen, f)
+				lastInlines := append(renderInlines(tinymarkdown.Inlines(last.Text), link, f), pe.Text(" "), back)
+				children = append(children, pe.P(lastInlines...))
+			}
+		}
+		if children == nil {
+			children = append(renderBlocks(body, link, f.gen, f), pe.P(back))
+		}
+		head := []pe.Node{el.Attr(el.ID, f.prefix()+":"+strconv.Itoa(n))}
+		items = append(items, el.El(el.Li, append(head, children...)...))
+	}
+	return el.El(el.Section,
+		el.Attr(el.Class, "footnotes"),
+		el.El(el.Hr),
+		el.El(el.Ol, items...))
 }
 
 // sectionMembers returns the members of ms shown as sections: every member but
@@ -189,7 +302,7 @@ func memberSection(link linker, base string, m Member, gen *anchorIDs) pe.Node {
 	body := []pe.Node{el.El(el.H2, el.Attr(el.ID, id), pe.A(base+"/"+m.Name, pe.Code(m.Name)), permalink(id))}
 	switch {
 	case m.Markdown:
-		body = append(body, renderBlocks(m.Doc.Children, link, gen)...)
+		body = append(body, renderDocument(m.Doc, link, gen)...)
 	case m.SVG:
 		body = append(body, el.El(el.Img,
 			el.Attr(el.Src, base+"/"+m.Name), el.Attr(el.Alt, m.Name)))
@@ -219,7 +332,7 @@ func docPage(env pageEnv, st *site, d Doc) pe.Node {
 	var body []pe.Node
 	if _, ok := firstTitle(d.Doc); !ok {
 		id := gen.id(plainText(d.Title))
-		head := append([]pe.Node{el.Attr(el.ID, id)}, renderInlines(tinymarkdown.Inlines(d.Title), link)...)
+		head := append([]pe.Node{el.Attr(el.ID, id)}, renderInlines(tinymarkdown.Inlines(d.Title), link, nil)...)
 		body = append(body, el.El(el.H1, append(head, permalink(id))...))
 	}
 	body = append(body, renderFace(link, d.Members, d.Doc, gen)...)
@@ -245,7 +358,7 @@ func relNav(prev, next *navItem) pe.Node {
 		if it == nil {
 			return el.El(el.Ul)
 		}
-		label := renderInlines(it.label, noLinks)
+		label := renderInlines(it.label, noLinks, nil)
 		children := []pe.Node{pe.Small(pe.Text(heading)), el.El(el.Br)}
 		if it.href != "" {
 			children = append(children, pe.A(it.href, label...))
@@ -292,8 +405,9 @@ var headingTags = [...]el.Tag{1: el.H1, 2: el.H2, 3: el.H3, 4: el.H4, 5: el.H5}
 
 // renderBlocks converts the Markdown tree into nodes. Every piece of text
 // goes through pe.Text, so HTML in posts is escaped. link resolves the URLs
-// of links. gen assigns each section's heading its anchor id.
-func renderBlocks(bs []tinymarkdown.Block, link linker, gen *anchorIDs) []pe.Node {
+// of links. gen assigns each section's heading its anchor id. fn resolves
+// footnote references; it is nil outside a document.
+func renderBlocks(bs []tinymarkdown.Block, link linker, gen *anchorIDs, fn *footnotes) []pe.Node {
 	out := make([]pe.Node, 0, len(bs))
 	for _, b := range bs {
 		switch b := b.(type) {
@@ -301,27 +415,27 @@ func renderBlocks(bs []tinymarkdown.Block, link linker, gen *anchorIDs) []pe.Nod
 			id := gen.id(plainText(b.Title))
 			head := append([]pe.Node{
 				el.Attr(el.ID, id),
-			}, renderInlines(tinymarkdown.Inlines(b.Title), link)...)
-			children := append([]pe.Node{el.El(headingTags[b.Level], append(head, permalink(id))...)}, renderBlocks(b.Children, link, gen)...)
+			}, renderInlines(tinymarkdown.Inlines(b.Title), link, fn)...)
+			children := append([]pe.Node{el.El(headingTags[b.Level], append(head, permalink(id))...)}, renderBlocks(b.Children, link, gen, fn)...)
 			out = append(out, pe.Section(children...))
 		case tinymarkdown.Paragraph:
-			out = append(out, pe.P(renderInlines(tinymarkdown.Inlines(b.Text), link)...))
+			out = append(out, pe.P(renderInlines(tinymarkdown.Inlines(b.Text), link, fn)...))
 		case tinymarkdown.List:
-			out = append(out, renderList(b.Items, link))
+			out = append(out, renderList(b.Items, link, fn))
 		case tinymarkdown.Quote:
-			out = append(out, pe.Blockquote(renderBlocks(b.Children, link, gen)...))
+			out = append(out, pe.Blockquote(renderBlocks(b.Children, link, gen, fn)...))
 		case tinymarkdown.Alert:
 			title := el.El(el.P, el.Attr(el.Class, "markdown-alert-title"), pe.Text(alertTitle(b.Kind)))
 			children := append([]pe.Node{
 				el.Attr(el.Class, "markdown-alert markdown-alert-"+b.Kind),
 				title,
-			}, renderBlocks(b.Children, link, gen)...)
+			}, renderBlocks(b.Children, link, gen, fn)...)
 			out = append(out, el.El(el.Blockquote, children...))
 		case tinymarkdown.Table:
 			cells := func(row []string) [][]pe.Node {
 				out := make([][]pe.Node, 0, len(row))
 				for _, c := range row {
-					out = append(out, renderInlines(tinymarkdown.Inlines(c), link))
+					out = append(out, renderInlines(tinymarkdown.Inlines(c), link, fn))
 				}
 				return out
 			}
@@ -339,9 +453,9 @@ func renderBlocks(bs []tinymarkdown.Block, link linker, gen *anchorIDs) []pe.Nod
 				out = append(out, pe.Pre(b.Code))
 			}
 		case tinymarkdown.Details:
-			children := renderBlocks(b.Children, link, gen)
+			children := renderBlocks(b.Children, link, gen, fn)
 			if b.Summary != "" {
-				summary := el.El(el.Tag("summary"), renderInlines(tinymarkdown.Inlines(b.Summary), link)...)
+				summary := el.El(el.Tag("summary"), renderInlines(tinymarkdown.Inlines(b.Summary), link, fn)...)
 				children = append([]pe.Node{summary}, children...)
 			}
 			out = append(out, el.El(el.Tag("details"), children...))
@@ -358,12 +472,12 @@ func alertTitle(kind string) string {
 
 // renderList renders items as a list, with the children of an item as a
 // list inside its <li>.
-func renderList(items []tinymarkdown.Item, link linker) pe.Node {
+func renderList(items []tinymarkdown.Item, link linker, fn *footnotes) pe.Node {
 	lis := make([]pe.Node, 0, len(items))
 	for _, it := range items {
-		li := renderInlines(tinymarkdown.Inlines(it.Text), link)
+		li := renderInlines(tinymarkdown.Inlines(it.Text), link, fn)
 		if len(it.Children) > 0 {
-			li = append(li, renderList(it.Children, link))
+			li = append(li, renderList(it.Children, link, fn))
 		}
 		lis = append(lis, pe.Li(li...))
 	}
@@ -373,11 +487,12 @@ func renderList(items []tinymarkdown.Item, link linker) pe.Node {
 // linkedTitle renders a title written in Markdown inside the link to its
 // page. Links in the title show only their text, as links cannot nest.
 func linkedTitle(title string) []pe.Node {
-	return renderInlines(tinymarkdown.Inlines(title), noLinks)
+	return renderInlines(tinymarkdown.Inlines(title), noLinks, nil)
 }
 
 // plainText drops the markup of inline Markdown: code spans and links keep
-// only their text. It is for places that hold no HTML, such as <title>.
+// only their text, and a footnote reference keeps its source form. It is
+// for places that hold no HTML, such as <title>.
 func plainText(s string) string {
 	var b strings.Builder
 	var walk func([]tinymarkdown.Inline)
@@ -388,6 +503,8 @@ func plainText(s string) string {
 				b.WriteString(in.Text)
 			case tinymarkdown.InlineLink:
 				walk(in.Children())
+			case tinymarkdown.InlineFootnote:
+				b.WriteString("[^" + in.Text + "]")
 			}
 		}
 	}
@@ -396,8 +513,10 @@ func plainText(s string) string {
 }
 
 // renderInlines turns code spans into <code> and links into <a>; the rest
-// is text. A link whose URL link rejects shows only its text.
-func renderInlines(ins []tinymarkdown.Inline, link linker) []pe.Node {
+// is text. A link whose URL link rejects shows only its text. A footnote
+// reference whose label has no definition — or any reference when fn is
+// nil — keeps its source text.
+func renderInlines(ins []tinymarkdown.Inline, link linker, fn *footnotes) []pe.Node {
 	var out []pe.Node
 	for _, in := range ins {
 		switch in.Kind {
@@ -406,11 +525,17 @@ func renderInlines(ins []tinymarkdown.Inline, link linker) []pe.Node {
 		case tinymarkdown.InlineCode:
 			out = append(out, pe.Code(in.Text))
 		case tinymarkdown.InlineLink:
-			children := renderInlines(in.Children(), link)
+			children := renderInlines(in.Children(), link, fn)
 			if href, ok := link(in.URL()); ok {
 				out = append(out, pe.A(href, children...))
 			} else {
 				out = append(out, children...)
+			}
+		case tinymarkdown.InlineFootnote:
+			if r := fn.ref(in.Text); r != nil {
+				out = append(out, r)
+			} else {
+				out = append(out, pe.Text("[^"+in.Text+"]"))
 			}
 		}
 	}

@@ -66,12 +66,14 @@ fn inlines(s : String) -> Array[@el.Node] {
     match i {
       Text(t) => @picoel.text(t)
       Code(t) => @picoel.code(t)
+      Footnote(label) => @picoel.text("[^\{label}]")
       Link(children~, url~) =>
         @picoel.a(
           url,
           children.map(c => {
             match c {
               Text(t) | Code(t) => @picoel.text(t)
+              Footnote(label) => @picoel.text("[^\{label}]")
               Link(..) => @picoel.text("")
             }
           }),
