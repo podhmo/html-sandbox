@@ -45,6 +45,9 @@ export interface ArrowOptions extends StrokeOptions {
   via?: Point[];
   head?: number;
   heads?: "end" | "start" | "both" | "none";
+  // split: draw two opposing arrows offset `split` px apart, instead of
+  // one line — the request/response notation of sequence diagrams.
+  split?: number;
 }
 
 export interface LineOptions extends StrokeOptions {
@@ -183,7 +186,30 @@ export class Canvas {
     return shape.y - gap - h;
   }
 
-  arrow(from: Point, to: Point, { via = [], head = 9, heads = "end", ...o }: ArrowOptions = {}): void {
+  arrow(from: Point, to: Point, { via = [], head = 9, heads = "end", split = 0, ...o }: ArrowOptions = {}): void {
+    if (split > 0) {
+      const dx = to[0] - from[0];
+      const dy = to[1] - from[1];
+      const len = Math.hypot(dx, dy) || 1;
+      const nx = (-dy / len) * (split / 2);
+      const ny = (dx / len) * (split / 2);
+      const shift = ([x, y]: Point, s: number): Point => [x + nx * s, y + ny * s];
+      // The forward arrow takes the "above/left of travel" side, like a
+      // sequence diagram: request on top, response below.
+      this.arrow(shift(from, -1), shift(to, -1), {
+        via: via.map((p) => shift(p, -1)),
+        head,
+        heads: "end",
+        ...o,
+      });
+      this.arrow(shift(to, 1), shift(from, 1), {
+        via: [...via].reverse().map((p) => shift(p, 1)),
+        head,
+        heads: "end",
+        ...o,
+      });
+      return;
+    }
     const pts: Point[] = [from, ...via, to];
     const d = "M" + pts.map(([x, y]) => `${x} ${y}`).join(" L");
     // A head is an open V at `tip`, pointing along (ux, uy).

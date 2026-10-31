@@ -69,12 +69,17 @@ c.text(c.anchor(ext, "s")[0] - 45, pi.y - 52, "pi -e でロード", {
   size: 11,
 });
 
-// Request and response, both ways.
-c.arrow(c.anchor(pi, "e"), c.anchor(proxy, "w"), { heads: "both" });
-label("HTTP", c.midpoint(c.anchor(pi, "e"), c.anchor(proxy, "w")));
-
-c.arrow(c.anchor(proxy, "e"), c.anchor(api, "w"), { heads: "both" });
-label("HTTPS", c.midpoint(c.anchor(proxy, "e"), c.anchor(api, "w")), -8, 10);
+// Request and response as two opposing arrows, not one double-headed line.
+const SPLIT = 12;
+c.arrow(c.anchor(pi, "e"), c.anchor(proxy, "w"), { split: SPLIT });
+c.arrow(c.anchor(proxy, "e"), c.anchor(api, "w"), { split: SPLIT });
+for (const [a, b, s, size] of [
+  [pi, proxy, "HTTP", 11],
+  [proxy, api, "HTTPS", 10],
+] as const) {
+  const [x, y] = c.midpoint(c.anchor(a, "e"), c.anchor(b, "w"));
+  c.text(x, y - SPLIT / 2 - 8, s, { anchor: "middle", size });
+}
 
 c.arrow(c.anchor(pi, "s"), c.anchor(files, "n"));
 {
