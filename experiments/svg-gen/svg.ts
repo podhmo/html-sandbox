@@ -290,6 +290,59 @@ export class Canvas {
     return [(from[0] + to[0]) / 2, (from[1] + to[1]) / 2];
   }
 
+  // Horizontal bars for tiny benchmark-style numbers. Bar lengths come
+  // from the values, so a wrong length is impossible by construction.
+  hbars(
+    items: { label: string; value: number }[],
+    {
+      x = 0,
+      y = 0,
+      barH = 20,
+      rowGap = 12,
+      maxW = 280,
+      labelW,
+      size = 12,
+      valueFmt = (v: number) => String(v),
+      fillOpacity = 0.45,
+      highlight,
+    }: {
+      x?: number;
+      y?: number;
+      barH?: number;
+      rowGap?: number;
+      maxW?: number;
+      labelW?: number;
+      size?: number;
+      valueFmt?: (v: number) => string;
+      fillOpacity?: number;
+      highlight?: number;
+    } = {},
+  ): void {
+    const lw = labelW ?? Math.max(...items.map((i) => textWidth(i.label, size))) + 16;
+    const scale = maxW / Math.max(...items.map((i) => i.value));
+    items.forEach((item, i) => {
+      const by = y + i * (barH + rowGap);
+      const w = item.value * scale;
+      this.text(x + lw - 8, by + barH / 2, item.label, {
+        anchor: "end",
+        baseline: "central",
+        size,
+      });
+      const bar = { x: x + lw, y: by, w, h: barH } as Shape;
+      if (highlight === i) this.highlight(bar, { pad: 4 });
+      this.parts.push(
+        `<rect x="${bar.x}" y="${by}" width="${w}" height="${barH}"` +
+          ` fill="currentColor" fill-opacity="${fillOpacity}" stroke="currentColor" stroke-width="1"/>`,
+      );
+      this.text(x + lw + w + 6, by + barH / 2, valueFmt(item.value), {
+        baseline: "central",
+        size: size - 1,
+        opacity: 0.7,
+      });
+      this.cover([x + lw, by], [x + lw + w, by + barH]);
+    });
+  }
+
   // A low-key emphasis zone behind a shape. "wash" is a translucent
   // currentColor fill (a grey wash in light theme, a light veil in dark
   // theme); "ring" is a dashed enclosure; both render behind the shape

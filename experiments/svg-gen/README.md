@@ -22,6 +22,8 @@ gets a small throwaway generator sharing a thin helper.
     bidirectional edges such as request/response pairs, or `split` for
     two opposing arrows; `midpoint` finds label positions, and
     `label: [...]` gives multi-line box text.
+  - `hbars([{label, value}])` draws a horizontal bar chart sized from
+    the values — benchmark-style figures where the scale cannot drift.
   - `highlight(shape, {opacity, mode})` adds a low-key emphasis zone
     behind a shape: a translucent currentColor "wash" (grey in light
     theme, a light veil in dark) or a dashed "ring" — quieter than a
