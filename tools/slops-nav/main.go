@@ -13,8 +13,8 @@
 //
 // Usage:
 //
-//	go run ./examples/slops-nav ../../slops
-//	go run ./examples/slops-nav -w ../../slops
+//	go run . ../../slops
+//	go run . -w ../../slops
 package main
 
 import (

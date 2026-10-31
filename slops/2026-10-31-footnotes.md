@@ -2,6 +2,7 @@
 title: このブログの Markdown に脚注を入れた
 description: tinymarkdown が `[^label]` 参照と `[^label]: 本文` 定義を読むようになった。複数ファイルを 1 ページに描くときの採番とアンカーの決め方、削った機能と残した細かい挙動の記録。
 prev: 2026-10-30-pi-sarashina-dogfooding.md
+next: 2026-10-31-svg-gen-figures.md
 ---
 
 # このブログの Markdown に脚注を入れた
