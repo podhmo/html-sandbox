@@ -14,11 +14,11 @@ export interface Shape {
   y: number;
   w: number;
   h: number;
-  label?: string;
+  label?: string | string[];
 }
 
 export interface ShapeOptions {
-  label?: string;
+  label?: string | string[];
   dash?: string;
   opacity?: number;
   size?: number;
@@ -44,6 +44,7 @@ export interface StrokeOptions {
 export interface ArrowOptions extends StrokeOptions {
   via?: Point[];
   head?: number;
+  heads?: "end" | "start" | "both" | "none";
 }
 
 export interface LineOptions extends StrokeOptions {
@@ -99,23 +100,32 @@ export class Canvas {
   }
 
   // Shapes return {x, y, w, h, label?}; anchors and placement read from it.
-  // Pass w: "auto" to size the box to its label (plus padX on each side).
+  // Pass w: "auto" to size the box to its widest label line (+padX each side).
+  private labelLines(cx: number, cy: number, label: string | string[], size: number, opacity?: number): void {
+    const lines = Array.isArray(label) ? label : [label];
+    const lh = size * 1.3;
+    lines.forEach((s, i) =>
+      this.text(cx, cy + (i - (lines.length - 1) / 2) * lh, s, {
+        anchor: "middle",
+        baseline: "central",
+        size,
+        opacity,
+      }),
+    );
+  }
+
   box(x: number, y: number, w: number | "auto", h: number, { label, rx = 8, padX = 16, size = 14, ...o }: BoxOptions = {}): Shape {
     if (w === "auto") {
       if (label == null) throw new Error('box w="auto" needs a label');
-      w = textWidth(label, size) + 2 * padX;
+      const lines = Array.isArray(label) ? label : [label];
+      w = Math.max(...lines.map((s) => textWidth(s, size))) + 2 * padX;
     }
     this.parts.push(
       `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}"` +
         ` fill="none" stroke="currentColor" stroke-width="1.5"${this.strokeAttrs(o)}/>`,
     );
     if (label != null) {
-      this.text(x + w / 2, y + h / 2, label, {
-        anchor: "middle",
-        baseline: "central",
-        size,
-        opacity: o.opacity,
-      });
+      this.labelLines(x + w / 2, y + h / 2, label, size, o.opacity);
     }
     const shape = { x, y, w, h, label };
     this.cover([x, y], [x + w, y + h]);
@@ -128,12 +138,7 @@ export class Canvas {
         ` fill="none" stroke="currentColor" stroke-width="1.5"${this.strokeAttrs(o)}/>`,
     );
     if (label != null) {
-      this.text(cx, cy, label, {
-        anchor: "middle",
-        baseline: "central",
-        size,
-        opacity: o.opacity,
-      });
+      this.labelLines(cx, cy, label, size, o.opacity);
     }
     const shape = { x: cx - r, y: cy - r, w: 2 * r, h: 2 * r, label };
     this.cover([cx - r, cy - r], [cx + r, cy + r]);
@@ -178,24 +183,38 @@ export class Canvas {
     return shape.y - gap - h;
   }
 
-  arrow(from: Point, to: Point, { via = [], head = 9, ...o }: ArrowOptions = {}): void {
+  arrow(from: Point, to: Point, { via = [], head = 9, heads = "end", ...o }: ArrowOptions = {}): void {
     const pts: Point[] = [from, ...via, to];
     const d = "M" + pts.map(([x, y]) => `${x} ${y}`).join(" L");
-    const [px, py] = pts[pts.length - 2];
-    const [qx, qy] = to;
-    const len = Math.hypot(qx - px, qy - py) || 1;
-    const ux = (qx - px) / len;
-    const uy = (qy - py) / len;
-    const bx = qx - head * ux;
-    const by = qy - head * uy;
-    const pxn = -uy * head * 0.45;
-    const pyn = ux * head * 0.45;
-    this.parts.push(
-      `<path d="${d}" fill="none" stroke="currentColor" stroke-width="1.5"${this.strokeAttrs(o)}/>` +
+    // A head is an open V at `tip`, pointing along (ux, uy).
+    const headAt = (tip: Point, seg: Point): string => {
+      const [qx, qy] = tip;
+      const len = Math.hypot(tip[0] - seg[0], tip[1] - seg[1]) || 1;
+      const ux = (tip[0] - seg[0]) / len;
+      const uy = (tip[1] - seg[1]) / len;
+      const bx = qx - head * ux;
+      const by = qy - head * uy;
+      const pxn = -uy * head * 0.45;
+      const pyn = ux * head * 0.45;
+      this.cover([bx + pxn, by + pyn], [bx - pxn, by - pyn]);
+      return (
         `<path d="M${bx + pxn} ${by + pyn} L${qx} ${qy} L${bx - pxn} ${by - pyn}"` +
-        ` fill="none" stroke="currentColor" stroke-width="1.5"${this.strokeAttrs(o)}/>`,
+        ` fill="none" stroke="currentColor" stroke-width="1.5"${this.strokeAttrs(o)}/>`
+      );
+    };
+    const headsSvg =
+      heads === "none"
+        ? ""
+        : (heads === "end" || heads === "both" ? headAt(to, pts[pts.length - 2]) : "") +
+          (heads === "start" || heads === "both" ? headAt(from, pts[1]) : "");
+    this.parts.push(
+      `<path d="${d}" fill="none" stroke="currentColor" stroke-width="1.5"${this.strokeAttrs(o)}/>` + headsSvg,
     );
-    this.cover(...pts, [bx + pxn, by + pyn], [bx - pxn, by - pyn]);
+    this.cover(...pts);
+  }
+
+  midpoint(from: Point, to: Point): Point {
+    return [(from[0] + to[0]) / 2, (from[1] + to[1]) / 2];
   }
 
   line(from: Point, to: Point, { via = [], ...o }: LineOptions = {}): void {

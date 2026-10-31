@@ -18,6 +18,9 @@ gets a small throwaway generator sharing a thin helper.
     geometry, so an arrow endpoint cannot drift off its box.
   - `box(x, y, "auto", h, {label})` sizes the box to the estimated label
     width, so a label cannot outgrow its box.
+  - `arrow` takes `heads: "both"` (or `"start"`/`"none"`) for
+    bidirectional edges such as request/response pairs, `midpoint` finds
+    label positions, and `label: [...]` gives multi-line box text.
   - `rightOf`/`leftOf`/`above`/`below` place shapes relative to each
     other; the canvas derives the `viewBox` from everything drawn
     (including estimated text extents), so nothing falls outside it.
