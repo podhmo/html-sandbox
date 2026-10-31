@@ -6,8 +6,7 @@ fn run(
 ) -> Unit raise {
   let failures = []
   for (name, src, want) in cases {
-    let got = @tinymarkdown.parse(src)
-    let want = @tinymarkdown.Document::{ children: want, }
+    let got = @tinymarkdown.parse(src).children
     if got != want {
       failures.push(
         "\{name}: parse(\{@debug.to_string(src)})\ngot  \{@debug.to_string(got)}\nwant \{@debug.to_string(want)}",
@@ -665,5 +664,138 @@ test "details" {
       [Paragraph("<details open>\nx\n</details>")],
     ),
     ("</details> alone is a paragraph", "</details>", [Paragraph("</details>")]),
+  ])
+}
+
+///|
+/// run_footnotes checks the footnotes parse collects on each (name, src,
+/// want) case, like run checks the blocks.
+fn run_footnotes(
+  cases : Array[(String, String, Array[@tinymarkdown.FootnoteDef])],
+) -> Unit raise {
+  let failures = []
+  for (name, src, want) in cases {
+    let got = @tinymarkdown.parse(src).footnotes
+    if got != want {
+      failures.push(
+        "\{name}: parse(\{@debug.to_string(src)})\ngot  \{@debug.to_string(got)}\nwant \{@debug.to_string(want)}",
+      )
+    }
+  }
+  if !failures.is_empty() {
+    fail(failures.join("\n"))
+  }
+}
+
+///|
+// The cases of TestFootnoteDefs in go/pkg/tinymarkdown.
+test "footnote defs" {
+  run_footnotes([
+    (
+      "a definition alone",
+      "[^a]: note",
+      [{ label: "a", children: [Paragraph("note")], }],
+    ),
+    (
+      "ref and definition",
+      "text[^a]\n\n[^a]: note",
+      [{ label: "a", children: [Paragraph("note")], }],
+    ),
+    (
+      "a definition may sit anywhere",
+      "[^a]: note\n\ntext[^a]",
+      [{ label: "a", children: [Paragraph("note")], }],
+    ),
+    (
+      "indented lines continue the definition",
+      "[^a]: one\n  two\n\n  three\n\ndone",
+      [{ label: "a", children: [Paragraph("one\ntwo"), Paragraph("three")], }],
+    ),
+    (
+      "a non-indented line ends the definition",
+      "[^a]: one\nnext",
+      [{ label: "a", children: [Paragraph("one")], }],
+    ),
+    (
+      "definitions collect from inside a quote",
+      "> [^a]: note",
+      [{ label: "a", children: [Paragraph("note")], }],
+    ),
+    (
+      "definitions collect from inside details",
+      "<details>\n[^a]: note\n</details>",
+      [{ label: "a", children: [Paragraph("note")], }],
+    ),
+    (
+      "the first definition of a label wins",
+      "[^a]: one\n\n[^a]: two",
+      [{ label: "a", children: [Paragraph("one")], }],
+    ),
+    (
+      "a label may hold spaces",
+      "[^my note]: body",
+      [{ label: "my note", children: [Paragraph("body")], }],
+    ),
+  ])
+  run([
+    ("ref and definition", "text[^a]\n\n[^a]: note", [Paragraph("text[^a]")]),
+    ("a definition ends a paragraph", "intro\n[^a]: note", [Paragraph("intro")]),
+    (
+      "a definition may sit anywhere",
+      "[^a]: note\n\ntext[^a]",
+      [Paragraph("text[^a]")],
+    ),
+    (
+      "indented lines continue the definition",
+      "[^a]: one\n  two\n\n  three\n\ndone",
+      [Paragraph("done")],
+    ),
+    (
+      "a non-indented line ends the definition",
+      "[^a]: one\nnext",
+      [Paragraph("next")],
+    ),
+    ("definitions collect from inside a quote", "> [^a]: note", [Quote([])]),
+    (
+      "definitions collect from inside details",
+      "<details>\n[^a]: note\n</details>",
+      [Details(summary="", children=[])],
+    ),
+  ])
+}
+
+///|
+// The negative cases of TestFootnoteDefs in go/pkg/tinymarkdown: no
+// footnote is collected.
+test "not footnote defs" {
+  run_footnotes([
+    ("the definition line must start at the first column", "  [^a]: note", []),
+    ("a definition inside a list item is item text", "- item\n  [^a]: note", []),
+    ("an empty label is not a definition", "[^]: note", []),
+    ("no colon is not a definition", "[^a] note", []),
+    ("a definition inside a code block is code", "```\n[^a]: note\n```", []),
+  ])
+  run([
+    (
+      "the definition line must start at the first column",
+      "  [^a]: note",
+      [Paragraph("[^a]: note")],
+    ),
+    (
+      "a definition inside a list item is item text",
+      "- item\n  [^a]: note",
+      [List(items(["item\n[^a]: note"]))],
+    ),
+    (
+      "an empty label is not a definition",
+      "[^]: note",
+      [Paragraph("[^]: note")],
+    ),
+    ("no colon is not a definition", "[^a] note", [Paragraph("[^a] note")]),
+    (
+      "a definition inside a code block is code",
+      "```\n[^a]: note\n```",
+      [CodeBlock("[^a]: note", info="")],
+    ),
   ])
 }

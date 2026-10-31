@@ -242,6 +242,52 @@ test "post" {
 }
 
 ///|
+test "footnotes" {
+  let s = new_site([
+    (
+      "2026-10-14-fn.md", "# T\ntext[^a] and again[^a] and[^none]\n\n[^a]: the note",
+    ),
+    ("2026-10-15-b.md/README.md", "# B\nface[^1]\n\n[^1]: face note"),
+    ("2026-10-15-b.md/x.md", "member[^1]\n\n[^1]: member note"),
+  ])
+  assert_contains(body(s, "/posts/fn"), [
+    "<p>text<sup class=\"footnote-ref\"><a href=\"#fn:1\" id=\"fn:ref:1\">1</a></sup> and again<sup class=\"footnote-ref\"><a href=\"#fn:1\" id=\"fn:ref:1:2\">1</a></sup> and[^none]</p>",
+    "<section class=\"footnotes\"><hr><ol><li id=\"fn:1\"><p>the note <a href=\"#fn:ref:1\" class=\"footnote-backref\" aria-label=\"Back to reference 1\">↩︎</a></p></li></ol></section>",
+  ])
+  // The same [^1] in the face and a member is a different note in each:
+  // they number apart and anchor under their own prefix.
+  assert_contains(body(s, "/posts/b"), [
+    "<p>face<sup class=\"footnote-ref\"><a href=\"#fn:1\" id=\"fn:ref:1\">1</a></sup></p>",
+    "<li id=\"fn:1\"><p>face note <a href=\"#fn:ref:1\" class=\"footnote-backref\" aria-label=\"Back to reference 1\">↩︎</a></p></li>",
+    "<p>member<sup class=\"footnote-ref\"><a href=\"#fn-1:1\" id=\"fn-1:ref:1\">1</a></sup></p>",
+    "<li id=\"fn-1:1\"><p>member note <a href=\"#fn-1:ref:1\" class=\"footnote-backref\" aria-label=\"Back to reference 1\">↩︎</a></p></li>",
+  ])
+}
+
+///|
+test "nested footnotes" {
+  // [^b] is referenced only from inside [^a]'s body: it is numbered
+  // while the footnote section renders, after the refs in the text.
+  let s = new_site([
+    (
+      "2026-10-14-fn.md", "# T\na[^a] b[^B] c[^no] d[^list]\n\n[^a]: outer[^b]\n\n[^b]: inner\n\n[^idle]: never used\n\n[^list]: a note\n    - not a paragraph",
+    ),
+  ])
+  let body = body(s, "/posts/fn")
+  assert_contains(body, [
+    "b[^B]", // labels are case-sensitive: [^b] is defined, [^B] is not
+     "<li id=\"fn:1\"><p>outer<sup class=\"footnote-ref\"><a href=\"#fn:3\" id=\"fn:ref:3\">3</a></sup> <a href=\"#fn:ref:1\" class=\"footnote-backref\" aria-label=\"Back to reference 1\">↩︎</a></p></li>",
+    // a note ending in a non-paragraph block gets the backref in its own p
+     "<li id=\"fn:2\"><p>a note</p><ul><li>not a paragraph</li></ul><p><a href=\"#fn:ref:2\" class=\"footnote-backref\" aria-label=\"Back to reference 2\">↩︎</a></p></li>",
+    "<li id=\"fn:3\"><p>inner <a href=\"#fn:ref:3\" class=\"footnote-backref\" aria-label=\"Back to reference 3\">↩︎</a></p></li>",
+  ])
+  // [^idle] is defined but never referenced, and [^no] is referenced but
+  // never defined: neither reaches the section.
+  assert_false(body.contains("never used"))
+  assert_false(body.contains("id=\"fn:4\""))
+}
+
+///|
 test "svg code block" {
   let s = new_site([
     (

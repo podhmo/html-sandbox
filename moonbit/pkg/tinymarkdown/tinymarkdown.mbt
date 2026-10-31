@@ -5,19 +5,25 @@
 // Supported: headings "#" to "#####" (which open nested sections), "- " or "* "
 // list items (which may continue on indented lines and nest by
 // indentation), paragraphs, "> "
-// quotes, "|" tables, code blocks fenced by exactly "```", and "<details>"
-// blocks. Anything else is treated as paragraph text. Block parsing keeps
-// inline syntax as text; inlines splits out code spans and links on
-// request.
+// quotes, "|" tables, code blocks fenced by exactly "```", "<details>"
+// blocks, and "[^label]" footnotes. Anything else is treated as paragraph
+// text. Block parsing keeps inline syntax as text; inlines splits out code
+// spans and links on request.
 //
 // Go indexes strings by byte and MoonBit by UTF-16 code unit. Every
 // character the parser looks for is ASCII, so the two agree.
 
 ///|
 /// Document is the root of a parsed document. Blocks before the first
-/// heading are its direct children.
+/// heading are its direct children. footnotes holds the "[^label]: ..."
+/// definitions of the document, in roughly the order they are written —
+/// a definition inside another's body is collected before the one that
+/// holds it. Where they are written does not matter — a definition may
+/// sit anywhere, inside a quote or a details block too — and the first
+/// definition of a label wins.
 pub(all) struct Document {
   children : Array[Block]
+  footnotes : Array[FootnoteDef]
 } derive(Eq, Debug)
 
 // The derived Eq and Debug are meant for == and assert_eq, not as methods;
@@ -99,6 +105,27 @@ pub extend Item with Eq::{not_equal, equal}
 pub extend Item with Debug::{to_repr}
 
 ///|
+/// FootnoteDef is a "[^label]: text" definition. The label is the text
+/// between "[^" and "]"; it may not be empty or hold brackets or a line
+/// break. The text after ":" is the start of the body; the indented lines
+/// that follow — and the blank lines between them — continue it, and the
+/// whole body is parsed again as a document, as in Quote. The definition
+/// line must start at the first column: an indented "[^label]:" continues
+/// a list item or stays paragraph text.
+pub(all) struct FootnoteDef {
+  label : String
+  children : Array[Block]
+} derive(Eq, Debug)
+
+///|
+#deprecated("Use == and != instead")
+pub extend FootnoteDef with Eq::{not_equal, equal}
+
+///|
+#deprecated("Use Debug::to_repr instead")
+pub extend FootnoteDef with Debug::{to_repr}
+
+///|
 const FENCE = "```"
 
 ///|
@@ -155,16 +182,48 @@ priv enum Flat {
 }
 
 ///|
+/// FootnoteSet collects the footnote definitions of a document as scan
+/// finds them. A label already seen is not collected again: the first
+/// definition wins.
+priv struct FootnoteSet {
+  seen : Map[String, Bool]
+  list : Array[FootnoteDef]
+}
+
+///|
+fn FootnoteSet::add(
+  self : FootnoteSet,
+  label : String,
+  children : Array[Block],
+) -> Unit {
+  if self.seen.contains(label) {
+    return
+  }
+  self.seen[label] = true
+  self.list.push({ label, children, })
+}
+
+///|
 /// parse parses src. It never fails: lines it does not understand become
 /// paragraph text.
 pub fn parse(src : String) -> Document {
-  let (children, _) = nest(scan(src), from=0, level=0)
-  { children, }
+  let notes = FootnoteSet::{ seen: {}, list: [], }
+  let (children, _) = nest(scan(src, notes), from=0, level=0)
+  { children, footnotes: notes.list, }
+}
+
+///|
+/// parse_children is the recursion of parse: the blocks of src, with the
+/// footnote definitions of src added to notes so that every definition of
+/// the outer document is collected wherever it was written.
+fn parse_children(src : String, notes : FootnoteSet) -> Array[Block] {
+  let (children, _) = nest(scan(src, notes), from=0, level=0)
+  children
 }
 
 ///|
 /// scan splits src into a flat list of blocks, with headings as markers.
-fn scan(src : String) -> Array[Flat] {
+fn scan(src : String, notes : FootnoteSet) -> Array[Flat] {
   let out : Array[Flat] = []
   let para : Array[StringView] = []
   let items : Array[RawItem] = []
@@ -183,9 +242,11 @@ fn scan(src : String) -> Array[Flat] {
       let kind = alert_kind(quote[0])
       if kind != "" {
         ignore(quote.remove(0))
-        out.push(Block(Alert(kind~, children=parse(quote.join("\n")).children)))
+        out.push(
+          Block(Alert(kind~, children=parse_children(quote.join("\n"), notes))),
+        )
       } else {
-        out.push(Block(Quote(parse(quote.join("\n")).children)))
+        out.push(Block(Quote(parse_children(quote.join("\n"), notes))))
       }
       quote.clear()
     }
@@ -206,6 +267,10 @@ fn scan(src : String) -> Array[Flat] {
   let mut details_depth = 0
   let mut details_code = false
   let mut in_details = false
+  let foot : Array[String] = []
+  let mut foot_label = ""
+  let mut foot_blank = 0
+  let mut in_foot = false
   for raw in src.split("\n") {
     // line stays a view: only the lines that are kept are copied to a String.
     let line = raw.strip_suffix("\r").unwrap_or(raw)
@@ -237,7 +302,7 @@ fn scan(src : String) -> Array[Flat] {
       } else if trimmed == "</details>" {
         details_depth -= 1
         if details_depth == 0 {
-          out.push(Block(parse_details(details)))
+          out.push(Block(parse_details(details, notes)))
           details.clear()
           in_details = false
         } else {
@@ -247,6 +312,27 @@ fn scan(src : String) -> Array[Flat] {
         details.push(line)
       }
       continue
+    }
+    if in_foot {
+      // Inside a footnote definition: an indented line continues it, and
+      // a blank line keeps it open for one more indented line.
+      if trimmed == "" {
+        foot_blank += 1
+        continue
+      } else if line[0] is (' ' | '\t') {
+        for _ in 0..<foot_blank {
+          foot.push("")
+        }
+        foot_blank = 0
+        foot.push(trimmed.to_owned())
+        continue
+      } else {
+        notes.add(foot_label, parse_children(foot.join("\n"), notes))
+        foot.clear()
+        foot_label = ""
+        foot_blank = 0
+        in_foot = false
+      }
     }
     if trimmed.has_prefix(FENCE) {
       flush()
@@ -258,6 +344,11 @@ fn scan(src : String) -> Array[Flat] {
     } else if is_heading(trimmed) {
       flush()
       out.push(parse_heading(trimmed))
+    } else if footnote_def(line) is Some((label, text)) {
+      flush()
+      foot_label = label
+      foot.push(text)
+      in_foot = true
     } else if trimmed.has_prefix("|") {
       if !para.is_empty() || !items.is_empty() || !quote.is_empty() {
         flush()
@@ -297,7 +388,11 @@ fn scan(src : String) -> Array[Flat] {
   }
   if in_details {
     // An unclosed "<details>" runs to the end of the document.
-    out.push(Block(parse_details(details)))
+    out.push(Block(parse_details(details, notes)))
+  }
+  if in_foot {
+    // A footnote definition open at the end closes there.
+    notes.add(foot_label, parse_children(foot.join("\n"), notes))
   }
   flush()
   out
@@ -308,7 +403,7 @@ fn scan(src : String) -> Array[Flat] {
 /// "</details>" into a Details. A first non-blank line of the form
 /// "<summary>...</summary>" is kept as summary; the rest is parsed again
 /// as a document, as in Quote.
-fn parse_details(lines : Array[StringView]) -> Block {
+fn parse_details(lines : Array[StringView], notes : FootnoteSet) -> Block {
   let mut summary = ""
   let mut body = lines[:]
   for i, line in lines {
@@ -321,7 +416,24 @@ fn parse_details(lines : Array[StringView]) -> Block {
     }
     break
   }
-  Details(summary~, children=parse(body.join("\n")).children)
+  Details(summary~, children=parse_children(body.join("\n"), notes))
+}
+
+///|
+/// footnote_def returns the label and the first line of the body of a
+/// "[^label]: text" line, or None when the line is not one. The label is
+/// the non-empty, bracket-free text between "[^" and "]"; the body starts
+/// after ":". The line must start at the first column.
+fn footnote_def(line : StringView) -> (String, String)? {
+  guard line.strip_prefix("[^") is Some(rest) else { return None }
+  guard rest.find("]") is Some(i) else { return None }
+  guard i > 0 &&
+    !rest[:i].contains("[") &&
+    i + 1 < rest.length() &&
+    rest[i + 1] == ':' else {
+    return None
+  }
+  Some((rest[:i].to_owned(), trim_space(rest[i + 2:]).to_owned()))
 }
 
 ///|

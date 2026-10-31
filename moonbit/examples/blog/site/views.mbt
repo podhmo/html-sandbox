@@ -274,7 +274,158 @@ fn render_face(
   if !members.is_empty() && !members[0].is_markdown {
     return [@picoel.pre(members[0].raw)]
   }
-  render_blocks(doc.children, link, gen)
+  render_document(doc, link, gen)
+}
+
+///|
+/// render_document renders a document's blocks, followed by its footnote
+/// section when a footnote reference was rendered. Each document gets its
+/// own footnotes: the face and the members of a bundle number and anchor
+/// theirs apart, so the same [^label] may mean a different note in each.
+fn render_document(
+  doc : @tinymarkdown.Document,
+  link : Linker,
+  gen : AnchorIds,
+) -> Array[@el.Node] {
+  let notes = Footnotes::new(gen, doc)
+  let out = render_blocks(doc.children, link, gen, notes)
+  if notes.section(link) is Some(sec) {
+    out.push(sec)
+  }
+  out
+}
+
+///|
+/// Footnotes numbers the [^label] references of one document as they
+/// render, and writes the footnote section after it. The anchors it makes
+/// are prefixed by scope, an id drawn from the page's AnchorIds, so two
+/// documents on one page cannot share an anchor.
+priv struct Footnotes {
+  gen : AnchorIds
+  mut scope : String // assigned lazily, only once a defined reference renders
+  defs : Map[String, Array[@tinymarkdown.Block]]
+  order : Array[String] // labels in first-reference order
+  num : Map[String, Int32] // label -> its number
+  refs : Map[String, Int32] // label -> how many times it was referenced
+}
+
+///|
+fn Footnotes::new(gen : AnchorIds, doc : @tinymarkdown.Document) -> Footnotes {
+  let defs = Map([])
+  for d in doc.footnotes {
+    defs[d.label] = d.children
+  }
+  { gen, scope: "", defs, order: [], num: {}, refs: {}, }
+}
+
+///|
+/// Footnotes::prefix is the anchor prefix of this document's footnotes,
+/// drawn from the page's anchor generator so every rendered document's
+/// are distinct.
+fn Footnotes::prefix(self : Footnotes) -> String {
+  if self.scope == "" {
+    self.scope = self.gen.id("fn")
+  }
+  self.scope
+}
+
+///|
+/// Footnotes::reference renders a [^label] reference: a superscript
+/// number, anchored so the note can link back to it and linking to the
+/// note. It returns None when the label names no definition, and the
+/// caller writes the source text.
+fn Footnotes::reference(self : Footnotes, label : String) -> @el.Node? {
+  if !self.defs.contains(label) {
+    return None
+  }
+  let n = match self.num.get(label) {
+    Some(n) => n
+    None => {
+      self.order.push(label)
+      let n = self.order.length()
+      self.num[label] = n
+      n
+    }
+  }
+  let k = self.refs.get(label).unwrap_or(0) + 1
+  self.refs[label] = k
+  let mut id = "\{self.prefix()}:ref:\{n}"
+  if k > 1 {
+    id += ":\{k}"
+  }
+  Some(
+    @el.el(@el.sup, [
+      @el.Attr(@el.class, "footnote-ref"),
+      @el.el(@el.a, [
+        @el.Attr(@el.href, "#\{self.prefix()}:\{n}"),
+        @el.Attr(@el.id, id),
+        @picoel.text("\{n}"),
+      ]),
+    ]),
+  )
+}
+
+///|
+/// Footnotes::section is the footnote section of the document: an <ol> of
+/// every note referenced, in the order the references appear. It returns
+/// None when no reference rendered. A reference inside a note's body
+/// registers while the section renders, so the range over order is read
+/// live.
+fn Footnotes::section(self : Footnotes, link : Linker) -> @el.Node? {
+  if self.order.is_empty() {
+    return None
+  }
+  let items = []
+  for i = 0; i < self.order.length(); i = i + 1 {
+    let label = self.order[i]
+    let n = i + 1
+    let back = @el.el(@el.a, [
+      @el.Attr(@el.href, "#\{self.prefix()}:ref:\{n}"),
+      @el.Attr(@el.class, "footnote-backref"),
+      @el.Attr(@el.AttrName("aria-label"), "Back to reference \{n}"),
+      @picoel.text("↩︎"),
+    ])
+    let body = self.defs[label]
+    // The backref joins the note's last paragraph when it has one;
+    // without one it is a paragraph of its own.
+    let children = if !body.is_empty() &&
+      body[body.length() - 1] is Paragraph(text) {
+      let children = render_blocks(
+        body[:body.length() - 1].to_owned(),
+        link,
+        self.gen,
+        self,
+      )
+      children.push(
+        @picoel.p(
+          [
+            ..render_inlines(
+              @tinymarkdown.inlines(text),
+              link,
+              notes=Some(self),
+            ),
+            @picoel.text(" "),
+            back,
+          ],
+        ),
+      )
+      children
+    } else {
+      let children = render_blocks(body, link, self.gen, self)
+      children.push(@picoel.p([back]))
+      children
+    }
+    items.push(
+      @el.el(@el.li, [@el.Attr(@el.id, "\{self.prefix()}:\{n}"), ..children]),
+    )
+  }
+  Some(
+    @el.el(@el.section, [
+      @el.Attr(@el.class, "footnotes"),
+      @el.el(@el.hr, []),
+      @el.el(@el.ol, items),
+    ]),
+  )
 }
 
 ///|
@@ -297,7 +448,7 @@ fn member_section(
     ]),
   ]
   if m.is_markdown {
-    body.push_iter(render_blocks(m.doc.children, link, gen).iter())
+    body.push_iter(render_document(m.doc, link, gen).iter())
   } else if m.is_svg {
     body.push(
       @el.el(@el.img, [
@@ -416,13 +567,16 @@ fn heading(level : Int32, id : String, children : Array[@el.Node]) -> @el.Node {
 ///|
 /// render_blocks converts the Markdown tree into nodes. Every piece of text
 /// goes through @picoel.text, so HTML in posts is escaped. link resolves
-/// the URLs of links.
+/// the URLs of links. notes resolves footnote references.
 fn render_blocks(
   bs : Array[@tinymarkdown.Block],
   link : Linker,
   gen : AnchorIds,
+  notes : Footnotes,
 ) -> Array[@el.Node] {
-  let inlines = (s : String) => render_inlines(@tinymarkdown.inlines(s), link)
+  let inlines = (s : String) => {
+    render_inlines(@tinymarkdown.inlines(s), link, notes=Some(notes))
+  }
   bs.map(b => {
     match b {
       Section(level~, title~, children~) => {
@@ -430,13 +584,14 @@ fn render_blocks(
         @picoel.section(
           [
             heading(level, id, inlines(title)),
-            ..render_blocks(children, link, gen),
+            ..render_blocks(children, link, gen, notes),
           ],
         )
       }
       Paragraph(text) => @picoel.p(inlines(text))
-      List(items) => render_list(items, link)
-      Quote(children) => @picoel.blockquote(render_blocks(children, link, gen))
+      List(items) => render_list(items, link, notes)
+      Quote(children) =>
+        @picoel.blockquote(render_blocks(children, link, gen, notes))
       Alert(kind~, children~) =>
         @el.el(
           @el.blockquote,
@@ -446,7 +601,7 @@ fn render_blocks(
               @el.Attr(@el.class, "markdown-alert-title"),
               @picoel.text(alert_title(kind)),
             ]),
-            ..render_blocks(children, link, gen),
+            ..render_blocks(children, link, gen, notes),
           ],
         )
       Table(header~, rows~) => {
@@ -462,13 +617,17 @@ fn render_blocks(
           @picoel.pre(code)
         }
       Details(summary~, children~) => {
-        let body = render_blocks(children, link, gen)
+        let body = render_blocks(children, link, gen, notes)
         if summary != "" {
           body.insert(
             0,
             @el.el(
               @el.Tag("summary"),
-              render_inlines(@tinymarkdown.inlines(summary), link),
+              render_inlines(
+                @tinymarkdown.inlines(summary),
+                link,
+                notes=Some(notes),
+              ),
             ),
           )
         }
@@ -494,12 +653,20 @@ fn alert_title(kind : String) -> String {
 ///|
 /// render_list renders items as a list, with the children of an item as a
 /// list inside its <li>.
-fn render_list(items : Array[@tinymarkdown.Item], link : Linker) -> @el.Node {
+fn render_list(
+  items : Array[@tinymarkdown.Item],
+  link : Linker,
+  notes : Footnotes,
+) -> @el.Node {
   @picoel.list(
     items.map(it => {
-      let li = render_inlines(@tinymarkdown.inlines(it.text), link)
+      let li = render_inlines(
+        @tinymarkdown.inlines(it.text),
+        link,
+        notes=Some(notes),
+      )
       if !it.children.is_empty() {
-        li.push(render_list(it.children, link))
+        li.push(render_list(it.children, link, notes))
       }
       @picoel.li(li)
     }),
@@ -510,13 +677,13 @@ fn render_list(items : Array[@tinymarkdown.Item], link : Linker) -> @el.Node {
 /// linked_title renders a title written in Markdown inside the link to its
 /// page. Links in the title show only their text, as links cannot nest.
 fn linked_title(title : String) -> Array[@el.Node] {
-  render_inlines(@tinymarkdown.inlines(title), no_links)
+  render_inlines(@tinymarkdown.inlines(title), no_links, notes=None)
 }
 
 ///|
 /// plain_text drops the markup of inline Markdown: code spans and links
-/// keep only their text. It is for places that hold no HTML, such as
-/// <title>.
+/// keep only their text, and a footnote reference keeps its source form.
+/// It is for places that hold no HTML, such as <title>.
 fn plain_text(s : String) -> String {
   let sb = StringBuilder()
   fn walk(ins : Array[@tinymarkdown.Inline]) {
@@ -524,6 +691,7 @@ fn plain_text(s : String) -> String {
       match i {
         Text(t) | Code(t) => sb.write_string(t)
         Link(children~, ..) => walk(children)
+        Footnote(label) => sb.write_string("[^\{label}]")
       }
     }
   }
@@ -534,10 +702,13 @@ fn plain_text(s : String) -> String {
 
 ///|
 /// render_inlines turns code spans into <code> and links into <a>; the
-/// rest is text. A link whose URL link rejects shows only its text.
+/// rest is text. A link whose URL link rejects shows only its text. A
+/// footnote reference whose label has no definition — or any reference
+/// when notes is None — keeps its source text.
 fn render_inlines(
   ins : Array[@tinymarkdown.Inline],
   link : Linker,
+  notes~ : Footnotes? = None,
 ) -> Array[@el.Node] {
   let out = []
   for i in ins {
@@ -545,12 +716,21 @@ fn render_inlines(
       Text(t) => out.push(@picoel.text(t))
       Code(t) => out.push(@picoel.code(t))
       Link(children~, url~) => {
-        let children = render_inlines(children, link)
+        let children = render_inlines(children, link, notes~)
         match link(url) {
           Some(href) => out.push(@picoel.a(href, children))
           None => out.push_iter(children.iter())
         }
       }
+      Footnote(label) =>
+        match notes {
+          Some(notes) =>
+            match notes.reference(label) {
+              Some(r) => out.push(r)
+              None => out.push(@picoel.text("[^\{label}]"))
+            }
+          None => out.push(@picoel.text("[^\{label}]"))
+        }
     }
   }
   out

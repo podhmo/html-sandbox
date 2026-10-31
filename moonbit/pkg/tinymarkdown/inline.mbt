@@ -7,10 +7,14 @@
 /// - Link is a [text](url) link. children hold the parsed text, which may
 ///   contain code spans but no links; url is as written, and resolving it
 ///   is up to the renderer.
+/// - Footnote is a [^label] footnote reference, holding the label of a
+///   FootnoteDef of the document; resolving and numbering it is up to the
+///   renderer.
 pub(all) enum Inline {
   Text(String)
   Code(String)
   Link(children~ : Array[Inline], url~ : String)
+  Footnote(String)
 } derive(Eq, Debug)
 
 ///|
@@ -37,6 +41,11 @@ pub extend Inline with Debug::{to_repr}
 /// than links: a "]" inside a code span does not close the text, and a link
 /// inside a code span is code. Anything that does not form a link is plain
 /// text.
+///
+/// A footnote reference is "[^", a label, and "]" not followed by "(": the
+/// label may not be empty or hold brackets or a line break. "[^x](u)" is a
+/// link whose text is "^x", not a reference. As with links, references
+/// inside code spans are code and a reference inside link text is text.
 pub fn inlines(s : String) -> Array[Inline] {
   split_inlines(s, links=true)
 }
@@ -62,6 +71,18 @@ fn split_inlines(s : String, links~ : Bool) -> Array[Inline] {
       i = end + m
       text = i
     } else if s[i] == '[' && links {
+      match footnote_ref(s, i) {
+        Some((label, end)) => {
+          if text < i {
+            out.push(Text(s[text:i].to_owned()))
+          }
+          out.push(Footnote(label))
+          i = end
+          text = i
+          continue
+        }
+        None => ()
+      }
       match link(s, i) {
         None => i += 1
         Some((label, url, end)) => {
@@ -81,6 +102,23 @@ fn split_inlines(s : String, links~ : Bool) -> Array[Inline] {
     out.push(Text(s[text:].to_owned()))
   }
   out
+}
+
+///|
+/// footnote_ref parses a footnote reference starting at s[i] == '['. It
+/// returns the label and the index just past the closing "]", or None when
+/// there is no "[^label]" here or a "(" follows — "[^x](u)" is a link.
+fn footnote_ref(s : String, i : Int32) -> (String, Int32)? {
+  guard i + 1 < s.length() && s[i + 1] == '^' else { return None }
+  guard s[i + 2:].find("]") is Some(r) && r > 0 else { return None }
+  let j = i + 2 + r
+  let label = s[i + 2:j]
+  guard !label.contains("[") &&
+    !label.contains("\n") &&
+    (j + 1 >= s.length() || s[j + 1] != '(') else {
+    return None
+  }
+  Some((label.to_owned(), j + 1))
 }
 
 ///|

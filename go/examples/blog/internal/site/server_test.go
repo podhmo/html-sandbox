@@ -454,6 +454,63 @@ func TestRedirects(t *testing.T) {
 	}
 }
 
+func TestFootnotes(t *testing.T) {
+	h := newTestServer(t, fstest.MapFS{
+		"2026-10-14-fn.md":          file("# T\ntext[^a] and again[^a] and[^none]\n\n[^a]: the note"),
+		"2026-10-15-b.md/README.md": file("# B\nface[^1]\n\n[^1]: face note"),
+		"2026-10-15-b.md/x.md":      file("member[^1]\n\n[^1]: member note"),
+	})
+	_, body := get(t, h, "/posts/fn")
+	for _, want := range []string{
+		`<p>text<sup class="footnote-ref"><a href="#fn:1" id="fn:ref:1">1</a></sup> and again<sup class="footnote-ref"><a href="#fn:1" id="fn:ref:1:2">1</a></sup> and[^none]</p>`,
+		`<section class="footnotes"><hr><ol><li id="fn:1"><p>the note <a href="#fn:ref:1" class="footnote-backref" aria-label="Back to reference 1">↩︎</a></p></li></ol></section>`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Errorf("body does not contain %q", want)
+		}
+	}
+	// The same [^1] in the face and a member is a different note in each:
+	// they number apart and anchor under their own prefix.
+	_, body = get(t, h, "/posts/b")
+	for _, want := range []string{
+		`<p>face<sup class="footnote-ref"><a href="#fn:1" id="fn:ref:1">1</a></sup></p>`,
+		`<li id="fn:1"><p>face note <a href="#fn:ref:1" class="footnote-backref" aria-label="Back to reference 1">↩︎</a></p></li>`,
+		`<p>member<sup class="footnote-ref"><a href="#fn-1:1" id="fn-1:ref:1">1</a></sup></p>`,
+		`<li id="fn-1:1"><p>member note <a href="#fn-1:ref:1" class="footnote-backref" aria-label="Back to reference 1">↩︎</a></p></li>`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Errorf("bundle: body does not contain %q", want)
+		}
+	}
+}
+
+func TestFootnotesNested(t *testing.T) {
+	h := newTestServer(t, fstest.MapFS{
+		// [^b] is referenced only from inside [^a]'s body: it is numbered
+		// while the footnote section renders, after the refs in the text.
+		"2026-10-14-fn.md": file("# T\na[^a] b[^B] c[^no] d[^list]\n\n[^a]: outer[^b]\n\n[^b]: inner\n\n[^idle]: never used\n\n[^list]: a note\n    - not a paragraph"),
+	})
+	_, body := get(t, h, "/posts/fn")
+	for _, want := range []string{
+		`b[^B]`, // labels are case-sensitive: [^b] is defined, [^B] is not
+		`<li id="fn:1"><p>outer<sup class="footnote-ref"><a href="#fn:3" id="fn:ref:3">3</a></sup> <a href="#fn:ref:1" class="footnote-backref" aria-label="Back to reference 1">↩︎</a></p></li>`,
+		// a note ending in a non-paragraph block gets the backref in its own p
+		`<li id="fn:2"><p>a note</p><ul><li>not a paragraph</li></ul><p><a href="#fn:ref:2" class="footnote-backref" aria-label="Back to reference 2">↩︎</a></p></li>`,
+		`<li id="fn:3"><p>inner <a href="#fn:ref:3" class="footnote-backref" aria-label="Back to reference 3">↩︎</a></p></li>`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Errorf("body does not contain %q", want)
+		}
+	}
+	// [^idle] is defined but never referenced, and [^no] is referenced but
+	// never defined: neither reaches the section.
+	for _, unwanted := range []string{`never used`, `id="fn:4"`} {
+		if strings.Contains(body, unwanted) {
+			t.Errorf("body contains %q", unwanted)
+		}
+	}
+}
+
 func TestSVGCodeBlock(t *testing.T) {
 	h := newTestServer(t, fstest.MapFS{
 		"2026-10-14-fig.md": file("# Fig\n```svg\n<svg><rect/></svg>\n```\n```xml\n<svg/>\n```"),

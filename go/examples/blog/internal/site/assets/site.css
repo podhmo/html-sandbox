@@ -394,3 +394,14 @@ body > header details.dropdown > summary + ul {
 #skim-out {
   cursor: pointer;
 }
+
+/* Footnotes ("footnotes"): the section under an article's text. pico
+   styles the hr and ol; only the smaller, muted body is added here, and
+   the backref keeps the pico link color so it reads as a link. */
+article .footnotes {
+  font-size: 0.875em;
+  color: var(--pico-muted-color);
+}
+article .footnotes a {
+  color: var(--pico-primary);
+}

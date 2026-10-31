@@ -51,9 +51,21 @@ fn object(kind : String, fields : Array[(String, Js)]) -> Js {
 ///|
 /// parse is tinymarkdown's parse, returning a Document of the TS port.
 pub fn parse(src : String) -> Js {
+  let doc = @tinymarkdown.parse(src)
   let o = new_object()
-  set(o, "children", blocks(@tinymarkdown.parse(src).children))
+  set(o, "children", blocks(doc.children))
+  set(o, "footnotes", footnote_defs(doc.footnotes))
   o
+}
+
+///|
+fn footnote_defs(defs : Array[@tinymarkdown.FootnoteDef]) -> Js {
+  array(defs, d => {
+    object("footnote", [
+      ("label", of_string(d.label)),
+      ("children", blocks(d.children)),
+    ])
+  })
 }
 
 ///|
@@ -116,6 +128,7 @@ fn inline_array(xs : Array[@tinymarkdown.Inline]) -> Js {
           ("children", inline_array(children)),
           ("url", of_string(url)),
         ])
+      Footnote(label) => object("footnote", [("label", of_string(label))])
     }
   })
 }

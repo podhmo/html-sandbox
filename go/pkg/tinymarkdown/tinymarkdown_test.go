@@ -386,6 +386,70 @@ func TestDetails(t *testing.T) {
 	})
 }
 
+func TestFootnoteDefs(t *testing.T) {
+	run(t, []testCase{
+		{"a definition alone", "[^a]: note",
+			Document{Footnotes: []FootnoteDef{
+				{Label: "a", Children: []Block{Paragraph{Text: "note"}}},
+			}}},
+		{"ref and definition", "text[^a]\n\n[^a]: note",
+			Document{
+				Children:  []Block{Paragraph{Text: "text[^a]"}},
+				Footnotes: []FootnoteDef{{Label: "a", Children: []Block{Paragraph{Text: "note"}}}},
+			}},
+		{"a definition may sit anywhere", "[^a]: note\n\ntext[^a]",
+			Document{
+				Children:  []Block{Paragraph{Text: "text[^a]"}},
+				Footnotes: []FootnoteDef{{Label: "a", Children: []Block{Paragraph{Text: "note"}}}},
+			}},
+		{"indented lines continue the definition", "[^a]: one\n  two\n\n  three\n\ndone",
+			Document{
+				Children: []Block{Paragraph{Text: "done"}},
+				Footnotes: []FootnoteDef{{Label: "a", Children: []Block{
+					Paragraph{Text: "one\ntwo"}, Paragraph{Text: "three"},
+				}}},
+			}},
+		{"a non-indented line ends the definition", "[^a]: one\nnext",
+			Document{
+				Children:  []Block{Paragraph{Text: "next"}},
+				Footnotes: []FootnoteDef{{Label: "a", Children: []Block{Paragraph{Text: "one"}}}},
+			}},
+		{"the definition line must start at the first column", "  [^a]: note",
+			Document{Children: []Block{Paragraph{Text: "[^a]: note"}}}},
+		{"a definition inside a list item is item text", "- item\n  [^a]: note",
+			Document{Children: []Block{List{Items: items("item\n[^a]: note")}}}},
+		{"definitions collect from inside a quote", "> [^a]: note",
+			Document{
+				Children:  []Block{Quote{}},
+				Footnotes: []FootnoteDef{{Label: "a", Children: []Block{Paragraph{Text: "note"}}}},
+			}},
+		{"definitions collect from inside details", "<details>\n[^a]: note\n</details>",
+			Document{
+				Children:  []Block{Details{}},
+				Footnotes: []FootnoteDef{{Label: "a", Children: []Block{Paragraph{Text: "note"}}}},
+			}},
+		{"the first definition of a label wins", "[^a]: one\n\n[^a]: two",
+			Document{Footnotes: []FootnoteDef{
+				{Label: "a", Children: []Block{Paragraph{Text: "one"}}},
+			}}},
+		{"a label may hold spaces", "[^my note]: body",
+			Document{Footnotes: []FootnoteDef{
+				{Label: "my note", Children: []Block{Paragraph{Text: "body"}}},
+			}}},
+		{"an empty label is not a definition", "[^]: note",
+			Document{Children: []Block{Paragraph{Text: "[^]: note"}}}},
+		{"no colon is not a definition", "[^a] note",
+			Document{Children: []Block{Paragraph{Text: "[^a] note"}}}},
+		{"a definition ends a paragraph", "intro\n[^a]: note",
+			Document{
+				Children:  []Block{Paragraph{Text: "intro"}},
+				Footnotes: []FootnoteDef{{Label: "a", Children: []Block{Paragraph{Text: "note"}}}},
+			}},
+		{"a definition inside a code block is code", "```\n[^a]: note\n```",
+			Document{Children: []Block{CodeBlock{Code: "[^a]: note"}}}},
+	})
+}
+
 func TestAsteriskLists(t *testing.T) {
 	run(t, []testCase{
 		{"asterisk items", "* a\n*   b  \n* c", Document{Children: []Block{List{Items: items("a", "b", "c")}}}},

@@ -60,6 +60,7 @@ fn inline(i : @tinymarkdown.Inline) -> Json {
   match i {
     Text(s) => { "t": "text", "s": Json(s) }
     Code(s) => { "t": "code", "s": Json(s) }
+    Footnote(label) => { "t": "footnote", "label": Json(label) }
     Link(children~, url~) =>
       {
         "t": "link",

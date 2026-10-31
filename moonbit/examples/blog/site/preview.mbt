@@ -134,7 +134,7 @@ pub fn preview(src : String, files : Array[String]) -> @el.Node {
       )
     }
   }
-  children.push_iter(render_blocks(doc.children, link, gen).iter())
+  children.push_iter(render_document(doc, link, gen).iter())
   @picoel.article(children)
 }
 
