@@ -18,7 +18,9 @@ test "files are sorted by name and hold the whole file" {
   assert_eq(names, names.copy()..sort_by((a, b) => a.lexical_compare(b)))
   let hello = @slops.files.iter().find_first(f => f.0 == "2026-10-14-hello.md")
   guard hello is Some((_, content)) else { fail("no hello post") }
-  assert_true(content.has_prefix("# Hello\n\n"))
+  // Front matter may be added or removed, so only the title line is
+  // pinned rather than the file's first bytes.
+  assert_true(content.contains("# Hello\n\n"))
   assert_true(content.has_suffix("embeds the posts with go:embed.\n"))
 }
 
@@ -28,5 +30,5 @@ test "non-ASCII text survives embedding" {
     .iter()
     .find_first(f => f.0 == "2026-10-15-tinymarkdown.md")
   guard tiny is Some((_, content)) else { fail("no tinymarkdown post") }
-  assert_true(content.has_prefix("# tinymarkdown で書けること\n"))
+  assert_true(content.contains("# tinymarkdown で書けること\n"))
 }
