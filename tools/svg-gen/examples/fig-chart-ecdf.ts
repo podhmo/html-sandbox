@@ -30,7 +30,7 @@ const p = new Plot(
   {
     w: 420,
     h: 190,
-    xdom: [40, 800],
+    xdom: [0, 900],
     ydom: [0, 1],
     xtitle: "レイテンシ (ms)",
     ytitle: "累積割合",
@@ -40,15 +40,17 @@ const p = new Plot(
 );
 p.frame();
 // faint guides at p50 / p90 / p99 so the improvement is readable off axes.
-for (const q of [0.5, 0.9, 0.99]) {
-  p.hline(q, { label: `p${q * 100}`, opacity: 0.25 });
-}
-// stride-thinned to ~150 vertices per curve for inline embedding;
-// the ECDF statistic itself is unchanged.
-// v2.2 is the grey baseline; v2.3 gets the one palette accent
-// (the guideline's "highlight = one colour, rest grey").
-p.step(ecdfPoints(p, v22, 150), { opacity: 0.65 });
-p.step(ecdfPoints(p, v23, 150), { width: 2.5, color: c.color(0) });
+p.data(() => {
+  for (const q of [0.5, 0.9, 0.99]) {
+    p.hline(q, { label: `p${q * 100}`, opacity: 0.25 });
+  }
+  // stride-thinned to ~150 vertices per curve for inline embedding;
+  // the ECDF statistic itself is unchanged.
+  // v2.2 is the grey baseline; v2.3 gets the one palette accent
+  // (the guideline's "highlight = one colour, rest grey").
+  p.step(ecdfPoints(p, v22, 150), { opacity: 0.65 });
+  p.step(ecdfPoints(p, v23, 150), { width: 2.5, color: c.color(0) });
+});
 // direct labels where the curves are far apart (near their p80).
 const at = (s: number[], q: number) => p.xs.map(quantile(s, q));
 const y80 = p.ys.map(0.8);

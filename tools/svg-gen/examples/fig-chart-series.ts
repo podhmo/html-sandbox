@@ -40,12 +40,14 @@ const p = new Plot(
   },
 );
 p.frame();
-p.vline(8, { label: "10/08 v2.3 デプロイ" });
-// colorful option: hue does the series distinction, width/dash stays
-// as a grayscale fallback so the figure still reads when colors
-// are unavailable (print, copy).
-p.series(days.map((d, i) => [p.xs.map(d), p.ys.map(p90[i])]), { dash: "5 3", color: c.color(3) });
-p.series(days.map((d, i) => [p.xs.map(d), p.ys.map(p50[i])]), { width: 2.5, color: c.color(0) });
+p.data(() => {
+  p.vline(8, { label: "10/08 v2.3 デプロイ" });
+  // colorful option: hue does the series distinction, width/dash stays
+  // as a grayscale fallback so the figure still reads when colors
+  // are unavailable (print, copy).
+  p.series(days.map((d, i) => [p.xs.map(d), p.ys.map(p90[i])]), { dash: "5 3", color: c.color(3) });
+  p.series(days.map((d, i) => [p.xs.map(d), p.ys.map(p50[i])]), { width: 2.5, color: c.color(0) });
+});
 // direct labels at the right ends (the two series end far apart).
 c.text(p.x1 + 6, p.ys.map(p50[13]), "p50", { baseline: "central", size: 10 });
 c.text(p.x1 + 6, p.ys.map(p90[13]), "p90", { baseline: "central", size: 10, opacity: 0.65 });

@@ -134,6 +134,54 @@ export class Plot {
   private grid: boolean;
   private framed = false;
   private c: Canvas;
+  // While data() runs, mark elements collect here and are emitted as
+  // one <g data-plot="x0 y0 x1 y1"> group — the conceptual parent
+  // region check.ts can verify against.
+  private buf: string[] | null = null;
+
+  private put(el: string, covered: [number, number][] = []): void {
+    if (this.buf) this.buf.push(el);
+    else this.c.raw(el, covered);
+  }
+
+  // Marks must stay inside the plot domain: a value outside it is a
+  // wrong domain choice, not a detail to clip silently.
+  private inside(pts: [number, number][]): [number, number][] {
+    for (const [x, y] of pts) {
+      if (x < this.x0 - 0.01 || x > this.x1 + 0.01 || y < this.y0 - 0.01 || y > this.y1 + 0.01) {
+        throw new Error(`point (${x.toFixed(1)}, ${y.toFixed(1)}) outside the plot domain`);
+      }
+    }
+    return pts;
+  }
+
+  // Run mark-emitting calls; their elements go into a
+  // <g data-plot="x0 y0 x1 y1"> group so check.ts can verify them
+  // against the plot area instead of only the viewBox.
+  data(fn: (p: Plot) => void): this {
+    const buf: string[] = [];
+    const prev = this.buf;
+    this.buf = buf;
+    try {
+      fn(this);
+    } finally {
+      this.buf = prev;
+    }
+    if (buf.length) {
+      this.c.raw(
+        `<g data-plot="${this.x0} ${this.y0} ${this.x1} ${this.y1}">\n${buf.join("\n")}\n</g>`,
+        [[this.x0, this.y0], [this.x1, this.y1]],
+      );
+    }
+    return this;
+  }
+
+  private sattrs(o: { dash?: string; opacity?: number; width?: number; color?: string }): string {
+    const w = ` stroke-width="${o.width ?? 1.5}"`;
+    const d = o.dash ? ` stroke-dasharray="${o.dash}"` : "";
+    const p = o.opacity != null ? ` opacity="${o.opacity}"` : "";
+    return ` stroke="${o.color ?? "currentColor"}"${w}${d}${p}`;
+  }
 
   constructor(c: Canvas, meta: ChartMeta, o: PlotOpts) {
     this.c = c;
@@ -198,7 +246,10 @@ export class Plot {
   series(pts: Point[], o: StrokeOptions & { label?: string } = {}): this {
     if (pts.length < 2) return this;
     const { label, ...stroke } = o;
-    this.c.line(pts[0], pts[pts.length - 1], { via: pts.slice(1, -1), ...stroke });
+    this.put(
+      `<path d="M${this.inside(pts).map(([x, y]) => `${x} ${y}`).join(" L")}" fill="none"${this.sattrs(stroke)}/>`,
+      pts,
+    );
     if (label) {
       this.c.text(this.x1 + 6, pts[pts.length - 1][1], label, { baseline: "central", size: 10 });
     }
@@ -213,10 +264,9 @@ export class Plot {
     for (let i = 1; i < pts.length; i++) {
       segs.push([pts[i][0], pts[i - 1][1]], pts[i]);
     }
-    this.c.path(
-      "M" + segs.map(([x, y]) => `${x} ${y}`).join(" L"),
+    this.put(
+      `<path d="M${this.inside(segs).map(([x, y]) => `${x} ${y}`).join(" L")}" fill="none"${this.sattrs(stroke)}/>`,
       segs,
-      stroke,
     );
     if (label) {
       this.c.text(this.x1 + 6, pts[pts.length - 1][1], label, { baseline: "central", size: 10 });
@@ -226,9 +276,10 @@ export class Plot {
 
   dots(pts: Point[], { r = 1.8, opacity = 0.5, color }: { r?: number; opacity?: number; color?: string } = {}): this {
     const fill = color ?? "currentColor";
-    for (const [x, y] of pts) {
-      this.c.raw(
+    for (const [x, y] of this.inside(pts)) {
+      this.put(
         `<circle cx="${x}" cy="${y}" r="${r}" fill="${fill}" fill-opacity="${opacity}" stroke="none"/>`,
+        [[x, y]],
       );
     }
     // dots do not extend the viewBox; the frame's domain already does.
@@ -238,7 +289,11 @@ export class Plot {
   // An event marker: vertical line at data x, with a short label above.
   vline(xv: number, { label, dash = "4 3", opacity = 0.6 }: { label?: string; dash?: string; opacity?: number } = {}): this {
     const px = this.xs.map(xv);
-    this.c.line([px, this.y0], [px, this.y1], { dash, opacity, width: 1 });
+    this.put(
+      `<line x1="${px}" y1="${this.y0}" x2="${px}" y2="${this.y1}"${this.sattrs({ dash, opacity, width: 1 })}/>`,
+      [[px, this.y0], [px, this.y1]],
+    );
+    this.inside([[px, this.y0]]);
     if (label) {
       this.c.text(px + 4, this.y0 + 10, label, { size: 10, opacity: 0.8 });
     }
@@ -248,7 +303,11 @@ export class Plot {
   // A reference line (SLO, baseline): horizontal line at data y.
   hline(yv: number, { label, dash = "4 3", opacity = 0.6 }: { label?: string; dash?: string; opacity?: number } = {}): this {
     const py = this.ys.map(yv);
-    this.c.line([this.x0, py], [this.x1, py], { dash, opacity, width: 1 });
+    this.put(
+      `<line x1="${this.x0}" y1="${py}" x2="${this.x1}" y2="${py}"${this.sattrs({ dash, opacity, width: 1 })}/>`,
+      [[this.x0, py], [this.x1, py]],
+    );
+    this.inside([[this.x0, py]]);
     if (label) {
       this.c.text(this.x1 - 4, py - 4, label, { anchor: "end", size: 10, opacity: 0.8 });
     }
@@ -278,25 +337,26 @@ export class Plot {
       const bw = (this.xs.map(i + 0.5 + boxW) - cx) * 2;
       if (overlay > 0 && rand) {
         for (let j = 0; j < s.length; j += stride) {
-          const jx = cx + (rand() - 0.5) * bw * 1.6;
-          c.raw(`<circle cx="${jx.toFixed(1)}" cy="${this.ys.map(s[j]).toFixed(1)}" r="1.3" fill="${color ?? "currentColor"}" fill-opacity="0.28" stroke="none"/>`);
+          const jx = Math.min(Math.max(cx + (rand() - 0.5) * bw * 1.6, this.x0 + 1.5), this.x1 - 1.5); // jitter stays inside the domain
+          this.put(`<circle cx="${jx.toFixed(1)}" cy="${this.ys.map(s[j]).toFixed(1)}" r="1.3" fill="${color ?? "currentColor"}" fill-opacity="0.28" stroke="none"/>`);
         }
       }
       // whiskers + caps
-      c.line([cx, this.ys.map(lo)], [cx, this.ys.map(hi)], { width: 1, color, opacity: 0.8 });
-      c.line([cx - bw * 0.2, this.ys.map(lo)], [cx + bw * 0.2, this.ys.map(lo)], { width: 1, color });
-      c.line([cx - bw * 0.2, this.ys.map(hi)], [cx + bw * 0.2, this.ys.map(hi)], { width: 1, color });
+      this.inside([[cx, this.ys.map(lo)], [cx, this.ys.map(hi)]]);
+      this.put(`<line x1="${cx}" y1="${this.ys.map(lo)}" x2="${cx}" y2="${this.ys.map(hi)}"${this.sattrs({ width: 1, color, opacity: 0.8 })}/>`);
+      this.put(`<line x1="${cx - bw * 0.2}" y1="${this.ys.map(lo)}" x2="${cx + bw * 0.2}" y2="${this.ys.map(lo)}"${this.sattrs({ width: 1, color })}/>`);
+      this.put(`<line x1="${cx - bw * 0.2}" y1="${this.ys.map(hi)}" x2="${cx + bw * 0.2}" y2="${this.ys.map(hi)}"${this.sattrs({ width: 1, color })}/>`);
       // outliers beyond the fences
       for (const v of s) {
         if (v < lo || v > hi) {
-          c.raw(`<circle cx="${cx.toFixed(1)}" cy="${this.ys.map(v).toFixed(1)}" r="1.6" fill="none" stroke="${color ?? "currentColor"}" stroke-width="1" opacity="0.6"/>`);
+          this.put(`<circle cx="${cx.toFixed(1)}" cy="${this.ys.map(v).toFixed(1)}" r="1.6" fill="none" stroke="${color ?? "currentColor"}" stroke-width="1" opacity="0.6"/>`);
         }
       }
       // IQR box + median
-      c.raw(
+      this.put(
         `<rect x="${(cx - bw / 2).toFixed(1)}" y="${this.ys.map(q3).toFixed(1)}" width="${bw.toFixed(1)}" height="${(this.ys.map(q1) - this.ys.map(q3)).toFixed(1)}" fill="${color ?? "currentColor"}" fill-opacity="0.18" stroke="${color ?? "currentColor"}" stroke-width="1.5"/>`,
       );
-      c.line([cx - bw / 2, this.ys.map(q2)], [cx + bw / 2, this.ys.map(q2)], { width: 2.5, color });
+      this.put(`<line x1="${cx - bw / 2}" y1="${this.ys.map(q2)}" x2="${cx + bw / 2}" y2="${this.ys.map(q2)}"${this.sattrs({ width: 2.5, color })}/>`);
     });
     return this;
   }
@@ -306,8 +366,8 @@ export class Plot {
     for (const b of bins) {
       const x = this.xs.map(b.x0);
       const w = this.xs.map(b.x1) - x;
-      const top = this.ys.map(b.n);
-      this.c.raw(
+      const top = this.inside([[this.xs.map(b.x0), this.ys.map(b.n)]])[0][1];
+      this.put(
         `<rect x="${x.toFixed(1)}" y="${top.toFixed(1)}" width="${w.toFixed(1)}" height="${(this.y1 - top).toFixed(1)}" fill="${color ?? "currentColor"}" fill-opacity="0.35" stroke="${color ?? "currentColor"}" stroke-width="1"/>`,
       );
     }
@@ -333,7 +393,7 @@ export class Plot {
     grid.forEach((row, j) => {
       row.forEach((v, i) => {
         const o = 0.06 + 0.9 * ((v - min) / span);
-        this.c.raw(
+        this.put(
           `<rect x="${(this.x0 + i * cw).toFixed(1)}" y="${(this.y0 + j * ch).toFixed(1)}" width="${(cw - 0.6).toFixed(1)}" height="${(ch - 0.6).toFixed(1)}" fill="${color ?? "currentColor"}" fill-opacity="${o.toFixed(2)}" stroke="none"/>`,
         );
       });

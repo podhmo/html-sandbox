@@ -38,7 +38,7 @@ const p = new Plot(
   },
 );
 p.frame();
-p.histogram(bs, { color: c.color(0) });
+p.data(() => p.histogram(bs, { color: c.color(0) }));
 
 assert.ok(dip < peak * 0.5, "a visible dip separates the two modes");
 assert.ok(peak <= 45, "tallest bin stays inside the y domain");

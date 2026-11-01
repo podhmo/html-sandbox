@@ -33,7 +33,7 @@ const report = (level: Level, file: string, msg: string): void => {
   console.log(`${level} ${file}: ${msg}`);
 };
 
-const TAG_RE = /<(\w[\w:-]*)([^<>]*?)\/?>/gs;
+const TAG_RE = /<(\w[\w:-]*)([^<>]*?)\/?>/gs; // kept for pathPoints; element scan uses TAG_RE2
 const ATTR_RE = /([\w:-]+)="([^"]*)"/g;
 const NUM = "-?\\d*\\.?\\d+(?:e-?\\d+)?";
 
@@ -104,8 +104,14 @@ async function check(file: string): Promise<void> {
     return;
   }
   const [vx, vy, vw, vh] = vb;
-  const inside = (x: number, y: number): boolean =>
-    x >= vx && x <= vx + vw && y >= vy && y <= vy + vh;
+  // <g data-plot="x0 y0 x1 y1"> marks the plot's data region; marks
+  // inside it must fit the plot rect (epsilon for stroke width), not
+  // just the viewBox — catches bars/dots poking past the domain.
+  const plots: number[][] = [];
+  const inside = (x: number, y: number): boolean => {
+    const r = plots.length ? plots[plots.length - 1] : [vx, vy, vw, vh];
+    return x >= r[0] - 2 && x <= r[0] + r[2] + 2 && y >= r[1] - 2 && y <= r[1] + r[3] + 2;
+  };
   const outside = (what: string, x: number, y: number): void =>
     report("FAIL", file, `${what} at (${x.toFixed(1)}, ${y.toFixed(1)}) outside viewBox`);
 
@@ -128,8 +134,18 @@ async function check(file: string): Promise<void> {
   interface TextBox { body: string; ax: number; ay: number; lx: number; ty: number; rx: number; by: number }
   const texts: TextBox[] = [];
 
-  for (const m of svg.matchAll(TAG_RE)) {
-    const [, tag, raw] = m;
+  const TAG_RE2 = /<(\/?)(\w[\w:-]*)([^<>]*?)\/?>/gs;
+  for (const m of svg.matchAll(TAG_RE2)) {
+    const [, close, tag, raw] = m;
+    if (tag === "g") {
+      if (close) plots.pop();
+      else {
+        const dp = attrs(raw)["data-plot"];
+        if (dp) plots.push(nums(dp));
+      }
+      continue;
+    }
+    if (close) continue;
     const a = attrs(raw);
     if (a.id) {
       if (ids.has(a.id)) {
