@@ -51,6 +51,11 @@
   - [x] 前後のコマを半透明で出し、on/off できるようにする（狭い画面では上下、広い画面では左右）。
   - [x] 区切りに BudouX（parser と ja モデルだけ）を esm.sh から読み込んで使い、読み込めないときは
     今の `Intl.Segmenter` の区切りに戻す。
+- [x] **図・グラフ用のガイドラインをまとめ、仮想データでグラフ生成を試す**:
+  issue #113 に添付された HTML artifacts（LLM 生成の図解規約）をもとに
+  `docs/sketch/ja/` に規約をまとめ、仮想データからのグラフ生成を svg-gen
+  拡張（あるいは chart-gen の芽）として試し、結果を slops 記事にする
+  （[issue #113](https://github.com/podhmo/html-sandbox/issues/113)）。
 
 ### Future work
 

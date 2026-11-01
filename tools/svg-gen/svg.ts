@@ -23,6 +23,7 @@ export interface ShapeOptions {
   opacity?: number;
   size?: number;
   width?: number;
+  color?: string; // literal stroke color instead of currentColor
   // underline the label text, not the box.
   underline?: boolean | number;
 }
@@ -42,10 +43,27 @@ export interface TextOptions {
   underline?: boolean | number;
 }
 
+// Categorical palette for the "colorful" option: Okabe-Ito-derived
+// hues with lightness adjusted to stay legible on both light and dark
+// backgrounds. The default figure is colorless (currentColor only);
+// pass `color: c.color(i)` on strokes/fills when series distinction
+// needs hue — six categories max, per the figure guideline.
+export const PALETTE = [
+  "#3B82C4", // blue
+  "#E69F00", // orange
+  "#00A876", // bluish green
+  "#D55E00", // vermillion
+  "#CC79A7", // reddish purple
+  "#56B4E9", // sky blue
+] as const;
+
 export interface StrokeOptions {
   dash?: string;
   opacity?: number;
   width?: number;
+  // literal stroke color instead of currentColor — prefer color(i)
+  // from the palette so the figure stays in the checked set.
+  color?: string;
 }
 
 export interface ArrowOptions extends StrokeOptions {
@@ -127,11 +145,17 @@ export class Canvas {
     }
   }
 
-  private strokeAttrs({ dash, opacity, width }: StrokeOptions): string {
+  private strokeAttrs({ dash, opacity, width, color }: StrokeOptions): string {
     const w = width != null && width !== 1.5 ? ` stroke-width="${width}"` : ` stroke-width="1.5"`;
     const d = dash ? ` stroke-dasharray="${dash}"` : "";
     const o = opacity != null ? ` opacity="${opacity}"` : "";
-    return w + d + o;
+    return ` stroke="${esc(color ?? "currentColor")}"` + w + d + o;
+  }
+
+  // Palette color for the colorful option. Indexes wrap around, but
+  // the guideline caps categorical color use at six anyway.
+  color(i: number): string {
+    return PALETTE[((i % PALETTE.length) + PALETTE.length) % PALETTE.length];
   }
 
   // Shapes return {x, y, w, h, label?}; anchors and placement read from it.
@@ -158,7 +182,7 @@ export class Canvas {
     }
     this.parts.push(
       `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}"` +
-        ` fill="none" stroke="currentColor"${this.strokeAttrs(o)}/>`,
+        ` fill="none"${this.strokeAttrs(o)}/>`,
     );
     if (label != null) {
       this.labelLines(x + w / 2, y + h / 2, label, size, o);
@@ -171,7 +195,7 @@ export class Canvas {
   circle(cx: number, cy: number, r: number, { label, size = 14, ...o }: ShapeOptions = {}): Shape {
     this.parts.push(
       `<circle cx="${cx}" cy="${cy}" r="${r}"` +
-        ` fill="none" stroke="currentColor"${this.strokeAttrs(o)}/>`,
+        ` fill="none"${this.strokeAttrs(o)}/>`,
     );
     if (label != null) {
       this.labelLines(cx, cy, label, size, o);
@@ -272,7 +296,7 @@ export class Canvas {
       this.cover([bx + pxn, by + pyn], [bx - pxn, by - pyn]);
       return (
         `<path d="M${bx + pxn} ${by + pyn} L${qx} ${qy} L${bx - pxn} ${by - pyn}"` +
-        ` fill="none" stroke="currentColor"${this.strokeAttrs(o)}/>`
+        ` fill="none"${this.strokeAttrs(o)}/>`
       );
     };
     const headsSvg =
@@ -281,7 +305,7 @@ export class Canvas {
         : (heads === "end" || heads === "both" ? headAt(pts[pts.length - 1], pts[pts.length - 2]) : "") +
           (heads === "start" || heads === "both" ? headAt(pts[0], pts[1]) : "");
     this.parts.push(
-      `<path d="${d}" fill="none" stroke="currentColor"${this.strokeAttrs(o)}/>` + headsSvg,
+      `<path d="${d}" fill="none"${this.strokeAttrs(o)}/>` + headsSvg,
     );
     this.cover(...pts);
   }
@@ -368,15 +392,22 @@ export class Canvas {
     const pts = trimEnds([from, ...via, to], gapStart ?? gap, gapEnd ?? gap);
     const d = "M" + pts.map(([x, y]) => `${x} ${y}`).join(" L");
     this.parts.push(
-      `<path d="${d}" fill="none" stroke="currentColor"${this.strokeAttrs(o)}/>`,
+      `<path d="${d}" fill="none"${this.strokeAttrs(o)}/>`,
     );
     this.cover(...pts);
+  }
+
+  // raw(el) is an escape hatch for elements the builder does not know
+  // (chart.ts uses it for scatter dots); caller lists the covered points.
+  raw(el: string, covered: Point[] = []): void {
+    this.parts.push(el);
+    this.cover(...covered);
   }
 
   // path(d) is an escape hatch for curves; caller lists the covered points.
   path(d: string, covered: Point[], o: StrokeOptions = {}): void {
     this.parts.push(
-      `<path d="${d}" fill="none" stroke="currentColor"${this.strokeAttrs(o)}/>`,
+      `<path d="${d}" fill="none"${this.strokeAttrs(o)}/>`,
     );
     this.cover(...covered);
   }
