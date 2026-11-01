@@ -115,6 +115,10 @@ export interface PlotOpts {
 
 const fmtNum = (v: number): string => String(v);
 
+// A tick is either a position formatted by xfmt/yfmt, or
+// [position, label] for categorical axes.
+export type Tick = number | [number, string];
+
 export class Plot {
   readonly x0: number;
   readonly y0: number;
@@ -154,22 +158,30 @@ export class Plot {
   }
 
   // Axis lines, tick labels, axis titles. Called once per plot.
-  frame(): this {
+  // Pass xticks/yticks to override the generated ones — e.g. for
+  // categorical axes ([pos, label] entries).
+  frame(o: { xticks?: Tick[]; yticks?: Tick[] } = {}): this {
     if (this.framed) return this;
     this.framed = true;
     const c = this.c;
     c.line([this.x0, this.y0], [this.x0, this.y1], { opacity: 0.45, width: 1 });
     c.line([this.x0, this.y1], [this.x1, this.y1], { opacity: 0.45, width: 1 });
-    for (const t of this.ys.ticks()) {
-      const py = this.ys.map(t);
+    const yts: [number, string][] = (o.yticks ?? this.ys.ticks()).map((t) =>
+      Array.isArray(t) ? t : [t, this.yfmt(t)],
+    );
+    for (const [v, label] of yts) {
+      const py = this.ys.map(v);
       c.line([this.x0 - 3, py], [this.x0, py], { opacity: 0.5, width: 1 });
-      c.text(this.x0 - 6, py, this.yfmt(t), { anchor: "end", baseline: "central", size: 10, opacity: 0.7 });
+      c.text(this.x0 - 6, py, label, { anchor: "end", baseline: "central", size: 10, opacity: 0.7 });
       if (this.grid) c.line([this.x0, py], [this.x1, py], { opacity: 0.1, width: 1 });
     }
-    for (const t of this.xs.ticks()) {
-      const px = this.xs.map(t);
+    const xts: [number, string][] = (o.xticks ?? this.xs.ticks()).map((t) =>
+      Array.isArray(t) ? t : [t, this.xfmt(t)],
+    );
+    for (const [v, label] of xts) {
+      const px = this.xs.map(v);
       c.line([px, this.y1], [px, this.y1 + 3], { opacity: 0.5, width: 1 });
-      c.text(px, this.y1 + 16, this.xfmt(t), { anchor: "middle", size: 10, opacity: 0.7 });
+      c.text(px, this.y1 + 16, label, { anchor: "middle", size: 10, opacity: 0.7 });
     }
     if (this.xtitle) {
       c.text((this.x0 + this.x1) / 2, this.y1 + 30, this.xtitle, { anchor: "middle", size: 10, opacity: 0.7 });
@@ -242,6 +254,124 @@ export class Plot {
     }
     return this;
   }
+
+  // Box-and-whisker per group, centred at x = i + 0.5 (use xdom
+  // [0, groups.length]). Whiskers reach the 1.5*IQR fences clamped
+  // to the data range; values beyond are outlier dots. `overlay`
+  // jitters raw points behind the boxes — the guideline wants raw
+  // points overlaid for small n because the box alone hides shape.
+  boxplot(
+    groups: { label: string; values: number[] }[],
+    { boxW = 0.44, overlay = 0, color, rand }: { boxW?: number; overlay?: number; color?: string; rand?: () => number } = {},
+  ): this {
+    const c = this.c;
+    const stride = overlay > 0 && overlay < 1 ? Math.max(1, Math.round(1 / overlay)) : 1;
+    groups.forEach((g, i) => {
+      const s = [...g.values].sort((a, b) => a - b);
+      const q1 = quantile(s, 0.25);
+      const q2 = quantile(s, 0.5);
+      const q3 = quantile(s, 0.75);
+      const iqr = q3 - q1;
+      const lo = Math.max(s[0], q1 - 1.5 * iqr);
+      const hi = Math.min(s[s.length - 1], q3 + 1.5 * iqr);
+      const cx = this.xs.map(i + 0.5);
+      const bw = (this.xs.map(i + 0.5 + boxW) - cx) * 2;
+      if (overlay > 0 && rand) {
+        for (let j = 0; j < s.length; j += stride) {
+          const jx = cx + (rand() - 0.5) * bw * 1.6;
+          c.raw(`<circle cx="${jx.toFixed(1)}" cy="${this.ys.map(s[j]).toFixed(1)}" r="1.3" fill="${color ?? "currentColor"}" fill-opacity="0.28" stroke="none"/>`);
+        }
+      }
+      // whiskers + caps
+      c.line([cx, this.ys.map(lo)], [cx, this.ys.map(hi)], { width: 1, color, opacity: 0.8 });
+      c.line([cx - bw * 0.2, this.ys.map(lo)], [cx + bw * 0.2, this.ys.map(lo)], { width: 1, color });
+      c.line([cx - bw * 0.2, this.ys.map(hi)], [cx + bw * 0.2, this.ys.map(hi)], { width: 1, color });
+      // outliers beyond the fences
+      for (const v of s) {
+        if (v < lo || v > hi) {
+          c.raw(`<circle cx="${cx.toFixed(1)}" cy="${this.ys.map(v).toFixed(1)}" r="1.6" fill="none" stroke="${color ?? "currentColor"}" stroke-width="1" opacity="0.6"/>`);
+        }
+      }
+      // IQR box + median
+      c.raw(
+        `<rect x="${(cx - bw / 2).toFixed(1)}" y="${this.ys.map(q3).toFixed(1)}" width="${bw.toFixed(1)}" height="${(this.ys.map(q1) - this.ys.map(q3)).toFixed(1)}" fill="${color ?? "currentColor"}" fill-opacity="0.18" stroke="${color ?? "currentColor"}" stroke-width="1.5"/>`,
+      );
+      c.line([cx - bw / 2, this.ys.map(q2)], [cx + bw / 2, this.ys.map(q2)], { width: 2.5, color });
+    });
+    return this;
+  }
+
+  // Histogram bars from bins() output; heights are counts.
+  histogram(bins: { x0: number; x1: number; n: number }[], { color }: { color?: string } = {}): this {
+    for (const b of bins) {
+      const x = this.xs.map(b.x0);
+      const w = this.xs.map(b.x1) - x;
+      const top = this.ys.map(b.n);
+      this.c.raw(
+        `<rect x="${x.toFixed(1)}" y="${top.toFixed(1)}" width="${w.toFixed(1)}" height="${(this.y1 - top).toFixed(1)}" fill="${color ?? "currentColor"}" fill-opacity="0.35" stroke="${color ?? "currentColor"}" stroke-width="1"/>`,
+      );
+    }
+    return this;
+  }
+
+  // Cells of a rows x cols grid; fill-opacity encodes value against
+  // the data max (sequential single-hue scale: currentColor keeps it
+  // theme-following). Row 0 draws at the top. Returns {min, max} for
+  // the legend.
+  heatmap(
+    grid: number[][],
+    { color }: { color?: string } = {},
+  ): { min: number; max: number } {
+    const rows = grid.length;
+    const cols = grid[0].length;
+    const cw = (this.x1 - this.x0) / cols;
+    const ch = (this.y1 - this.y0) / rows;
+    let min = Infinity;
+    let max = -Infinity;
+    for (const row of grid) for (const v of row) { min = Math.min(min, v); max = Math.max(max, v); }
+    const span = max - min || 1;
+    grid.forEach((row, j) => {
+      row.forEach((v, i) => {
+        const o = 0.06 + 0.9 * ((v - min) / span);
+        this.c.raw(
+          `<rect x="${(this.x0 + i * cw).toFixed(1)}" y="${(this.y0 + j * ch).toFixed(1)}" width="${(cw - 0.6).toFixed(1)}" height="${(ch - 0.6).toFixed(1)}" fill="${color ?? "currentColor"}" fill-opacity="${o.toFixed(2)}" stroke="none"/>`,
+        );
+      });
+    });
+    return { min, max };
+  }
+
+  // Legend ramp for heatmap(): N steps of increasing fill-opacity
+  // with min/max labels below and an optional caption to the left.
+  // Position it above the plot top so labels stay clear of cells.
+  heatLegend(
+    { min, max }: { min: number; max: number },
+    { x, y, w = 70, fmt = fmtNum, label }: { x: number; y: number; w?: number; fmt?: (v: number) => string; label?: string } = {},
+  ): this {
+    const steps = 6;
+    const sw = w / steps;
+    for (let i = 0; i < steps; i++) {
+      const o = 0.06 + 0.9 * (i / (steps - 1));
+      this.c.raw(`<rect x="${(x + i * sw).toFixed(1)}" y="${y}" width="${(sw - 1).toFixed(1)}" height="8" fill="currentColor" fill-opacity="${o.toFixed(2)}" stroke="none"/>`);
+    }
+    this.c.text(x, y + 16, fmt(min), { size: 9, opacity: 0.6 });
+    this.c.text(x + w, y + 16, fmt(max), { anchor: "end", size: 9, opacity: 0.6 });
+    if (label) this.c.text(x - 6, y + 4, label, { anchor: "end", baseline: "central", size: 9, opacity: 0.6 });
+    return this;
+  }
+}
+
+// Count samples into width-w bins aligned to w*k boundaries.
+export function bins(values: number[], w: number): { x0: number; x1: number; n: number }[] {
+  const lo = Math.floor(Math.min(...values) / w) * w;
+  const hi = Math.ceil(Math.max(...values) / w) * w;
+  const out: { x0: number; x1: number; n: number }[] = [];
+  for (let x = lo; x < hi - 1e-9; x += w) out.push({ x0: x, x1: x + w, n: 0 });
+  for (const v of values) {
+    const i = Math.min(out.length - 1, Math.floor((v - lo) / w));
+    out[i].n++;
+  }
+  return out;
 }
 
 // Build an ECDF's pixel points from raw samples on a Plot. `max`

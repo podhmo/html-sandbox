@@ -41,8 +41,10 @@ gets a small throwaway generator sharing a thin helper.
   event and reference lines. Its constructor requires
   `{title, subtitle, footnote}` so the guideline's mandatory
   metadata is a mandatory argument. `fig-chart-*.ts` draw charts
-  from seeded-PRNG virtual data; `ecdfPoints` thins step vertices
-  for inline embedding.
+  (ECDF, series, scatter, boxplot, histogram, heatmap) from
+  seeded-PRNG virtual data; `data.ts` holds the shared virtual
+  datasets so "same data, different figure" comparisons cite one
+  source; `ecdfPoints` thins step vertices for inline embedding.
 - Color is opt-in (the "colorful" option): `color: c.color(i)` on a
   stroke or fill picks from `PALETTE`, six categorical hues adjusted
   to stay legible on both themes. Text stays `currentColor`; use hue
