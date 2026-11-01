@@ -43,7 +43,7 @@ const p = new Plot(
     w: 420,
     h: 190,
     xdom: [1, 1000],
-    ydom: [0, 320],
+    ydom: [0, 400],
     xlog: true,
     xtitle: "ペイロード (KiB, log)",
     ytitle: "レイテンシ (ms)",
@@ -68,6 +68,8 @@ c.text(p.xs.map(300), p.ys.map(lx(Math.log10(300))) - 8, "単回帰（説明用�
   opacity: 0.7,
 });
 
+const ymax = Math.max(...ys);
+assert.ok(ymax <= 400, "outliers stay inside the y domain");
 assert.ok(perDecade > 20 && perDecade < 60, "slope lands in the designed range");
 
 await writeFile(

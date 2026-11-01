@@ -30,7 +30,8 @@ const p = new Plot(
     w: 420,
     h: 170,
     xdom: [60, 200],
-    ydom: [0, 30],
+    // ~10% headroom above the tallest bin, rounded up to a tick step
+    ydom: [0, Math.ceil(peak * 1.1 / 10) * 10],
     xtitle: "試行時間 (ms)",
     ytitle: "件数",
     grid: true,
@@ -40,6 +41,7 @@ p.frame();
 p.histogram(bs, { color: c.color(0) });
 
 assert.ok(dip < peak * 0.5, "a visible dip separates the two modes");
+assert.ok(peak <= 45, "tallest bin stays inside the y domain");
 
 await writeFile(
   new URL("../build/fig-chart-hist.svg", import.meta.url),
