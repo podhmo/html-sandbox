@@ -43,6 +43,11 @@ gets a small throwaway generator sharing a thin helper.
   metadata is a mandatory argument. `fig-chart-*.ts` draw charts
   from seeded-PRNG virtual data; `ecdfPoints` thins step vertices
   for inline embedding.
+- Color is opt-in (the "colorful" option): `color: c.color(i)` on a
+  stroke or fill picks from `PALETTE`, six categorical hues adjusted
+  to stay legible on both themes. Text stays `currentColor`; use hue
+  only to distinguish data marks and keep a dash/width fallback.
+  `check.ts` warns on literal colors outside `PALETTE`.
 - `check.ts` — an SVG lint built from the failure modes recorded in
   `slops/2026-10-27-writing-slops.md/03-svg-pitfalls.md` (see below).
 - `fig-*.ts` — example generators. `node fig-loop.ts` writes
@@ -63,7 +68,8 @@ covered:
 | Label clipped by `viewBox` (`text-anchor="end"` at the edge) | viewBox is derived from drawn content; `check.ts` re-verifies every element, including estimated text boxes, sits inside it |
 | Text wider than its box | `box` `w: "auto"` sizes to the label; `check.ts` finds the shape containing each text's anchor point and fails if the estimated box overflows it |
 | Duplicate `id` across `<pattern>`/`<linearGradient>` | `check.ts` flags duplicate ids per file (bundle-level collision needs a page-level pass) |
-| Literal colors in a `currentColor` figure | `check.ts` warns when literal `stroke`/`fill`/`color` values mix with `currentColor` |
+| Literal colors in a `currentColor` figure | `check.ts` warns on `stroke`/`fill`/`color` values outside `PALETTE` (colorful figures mix `currentColor` text with palette marks on purpose) |
+| Text anchor sitting on a data mark treated as a label container | `check.ts` skips shapes below `TEXT_MIN` (12px); scatter dots are marks, not containers |
 | Forbidden constructs in an svg fence (script, `foreignObject`, handlers, remote refs) | `check.ts` fails on them |
 | Axis direction inverted ("position means the wrong thing") | not automatable; `assert` in the generator at least states the intended spatial relation in code |
 | One fill carrying two meanings | editorial, still manual |

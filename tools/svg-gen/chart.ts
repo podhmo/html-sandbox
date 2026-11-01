@@ -212,10 +212,11 @@ export class Plot {
     return this;
   }
 
-  dots(pts: Point[], { r = 1.8, opacity = 0.5 }: { r?: number; opacity?: number } = {}): this {
+  dots(pts: Point[], { r = 1.8, opacity = 0.5, color }: { r?: number; opacity?: number; color?: string } = {}): this {
+    const fill = color ?? "currentColor";
     for (const [x, y] of pts) {
       this.c.raw(
-        `<circle cx="${x}" cy="${y}" r="${r}" fill="currentColor" fill-opacity="${opacity}" stroke="none"/>`,
+        `<circle cx="${x}" cy="${y}" r="${r}" fill="${fill}" fill-opacity="${opacity}" stroke="none"/>`,
       );
     }
     // dots do not extend the viewBox; the frame's domain already does.

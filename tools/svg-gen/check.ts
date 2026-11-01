@@ -10,14 +10,15 @@
 //     (script, foreignObject, event handlers, remote refs)
 //   - text whose estimated box overflows the shape it sits in
 //     ("label wider than its box")
-//   - literal colors mixed into a currentColor figure
-//     (dark-theme legends no longer match the strokes)
+//   - literal colors outside PALETTE
+//     (colorful figures mix currentColor text with palette marks;
+//     only off-palette colors break the dark-theme contract)
 //   - missing role/aria-label
 //
 // Usage: node check.ts file.svg [more.svg ...]
 
 import { readFile } from "node:fs/promises";
-import { textWidth } from "./svg.ts";
+import { PALETTE, textWidth } from "./svg.ts";
 
 type Level = "FAIL" | "WARN";
 interface Result {
@@ -114,7 +115,6 @@ async function check(file: string): Promise<void> {
 
   const ids = new Map<string, string>();
   const colors = new Set<string>();
-  let usesCurrentColor = false;
   let textCount = 0;
   // Containers and texts are checked against each other after the scan.
   // A shape too small to hold any label is a mark (scatter dots, bar
@@ -138,8 +138,7 @@ async function check(file: string): Promise<void> {
       ids.set(a.id, tag);
     }
     for (const k of ["stroke", "fill", "color"] as const) {
-      if (a[k] === "currentColor") usesCurrentColor = true;
-      else if (a[k] && a[k] !== "none" && !/^url\(/.test(a[k])) colors.add(a[k]);
+      if (a[k] && a[k] !== "none" && a[k] !== "currentColor" && !/^url\(/.test(a[k])) colors.add(a[k]);
     }
 
     switch (tag) {
@@ -252,11 +251,12 @@ async function check(file: string): Promise<void> {
   if (textCount === 0) {
     report("WARN", file, "no <text> elements; labels will not be searchable");
   }
-  if (usesCurrentColor && colors.size > 0) {
+  const offPalette = [...colors].filter((v) => !(PALETTE as readonly string[]).includes(v));
+  if (offPalette.length > 0) {
     report(
       "WARN",
       file,
-      `literal color(s) ${[...colors].join(", ")} mixed into a currentColor figure`,
+      `literal color(s) ${offPalette.join(", ")} outside PALETTE (use Canvas.color(i))`,
     );
   }
 }
