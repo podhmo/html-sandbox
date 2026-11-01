@@ -75,7 +75,7 @@ HTML artifacts（issue artifacts で `gh api repos/.../issues/113/artifacts` か
   このドキュメント群の側に判断を置く（Claude 版付録 B と同じ結論）。
 
 次のステップとして、仮想データ（seed 固定の疑似乱数で作る、それっぽい計測値）から
-ECDF・折れ線・散布図を描く小さなデータ図キット（chart.ts + fig-chart-*.ts）を svg-gen 内で試し、
+ECDF・折れ線・散布図を描く小さなデータ図キット（chart.ts + examples/fig-chart-*.ts）を svg-gen 内で試し、
 結果を slops 記事にする。うまくいけば「データ図キット」分割の実績になる。
 
 ## 出典
