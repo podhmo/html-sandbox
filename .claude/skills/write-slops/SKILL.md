@@ -63,6 +63,25 @@ whenever the figure is more than a handful of elements. See
 `tools/svg-gen/README.md` and the gallery article
 `slops/2026-10-31-svg-gen-figures.md` for examples.
 
+For data figures (statistical charts), the same directory has `chart.ts`:
+a `Plot` with axes, nice ticks, `series`/`step`/`dots`/`vline`/`hline`,
+and a constructor that requires `{title, subtitle, footnote}` — the
+figure guideline's mandatory metadata as mandatory arguments. Seeded
+`rng`/`gauss` produce reproducible virtual data; label it as such.
+`fig-chart-*.ts` are the examples.
+
+Figures are colorless (`currentColor`) by default. The colorful option
+is `color: c.color(i)` on strokes/fills, drawing from `PALETTE` — six
+categorical hues adjusted to read on both light and dark themes. Keep
+text `currentColor`; let hue distinguish only data marks, and keep a
+dash/width fallback so the figure still reads without color. `check.ts`
+warns on literal colors outside `PALETTE`.
+
+When figure work hits a new failure mode — a lint false positive, a
+label collision, a mark that reads as what it is not — record it in
+`slops/2026-10-27-writing-slops.md/03-svg-pitfalls.md` alongside the
+existing entries so the pitfall list stays current.
+
 ## SVG is an image only with the svg fence label
 
 For inline images, the opening fence must be exactly three backticks
