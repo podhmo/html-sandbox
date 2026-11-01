@@ -37,7 +37,10 @@ p.frame({
   xticks: [0, 6, 12, 18, 24].map((h) => [h, `${h}時`] as [number, string]),
   yticks: trafficDays.map((d, i) => [traffic.length - 0.5 - i, d] as [number, string]),
 });
-const mm = p.heatmap(traffic);
+let mm!: { min: number; max: number };
+p.data(() => {
+  mm = p.heatmap(traffic);
+});
 p.heatLegend(mm, { x: p.x1 - 80, y: p.y0 - 24, fmt: (v) => String(Math.round(v)), label: "req/s" });
 
 assert.ok(peak.d === 1, "the incident peak is on Tuesday");

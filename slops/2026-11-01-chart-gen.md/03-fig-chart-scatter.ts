@@ -51,17 +51,19 @@ const p = new Plot(
   },
 );
 p.frame();
-p.dots(pairs.map(([x, y]) => [p.xs.map(x), p.ys.map(y)]), { r: 1.8, opacity: 0.45 });
 // regression guide, drawn dashed so it reads as "a fitted model",
 // not as another measured series.
 const lx = (v: number) => my + slope * (v - mx);
-p.series(
-  [
-    [p.xs.map(1), p.ys.map(lx(0))],
-    [p.xs.map(1000), p.ys.map(lx(3))],
-  ],
-  { dash: "2 3", opacity: 0.8, color: c.color(0) },
-);
+p.data(() => {
+  p.dots(pairs.map(([x, y]) => [p.xs.map(x), p.ys.map(y)]), { r: 1.8, opacity: 0.45 });
+  p.series(
+    [
+      [p.xs.map(1), p.ys.map(lx(0))],
+      [p.xs.map(1000), p.ys.map(lx(3))],
+    ],
+    { dash: "2 3", opacity: 0.8, color: c.color(0) },
+  );
+});
 c.text(p.xs.map(300), p.ys.map(lx(Math.log10(300))) - 8, "単回帰（説明用）", {
   anchor: "middle",
   size: 10,

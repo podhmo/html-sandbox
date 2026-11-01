@@ -37,7 +37,7 @@ p.frame({
 });
 // faint jittered points (thinned): the box alone hides shape, so the
 // points carry the multimodality the boxes cannot show.
-p.boxplot(bench, { overlay: 0.25, rand: jitter, color: c.color(0) });
+p.data(() => p.boxplot(bench, { overlay: 0.25, rand: jitter, color: c.color(0) }));
 
 assert.ok(bench.length === 4, "four benchmark groups drawn");
 
