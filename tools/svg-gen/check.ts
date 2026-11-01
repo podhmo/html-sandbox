@@ -117,8 +117,14 @@ async function check(file: string): Promise<void> {
   let usesCurrentColor = false;
   let textCount = 0;
   // Containers and texts are checked against each other after the scan.
+  // A shape too small to hold any label is a mark (scatter dots, bar
+  // slivers), not a text container, so it is not registered here.
+  const TEXT_MIN = 12;
   interface Bounds { x: number; y: number; w: number; h: number; ellipse: boolean }
   const containers: Bounds[] = [];
+  const container = (b: Bounds): void => {
+    if (Math.min(b.w, b.h) >= TEXT_MIN) containers.push(b);
+  };
   interface TextBox { body: string; ax: number; ay: number; lx: number; ty: number; rx: number; by: number }
   const texts: TextBox[] = [];
 
@@ -139,7 +145,7 @@ async function check(file: string): Promise<void> {
     switch (tag) {
       case "rect": {
         const [x, y, w, h] = [+a.x || 0, +a.y || 0, +a.width || 0, +a.height || 0];
-        containers.push({ x, y, w, h, ellipse: false });
+        container({ x, y, w, h, ellipse: false });
         for (const [px, py] of [[x, y], [x + w, y + h]]) {
           if (!inside(px, py)) outside(`<rect> corner`, px, py);
         }
@@ -147,7 +153,7 @@ async function check(file: string): Promise<void> {
       }
       case "circle": {
         const [cx, cy, r] = [+a.cx || 0, +a.cy || 0, +a.r || 0];
-        containers.push({ x: cx - r, y: cy - r, w: 2 * r, h: 2 * r, ellipse: true });
+        container({ x: cx - r, y: cy - r, w: 2 * r, h: 2 * r, ellipse: true });
         for (const [px, py] of [[cx - r, cy - r], [cx + r, cy + r]]) {
           if (!inside(px, py)) outside(`<circle> edge`, px, py);
         }
@@ -155,7 +161,7 @@ async function check(file: string): Promise<void> {
       }
       case "ellipse": {
         const [cx, cy, rx, ry] = [+a.cx || 0, +a.cy || 0, +a.rx || 0, +a.ry || 0];
-        containers.push({ x: cx - rx, y: cy - ry, w: 2 * rx, h: 2 * ry, ellipse: true });
+        container({ x: cx - rx, y: cy - ry, w: 2 * rx, h: 2 * ry, ellipse: true });
         for (const [px, py] of [[cx - rx, cy - ry], [cx + rx, cy + ry]]) {
           if (!inside(px, py)) outside(`<ellipse> edge`, px, py);
         }

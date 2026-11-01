@@ -34,6 +34,15 @@ gets a small throwaway generator sharing a thin helper.
     (including estimated text extents), so nothing falls outside it.
   - Output is `currentColor` + plain `<text>`, so figures follow the
     site's light/dark theme and stay searchable.
+- `chart.ts` — the data-figure half (the "chart-gen" seed from issue
+  #113's figure guideline, see `docs/sketch/ja/figure-guidelines.md`).
+  `Scale` maps data to pixels (linear or log, with nice ticks);
+  `Plot` draws the frame — axes, tick labels, series/step/dots,
+  event and reference lines. Its constructor requires
+  `{title, subtitle, footnote}` so the guideline's mandatory
+  metadata is a mandatory argument. `fig-chart-*.ts` draw charts
+  from seeded-PRNG virtual data; `ecdfPoints` thins step vertices
+  for inline embedding.
 - `check.ts` — an SVG lint built from the failure modes recorded in
   `slops/2026-10-27-writing-slops.md/03-svg-pitfalls.md` (see below).
 - `fig-*.ts` — example generators. `node fig-loop.ts` writes

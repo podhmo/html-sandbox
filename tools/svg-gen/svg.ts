@@ -373,6 +373,13 @@ export class Canvas {
     this.cover(...pts);
   }
 
+  // raw(el) is an escape hatch for elements the builder does not know
+  // (chart.ts uses it for scatter dots); caller lists the covered points.
+  raw(el: string, covered: Point[] = []): void {
+    this.parts.push(el);
+    this.cover(...covered);
+  }
+
   // path(d) is an escape hatch for curves; caller lists the covered points.
   path(d: string, covered: Point[], o: StrokeOptions = {}): void {
     this.parts.push(
