@@ -60,7 +60,7 @@ p.series(
     [p.xs.map(1), p.ys.map(lx(0))],
     [p.xs.map(1000), p.ys.map(lx(3))],
   ],
-  { dash: "2 3", opacity: 0.45 },
+  { dash: "2 3", opacity: 0.8, color: c.color(0) },
 );
 c.text(p.xs.map(300), p.ys.map(lx(Math.log10(300))) - 8, "単回帰（説明用）", {
   anchor: "middle",
