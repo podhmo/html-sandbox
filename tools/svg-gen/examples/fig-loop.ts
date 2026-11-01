@@ -2,7 +2,7 @@
 // as the earlier /tmp prototype, now with anchors instead of literals.
 import assert from "node:assert/strict";
 import { writeFile } from "node:fs/promises";
-import { Canvas } from "./svg.ts";
+import { Canvas } from "../svg.ts";
 
 const H = 44;
 const GAP = 40;
@@ -38,6 +38,6 @@ assert.ok(
 );
 
 await writeFile(
-  new URL("./build/fig-loop.svg", import.meta.url),
+  new URL("../build/fig-loop.svg", import.meta.url),
   c.toString({ label: "generate, render, then check and fix loop" }),
 );

@@ -4,8 +4,8 @@
 // PRNG, with a handful of timeout-ish outliers.
 import assert from "node:assert/strict";
 import { writeFile } from "node:fs/promises";
-import { Canvas } from "./svg.ts";
-import { Plot, gauss, rng } from "./chart.ts";
+import { Canvas } from "../svg.ts";
+import { Plot, gauss, rng } from "../chart.ts";
 
 const c = new Canvas();
 const rand = rng(20261031);
@@ -37,7 +37,7 @@ const p = new Plot(
   {
     title: `ペイロード 1 桁ごとにレイテンシ +約 ${perDecade} ms（仮想データ）`,
     subtitle: "n = 220 リクエスト、2026-10-14 の 1 時間、生値、仮想データ",
-    footnote: "出典: 仮想データ (seed 20261031) / n = 220 / 集計: なし（生値）/ 生成: tools/svg-gen/fig-chart-scatter.ts",
+    footnote: "出典: 仮想データ (seed 20261031) / n = 220 / 集計: なし（生値）/ 生成: tools/svg-gen/examples/fig-chart-scatter.ts",
   },
   {
     w: 420,
@@ -71,6 +71,6 @@ c.text(p.xs.map(300), p.ys.map(lx(Math.log10(300))) - 8, "単回帰（説明用�
 assert.ok(perDecade > 20 && perDecade < 60, "slope lands in the designed range");
 
 await writeFile(
-  new URL("./build/fig-chart-scatter.svg", import.meta.url),
+  new URL("../build/fig-chart-scatter.svg", import.meta.url),
   c.toString({ label: `scatter of payload size vs latency: about +${perDecade} ms per decade of payload (virtual data)` }),
 );

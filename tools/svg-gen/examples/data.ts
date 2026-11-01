@@ -2,7 +2,7 @@
 // "same data, different figure" comparison (boxplot vs histogram)
 // reads from one source. Everything is seeded; values are virtual,
 // not measurements.
-import { gauss, rng } from "./chart.ts";
+import { gauss, rng } from "../chart.ts";
 
 const rand = rng(20261102);
 const g = gauss(rand);

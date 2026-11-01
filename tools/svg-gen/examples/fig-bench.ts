@@ -4,7 +4,7 @@
 // measured from the labels.
 import assert from "node:assert/strict";
 import { writeFile } from "node:fs/promises";
-import { Canvas } from "./svg.ts";
+import { Canvas } from "../svg.ts";
 
 const c = new Canvas();
 
@@ -30,6 +30,6 @@ assert.ok(
 );
 
 await writeFile(
-  new URL("./build/fig-bench.svg", import.meta.url),
+  new URL("../build/fig-bench.svg", import.meta.url),
   c.toString({ label: "SVG file size by renderer and layout" }),
 );

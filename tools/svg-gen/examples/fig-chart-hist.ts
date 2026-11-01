@@ -4,8 +4,8 @@
 // declared in the subtitle, as the guideline requires.
 import assert from "node:assert/strict";
 import { writeFile } from "node:fs/promises";
-import { Canvas } from "./svg.ts";
-import { Plot, bins } from "./chart.ts";
+import { Canvas } from "../svg.ts";
+import { Plot, bins } from "../chart.ts";
 import { bench } from "./data.ts";
 
 const c = new Canvas();
@@ -24,7 +24,7 @@ const p = new Plot(
     title: `"cached" の試行時間は二峰（箱ひげと同じデータ、仮想）`,
     subtitle: `ベンチマーク試行 n = ${cached.values.length}、ビン幅 ${binW} ms、仮想データ`,
     footnote:
-      "出典: 仮想データ (tools/svg-gen/data.ts, seed 20261102) / n = 160 / ビン幅 10 ms / 生成: tools/svg-gen/fig-chart-hist.ts",
+      "出典: 仮想データ (tools/svg-gen/examples/data.ts, seed 20261102) / n = 160 / ビン幅 10 ms / 生成: tools/svg-gen/examples/fig-chart-hist.ts",
   },
   {
     w: 420,
@@ -42,6 +42,6 @@ p.histogram(bs, { color: c.color(0) });
 assert.ok(dip < peak * 0.5, "a visible dip separates the two modes");
 
 await writeFile(
-  new URL("./build/fig-chart-hist.svg", import.meta.url),
+  new URL("../build/fig-chart-hist.svg", import.meta.url),
   c.toString({ label: "histogram of cached trials showing two modes (same virtual data as the box plot)" }),
 );

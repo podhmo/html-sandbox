@@ -42,7 +42,7 @@ gets a small throwaway generator sharing a thin helper.
   `{title, subtitle, footnote}` so the guideline's mandatory
   metadata is a mandatory argument. `fig-chart-*.ts` draw charts
   (ECDF, series, scatter, boxplot, histogram, heatmap) from
-  seeded-PRNG virtual data; `data.ts` holds the shared virtual
+  seeded-PRNG virtual data; `examples/data.ts` holds the shared virtual
   datasets so "same data, different figure" comparisons cite one
   source; `ecdfPoints` thins step vertices for inline embedding.
 - Color is opt-in (the "colorful" option): `color: c.color(i)` on a
@@ -52,11 +52,11 @@ gets a small throwaway generator sharing a thin helper.
   `check.ts` warns on literal colors outside `PALETTE`.
 - `check.ts` — an SVG lint built from the failure modes recorded in
   `slops/2026-10-27-writing-slops.md/03-svg-pitfalls.md` (see below).
-- `fig-*.ts` — example generators. `node fig-loop.ts` writes
+- `examples/fig-*.ts` — example generators. `node examples/fig-loop.ts` writes
   `build/fig-loop.svg`. Generators can also `assert` spatial claims the
   figure depends on ("these three boxes share the row") so the claim
   fails loudly at build time instead of silently in the picture.
-- `Makefile` — `make all` runs every `fig-*.ts`, lints `build/*.svg`,
+- `Makefile` — `make all` runs every `examples/fig-*.ts`, lints `build/*.svg`,
   and rasterizes them with `rsvg-convert`. Node 26 (runs `.ts`
   directly); no `npm install`.
 

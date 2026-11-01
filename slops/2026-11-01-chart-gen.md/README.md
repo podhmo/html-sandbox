@@ -38,10 +38,10 @@ prev: ../2026-10-31-svg-gen-figures.md
 問いは「リリース前後でレイテンシはどう散らばるか」。開発者向けの第一選択は ECDF——ビン幅に依存せず、任意のパーセンタイルが直接読める。
 
 ```svg
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-32.5 -65 635 309" width="635" height="309" role="img" aria-label="ECDF of request latency: p99 improves 19% in v2.3 (virtual data)">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-32.5 -65 684.5 309" width="685" height="309" role="img" aria-label="ECDF of request latency: p99 improves 19% in v2.3 (virtual data)">
 <text x="0" y="-40" font-size="15" fill="currentColor">v2.3 で p99 レイテンシが 19% 改善（仮想データ）</text>
 <text x="0" y="-22" font-size="11" fill="currentColor" opacity="0.65">us-east-1 相当の仮想計測、2026-10-01〜10-14、n = 600 / version、生値</text>
-<text x="0" y="232" font-size="10" fill="currentColor" opacity="0.55">出典: 仮想データ (seed 20261101) / n = 600×2 / 集計: なし（生値の ECDF）/ 生成: tools/svg-gen/fig-chart-ecdf.ts</text>
+<text x="0" y="232" font-size="10" fill="currentColor" opacity="0.55">出典: 仮想データ (seed 20261101) / n = 600×2 / 集計: なし（生値の ECDF）/ 生成: tools/svg-gen/examples/fig-chart-ecdf.ts</text>
 <path d="M0 0 L0 190" fill="none" stroke="currentColor" stroke-width="1" opacity="0.45"/>
 <path d="M0 190 L420 190" fill="none" stroke="currentColor" stroke-width="1" opacity="0.45"/>
 <path d="M-3 190 L0 190" fill="none" stroke="currentColor" stroke-width="1" opacity="0.5"/>
@@ -102,10 +102,10 @@ prev: ../2026-10-31-svg-gen-figures.md
 問いは「デプロイを挟んでレイテンシはどう変わったか」。日次集計の p50 と p90 を 2 本の線で、10/08 のデプロイを縦線で注記する。
 
 ```svg
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-32.5 -65 676 289" width="676" height="289" role="img" aria-label="daily p50/p90 latency: p90 drops about 29% after the 10/08 deploy (virtual data)">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-32.5 -65 725.5 289" width="726" height="289" role="img" aria-label="daily p50/p90 latency: p90 drops about 29% after the 10/08 deploy (virtual data)">
 <text x="0" y="-40" font-size="15" fill="currentColor">10/08 デプロイ後に p90 が約 29% 低下（仮想データ）</text>
 <text x="0" y="-22" font-size="11" fill="currentColor" opacity="0.65">JST、1 時間平均の日次集計、2026-10-01〜10-14、仮想データ</text>
-<text x="0" y="212" font-size="10" fill="currentColor" opacity="0.55">出典: 仮想データ (seed 20261030) / 集計: 日次 / イベント: 10/08 v2.3 デプロイ / 生成: tools/svg-gen/fig-chart-series.ts</text>
+<text x="0" y="212" font-size="10" fill="currentColor" opacity="0.55">出典: 仮想データ (seed 20261030) / 集計: 日次 / イベント: 10/08 v2.3 デプロイ / 生成: tools/svg-gen/examples/fig-chart-series.ts</text>
 <path d="M0 0 L0 170" fill="none" stroke="currentColor" stroke-width="1" opacity="0.45"/>
 <path d="M0 170 L420 170" fill="none" stroke="currentColor" stroke-width="1" opacity="0.45"/>
 <path d="M-3 170 L0 170" fill="none" stroke="currentColor" stroke-width="1" opacity="0.5"/>
@@ -161,10 +161,10 @@ prev: ../2026-10-31-svg-gen-figures.md
 問いは「ペイロードサイズとレイテンシはどう関係するか」。3 桁にまたがるペイロードには log 軸を選び、規約どおり軸タイトルに `(log)` を書いた。
 
 ```svg
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-32.5 -65 603 309" width="603" height="309" role="img" aria-label="scatter of payload size vs latency: about +43 ms per decade of payload (virtual data)">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-32.5 -65 652.5 309" width="653" height="309" role="img" aria-label="scatter of payload size vs latency: about +43 ms per decade of payload (virtual data)">
 <text x="0" y="-40" font-size="15" fill="currentColor">ペイロード 1 桁ごとにレイテンシ +約 43 ms（仮想データ）</text>
 <text x="0" y="-22" font-size="11" fill="currentColor" opacity="0.65">n = 220 リクエスト、2026-10-14 の 1 時間、生値、仮想データ</text>
-<text x="0" y="232" font-size="10" fill="currentColor" opacity="0.55">出典: 仮想データ (seed 20261031) / n = 220 / 集計: なし（生値）/ 生成: tools/svg-gen/fig-chart-scatter.ts</text>
+<text x="0" y="232" font-size="10" fill="currentColor" opacity="0.55">出典: 仮想データ (seed 20261031) / n = 220 / 集計: なし（生値）/ 生成: tools/svg-gen/examples/fig-chart-scatter.ts</text>
 <path d="M0 0 L0 190" fill="none" stroke="currentColor" stroke-width="1" opacity="0.45"/>
 <path d="M0 190 L420 190" fill="none" stroke="currentColor" stroke-width="1" opacity="0.45"/>
 <path d="M-3 190 L0 190" fill="none" stroke="currentColor" stroke-width="1" opacity="0.5"/>
@@ -442,10 +442,10 @@ prev: ../2026-10-31-svg-gen-figures.md
 問いは「4 つの実装でベンチマーク結果はどう違うか」。分布の形ごと比べる箱ひげ図を選び、ジッターで散らした生データ点を重ねた（規約は n < 30 で点の重ねを MUST にしているが、n=160 でも間引いた点を重ねると形が読める）。
 
 ```svg
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-32.5 -65 702.5 309" width="703" height="309" role="img" aria-label="box plot of four benchmark variants; the cached group is secretly bimodal (virtual data)">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-32.5 -65 801.5 309" width="802" height="309" role="img" aria-label="box plot of four benchmark variants; the cached group is secretly bimodal (virtual data)">
 <text x="0" y="-40" font-size="15" fill="currentColor">"cached" は箱では一様だが、実は二峰（仮想データ）</text>
 <text x="0" y="-22" font-size="11" fill="currentColor" opacity="0.65">ベンチマーク試行 n = 160 / impl、中央値最小は "cached"、仮想データ</text>
-<text x="0" y="232" font-size="10" fill="currentColor" opacity="0.55">出典: 仮想データ (tools/svg-gen/data.ts, seed 20261102) / n = 160×4 / ひげ: 1.5×IQR / 生成: tools/svg-gen/fig-chart-box.ts</text>
+<text x="0" y="232" font-size="10" fill="currentColor" opacity="0.55">出典: 仮想データ (tools/svg-gen/examples/data.ts, seed 20261102) / n = 160×4 / ひげ: 1.5×IQR / 生成: tools/svg-gen/examples/fig-chart-box.ts</text>
 <path d="M0 0 L0 190" fill="none" stroke="currentColor" stroke-width="1" opacity="0.45"/>
 <path d="M0 190 L420 190" fill="none" stroke="currentColor" stroke-width="1" opacity="0.45"/>
 <path d="M-3 190 L0 190" fill="none" stroke="currentColor" stroke-width="1" opacity="0.5"/>
@@ -689,10 +689,10 @@ prev: ../2026-10-31-svg-gen-figures.md
 図4 と同じ `cached` のデータ（出典も同じ data.ts）を、ビン幅 10ms のヒストグラムにすると:
 
 ```svg
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-27 -65 685 289" width="685" height="289" role="img" aria-label="histogram of cached trials showing two modes (same virtual data as the box plot)">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-27 -65 784 289" width="784" height="289" role="img" aria-label="histogram of cached trials showing two modes (same virtual data as the box plot)">
 <text x="0" y="-40" font-size="15" fill="currentColor">"cached" の試行時間は二峰（箱ひげと同じデータ、仮想）</text>
 <text x="0" y="-22" font-size="11" fill="currentColor" opacity="0.65">ベンチマーク試行 n = 160、ビン幅 10 ms、仮想データ</text>
-<text x="0" y="212" font-size="10" fill="currentColor" opacity="0.55">出典: 仮想データ (tools/svg-gen/data.ts, seed 20261102) / n = 160 / ビン幅 10 ms / 生成: tools/svg-gen/fig-chart-hist.ts</text>
+<text x="0" y="212" font-size="10" fill="currentColor" opacity="0.55">出典: 仮想データ (tools/svg-gen/examples/data.ts, seed 20261102) / n = 160 / ビン幅 10 ms / 生成: tools/svg-gen/examples/fig-chart-hist.ts</text>
 <path d="M0 0 L0 170" fill="none" stroke="currentColor" stroke-width="1" opacity="0.45"/>
 <path d="M0 170 L420 170" fill="none" stroke="currentColor" stroke-width="1" opacity="0.45"/>
 <path d="M-3 170 L0 170" fill="none" stroke="currentColor" stroke-width="1" opacity="0.5"/>
@@ -758,10 +758,10 @@ prev: ../2026-10-31-svg-gen-figures.md
 問いは「トラフィックに日次・週次のパターンはあるか」。168 点の時系列を折れ線にするとスパゲッティになるので、曜日 × 時刻のヒートマップにした。色は 1 色相の濃淡（規約の color.sequential）で、currentColor の不透明度で実装した——テーマに追従する単色スケールになる。
 
 ```svg
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-32.5 -65 654.5 269" width="655" height="269" role="img" aria-label="traffic heatmap: peak on Tue around 14:00, weekends quiet (virtual data)">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-32.5 -65 753.5 269" width="754" height="269" role="img" aria-label="traffic heatmap: peak on Tue around 14:00, weekends quiet (virtual data)">
 <text x="0" y="-40" font-size="15" fill="currentColor">Tue 14 時台のスパイクと週末の谷（仮想データ）</text>
 <text x="0" y="-22" font-size="11" fill="currentColor" opacity="0.65">req/s の 1 時間平均、2026-10-W42 の 1 週間、仮想データ</text>
-<text x="0" y="192" font-size="10" fill="currentColor" opacity="0.55">出典: 仮想データ (tools/svg-gen/data.ts, seed 20261102) / 集計: 1 時間平均 / 生成: tools/svg-gen/fig-chart-heat.ts</text>
+<text x="0" y="192" font-size="10" fill="currentColor" opacity="0.55">出典: 仮想データ (tools/svg-gen/examples/data.ts, seed 20261102) / 集計: 1 時間平均 / 生成: tools/svg-gen/examples/fig-chart-heat.ts</text>
 <path d="M0 0 L0 150" fill="none" stroke="currentColor" stroke-width="1" opacity="0.45"/>
 <path d="M0 150 L440 150" fill="none" stroke="currentColor" stroke-width="1" opacity="0.45"/>
 <path d="M-3 10.714285714285722 L0 10.714285714285722" fill="none" stroke="currentColor" stroke-width="1" opacity="0.5"/>

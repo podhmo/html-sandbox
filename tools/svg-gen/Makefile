@@ -4,16 +4,16 @@
 
 NODE ?= node
 RSVG ?= rsvg-convert
-FIGS := $(patsubst fig-%.ts,build/fig-%.svg,$(wildcard fig-*.ts))
+FIGS := $(patsubst examples/fig-%.ts,build/fig-%.svg,$(wildcard examples/fig-*.ts))
 
 .PHONY: all svg check png clean help
 
 all: svg check png
 
-## svg: run every fig-*.ts generator into build/
+## svg: run every examples/fig-*.ts generator into build/
 svg: $(FIGS)
 
-build/fig-%.svg: fig-%.ts svg.ts chart.ts data.ts
+build/fig-%.svg: examples/fig-%.ts svg.ts chart.ts examples/data.ts
 	@mkdir -p build
 	$(NODE) $<
 

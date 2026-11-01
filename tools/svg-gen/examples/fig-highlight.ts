@@ -2,7 +2,7 @@
 // weakest to strongest claim. The posts figures used a flat grey band;
 // these stay currentColor so they work on both themes.
 import { writeFile } from "node:fs/promises";
-import { Canvas, type Shape, type ShapeOptions } from "./svg.ts";
+import { Canvas, type Shape, type ShapeOptions } from "../svg.ts";
 
 const c = new Canvas();
 const ROW_H = 64;
@@ -30,6 +30,6 @@ variants.forEach(([caption, v], i) => {
 });
 
 await writeFile(
-  new URL("./build/fig-highlight.svg", import.meta.url),
+  new URL("../build/fig-highlight.svg", import.meta.url),
   c.toString({ label: "five low-key ways to emphasize a box" }),
 );

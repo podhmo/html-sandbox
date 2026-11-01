@@ -6,8 +6,8 @@
 // every run.
 import assert from "node:assert/strict";
 import { writeFile } from "node:fs/promises";
-import { Canvas } from "./svg.ts";
-import { Plot, ecdfPoints, gauss, quantile, rng } from "./chart.ts";
+import { Canvas } from "../svg.ts";
+import { Plot, ecdfPoints, gauss, quantile, rng } from "../chart.ts";
 
 const c = new Canvas();
 const g = gauss(rng(20261101));
@@ -25,7 +25,7 @@ const p = new Plot(
   {
     title: `v2.3 で p99 レイテンシが ${gain}% 改善（仮想データ）`,
     subtitle: "us-east-1 相当の仮想計測、2026-10-01〜10-14、n = 600 / version、生値",
-    footnote: "出典: 仮想データ (seed 20261101) / n = 600×2 / 集計: なし（生値の ECDF）/ 生成: tools/svg-gen/fig-chart-ecdf.ts",
+    footnote: "出典: 仮想データ (seed 20261101) / n = 600×2 / 集計: なし（生値の ECDF）/ 生成: tools/svg-gen/examples/fig-chart-ecdf.ts",
   },
   {
     w: 420,
@@ -58,6 +58,6 @@ c.text(at(v23, 0.8) + 6, y80 - 14, "v2.3", { baseline: "central", size: 11 });
 assert.ok(gain > 0, "v2.3 improves p99 over v2.2");
 
 await writeFile(
-  new URL("./build/fig-chart-ecdf.svg", import.meta.url),
+  new URL("../build/fig-chart-ecdf.svg", import.meta.url),
   c.toString({ label: `ECDF of request latency: p99 improves ${gain}% in v2.3 (virtual data)` }),
 );

@@ -4,7 +4,7 @@
 // only had request-direction arrows; here they are bidirectional, since
 // a response always comes back.
 import { writeFile } from "node:fs/promises";
-import { Canvas } from "./svg.ts";
+import { Canvas } from "../svg.ts";
 
 const c = new Canvas();
 const DASH = "4 3";
@@ -88,7 +88,7 @@ c.arrow(c.anchor(pi, "s"), c.anchor(files, "n"));
 }
 
 await writeFile(
-  new URL("./build/fig-sarashina.svg", import.meta.url),
+  new URL("../build/fig-sarashina.svg", import.meta.url),
   c.toString({
     label:
       "作業の構造: 人は Devin に指示するだけで、Devin が拡張を実装し、pi を実行・監督する。pi は拡張をロードしてプロキシ越しに Sarashina API を呼びながら Go のファイルを書く",

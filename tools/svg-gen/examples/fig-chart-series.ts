@@ -4,8 +4,8 @@
 // two weeks of daily-aggregated p50/p90 from a seeded PRNG.
 import assert from "node:assert/strict";
 import { writeFile } from "node:fs/promises";
-import { Canvas } from "./svg.ts";
-import { Plot, gauss, rng } from "./chart.ts";
+import { Canvas } from "../svg.ts";
+import { Plot, gauss, rng } from "../chart.ts";
 
 const c = new Canvas();
 const g = gauss(rng(20261030));
@@ -26,7 +26,7 @@ const p = new Plot(
   {
     title: `10/08 デプロイ後に p90 が約 ${drop}% 低下（仮想データ）`,
     subtitle: "JST、1 時間平均の日次集計、2026-10-01〜10-14、仮想データ",
-    footnote: "出典: 仮想データ (seed 20261030) / 集計: 日次 / イベント: 10/08 v2.3 デプロイ / 生成: tools/svg-gen/fig-chart-series.ts",
+    footnote: "出典: 仮想データ (seed 20261030) / 集計: 日次 / イベント: 10/08 v2.3 デプロイ / 生成: tools/svg-gen/examples/fig-chart-series.ts",
   },
   {
     w: 420,
@@ -53,6 +53,6 @@ c.text(p.x1 + 6, p.ys.map(p90[13]), "p90", { baseline: "central", size: 10, opac
 assert.ok(drop > 10, "p90 clearly drops after the deploy");
 
 await writeFile(
-  new URL("./build/fig-chart-series.svg", import.meta.url),
+  new URL("../build/fig-chart-series.svg", import.meta.url),
   c.toString({ label: `daily p50/p90 latency: p90 drops about ${drop}% after the 10/08 deploy (virtual data)` }),
 );

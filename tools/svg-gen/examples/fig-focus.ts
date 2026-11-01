@@ -2,7 +2,7 @@
 // neighbours dimmed, drawn without a layout engine.
 import assert from "node:assert/strict";
 import { writeFile } from "node:fs/promises";
-import { Canvas } from "./svg.ts";
+import { Canvas } from "../svg.ts";
 
 const c = new Canvas();
 const DIM = 0.35;
@@ -39,6 +39,6 @@ assert.ok(users.y === tests.y, "side boxes share the row");
 assert.ok(lib.x === app.x, "top and bottom boxes share the column");
 
 await writeFile(
-  new URL("./build/fig-focus.svg", import.meta.url),
+  new URL("../build/fig-focus.svg", import.meta.url),
   c.toString({ label: "one package in focus, related packages dimmed" }),
 );

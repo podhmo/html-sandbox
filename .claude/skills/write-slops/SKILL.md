@@ -56,7 +56,7 @@ it as a successful illustration or add a bad example to every article.
 Hand-written SVG breaks in predictable ways (lines that miss their box,
 labels clipped by the viewBox). This repo keeps `tools/svg-gen`, a
 zero-dependency TypeScript kit for small concept figures: write
-`fig-<name>.ts` there, run `make -C tools/svg-gen` to emit `build/*.svg`
+`examples/fig-<name>.ts` there, run `make -C tools/svg-gen` to emit `build/*.svg`
 and lint them with `check.ts`, then embed the output in an `svg` fence.
 Anchors and auto-sized boxes keep lines attached to shapes, so prefer it
 whenever the figure is more than a handful of elements. See
@@ -68,7 +68,7 @@ a `Plot` with axes, nice ticks, `series`/`step`/`dots`/`vline`/`hline`,
 and a constructor that requires `{title, subtitle, footnote}` — the
 figure guideline's mandatory metadata as mandatory arguments. Seeded
 `rng`/`gauss` produce reproducible virtual data; label it as such.
-`fig-chart-*.ts` are the examples.
+`examples/fig-chart-*.ts` are the examples.
 
 Figures are colorless (`currentColor`) by default. The colorful option
 is `color: c.color(i)` on strokes/fills, drawing from `PALETTE` — six
