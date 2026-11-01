@@ -989,6 +989,14 @@ prev: ../2026-10-31-svg-gen-figures.md
 
 残っている大きい穴は、誤差棒（推定値の比較では必須級）、スモールマルチプル、バイオリン図あたり。箱ひげ・ヒストグラム・ヒートマップは今回入った。それと「図にするか」「どの抽象レベルか」の判断はツールでは強制できないので、write-slops かガイドライン文書の側に置く、という付録の結論は妥当だった。
 
+## 余談: issue artifacts は「issue を読む」だけでは見えない
+
+今回の作業の起点は「issue #113 に添付された HTML artifacts を見て」だったのだが、最初の依頼は「issue を読んで」と言う形で、添付物は見つけられなかった。issue の本文・コメントには添付への言及が一切なく、`gh issue view` はもちろん REST API の `body`/`comments` にも artifact の記述が出てこない。タイムラインや編集履歴にも痕跡はない。
+
+見えたきっかけは、ブラウザで見えるはずの URL `…/issues/113/artifacts/3` を直接教えてもらったこと。そこから `gh api repos/podhmo/html-sandbox/issues/113/artifacts` という専用エンドポイントの存在に気づいた。一覧・個別取得（`.artifact.body` に HTML 全文）ともにここだけで取れる。
+
+「artifacts を見て」と言えば辿り着けるか、はたぶん辿り着ける——エンドポイント名がそのまま `artifacts` なので、`gh api` に試せば当たる。問題はそもそも存在を知らないことで、「issue を読んで」ではコメントを眺めて終わる。添付物を見てほしい場合は、URL か「artifacts」という単語を明示するのが確実。
+
 ## 検証
 
 `make -C tools/svg-gen` で全 11 図を生成し `check.ts` を通した（0 failure、パレット色は警告対象外）。PNG は rsvg-convert で rasterize し、ライト・ダーク両方の見え方を確認した（ダーク側は currentColor を明色に置き換えたコピー + 暗色背景、および Go 版ブログ `make -C go watch` の /slops/chart-gen 実ページ）。メンバーの raw ルート（`/slops/chart-gen/chart.ts` など）と prev/next チェーン（slops-nav）も確認済み。
