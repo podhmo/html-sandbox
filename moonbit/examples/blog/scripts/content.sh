@@ -58,14 +58,16 @@ sort -u -t '	' -k 1,1 "$names.unsorted" >"$names"
 
 # Each collection's addition order, packed as <collection>/.order for the
 # loaders' same-day ordering; article-order.sh prints nothing without
-# git, and an empty file is not packed.
-order=$out.order.$$
-trap 'rm -f "$names" "$names.unsorted" "$tmp" "$order"' EXIT
-if sh "$script/../../../../tools/article-order.sh" "$posts" >"$order" && [ -s "$order" ]; then
-  printf 'posts/.order\t%s\n' "$order" >>"$names"
+# git, and an empty file is not packed. The two files stay distinct:
+# posts/.order and slops/.order may not share one temp file.
+order_posts=$out.posts.order.$$
+order_slops=$out.slops.order.$$
+trap 'rm -f "$names" "$names.unsorted" "$tmp" "$order_posts" "$order_slops"' EXIT
+if sh "$script/../../../../tools/article-order.sh" "$posts" >"$order_posts" && [ -s "$order_posts" ]; then
+  printf 'posts/.order\t%s\n' "$order_posts" >>"$names"
 fi
-if sh "$script/../../../../tools/article-order.sh" "$slops" >"$order" && [ -s "$order" ]; then
-  printf 'slops/.order\t%s\n' "$order" >>"$names"
+if sh "$script/../../../../tools/article-order.sh" "$slops" >"$order_slops" && [ -s "$order_slops" ]; then
+  printf 'slops/.order\t%s\n' "$order_slops" >>"$names"
 fi
 
 : >"$tmp"
