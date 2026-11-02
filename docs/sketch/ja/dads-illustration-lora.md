@@ -99,3 +99,52 @@ GPUもAPIトークンも手元にないため未検証だが、データセッ�
 - 学習は $2-6 の使い切り。高いのは学習ではなく運用の一手間 (PNG→ブログに載せる経路)
 - 次の一手は「fal か Replicate のトークンを取って $2 の学習を1回流す」こと。失敗しても数百円の実験
 - それ以前に「挿絵をラスタで欲しいのか、SVG路線の延長で欲しいのか」の方向性の確認は残る
+
+## この環境 (RTX 5060 Laptop / WSL2) で学習できるか
+
+記事執筆時のVM (Devin) にはGPUが無かったが、別の手元環境 (WSL2) にはGPUがある。同じDADS素材を使って、有料APIを使わずローカル学習できるかを追試した。2026-11-03時点の記録。
+
+### 環境
+
+| 項目 | 値 |
+| --- | --- |
+| OS | Ubuntu 26.04.1 on WSL2 (kernel 6.18) |
+| GPU | NVIDIA GeForce RTX 5060 Laptop GPU, 8GB VRAM (cc 12.0, Blackwell) |
+| Driver / CUDA | 573.22 / 12.8 |
+| CPU / RAM | Ryzen 7 255 (8C/16T) / 15GB |
+| Disk | 約900GB空き |
+| Python | 3.12.16 (uv) |
+
+注意点として `/tmp` は tmpfs 7.7GB しかない。venv (7.2GB) とモデル (約16GB) を置くと溢れるので、作業ディレクトリは `~/lora-work` に移した。
+
+### 入れたもの
+
+- `torch 2.11.0+cu128` / `torchvision 0.26.0`
+- `diffusers 0.42.0.dev0` (main) / `transformers 5.22.1` / `peft 0.21.2`
+- `bitsandbytes 0.50.2` / `torchao 0.18.0`
+- accelerate, datasets, ftfy, tensorboard, sentencepiece, prodigyopt
+
+### 確認できたこと
+
+- CUDA: `torch.cuda.is_available() == True`、bf16 matmul 動作
+- torchao の FP8 training (`Float8Linear`) が sm_120 で動作。ただし行列次元が16の倍数である必要があり、`Float8LinearConfig(pad_inner_dim=True)` を使う
+- diffusers に klein 4B 専用の公式学習スクリプト `train_dreambooth_lora_flux2_klein.py` がある。`--do_fp8_training` / `--bnb_quantization_config_path` (NF4) / `--cache_latents` / `--gradient_checkpointing` / `--offload` に対応
+- モデル構成: transformer 7.75GB (bf16, 4B) + text encoder 8.04GB (Qwen3-4B) + VAE 168MB。モデルカードの推論要件は約13GB VRAM
+
+### 8GB VRAM の壁
+
+- transformer を bf16 で載せると 7.75GB でほぼ埋まる。FP8 (torchao) なら約4GB、NF4なら約2.5GB
+- text encoder (Qwen3-4B, bf16 8GB) は transformer と同時にGPUへ載せられない。diffusers の `--offload` はプロンプト埋め込み計算時にTEをGPUへ戻すため、fp8 transformer (4GB) + TE (8GB) = 12GB でOOMする
+- 対策: TEはCPUに置いたままプロンプト埋め込みだけ計算する。スタイルLoRAはトリガーワード固定なので埋め込みは1回で済み、RAM 15GBにTE 8GBを載せても学習は成立する見込み
+- 画像解像度はまず512pxで試す (記事のデータセットは1024px)。1024pxは未検証
+
+### データセット
+
+PRにはzipが含まれていないため、公開zipから再作成した。illustration PNG 74枚を白背景に合成し、長辺512pxにリサイズ (記事の1024pxから縮小)。スモークテストでは静的プロンプト `dadsillu, flat illustration` を使い、本番では `dadsillu, <内容>` のtxtを付ける。
+
+### 現状
+
+- 環境構築・GPU/FP8の動作確認・データセット再作成まで完了
+- モデル (約16GB) をダウンロード中
+- これから diffusers の klein 学習スクリプトを fp8 + TE CPU + 512px + 20-50 steps で走らせ、VRAMピークとlossを確認する
+- 有料APIは使わない ($0、GPU時間のみ)
