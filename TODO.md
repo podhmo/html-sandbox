@@ -11,6 +11,17 @@
 
 ## To Be Implemented
 
+- [ ] **同日に複数記事があるとき slops の一覧をファイルの追加時刻で並べる**: 記事一覧
+  （Go `go/examples/blog/internal/site/posts.go`、MoonBit `moonbit/examples/blog/site/content.mbt`）と
+  [tools/slops-nav](tools/slops-nav) は date+slug の辞書順を正規と見なすが、同日の記事どうしは
+  slug 名順になり執筆した叙述順とずれる（2026-11-03 の記事群で発生）。`git log --diff-filter=A
+  --name-only --format=%aI -- slops/` を1回呼ぶだけで全ファイルの追加時刻が取れるので
+  （ファイル数分の呼び出しは不要、実測済み）、同日のタイブレークを「追加が新しい方を上」にする
+  方向で。残る論点: pack/build 時に `.git` が要ること（`moonbit` の `content.sh` はリポジトリで
+  動くが CI の checkout depth 次第）、同一コミット内の順序、代替案（prev/next の叙述チェーンから
+  同日順を導く、front matter の order キー）。prev/next は関連記事の体裁として自由に繋ぐ前提は
+  そのまま。元 Future work の項目を昇格。
+
 - [ ] **MoonBit の http ライブラリから非同期の I/O を使えるようにする**: `serve` は
   同期なので、ハンドラーから KV、R2、D1、Static Assets、外への `fetch` を呼べない。
   JSPI（`WebAssembly.Suspending` / `promising`）で Wasm から JS の `fetch` を待つ形が、
@@ -97,9 +108,3 @@
   そのまま置くのでブラウザーで別のパスとして解釈されて 404 になる。
   `<a href>` の時点で同じ問題なので svg 固有ではない。パーセントエンコードで
   作る URL と、Go/MoonBit 両方のルーティングでのデコード側の一致も要確認。
-
-- [ ] **同日に複数記事があるときの並び順**: 記事一覧と slops-nav は
-  date+slug の辞書順を正規と見なすが、同日の記事どうしは slug 名順になり
-  執筆した叙述順とずれる（2026-11-03 の記事群で発生。prev/next を叙述順で
-  繋ぐと [tools/slops-nav](tools/slops-nav) が差異として指摘する）。叙述順を
-  front matter の order キーなどで持つか、ソート自体を見直す余地がある。
