@@ -2,6 +2,7 @@
 title: DADSイラスト素材のLoRA化を調べた — 学習は$2、壁は「このブログがPNGを載せられるか」だった
 description: デジタル庁デザインシステムのイラストレーション素材74枚でスタイルLoRAを作る目論見を調査。データセット(74ペア・白背景化・キャプション付き)まで実際に作り、学習$2-6・推奨モデルはFLUX.2 klein 4BかFLUX.1 devと結論。だが本命の壁は別にあった — slopsはPNGを載せられない。SVG(採用済み)・PNG(今回)・MathML(issue #73)と同じ「表現形式を増やすか」問いの3例目。
 prev: ../2026-11-03-unslop-dads-reports.md
+next: ../2026-11-03-silence-as-consent.md
 ---
 
 # DADSイラスト素材のLoRA化を調べた — 学習は$2、壁は「このブログがPNGを載せられるか」だった
