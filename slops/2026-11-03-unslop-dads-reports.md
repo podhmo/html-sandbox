@@ -2,6 +2,7 @@
 title: unslop をDADS製レポートに適用してみた — slopゼロ判定と、残ったdirectionの問い
 description: heydamir/unslop(デザイナーのレッドライン的に「AIっぽいUI」を直すスキル)を読み解き、先に作った5種のデジタル庁デザインシステム製レポートに監査を走らせた記録。兆候はほぼ検出されず、残ったのは craft ではなく direction(世界観)の問いだった。
 prev: 2026-11-03-html-report-variations.md
+next: 2026-11-03-dads-illustration-lora.md
 ---
 
 # unslop をDADS製レポートに適用してみた — slopゼロ判定と、残ったdirectionの問い
