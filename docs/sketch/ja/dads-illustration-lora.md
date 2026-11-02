@@ -34,7 +34,7 @@ Low-Rank Adaptation。事前学習済みモデルの重み行列 `W` を凍結�
 | Civitai サイト内トレーナー | 約2000 Buzz(サイト内クレジット) | サイト内生成 |
 | ローカル (FluxGym / ai-toolkit / kohya) | GPU時間のみ | GPU時間のみ |
 
-ローカルに必要なVRAMの目安: FLUX系(量子化込み)で12-24GB、SDXLで12GB前後、SD1.5なら8GBでも動く。この作業VMにはGPUがないのでローカル学習は検証できなかった。
+ローカルに必要なVRAMの目安: FLUX系(量子化込み)で12-24GB、SDXLで12GB前後、SD1.5なら8GBでも動く。この作業VMにはGPUがないのでローカル学習は検証できなかった (その後、別環境の8GB GPUで追試して学習まで通った。下記参照)。
 
 参考: falの公式ガイド [Fine-Tune FLUX: When, Which Model, What It Costs](https://fal.ai/learn/devs/how-to-fine-tune-flux-with-the-api)。「数枚の参照画像で済むなら学習なしのリファレンス編集(FLUX.2 dev / Klein の edit)で十分」と公式も言っている。
 
@@ -97,6 +97,7 @@ GPUもAPIトークンも手元にないため未検証だが、データセッ�
 
 - 素材・ライセンス・データセットは揃った (74ペアのzipまで作成済み)
 - 学習は $2-6 の使い切り。高いのは学習ではなく運用の一手間 (PNG→ブログに載せる経路)
+- 8GB GPU + NF4 + text encoder CPU なら **$0でローカル学習できる**ことを確認した (512px・74枚・400stepsで12分、ピーク3GiB)
 - 次の一手は「fal か Replicate のトークンを取って $2 の学習を1回流す」こと。失敗しても数百円の実験
 - それ以前に「挿絵をラスタで欲しいのか、SVG路線の延長で欲しいのか」の方向性の確認は残る
 
@@ -136,7 +137,7 @@ GPUもAPIトークンも手元にないため未検証だが、データセッ�
 - transformer を bf16 で載せると 7.75GB でほぼ埋まる。FP8 (torchao) なら約4GB、NF4なら約2.5GB
 - text encoder (Qwen3-4B, bf16 8GB) は transformer と同時にGPUへ載せられない。diffusers の `--offload` はプロンプト埋め込み計算時にTEをGPUへ戻すため、fp8 transformer (4GB) + TE (8GB) = 12GB でOOMする
 - 対策: TEはCPUに置いたままプロンプト埋め込みだけ計算する。スタイルLoRAはトリガーワード固定なので埋め込みは1回で済み、RAM 15GBにTE 8GBを載せても学習は成立する見込み
-- 画像解像度はまず512pxで試す (記事のデータセットは1024px)。1024pxは未検証
+- 画像解像度は512pxと1024pxの両方で確認した (記事のデータセットは1024px)
 
 ### データセット
 
@@ -145,6 +146,49 @@ PRにはzipが含まれていないため、公開zipから再作成した。ill
 ### 現状
 
 - 環境構築・GPU/FP8の動作確認・データセット再作成まで完了
-- モデル (約16GB) をダウンロード中
-- これから diffusers の klein 学習スクリプトを fp8 + TE CPU + 512px + 20-50 steps で走らせ、VRAMピークとlossを確認する
+- モデル (約16GB) のダウンロード完了
+- diffusers の klein 学習スクリプトを NF4 + TE CPU で走らせ、512px / 1024px の両方で VRAM ピークと loss を確認済み
+- 学習した LoRA での生成まで確認済み
 - 有料APIは使わない ($0、GPU時間のみ)
+
+### 結果: 8GBでも学習できた
+
+NF4 (bitsandbytes) + text encoder CPU + gradient checkpointing で、実際に学習まで通った。
+
+| 条件 | ピークVRAM (allocated / reserved) | 速度 |
+| --- | --- | --- |
+| 512px / 74枚 / 400 steps | 3.00 GiB / 3.20 GiB | 約1.84 s/step (合計12分21秒) |
+| 1024px / 16枚 / 10 steps | 4.99 GiB / 5.66 GiB | 約6.0 s/step |
+
+1024pxでもピーク5GiB程度で、8GBに収まる。学習したLoRA (rank 16) での1024px生成は4 stepsで約5秒。
+
+注意: FP8 (torchao) は使っていない。bf16のtransformer (7.75GB) をGPUに載せる時点で8GBを超えるため。NF4ならロード時から量子化されるのでピークが低い。FP8はCPUで変換してから載せる改造が要る (未検証)。
+
+### うまくいった構成
+
+- transformer: NF4 (double quant)
+- text encoder: CPU (bf16, 8GB RAM)。プロンプト埋め込みの計算だけCPUで行い、学習ループには入れない
+- VAE: GPU (168MB)
+- gradient checkpointing + latent caching + 8-bit Adam
+- 512px / rank 16 / alpha 16 / lr 1e-4 / constant
+
+diffusers の `train_dreambooth_lora_flux2_klein.py` には4箇所のパッチが必要だった:
+
+1. VAEはGPU、text encoderはCPUに置く (元は両方GPU)
+2. CPUで作ったprompt embedsを学習デバイスへ移す
+3. LoRA対象の `single_transformer_blocks` を `config.num_single_layers` (4Bは20) から作る。元は24固定で、存在しない4モジュールを指定していた
+4. ピークVRAMのログ
+
+### 生成結果
+
+512px・400 stepsのLoRAで1024px生成した例。ベースモデル (同じプロンプト・seed) と比べると、輪郭線なし・faceless・限定パレットのDADSらしさが出ている。400 stepsでは構図はまだ粗い。生成物は再現用リポジトリの `samples/` に置いた。
+
+### 再現用リポジトリ
+
+`~/ghq/github.com/podhmo/dads-illustration-lora` に、セットアップ・データセット作成・学習・生成をまとめた。ベースモデル (約16GB) とデータはリポジトリに含めず、`make model` / `make dataset` で取る。
+
+- `make setup` — uv + torch cu128 + diffusers
+- `make model` — FLUX.2-klein-4B
+- `make dataset` — DADS zipから74枚 (512px, 白背景)
+- `make train` — NF4 + TE CPU、400 steps (RES=1024も可)
+- `make generate` — LoRA付きで1枚生成
