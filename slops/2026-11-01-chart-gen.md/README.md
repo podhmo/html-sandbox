@@ -2,7 +2,7 @@
 title: 図解ガイドラインを受けて、仮想データで統計グラフを生成してみた
 description: issue #113 の図解ガイドライン（LLM 生成の 2 本）を docs/sketch に要約し、規約の「必須記載」を必須引数にした小さなデータ図ヘルパー tools/svg-gen/chart.ts で、seed 固定の仮想データから ECDF・時系列・散布図・箱ひげ・ヒストグラム・ヒートマップを描いた記録。
 prev: ../2026-10-31-svg-gen-figures.md
-next: ../2026-11-03-dads-illustration-lora.md
+next: ../2026-11-03-html-report-variations.md
 ---
 
 # 図解ガイドラインを受けて、仮想データで統計グラフを生成してみた

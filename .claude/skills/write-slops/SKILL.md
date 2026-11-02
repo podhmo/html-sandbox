@@ -63,6 +63,9 @@ whenever the figure is more than a handful of elements. See
 `tools/svg-gen/README.md` and the gallery article
 `slops/2026-10-31-svg-gen-figures.md` for examples.
 
+The generator stays in `examples/` — do not attach `fig-*.ts` sources to
+the article bundle; the article carries the rendered figure, not its code.
+
 For data figures (statistical charts), the same directory has `chart.ts`:
 a `Plot` with axes, nice ticks, `series`/`step`/`dots`/`vline`/`hline`,
 and a constructor that requires `{title, subtitle, footnote}` — the
