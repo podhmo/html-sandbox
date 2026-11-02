@@ -4,7 +4,9 @@
 # one per line, the most recently added first, as "git log" says they
 # entered the repository. A file's time is the author date of the commit
 # that added it; a bundle directory takes the earliest add of its
-# members. One git call answers for every file.
+# members. One git call answers for every file. Times compare as
+# seconds: offset-laden date strings do not sort chronologically across
+# timezones.
 #
 #   sh tools/article-order.sh DIR
 #
@@ -31,10 +33,10 @@ if ! git -C "$dir" rev-parse --git-dir >/dev/null 2>&1; then
 fi
 
 # git log walks the commits that added files under the directory, newest
-# first; each block is a "@<author date>" line and the added paths,
-# relative to the directory. The last write to added[] is the first
-# commit to touch the entry.
-if ! log=$(git -C "$dir" log --diff-filter=A --format='@%aI' --name-only --relative -- .); then
+# first; each block is a "@<author time in seconds>" line and the added
+# paths, relative to the directory. The last write to added[] is the
+# first commit to touch the entry.
+if ! log=$(git -C "$dir" log --diff-filter=A --format='@%at' --name-only --relative -- .); then
   echo "article-order.sh: $dir: git log failed" >&2
   exit 0
 fi
@@ -49,5 +51,5 @@ printf '%s\n' "$log" |
     END {
       for (entry in added) printf "%s\t%s\n", added[entry], entry
     }' |
-  sort -k 1,1r -k 2,2 |
+  sort -k 1,1nr -k 2,2 |
   cut -f 2-
