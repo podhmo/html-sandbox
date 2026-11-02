@@ -141,7 +141,7 @@ GPUもAPIトークンも手元にないため未検証だが、データセッ�
 
 ### データセット
 
-PRにはzipが含まれていないため、公開zipから再作成した。illustration PNG 74枚を白背景に合成し、長辺512pxにリサイズ (記事の1024pxから縮小)。スモークテストでは静的プロンプト `dadsillu, flat illustration` を使い、本番では `dadsillu, <内容>` のtxtを付ける。
+PRにはzipが含まれていないため、公開zipから再作成した。illustration PNG 74枚を白背景に合成し、長辺512pxにリサイズ (記事の1024pxから縮小)。diffusers のローカル画像パスは `.txt` キャプションを読まないため、今回は静的プロンプト `dadsillu, flat vector illustration` を使った。画像ごとのキャプションは dataset の `text` 列として渡す経路が必要 (TODO)。
 
 ### 現状
 
