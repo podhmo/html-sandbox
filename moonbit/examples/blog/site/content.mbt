@@ -229,6 +229,21 @@ pub fn load_posts(
   files : ReadOnlyArray[(String, String)],
   collection~ : String = "posts",
 ) -> Array[Post] raise LoadError {
+  // A top-level ".order" file, when the pack carried one, ranks each
+  // article by when it was added to the repository, the most recently
+  // added first (tools/article-order.sh writes it); it is not content.
+  let rank : Map[String, Int32] = Map([])
+  for (name, src) in files {
+    if name == ".order" {
+      let mut i = 0
+      for line in src.split("\n") {
+        if line != "" && !rank.contains(line.to_owned()) {
+          rank[line.to_owned()] = i
+        }
+        i = i + 1
+      }
+    }
+  }
   let seen : Map[String, String] = Map([]) // slug -> file name
   let posts = []
   let bundles : Map[String, Array[(String, String)]] = Map([])
@@ -315,12 +330,24 @@ pub fn load_posts(
       load_post_bundle(dir_name, date, slug, bundles[dir_name], collection),
     )
   }
+  // Posts are listed newest first; same-day ties go to the article
+  // added last per the collection's .order file (rank), then to the
+  // slug. An entry the file does not name counts as the newest of its
+  // day (rank -1), matching the Go blog.
   posts.sort_by((a, b) => {
     let c = b.date.lexical_compare(a.date)
     if c != 0 {
       c
     } else {
-      a.slug.lexical_compare(b.slug)
+      let c = rank
+        .get(a.file)
+        .unwrap_or(-1)
+        .compare(rank.get(b.file).unwrap_or(-1))
+      if c != 0 {
+        c
+      } else {
+        a.slug.lexical_compare(b.slug)
+      }
     }
   })
   posts

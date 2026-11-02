@@ -56,6 +56,18 @@ trap 'rm -f "$names" "$names.unsorted" "$tmp"' EXIT
 } >"$names.unsorted"
 sort -u -t '	' -k 1,1 "$names.unsorted" >"$names"
 
+# Each collection's addition order, packed as <collection>/.order for the
+# loaders' same-day ordering; article-order.sh prints nothing without
+# git, and an empty file is not packed.
+order=$out.order.$$
+trap 'rm -f "$names" "$names.unsorted" "$tmp" "$order"' EXIT
+if sh "$script/../../../../tools/article-order.sh" "$posts" >"$order" && [ -s "$order" ]; then
+  printf 'posts/.order\t%s\n' "$order" >>"$names"
+fi
+if sh "$script/../../../../tools/article-order.sh" "$slops" >"$order" && [ -s "$order" ]; then
+  printf 'slops/.order\t%s\n' "$order" >>"$names"
+fi
+
 : >"$tmp"
 while IFS='	' read -r name path; do
   size=$(wc -c <"$path" | tr -d ' ')

@@ -11,7 +11,7 @@
 
 ## To Be Implemented
 
-- [ ] **同日に複数記事があるとき slops の一覧をファイルの追加時刻で並べる**: 記事一覧
+- [x] **同日に複数記事があるとき slops の一覧をファイルの追加時刻で並べる**: 記事一覧
   （Go `go/examples/blog/internal/site/posts.go`、MoonBit `moonbit/examples/blog/site/content.mbt`）と
   [tools/slops-nav](tools/slops-nav) は date+slug の辞書順を正規と見なすが、同日の記事どうしは
   slug 名順になり執筆した叙述順とずれる（2026-11-03 の記事群で発生）。`git log --diff-filter=A

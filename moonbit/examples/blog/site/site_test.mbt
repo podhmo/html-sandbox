@@ -122,6 +122,25 @@ test "load posts" {
 }
 
 ///|
+/// The .order file lists entry names in addition order, newest first;
+/// same-day posts follow it instead of slug order, and an entry it does
+/// not name counts as the newest of its day.
+test "load posts order" {
+  let posts = @site.load_posts([
+    (".order", "2026-10-14-hello.md\n2026-10-14-another.md\n"),
+    ("2026-10-01-old.md", "# Old\nbody"),
+    ("2026-10-14-hello.md", "# Hello"),
+    ("2026-10-14-another.md", "# Another"),
+    ("2026-10-14-extra.md", "# Extra"),
+    ("2026-10-14-bundle.md/README.md", "# Bundle"),
+  ])
+  assert_eq([ for p in posts => "\{p.date} \{p.slug} \{p.title}" ], [
+    "2026-10-14 bundle Bundle", "2026-10-14 extra Extra", "2026-10-14 hello Hello",
+    "2026-10-14 another Another", "2026-10-01 old Old",
+  ])
+}
+
+///|
 test "load posts errors" {
   let cases : Array[(String, ReadOnlyArray[(String, String)], String)] = [
     ("no date", [("hello.md", "# x")], "YYYY-MM-DD-slug.md"),
