@@ -28,6 +28,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v7
+      with:
+        # Full history: embed.sh packs each collection's .order from
+        # "git log --diff-filter=A"; a shallow checkout has none.
+        fetch-depth: 0
 
     - name: Set up Go
       uses: actions/setup-go@v7
