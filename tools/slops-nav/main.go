@@ -124,7 +124,9 @@ func load(dir string) ([]article, error) {
 	// addition comes first, so here it is the day's last. Within one
 	// commit names sort lexically; gitorder.Names is nil without git,
 	// and an unlisted entry — one not committed yet — counts as the
-	// day's last (the blog lists it as the newest).
+	// day's last (the blog lists it as the newest). Slugs sort
+	// descending either way, the reverse of the list's ascending
+	// fallback.
 	names := gitorder.Names(dir)
 	rank := func(a article) int {
 		for i, name := range names {
@@ -135,7 +137,7 @@ func load(dir string) ([]article, error) {
 		return -1
 	}
 	slices.SortFunc(arts, func(a, b article) int {
-		return cmp.Or(strings.Compare(a.date, b.date), cmp.Compare(rank(b), rank(a)), strings.Compare(a.slug, b.slug))
+		return cmp.Or(strings.Compare(a.date, b.date), cmp.Compare(rank(b), rank(a)), strings.Compare(b.slug, a.slug))
 	})
 	return arts, nil
 }
