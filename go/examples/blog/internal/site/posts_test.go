@@ -35,6 +35,38 @@ func TestLoadPosts(t *testing.T) {
 	}
 }
 
+// The .order file lists entry names in addition order, newest first;
+// same-day posts follow it instead of slug order, and an entry it does
+// not name counts as the newest of its day.
+func TestLoadPostsOrderFile(t *testing.T) {
+	fsys := fstest.MapFS{
+		".order":                         file("2026-10-14-hello.md\n2026-10-14-another.md\n"),
+		"2026-10-01-old.md":              file("# Old\nbody"),
+		"2026-10-14-hello.md":            file("# Hello"),
+		"2026-10-14-another.md":          file("# Another"),
+		"2026-10-14-extra.md":            file("# Extra"),
+		"2026-10-14-bundle.md/README.md": file("# Bundle"),
+	}
+	posts, err := LoadPosts(fsys)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got []string
+	for _, p := range posts {
+		got = append(got, p.Date.Format(time.DateOnly)+" "+p.Slug+" "+p.Title)
+	}
+	want := []string{
+		"2026-10-14 bundle Bundle",
+		"2026-10-14 extra Extra",
+		"2026-10-14 hello Hello",
+		"2026-10-14 another Another",
+		"2026-10-01 old Old",
+	}
+	if strings.Join(got, "\n") != strings.Join(want, "\n") {
+		t.Errorf("got\n%s\nwant\n%s", strings.Join(got, "\n"), strings.Join(want, "\n"))
+	}
+}
+
 func TestLoadPostsErrors(t *testing.T) {
 	cases := []struct {
 		name    string

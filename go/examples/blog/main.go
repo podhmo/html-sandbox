@@ -9,9 +9,11 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/podhmo/html-sandbox/go/examples/blog/internal/site"
+	"github.com/podhmo/html-sandbox/go/pkg/gitorder"
 )
 
 func main() {
@@ -37,12 +39,14 @@ func run() error {
 
 	postsFS, slopsFS, docsFS := site.EmbeddedSources()
 	var err error
+	repoDir := ""
 	if *debug {
 		if *root == "" {
 			if *root, err = findModuleRoot("."); err != nil {
 				return err
 			}
 		}
+		repoDir = filepath.Dir(*root)
 		// posts/, TODO.md, and docs/ sit in the repository root, above the
 		// module.
 		if docsFS, err = openRepo(*root); err != nil {
@@ -60,11 +64,11 @@ func run() error {
 		}
 	}
 	load := func() ([]site.Post, []site.Doc, error) {
-		posts, err := site.LoadPosts(postsFS)
+		posts, err := site.LoadPosts(site.WithOrderFile(postsFS, orderOf(repoDir, "posts")))
 		if err != nil {
 			return nil, nil, err
 		}
-		slops, err := site.LoadSlops(slopsFS)
+		slops, err := site.LoadSlops(site.WithOrderFile(slopsFS, orderOf(repoDir, "slops")))
 		if err != nil {
 			return nil, nil, err
 		}
@@ -98,4 +102,14 @@ func run() error {
 	slog.Info("listening", "addr", "http://"+*addr, "base-url", *baseURL,
 		"posts", len(posts), "docs", len(docs), "debug", *debug, "watch", *watch, "root", *root)
 	return http.ListenAndServe(*addr, s)
+}
+
+// orderOf returns the collection's .order content in a real checkout —
+// what tools/article-order.sh packs — or nil outside a checkout, where
+// the embedded copy (or none) stands.
+func orderOf(repoDir, coll string) []byte {
+	if repoDir == "" {
+		return nil
+	}
+	return gitorder.OrderFile(filepath.Join(repoDir, coll))
 }

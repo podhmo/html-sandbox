@@ -124,8 +124,19 @@ func LoadPosts(fsys fs.FS) ([]Post, error) {
 		}
 		posts = append(posts, Post{Slug: slug, File: name, Date: date, Title: title, Description: description, prevRaw: meta["prev"], nextRaw: meta["next"], Doc: doc, Markdown: string(src)})
 	}
+	// Posts are listed newest first; same-day ties go to the article
+	// added last per the collection's .order file (orderRanks), then to
+	// the slug. An entry the file does not name — one not committed when
+	// the content was packed — counts as the newest of its day.
+	ranks := orderRanks(fsys)
+	rank := func(p Post) int {
+		if r, ok := ranks[p.File]; ok {
+			return r
+		}
+		return -1
+	}
 	slices.SortFunc(posts, func(a, b Post) int {
-		return cmp.Or(b.Date.Compare(a.Date), cmp.Compare(a.Slug, b.Slug))
+		return cmp.Or(b.Date.Compare(a.Date), cmp.Compare(rank(a), rank(b)), cmp.Compare(a.Slug, b.Slug))
 	})
 	return posts, nil
 }

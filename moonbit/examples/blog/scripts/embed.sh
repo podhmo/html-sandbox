@@ -28,17 +28,26 @@ out=$1
 # moon passes paths as ./PATH; drop that so both callers write the same file.
 base=${2#./}
 shift 2
+script=$(dirname "$0")
 tmp=$out.tmp.$$
 list=$out.list.$$
 raw=$out.raw.$$
-trap 'rm -f "$tmp" "$tmp.one" "$list" "$raw"' EXIT
+order=$out.order.$$
+trap 'rm -f "$tmp" "$tmp.one" "$list" "$raw" "$order"' EXIT
 
 LC_ALL=C
 export LC_ALL
 
 # Write the names to a file before sorting them, so a path list-files.sh
 # rejects stops the build: in a pipeline, set -e sees only sort's status.
-sh "$(dirname "$0")/list-files.sh" "$base" "$@" >"$raw"
+sh "$script/list-files.sh" "$base" "$@" >"$raw"
+
+# A collection (no PATHs: the posts or slops directory) also carries its
+# addition order as ".order", like content.sh packs it; without git it
+# is left out and the loaders fall back to slug order.
+if [ $# -eq 0 ] && sh "$script/../../../../tools/article-order.sh" "$base" >"$order" && [ -s "$order" ]; then
+  echo .order >>"$raw"
+fi
 sort -u -o "$list" "$raw"
 
 {
@@ -46,7 +55,9 @@ sort -u -o "$list" "$raw"
   i=0
   while IFS= read -r name; do
     # moon tool embed is what moon.pkg's :embed runs; drop its header.
-    moon tool embed --text -i "$base/$name" -o "$tmp.one" --name "file_$i"
+    src=$base/$name
+    [ "$name" = .order ] && src=$order
+    moon tool embed --text -i "$src" -o "$tmp.one" --name "file_$i"
     echo
     sed -n '/^\/\/\/|$/,$p' "$tmp.one"
     i=$((i + 1))

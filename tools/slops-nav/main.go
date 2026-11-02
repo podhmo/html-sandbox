@@ -18,6 +18,7 @@
 package main
 
 import (
+	"cmp"
 	"flag"
 	"fmt"
 	"log/slog"
@@ -29,6 +30,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/podhmo/html-sandbox/go/pkg/gitorder"
 	"github.com/podhmo/html-sandbox/go/pkg/tinyfrontmatter"
 	"github.com/podhmo/html-sandbox/go/pkg/tinymarkdown"
 )
@@ -116,8 +118,26 @@ func load(dir string) ([]article, error) {
 		a.meta = meta
 		arts = append(arts, a)
 	}
+	// Articles of one date follow the collection's addition order the
+	// way the site's lists do, so list position and chain neighbours
+	// tell one story: on the site's newest-first list the latest
+	// addition comes first, so here it is the day's last. Within one
+	// commit names sort lexically; gitorder.Names is nil without git,
+	// and an unlisted entry — one not committed yet — counts as the
+	// day's last (the blog lists it as the newest). Slugs sort
+	// descending either way, the reverse of the list's ascending
+	// fallback.
+	names := gitorder.Names(dir)
+	rank := func(a article) int {
+		for i, name := range names {
+			if name == a.name {
+				return i
+			}
+		}
+		return -1
+	}
 	slices.SortFunc(arts, func(a, b article) int {
-		return strings.Compare(a.date+a.slug, b.date+b.slug)
+		return cmp.Or(strings.Compare(a.date, b.date), cmp.Compare(rank(b), rank(a)), strings.Compare(b.slug, a.slug))
 	})
 	return arts, nil
 }
