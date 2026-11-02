@@ -23,7 +23,12 @@ jobs:
       run:
         working-directory: moonbit
     steps:
+      # Full history: content.sh derives each collection's .order from
+      # "git log --diff-filter=A"; a shallow checkout has no additions to
+      # report and the deployed lists fall back to slug order.
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v7
         with:
           node-version: 24
