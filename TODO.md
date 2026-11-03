@@ -68,6 +68,10 @@
   `docs/sketch/ja/` に規約をまとめ、仮想データからのグラフ生成を svg-gen
   拡張（あるいは chart-gen の芽）として試し、結果を slops 記事にする
   （[issue #113](https://github.com/podhmo/html-sandbox/issues/113)）。
+- [ ] **Qwen3-TTS を vLLM バックエンドで動かして実時間に届くか確かめる**: 素の `qwen-tts` では
+  RTF 1.6〜1.8 で、GPU 使用率 27% のまま Python の生成ループが律速していた。WSL2 + RTX 5060 8GB
+  （root なし）で vLLM が sm_120 / cu128 で入るか、RTF が 1.0 を切るかを測って追記する
+  （[調査メモ](docs/sketch/ja/tts-wsl2.md)、[PR #127](https://github.com/podhmo/html-sandbox/pull/127)）。
 
 ### Future work
 

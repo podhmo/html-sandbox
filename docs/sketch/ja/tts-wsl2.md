@@ -3,6 +3,10 @@
 WSL2 (Ubuntu 26.04) + RTX 5060 Laptop 8GB で、ローカル TTS の「読み上げ」が実際にどこまで動くかを確かめた記録。
 対象は Grok との会話で候補に挙がったもののうち、この環境で追加のインストール権限なしに試せるもの。
 
+依頼は [Grok との対話](https://x.com/i/grok/share/c2hhcmQtMg_d2d39649-2804-410f-8d30-ffbaacd5138b)の抜粋を渡したうえで、「WSL2 上の Ubuntu で 8GB の NVIDIA GPU がある。この状況で音声読み上げの動作確認をして、結果と後片付けの方法を docs/sketch に残す」というものだった。
+
+作業したのは [WSL を簡易的な隔離環境として使う記事](../../../posts/2026-10-19-wsl-opencode.md/article1.md)で作った環境で、エージェント（opencode）に root を渡していないのは**意図的**。`/etc/wsl.conf` で `automount` と `interop` を切ってあるのも同じ記事の設定で、Windows 側のファイルやプログラムにエージェントが触れないようにしている。だから以下の手順は「sudo が使えない環境での回避策」ではなく、「ユーザー権限の中で完結させる」ことを前提に組んである。
+
 - **Piper**（CPU・超軽量）
 - **Kokoro 82M**（GPU/CPU・軽量）
 - **Qwen3-TTS 0.6B / 1.7B**（GPU・高品質・指示つき）
@@ -12,7 +16,7 @@ Voicebox と VOICEVOX は、この環境では前提（Docker / 7z 展開 / root
 
 ## 結論
 
-- **WSL2 でも普通に鳴る。** WSLg が PulseAudio サーバー（`unix:/mnt/wslg/PulseServer`, sink は `RDPSink`）を最初から立てている。足りないのはクライアント（`paplay` / `pactl`）だけで、root 無しでも `.deb` を展開すれば使える。`~/.asoundrc` も pulseaudio パッケージも要らなかった。
+- **WSL2 でも普通に鳴る（人が実際に PC から音が出るのを確認した）。** WSLg が PulseAudio サーバー（`unix:/mnt/wslg/PulseServer`, sink は `RDPSink`）を最初から立てている。足りないのはクライアント（`paplay` / `pactl`）だけで、root 無しでも `.deb` を展開すれば使える。`~/.asoundrc` も pulseaudio パッケージも要らなかった。
 - **日本語の長文読み上げの第一候補は Kokoro 82M (GPU)。** 13 秒の音声を 0.23 秒で合成（RTF 0.018）、VRAM 830MiB。文単位に区切れば最初の音が約 1.0 秒で出る。
 - **Piper は CPU だけで RTF 0.13。** GPU を一切使わないので併用しやすい。ただし日本語ボイスは `ja_JP-hi_fi_captain-medium` の 1 種類だけ。
 - **Qwen3-TTS は 8GB でも余裕で載る（1.7B で VRAM 4.0GB）が、公式 Python パッケージのままだと RTF 1.6〜1.8 で実時間より遅い。** GPU 使用率は 27% 程度しか出ておらず、ボトルネックは GPU ではなく 1 フレームごとの Python ループ。実時間で回すには vLLM など別バックエンドが要る（今回は未検証）。
@@ -40,15 +44,15 @@ RTF は「音声 1 秒あたりの合成秒数」。1.0 未満なら実時間よ
 | ディストリ | Ubuntu 26.04.1 LTS（Resolute Raccoon） |
 | システム Python | 3.14.4（pip 無し） |
 | uv | 0.13.7（`~/.local/bin/uv`） |
-| sudo | **使えない**（パスワード入力が必要。`sudo -n` は失敗） |
-| WSL 設定 | `systemd=true`、`automount=false`、`interop=false`（`.exe` は実行できない）、`/mnt/c` は空 |
+| sudo | **使えない**（パスワード入力が必要。`sudo -n` は失敗）。エージェントに root を渡さないのは意図的 |
+| WSL 設定 | `systemd=true`、`automount=false`、`interop=false`（`.exe` は実行できない）、`/mnt/c` は空。隔離のための設定 |
 | ファイルシステム | `/` は 1TB で 866GB 空き。**`/tmp` は tmpfs 7.7GB** |
 
-この記事のコマンドはすべて `~/tts-lab` で作業する前提。`/tmp` に venv を作ると torch を入れた時点で tmpfs が埋まる（実際に埋まった）。
+この記事のコマンドはすべて `~/tts-lab` で作業する前提。`/tmp` は tmpfs（メモリ上）なので、torch 入りの venv（約 7.3GB）のような大物を置く場所ではない。最初に `/tmp` で作業して埋めてしまったのはエージェント側の不注意で、環境の問題ではない。
 
 ## 1. 音声出力（WSLg）の確認
 
-`PULSE_SERVER` は最初から設定されていて、ソケットも存在する。
+`PULSE_SERVER` は最初から設定されていて、ソケットも存在する。これは WSLg が有効なときに WSLg 側が用意するもので（`DISPLAY` や `WAYLAND_DISPLAY` と同じ扱い）、ディストリ側で何かを設定した結果ではない。
 
 ```console
 $ echo $PULSE_SERVER
@@ -104,7 +108,7 @@ $ pactl list short sinks
 1  RDPSink  module-rdp-sink.c  s16le 2ch 44100Hz  RUNNING
 ```
 
-つまり `paplay` の終了コードと sink の状態までは確認できる。**実際に耳に届いているかは、この環境からは確認できない**ので、そこは手元で確かめる必要がある（音が出ない場合は Windows 側のサウンド設定と WSLg のオーディオを疑う）。
+つまり `paplay` の終了コードと sink の状態までは確認できる。実際に耳に届いているかはエージェントからは確認できないが、**手元の PC から音が鳴っていることは人が確認した**。`RDPSink` が `RUNNING` になれば Windows 側まで届いていると見てよい（音が出ない場合は Windows 側のサウンド設定と WSLg のオーディオを疑う）。
 
 注意点:
 
@@ -314,11 +318,13 @@ chunk 2: 2.40s の音声が 1.22s 時点で生成完了
 
 | 候補 | 状態 | 理由 |
 | --- | --- | --- |
-| Voicebox (jamiepine/voicebox) | 未検証 | Docker が入っていない。WSL2 内で Docker を動かすには root が要る（この環境では sudo 不可）。GPU パススルー以前の前提が揃わない |
+| Voicebox (jamiepine/voicebox) | 未検証 | Docker が入っていない。WSL2 内で Docker を動かすには root が要る（この環境ではエージェントに root を渡していない）。GPU パススルー以前の前提が揃わない |
 | VOICEVOX | 未検証 | エンジンの配布物が `.7z` で、展開に p7zip か py7zr が要る。加えて「Windows 側で起動して WSL から叩く」構成はこの環境では不可（`interop=false`、`/mnt/c` 空）。Linux 版エンジンを WSL2 内で動かすのが筋 |
 | Chatterbox | 未検証 | `torch==2.6.0` をピンするので、cu128 の新しい torch と衝突する。8GB では動くはずだが、今回の目的（日本語の読み上げ）に対して優先度が低い |
 | vLLM バックエンドの Qwen3-TTS | 未検証 | Qwen3-TTS の README は vLLM を挙げている。実時間化の本命だが、vLLM のインストールと sm_120 向けビルドの確認に時間がかかるため今回は見送り |
 | Piper の GPU 実行 | 未検証 | `onnxruntime-gpu` を入れれば `--cuda` が使えるはず。CPU で RTF 0.13 なので優先度は低い |
+
+このうち次にやりたいのは **vLLM バックエンドの Qwen3-TTS** だけで、ほかは優先度が低い。Qwen3-TTS は VRAM には余裕があり、遅さの原因も Python のループと分かっているので、バックエンドを替えて RTF が 1.0 を切るかを確かめる価値がある。Voicebox は root が前提なので、この環境の方針（root を渡さない）とそもそも噛み合わない。
 
 ## 6. 推奨
 
