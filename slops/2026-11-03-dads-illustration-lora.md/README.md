@@ -183,3 +183,79 @@ issue #73 の裏テーマを立てるなら、この調査自身が「式の需�
    - 諦めてPNG/JPEGメンバー(attachments)を許す。content.binのバイナリ対応というサイト拡張。SVGのときと同じ「特別扱いを1つ足す」設計判断
 
 つまり順序は「作って眺める → 良かったら vtracer→SVG で済むか試す → 無理なら添付許容を考える」。学習の$2より前に、この検証サイクルの1周目(生成してissue artifactsに貼る)が次の一手になる。
+
+## 追記(その3): 8GB GPUで$0学習できた
+
+この記事を書いた時点では「学習は$2から」「GPUがないのでローカル学習は未検証」だった。その後、WSL2上のRTX 5060 Laptop (8GB VRAM) で、有料APIを一切使わずにLoRA学習と生成まで通った。2026-11-03時点の実測を残す。
+
+### 構成
+
+FLUX.2 klein 4Bの内訳は transformer 7.75GB (bf16) + Qwen3 text encoder 8.04GB + VAE 168MB。合計16GBで、そのままでは8GBに載らない。次の3点で収めた:
+
+- transformerをNF4 (bitsandbytes, double quant) で量子化する。約2.5GB
+- Qwen3 text encoderはCPUに置く。プロンプト埋め込みの計算だけCPUで行い、学習ループには入れない
+- gradient checkpointing + latent caching + 8-bit Adam
+
+この構成で、diffusersの `train_dreambooth_lora_flux2_klein.py` は4箇所のパッチで動いた:
+
+- VAEはGPU、text encoderはCPUに置く (元は両方GPU)
+- CPUで作ったprompt embedsを学習デバイスへ移す
+- LoRA対象の `single_transformer_blocks` を `config.num_single_layers` (4Bは20) から作る。元は24固定で、存在しないモジュールを4つ指定していた
+- ピークVRAMをログに出す
+
+FP8 (torchao) はsm_120で動くことを確認したが、学習には使っていない。bf16のtransformer 7.75GBをGPUに載せる時点で8GBを超えるため。NF4はロード時から量子化されるのでピークが低い。
+
+### 実測
+
+| 条件 | ピークVRAM (allocated / reserved) | 速度 |
+| --- | --- | --- |
+| 512px / 74枚 / 400 steps | 3.00 GiB / 3.20 GiB | 1.84 s/step (合計12分21秒) |
+| 1024px / 16枚 / 10 steps | 4.99 GiB / 5.66 GiB | 約6.0 s/step |
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -55 411.47499999999997 155.2" width="411" height="155" role="img" aria-label="peak VRAM of the local LoRA training: 512px 400 steps 3.00 GiB, 1024px 10 steps 4.99 GiB, on an 8 GiB card">
+<text x="113.59999999999997" y="10" font-size="12" text-anchor="end" dominant-baseline="central" fill="currentColor">512px, 400 steps</text>
+<rect x="121.59999999999997" y="0" width="78" height="20" fill="currentColor" fill-opacity="0.45" stroke="currentColor" stroke-width="1"/>
+<text x="205.59999999999997" y="10" font-size="11" dominant-baseline="central" fill="currentColor" opacity="0.7">3.00 GiB</text>
+<text x="113.59999999999997" y="44" font-size="12" text-anchor="end" dominant-baseline="central" fill="currentColor">1024px, 10 steps</text>
+<rect x="121.59999999999997" y="34" width="129.74" height="20" fill="currentColor" fill-opacity="0.45" stroke="currentColor" stroke-width="1"/>
+<text x="257.34" y="44" font-size="11" dominant-baseline="central" fill="currentColor" opacity="0.7">4.99 GiB</text>
+<path d="M329.59999999999997 -26 L329.59999999999997 64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 3"/>
+<text x="329.59999999999997" y="-34" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.7">8 GiB (このGPUのVRAM)</text>
+<text x="0" y="88" font-size="11" fill="currentColor" opacity="0.65">ピークは transformer をNF4、text encoderをCPUに置いた構成の実測値。</text>
+</svg>
+```
+
+1024pxでもピーク5GiB弱で、8GBに収まる。512pxの400 stepsは12分で終わるので、待ち時間は記事を1本書く合間程度。API課金は$0で、GPU時間と電気代だけがコストになる。
+
+### 生成結果
+
+学習したLoRA (rank 16) での1024px生成は4 stepsで約5秒。同じプロンプト・seedのベースモデルと比べると、輪郭線なし・顔のパーツを描かない・サーモンピンク/ブルー/オリーブの限定パレットというDADSの特徴が出た。サンプルは[PR #125のコメント](https://github.com/podhmo/html-sandbox/pull/125#issuecomment-6590651796)に貼った。
+
+ただし400 stepsでは構図とポーズがまだ粗い。「もうちょっと回さないとダメそう」というのが生成物を見た感想で、この記事の範囲では追加学習はしていない。
+
+### データとキャプションの制約
+
+DADSの公開zipからイラスト74枚を取り、透過PNGを白背景に合成して512pxに縮小した。透過のままだと背景が黒として学習される。
+
+キャプションは全画像で `dadsillu, flat vector illustration` の固定。diffusersのローカル画像パスは `.txt` キャプションを読まないため、画像ごとのキャプションを使うには `image` / `text` 列を持つdatasetを `--dataset_name` で渡す必要がある。スタイルLoRAなら共通トリガーでも動くが、内容とスタイルの分離は弱くなる。
+
+### 再現用リポジトリ
+
+`~/ghq/github.com/podhmo/dads-illustration-lora` に、セットアップから生成までをまとめた (ローカルのみで、GitHubには未公開)。ベースモデル約16GBとデータは含めず、makeで取る。
+
+- `make setup` — uv + torch cu128 + diffusers
+- `make model` — FLUX.2-klein-4B
+- `make dataset` — DADS zipから74枚 (512px, 白背景)
+- `make train` — NF4 + text encoder CPU、400 steps。`RES=1024 STEPS=1000` も可
+- `make generate` — LoRA付きで1枚生成
+
+### 次に回すなら
+
+品質を詰めるなら、優先順はこの順になるはず:
+
+- 1024pxで1000 steps以上。1024pxは6秒/stepなので1000 stepsで約1.7時間
+- 画像ごとのキャプション。`dadsillu, <内容>` をdatasetのtext列で渡す
+- rank 16 → 32、lrを少し下げる
+
+記事の結論「真の障壁は学習コストではなくPNGをブログに載せる経路」は変わっていない。学習が$0・12分で回るなら、残る問題は生成物の使い道とフォーマットだけになる。
