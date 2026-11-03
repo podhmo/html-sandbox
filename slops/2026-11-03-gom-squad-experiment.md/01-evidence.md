@@ -19,4 +19,5 @@ README 本文の推測を支える観察の一覧。「観察」はリポジト�
 
 - リポジトリ: https://github.com/podhmo/gom （2026-11-03 時点の main）
 - 作者の投稿（squad / swarm、オーケストレーターのモデル差、工夫の列挙）: https://x.com/podhmo/status/2117504262272139706
-- 運用条件「Devin の SWE-2 local use が無料なので全部 SWE-2 effort=max」は、記事執筆の依頼で作者から直接伝えられた情報
+- 運用条件「Devin の SWE-2 local use が無料なので全部 SWE-2 effort=max」は、記事執筆の依頼で作者から直接伝えられた情報。追記で作者から「コードは基本的に全部 SWE-2 だが、最初のドキュメント（spec.md・design.md）は SWE-2 ではない」と訂正あり
+- 追記の「著者の回答」（存在しない言語への認識力の測定、MoonBit との対照、関数型・式志向への好み）は、記事公開後に作者本人から伝えられたもの
