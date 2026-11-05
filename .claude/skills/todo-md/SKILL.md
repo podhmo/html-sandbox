@@ -40,6 +40,29 @@ Run whenever `[x]` entries accumulate in `TODO.md` — any session may do it
    collapse the ancestor chain into that one line (`> parent: A › B › …`).
    If the parent's title has drifted, use its current text — the GC pass is
    where such drift gets reconciled.
+3. Never archive a subtree. Each archive entry is one `- [x]` at column 0,
+   so `rg <word>` on any item lands on a line whose context line sits
+   directly above it. When a completed entry has `[x]` children, split it:
+   the parent goes first with its children removed, then each child (and
+   grandchild, …) follows as its own entry with its own `> parent:` line,
+   in document order. Plain `- ` notes without a checkbox (`完了の条件:`,
+   `決めること:`) are part of their owner's text and stay indented under it.
+
+   ```markdown
+   <!-- TODO.md -->
+   - [x] **A**: ...
+     - [x] **B**: ...
+       - [x] **C**: ...
+     - 完了の条件: ...
+
+   <!-- appended to TODO-archive.md -->
+   - [x] **A**: ...
+     - 完了の条件: ...
+   > parent: A
+   - [x] **B**: ...
+   > parent: A › B
+   - [x] **C**: ...
+   ```
 
 Only GC writes to `TODO-archive.md`, so the file stays append-only and
 conflict-free.

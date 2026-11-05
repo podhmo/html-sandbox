@@ -4,8 +4,9 @@
 > `TODO.md` by a periodic GC sweep (see `.claude/skills/todo-md/SKILL.md` —
 > feature PRs never write here, so this file never conflicts). Entries land
 > **verbatim** at the end of the file as `- [x]` lines; nested items get a
-> `> parent: <title>` context line first. Entries are never rewritten;
-> links into docs, issues, and PRs are preserved.
+> `> parent: <title>` context line first. Subtrees are split into
+> one top-level entry per item, so every item is greppable on its own
+> line. Entries are never rewritten; links into docs, issues, and PRs are preserved.
 >
 > **Reading this file:** do not read it whole — `grep` for a symbol or
 > feature name, then read only the surrounding lines (`rg -C` / read with
