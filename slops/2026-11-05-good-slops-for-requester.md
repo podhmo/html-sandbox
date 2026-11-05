@@ -2,6 +2,7 @@
 title: 依頼した人にとって良い slops とは
 description: issue #133 のコメント、このセッションでの依頼した人の発言、既存の記事に追記された感想から、依頼した人にとって良い slops の条件を 11 項目に整理し、それぞれに根拠と説明を付けた。後半は確かめていない推測として、PR や diff から見えなかった側が書かれているか、という判定の基準を置く。
 prev: 2026-11-05-slops-use-case-templates.md
+next: 2026-11-05-skill-for-new-articles.md
 ---
 
 # 依頼した人にとって良い slops とは
