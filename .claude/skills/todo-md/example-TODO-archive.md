@@ -5,7 +5,7 @@
 > feature PRs never write here, so this file never conflicts). Each item
 > lands at the end of the file as one line, prefixed with its ancestor
 > chain (`- [x] A > B > **C**: ...`), so a grep hit names the whole path.
-> Wording and links are kept verbatim; entries are never rewritten.
+> Wording and links are kept verbatim; only the layout is normalized.
 >
 > **Reading this file:** do not read it whole — `grep` for a symbol or
 > feature name; the matching line is the whole entry.

@@ -29,43 +29,57 @@ asynchronous so the archive can never conflict between branches.
 ## GC: consolidating completed entries
 
 Run whenever `[x]` entries accumulate in `TODO.md` — any session may do it
-(e.g. at the end of a work round); there is no fixed schedule. For each
-`[x]` entry in `TODO.md`:
+(e.g. at the end of a work round); there is no fixed schedule. Run it with
+the tool, not by hand:
 
-1. Delete it from `TODO.md`.
+```sh
+make todo-gc   # = cd tools/todo-gc && go run . -w ../..
+```
+
+Without `-w` (`cd tools/todo-gc && go run . ../..`) it only reports, and
+exits 1 when a file would change. The tool does the following; edit
+[tools/todo-gc](../../../tools/todo-gc/main.go) rather than working around
+it when the rule changes.
+
+1. Delete each `[x]` entry from `TODO.md`. An `[x]` entry that still has an
+   open child is left in place with a warning — fix the entry by hand.
 2. Append it to the **end** of `TODO-archive.md` as **one physical line per
    item**, so `rg <word>` on any word of any item returns a line that also
    names every ancestor:
    - Start the line with `- [x] `, then the ancestor chain, then the item:
-     `- [x] A > B > **C**: ...`. Ancestors are their title text only (no
-     `[ ]`/`[-]` marker, no bold); the item keeps its own text as written.
-     A top-level item has no chain. If an ancestor's title has drifted,
-     use its current text — the GC pass is where such drift gets
-     reconciled.
-   - Join the item's wrapped lines into that one line with spaces. Keep
-     the wording and links verbatim.
+     `- [x] A > B > **C**: ...`. Ancestors are named by their bold title
+     (else the text before the first colon, else the whole text), with no
+     `[ ]`/`[-]` marker. A top-level item has no chain. A drifted parent
+     title is reconciled by its current text at GC time.
+   - Join the item's wrapped lines into that one line (a space, except
+     between Japanese characters). Keep the wording and links verbatim.
    - Never archive a subtree. A completed parent with `[x]` children goes
      first without them; each child, grandchild, … follows as its own
      line, in document order.
-   - Plain `- ` notes without a checkbox (`完了の条件:`, `決めること:`) get
-     the same treatment without the checkbox: `- A > 完了の条件: ...`.
+   - Plain `- ` notes without a checkbox (`完了の条件:`, `決めること:`)
+     under an archived item get the same treatment without the checkbox:
+     `- A > 完了の条件: ...`.
+3. Normalize the rest of the archive into the same form (idempotent), so
+   older multi-line entries and `> parent:` context lines never come back.
 
-   ```markdown
-   <!-- TODO.md -->
-   - [x] **A**: one
-     two.
-     - [x] **B**: ...
-     - [x] **C**: ...
-       - [x] **D**: ...
-     - 完了の条件: ...
+For example:
 
-   <!-- appended to TODO-archive.md -->
-   - [x] **A**: one two.
-   - [x] A > **B**: ...
-   - [x] A > **C**: ...
-   - [x] A > C > **D**: ...
-   - A > 完了の条件: ...
-   ```
+```markdown
+<!-- TODO.md -->
+- [x] **A**: one
+  two.
+  - [x] **B**: ...
+  - [x] **C**: ...
+    - [x] **D**: ...
+  - 完了の条件: ...
+
+<!-- appended to TODO-archive.md -->
+- [x] **A**: one two.
+- [x] A > **B**: ...
+- [x] A > **C**: ...
+- [x] A > C > **D**: ...
+- A > 完了の条件: ...
+```
 
 Only GC writes to `TODO-archive.md`, so the file stays append-only and
 conflict-free.
@@ -73,9 +87,8 @@ conflict-free.
 ## Reading the archive
 
 Never read it whole. `rg <symbol>` returns the matching item with its
-ancestor chain on the same line. Entries archived before the one-line rule
-still span several lines with `> parent:` context lines; for those, read
-the surrounding window (`rg -C 20`, or an offset read).
+ancestor chain on the same line; read neighbouring lines (`rg -C 3`) only
+to see its siblings.
 
 ## Porting this scheme to another repo
 

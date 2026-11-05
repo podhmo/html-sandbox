@@ -1,15 +1,14 @@
 # TODO archive
 
 > **What this file is:** append-only history of completed work moved out of
-> `TODO.md` by a periodic GC sweep (see `.claude/skills/todo-md/SKILL.md` —
+> `TODO.md` by a periodic GC sweep (`make todo-gc`; see `.claude/skills/todo-md/SKILL.md` —
 > feature PRs never write here, so this file never conflicts). Each item
 > lands at the end of the file as one line, prefixed with its ancestor
 > chain (`- [x] A > B > **C**: ...`), so a grep hit names the whole path.
-> Wording and links are kept verbatim; entries are never rewritten.
+> Wording and links are kept verbatim; only the layout is normalized.
 >
 > **Reading this file:** do not read it whole — `grep` for a symbol or
-> feature name, then read only the surrounding lines (`rg -C` / read with
-> an offset).
+> feature name; the matching line is the whole entry.
 
 - [x] **Core `pkg/el`** ([design](docs/ja/design.md)): the scope the blog
   needs first; more elements/attributes are added as const lines later.
