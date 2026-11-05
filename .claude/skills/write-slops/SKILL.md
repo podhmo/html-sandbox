@@ -24,7 +24,10 @@ when a reusable instruction for another LLM is needed.
   inline code, and `[label](URL)` links.
 - Code fences use exactly three backticks. Other fence lengths and `~~~`
   are not supported. A literal HTML fragment outside an SVG fence is text.
-- Do not rely on emphasis, numbered lists, `![]()` images, `data:` images,
+- Never use `*` for bold or emphasis (`**bold**`, `*em*`, `***both***`),
+  in prose, lists, tables, or quotes. tinymarkdown will not support it and
+  the literal asterisks are hard to read. A `* ` list marker is fine.
+- Do not rely on other emphasis, numbered lists, `![]()` images, `data:` images,
   Mermaid rendering, or syntax highlighting. Explain or simplify instead
   of extending the renderer as part of an article-writing task.
 - Front matter, if used, is simple `key: value`, not general YAML.
