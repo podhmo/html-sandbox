@@ -2,6 +2,7 @@
 title: slops の書き方を読み直した日
 description: issue #133 で「論ずる文体が鼻についてきた」と言われて、最近の slops と write-slops の指定と docs/ との境目を読み直した。その日の作業を、観察日記の形で書いてみる。指定の棚卸し、docs/ との使い分け、取りこぼしは別のファイルに分けた。
 prev: ../2026-11-05-answers-under-constraints.md
+next: ../2026-11-05-slops-use-case-templates.md
 ---
 
 # slops の書き方を読み直した日
