@@ -11,18 +11,6 @@
 
 ## To Be Implemented
 
-- [x] **同日に複数記事があるとき slops の一覧をファイルの追加時刻で並べる**: 記事一覧
-  （Go `go/examples/blog/internal/site/posts.go`、MoonBit `moonbit/examples/blog/site/content.mbt`）と
-  [tools/slops-nav](tools/slops-nav) は date+slug の辞書順を正規と見なすが、同日の記事どうしは
-  slug 名順になり執筆した叙述順とずれる（2026-11-03 の記事群で発生）。`git log --diff-filter=A
-  --name-only --format=%aI -- slops/` を1回呼ぶだけで全ファイルの追加時刻が取れるので
-  （ファイル数分の呼び出しは不要、実測済み）、同日のタイブレークを「追加が新しい方を上」にする
-  方向で。git が見つからない環境では従来の date+slug 辞書順にフォールバックする
-  （第2選択肢）。残る論点: pack/build 時に `.git` が要ること（`moonbit` の `content.sh` は
-  リポジトリで動くが CI の checkout depth 次第）、同一コミット内の順序、代替案
-  （prev/next の叙述チェーンから同日順を導く、front matter の order キー）。prev/next は
-  関連記事の体裁として自由に繋ぐ前提はそのまま。元 Future work の項目を昇格。
-
 - [ ] **MoonBit の http ライブラリから非同期の I/O を使えるようにする**: `serve` は
   同期なので、ハンドラーから KV、R2、D1、Static Assets、外への `fetch` を呼べない。
   JSPI（`WebAssembly.Suspending` / `promising`）で Wasm から JS の `fetch` を待つ形が、
@@ -47,30 +35,7 @@
   を `<details>` のドロップダウン `more tools`（preview と listen）にし、`/listen` でファイルパスを fuzzy に絞り込んで選ぶとそのページの記事を、
   Markdown を貼ると `preview.wasm` で描画した DOM を、Web Speech API で文ごとに読む。
   Go と MoonBit の両方に入れる（[issue #95](https://github.com/podhmo/html-sandbox/issues/95)）。
-  - [x] MVP: 記事の選択（ファイルパスの fuzzy 検索）、再生/一時停止/停止、声・速度・音高・音量、
-    文ごとの分割と強調表示。コードブロックは読まず、リンクはテキストだけ読み、見出しの
-    前後にも間を入れない。
-  - [x] 読みの置換規則（`パターン => 読み`、`/正規表現/` も可。初期値は絵文字を読まない、
-    URL を「URL」と読む）と、声・速度・音高・音量・規則の `localStorage` への保存。
   - [ ] 任意: 見出しの前後や文・ブロックの間隔を設定できるようにする。
-- [x] **記事を RSVP で速く読めるようにする（`/skim`）**: `more tools` に skim を足し、
-  listen と同じように選んだ記事か貼った Markdown を、文節に近いコマに区切って画面の中央に
-  1 つずつ出す。Go と MoonBit の両方に入れる
-  （[issue #101](https://github.com/podhmo/html-sandbox/issues/101)、[調査メモ](docs/sketch/ja/skim.md)）。
-  - [x] MVP: 毎分の文字数（初期値 600、300〜1500）は再生の前に決め、長い英数字は `/` や `.` で
-    分け、操作はボタンとタップ・スワイプの両方。`skim.js` は `listen.js` と共有しない。
-  - [x] 再生中にも速さを変えられるようにする。
-  - [x] 前後のコマを半透明で出し、on/off できるようにする（狭い画面では上下、広い画面では左右）。
-  - [x] 区切りに BudouX（parser と ja モデルだけ）を esm.sh から読み込んで使い、読み込めないときは
-    今の `Intl.Segmenter` の区切りに戻す。
-- [x] **図・グラフ用のガイドラインをまとめ、仮想データでグラフ生成を試す**:
-  issue #113 に添付された HTML artifacts（LLM 生成の図解規約）をもとに
-  `docs/sketch/ja/` に規約をまとめ、仮想データからのグラフ生成を svg-gen
-  拡張（あるいは chart-gen の芽）として試し、結果を slops 記事にする
-  （[issue #113](https://github.com/podhmo/html-sandbox/issues/113)）。
-- [x] **読み上げレポートをドライバ更新後に追試する**: WSL2 の GPU ドライバを 573.22 / CUDA 12.8
-  から 617.42 / CUDA 13.4 に更新したので、`docs/sketch/ja/tts-wsl2.md` の計測をやり直し、
-  `torch` の cu128 固定がドライバ由来だったことを確かめる（[issue #128](https://github.com/podhmo/html-sandbox/issues/128)）。
 - [ ] **Qwen3-TTS を vLLM バックエンドで動かして実時間に届くか確かめる**: 素の `qwen-tts` では
   RTF 1.5〜1.9 で、GPU 使用率 25% 前後のまま Python の生成ループが律速している。WSL2 + RTX 5060 8GB
   （root なし）で vLLM が sm_120 / cu13 で入るか、RTF が 1.0 を切るかを測って追記する
