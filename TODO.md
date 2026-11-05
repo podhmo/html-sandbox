@@ -68,9 +68,12 @@
   `docs/sketch/ja/` に規約をまとめ、仮想データからのグラフ生成を svg-gen
   拡張（あるいは chart-gen の芽）として試し、結果を slops 記事にする
   （[issue #113](https://github.com/podhmo/html-sandbox/issues/113)）。
+- [x] **読み上げレポートをドライバ更新後に追試する**: WSL2 の GPU ドライバを 573.22 / CUDA 12.8
+  から 617.42 / CUDA 13.4 に更新したので、`docs/sketch/ja/tts-wsl2.md` の計測をやり直し、
+  `torch` の cu128 固定がドライバ由来だったことを確かめる（[issue #128](https://github.com/podhmo/html-sandbox/issues/128)）。
 - [ ] **Qwen3-TTS を vLLM バックエンドで動かして実時間に届くか確かめる**: 素の `qwen-tts` では
-  RTF 1.6〜1.8 で、GPU 使用率 27% のまま Python の生成ループが律速していた。WSL2 + RTX 5060 8GB
-  （root なし）で vLLM が sm_120 / cu128 で入るか、RTF が 1.0 を切るかを測って追記する
+  RTF 1.5〜1.9 で、GPU 使用率 25% 前後のまま Python の生成ループが律速している。WSL2 + RTX 5060 8GB
+  （root なし）で vLLM が sm_120 / cu13 で入るか、RTF が 1.0 を切るかを測って追記する
   （[調査メモ](docs/sketch/ja/tts-wsl2.md)、[PR #127](https://github.com/podhmo/html-sandbox/pull/127)）。
 
 ### Future work
