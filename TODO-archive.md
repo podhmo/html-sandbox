@@ -2,11 +2,10 @@
 
 > **What this file is:** append-only history of completed work moved out of
 > `TODO.md` by a periodic GC sweep (see `.claude/skills/todo-md/SKILL.md` —
-> feature PRs never write here, so this file never conflicts). Entries land
-> **verbatim** at the end of the file as `- [x]` lines; nested items get a
-> `> parent: <title>` context line first. Subtrees are split into
-> one top-level entry per item, so every item is greppable on its own
-> line. Entries are never rewritten; links into docs, issues, and PRs are preserved.
+> feature PRs never write here, so this file never conflicts). Each item
+> lands at the end of the file as one line, prefixed with its ancestor
+> chain (`- [x] A > B > **C**: ...`), so a grep hit names the whole path.
+> Wording and links are kept verbatim; entries are never rewritten.
 >
 > **Reading this file:** do not read it whole — `grep` for a symbol or
 > feature name, then read only the surrounding lines (`rg -C` / read with

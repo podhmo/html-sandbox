@@ -20,7 +20,7 @@ This file tracks actionable tasks only; completed work is swept to
   stays open while it has open children.
   - [ ] **Void elements**: render `<br>`, `<img>` etc. without closing tags.
   - [x] **Escape text and attribute values**: marked but not yet swept —
-    the next GC pass moves it to `TODO-archive.md` with a `> parent:`
-    context line.
+    the next GC pass moves it to `TODO-archive.md` as one line prefixed
+    with `HTML correctness > `.
 - [x] **`PlainRenderer`**: feature PRs only mark `[x]`; they never edit
   `TODO-archive.md` themselves.

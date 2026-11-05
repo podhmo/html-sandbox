@@ -27,4 +27,4 @@ One deliberate looseness: consolidation is *asynchronous GC*, not part of
 the completing PR. Feature branches just mark `[x]` (or delete); a periodic
 sweep appends stragglers to the archive. That keeps `TODO-archive.md`
 conflict-free across parallel branches and moves every judgment call
-(parent renames, context lines) into one place — the GC pass.
+(parent renames, ancestor chains) into one place — the GC pass.

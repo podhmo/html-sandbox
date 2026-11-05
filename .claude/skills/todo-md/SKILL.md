@@ -33,38 +33,38 @@ Run whenever `[x]` entries accumulate in `TODO.md` — any session may do it
 `[x]` entry in `TODO.md`:
 
 1. Delete it from `TODO.md`.
-2. Append it to the **end** of `TODO-archive.md` verbatim, keeping the
-   `- [x]` marker. If it was nested under a parent item, prepend one context
-   line `> parent: <parent's title text>` (the parent's own text, *without*
-   its `[ ]`/`[-]` marker) so the line is self-contained. Deeper nesting:
-   collapse the ancestor chain into that one line (`> parent: A › B › …`).
-   If the parent's title has drifted, use its current text — the GC pass is
-   where such drift gets reconciled.
-3. Never archive a subtree. Each archive entry is one `- [x]` at column 0,
-   so `rg <word>` on any item lands on a line whose context line sits
-   directly above it. When a completed entry has `[x]` children, split it:
-   the parent goes first with its children removed, then each child (and
-   grandchild, …) follows as its own entry with its own `> parent:` line,
-   in document order. Plain `- ` notes without a checkbox (`完了の条件:`,
-   `決めること:`) are part of their owner's text and stay indented under it.
+2. Append it to the **end** of `TODO-archive.md` as **one physical line per
+   item**, so `rg <word>` on any word of any item returns a line that also
+   names every ancestor:
+   - Start the line with `- [x] `, then the ancestor chain, then the item:
+     `- [x] A > B > **C**: ...`. Ancestors are their title text only (no
+     `[ ]`/`[-]` marker, no bold); the item keeps its own text as written.
+     A top-level item has no chain. If an ancestor's title has drifted,
+     use its current text — the GC pass is where such drift gets
+     reconciled.
+   - Join the item's wrapped lines into that one line with spaces. Keep
+     the wording and links verbatim.
+   - Never archive a subtree. A completed parent with `[x]` children goes
+     first without them; each child, grandchild, … follows as its own
+     line, in document order.
+   - Plain `- ` notes without a checkbox (`完了の条件:`, `決めること:`) get
+     the same treatment without the checkbox: `- A > 完了の条件: ...`.
 
    ```markdown
    <!-- TODO.md -->
-   - [x] **A**: ...
+   - [x] **A**: one
+     two.
      - [x] **B**: ...
      - [x] **C**: ...
        - [x] **D**: ...
      - 完了の条件: ...
 
    <!-- appended to TODO-archive.md -->
-   - [x] **A**: ...
-     - 完了の条件: ...
-   > parent: A
-   - [x] **B**: ...
-   > parent: A
-   - [x] **C**: ...
-   > parent: A › C
-   - [x] **D**: ...
+   - [x] **A**: one two.
+   - [x] A > **B**: ...
+   - [x] A > **C**: ...
+   - [x] A > C > **D**: ...
+   - A > 完了の条件: ...
    ```
 
 Only GC writes to `TODO-archive.md`, so the file stays append-only and
@@ -72,8 +72,10 @@ conflict-free.
 
 ## Reading the archive
 
-Never read it whole. `rg <symbol>` to find the entry, then read the
-surrounding window (`rg -C 20`, or an offset read).
+Never read it whole. `rg <symbol>` returns the matching item with its
+ancestor chain on the same line. Entries archived before the one-line rule
+still span several lines with `> parent:` context lines; for those, read
+the surrounding window (`rg -C 20`, or an offset read).
 
 ## Porting this scheme to another repo
 

@@ -2,19 +2,15 @@
 
 > **What this file is:** append-only history of completed work moved out of
 > `TODO.md` by a periodic GC sweep (see `.claude/skills/todo-md/SKILL.md` —
-> feature PRs never write here, so this file never conflicts). Entries land
-> **verbatim** at the end of the file as `- [x]` lines; nested items get a
-> `> parent: <title>` context line first. Subtrees are split into
-> one top-level entry per item, so every item is greppable on its own
-> line. Entries are never rewritten; links into docs, issues, and PRs are preserved.
+> feature PRs never write here, so this file never conflicts). Each item
+> lands at the end of the file as one line, prefixed with its ancestor
+> chain (`- [x] A > B > **C**: ...`), so a grep hit names the whole path.
+> Wording and links are kept verbatim; entries are never rewritten.
 >
 > **Reading this file:** do not read it whole — `grep` for a symbol or
-> feature name, then read only the surrounding lines (`rg -C` / read with
-> an offset).
+> feature name; the matching line is the whole entry.
 
-- [x] **`HTMLRenderer`** ([#1](#)): kept verbatim from TODO.md at GC time.
-> parent: HTML correctness
-- [x] **Escape text and attribute values**: context line above records
-  which parent it came from (parent title only, no `[ ]`/`[-]` marker —
-  open-state greps stay clean). Deeper nesting collapses into one line:
-  `> parent: A › B`.
+- [x] **`HTMLRenderer`** ([#1](#)): wrapped lines in TODO.md are joined into one line at GC time.
+- [x] HTML correctness > **Escape text and attribute values**: the chain names the parent by its title only (no `[ ]`/`[-]` marker — open-state greps stay clean).
+- [x] HTML correctness > Escape text and attribute values > **Attributes**: deeper nesting extends the chain.
+- HTML correctness > 完了の条件: notes without a checkbox get a chain too.
