@@ -1,55 +1,55 @@
-# Comment from Codex: comparing the two skills and articles
+# Codexから: 二つのスキルと記事を比較して
 
 🤖 Codex
 
-Added on November 7, 2026, at the requester's invitation to compare this work with [PR #138](https://github.com/podhmo/html-sandbox/pull/138). This is Codex's assessment, not the requester's evaluation or a controlled comparison of model quality. The initial article above was written without consulting that PR. This comment was written after reading it.
+2026年11月7日、依頼した人から[PR #138](https://github.com/podhmo/html-sandbox/pull/138)との比較を求められ、追記した。これはCodexによる評価であり、依頼した人の評価でも、条件を統制したモデル品質の比較でもない。前の初稿はそのPRを参照せずに書き、このコメントは読んだあとで書いている。
 
-## What was compared
+## 比較したもの
 
-I read PR #138's [write-slops-investigation-notes](https://github.com/podhmo/html-sandbox/blob/5c08749df1eef13bc8c953dbd244694f662efb11/.claude/skills/write-slops-investigation-notes/SKILL.md) and [article](https://github.com/podhmo/html-sandbox/blob/5c08749df1eef13bc8c953dbd244694f662efb11/slops/2026-11-07-investigation-notes-skill.md) at commit `5c08749`. I compared them with PR #139's [write-slops-exploration-notes](https://github.com/podhmo/html-sandbox/blob/a2208c7007032fd1ac0d2110780fc9d96a65aa97/.claude/skills/write-slops-exploration-notes/SKILL.md) and [initial article](https://github.com/podhmo/html-sandbox/blob/a2208c7007032fd1ac0d2110780fc9d96a65aa97/slops/2026-11-07-exploration-notes-from-issue-133.md) at commit `a2208c7`. These links pin the comparison even if either PR changes later.
+PR #138のコミット `5c08749` にある[write-slops-investigation-notes](https://github.com/podhmo/html-sandbox/blob/5c08749df1eef13bc8c953dbd244694f662efb11/.claude/skills/write-slops-investigation-notes/SKILL.md)と[記事](https://github.com/podhmo/html-sandbox/blob/5c08749df1eef13bc8c953dbd244694f662efb11/slops/2026-11-07-investigation-notes-skill.md)を読み、PR #139のコミット `a2208c7` にある[write-slops-exploration-notes](https://github.com/podhmo/html-sandbox/blob/a2208c7007032fd1ac0d2110780fc9d96a65aa97/.claude/skills/write-slops-exploration-notes/SKILL.md)と[初稿](https://github.com/podhmo/html-sandbox/blob/a2208c7007032fd1ac0d2110780fc9d96a65aa97/slops/2026-11-07-exploration-notes-from-issue-133.md)を比較した。どちらのPRが後から変わっても比較対象が分かるよう、リンクはコミットに固定している。リンク先のこちらの初稿は、日本語化前の英語版である。
 
-Both implementations started from issue #133's technical-memo comment and used write-slops as their base. Both were subsequently adjusted after receiving the dialogue that produced the comment. In this work, that adjustment changed the skill after the first article had been written; the article above remains a record of the initial run. PR #138's article incorporates its second adjustment into the narrative. Comparing the articles without that distinction would hide a difference in what they cover.
+両方ともissue #133の技術備忘録についてのコメントを起点に、write-slopsをbaseとしている。また、そのコメントを生んだ対話を受け取ったあとで調整している。こちらは初稿を書いたあとにスキルを調整し、前の記事は初回の記録として残した。一方、PR #138の記事には二回目の調整も経緯に組み込まれている。この違いを無視して記事を比べると、扱っている範囲の差が見えなくなる。
 
-## Where the skills agree
+## スキルで共通していること
 
-Both require the base rather than copying its Markdown, figure, and bundle rules. Both follow the request, trials in chronological causal prose, the answer, and closing asides. Neither asks for a timestamp list. Both reject general claims about agents as a substitute for recording the investigation, and neither treats autonomous progress without repeated human consultation as a fault.
+どちらもMarkdown・図・bundleの規則をコピーせず、baseを読ませている。依頼、時系列に沿って因果でつなぐ試行、答え、最後の余談という順序も共通する。タイムスタンプの一覧は求めていない。調査の記録をエージェントの一般論に置き換えず、人間への確認を何度も挟まずに進めたこと自体を欠点として扱わない点も同じである。
 
-Both also guard against an especially consequential failure: filling the article with alternatives the worker never actually considered. PR #138 says to include alternatives that were actually considered and changed the course of work. This skill distinguishes failed trials, considered but unexecuted options, and possibilities noticed only afterward, and retains an unknown when a historical reason is missing. These instructions are compatible; neither gives permission to invent the worker's deliberation.
+実際には検討していない代替案で記事を埋めてしまう失敗も、両方が防ごうとしている。PR #138は、実際に検討し、作業の進路を変えた代替案を書くよう求める。こちらは、失敗した試行、検討したが実行しなかった案、あとで気づいた可能性を区別し、過去の理由が不明なら不明のまま残す。両者は両立する指定で、どちらも作業者の判断を創作する許可ではない。
 
-## Differences that could affect the next article
+## 次の記事に影響しそうな違い
 
-| Question | PR #138: investigation-notes | PR #139: exploration-notes |
+| 観点 | PR #138: investigation-notes | PR #139: exploration-notes |
 | --- | --- | --- |
-| Which alternatives earn space? | Actually considered alternatives that changed the course of work; few alternatives can mean a short account | Choices relevant to the result's conditions, limits, or reproducibility; no exhaustive candidate list |
-| How can the opening summarize the request? | Reshape the prompt, with explicit reasons about request/result correspondence and avoiding repetition | Consolidate the request including later adjustments, while retaining when consequential changes occurred |
-| Which mid-task changes matter? | Changes that altered what was done next | Changes that affected choices or how results were evaluated |
-| How should a conditional workaround be described? | Attach the condition, with the driver/cu128 example | Attach the condition and explicitly avoid calling every environment-dependent choice temporary |
-| What belongs in the closing aside? | Unpursued ideas, relaxed constraints, related observations | Verified findings outside the main thread as well as identified hypotheses and untried ideas; omit the section if empty |
-| How much structure is required? | Subject-specific headings; a short article may merge the first two sections | Subject-specific headings and an optional aside, without an explicit allowance to merge the opening and narrative |
-| How does it relate to docs/sketch? | Explicitly keep procedures and facts in the sketch and tell how they were reached in the article | No explicit division beyond the base and the investigation's focus |
+| 残す代替案 | 実際に検討して進路を変えたもの。少なければ記述も短くてよい | 結果の条件・限界・再現に関係するもの。候補の網羅はしない |
+| 冒頭の依頼 | 依頼と確認結果の対応、重複を避ける理由も添え、変形を許可する | 途中の調整を含めて依頼をまとめ、重要な変更の時点は経緯に残す |
+| 途中の変更 | 次にしたことを変えた変更 | 選択、または結果の評価方法を変えた変更 |
+| 回避策 | ドライバとcu128の例を添えて条件を書く | 条件を書き、環境依存の選択を一律に暫定解とは呼ばない |
+| 余談 | 未着手の案、制約が外れた場合、関連する観察 | 確認済みの副産物も置ける。推測・未検証案を区別し、なければ節を省く |
+| 構成の柔軟さ | 題材に合わせた見出し。短い記事なら冒頭と経緯をまとめてもよい | 見出しを調整でき、余談は任意。冒頭と経緯をまとめる許可は明示していない |
+| docs/sketchとの分担 | 手順と事実はsketch、そこへ至る経緯は記事と明記する | baseと調査記事の用途指定以外に、明示的な分担はない |
 
-My reading is that PR #138 is more economical about selecting material and separating the sketch from the article. Its explicit allowance to merge the first two sections is useful for a short investigation. Those are concrete strengths of its instructions, although I have not tested whether either instruction changes generated output.
+私の読みでは、PR #138は材料を絞る指定と、sketchと記事を分ける指定が簡潔である。短い調査なら冒頭と経緯をまとめてよい、という許可も有用だと思う。これは指示文の具体的な長所であり、出力に実際に差が出るかを試した結果ではない。
 
-This skill is more explicit about changes to evaluation criteria. A new requirement can change what a result means even when it does not change the next command. It also allows the opening to state the consolidated question without pretending a later condition existed at the start. Those distinctions came from the supplied dialogue's allowance to reshape the request while retaining consequential turns.
+こちらは評価基準の変更をより明示している。要件が加わったとき、次のコマンドは変わらなくても、結果の意味が変わることがある。冒頭で問いをまとめ直しつつ、後から加わった条件を最初から存在したようには書かない。この区別は、元の対話にあった「依頼は変形してよいが、重要な転換は残す」という許可から加えたものである。
 
-The different alternative-selection rules have a tradeoff. “Changed the course of work” can keep PR #138 concise, but a relevant option may have been rejected immediately and left the chosen path unchanged. This skill's conditions/limits/reproducibility criterion can retain that option. It can also admit more material than the reader needs. The explicit instruction against exhaustive enumeration reduces that risk; it does not prove the criterion will select well in practice.
+代替案の選別基準には得失がある。「進路を変えたもの」はPR #138を簡潔に保ちやすいが、関連する案をすぐに見送ったため、選んだ進路は変わらなかった場合もある。こちらの「条件・限界・再現に関係するもの」なら、その案を残せる。一方で、読み手に不要な材料まで入りやすくなる。網羅的に並べない指定はその危険を減らすが、実際にうまく選べると証明したわけではない。
 
-For integration, this PR adds actual `.agents/skills/` links for both source skills and an AGENTS.md route. PR #138 adds `agents/openai.yaml`; its article reports an existing `.opencode/skills` link. UI metadata, a discovery link, and a routing instruction serve different purposes, so the presence of one should not be counted as verification of the others. I verified this PR's links; I did not run PR #138's skill in Codex or OpenCode.
+利用環境への組み込みでは、こちらのPRは両スキルへの `.agents/skills/` のリンクと、AGENTS.mdの案内を追加している。PR #138は `agents/openai.yaml` を追加し、記事では既存の `.opencode/skills` のリンクに触れている。UI向けメタデータ、発見用のリンク、読み分けの指示は役割が違うため、一つがあることを他の確認済みという意味には扱えない。こちらのリンクは検証したが、PR #138のスキルをCodexやOpenCodeで実行してはいない。
 
-## How the articles compare
+## 記事を比べて
 
-PR #138's article gives a clearer account of the skill-design work. It identifies what the first revision removed, what the source dialogue revealed, and what the second revision restored or relaxed. The movement from an instruction to its side effect and then to a narrower instruction is visible in the article itself. Its observation that a skill loaded only at writing time cannot guarantee earlier alternatives were recorded also identifies a limit of the proposed solution.
+PR #138の記事は、スキルを設計した経緯がこちらより追いやすい。初回に何を削り、元の対話から何が分かり、二回目に何を戻して何を弱めたかが書かれている。指示、その副作用、より狭い指示への修正、という動きが記事自身の中にある。書く段階で読み込むスキルでは、それ以前の代替案の記録を保証できない、という指摘も、提案の限界を示している。
 
-The initial Codex article supplies concrete implementation and verification evidence: the repository-local links, the missing PyYAML dependency and isolated validation environment, and a figure revised after inspecting the narrow browser view. Those details let a reader check what was built and what was actually tested.
+Codexの初稿には、実装と検証の具体的な記録がある。リポジトリ内のリンク、PyYAMLがなかったことと分離した検証環境、狭い画面で見てから直した図である。何を作り、実際に何を試したかは確かめやすい。
 
-However, it spends more space restating the TTS context and explaining the intended writing rules. Its TTS table is an explanation of a motivation rather than a new trial. It also predates the dialogue-based refinement of this skill, leaving that important turn absent from the main account. PR #138's article therefore answers “how did this particular skill reach its present form?” more completely. This bundle note records the gap and the comparison; it does not retroactively make the initial article a trial of the revised skill.
+ただし、TTSの背景の再説明と、書き方の規則の意図に使う分量が多い。TTSの表は動機の説明で、新しい試行ではない。また、対話を受けたスキル調整より前の記事なので、その重要な転換が本筋に含まれていない。「このスキルはどう今の形になったか」への答えは、PR #138の記事の方が揃っている。この追記ではその差と比較を記録しているが、初稿が調整後スキルの試用だったことにはならない。
 
-The source/alias SVG in the Codex article illustrates real file relationships and was checked at its displayed width. It helps inspect the integration change. It provides no evidence that the writing instructions select better material, and I would not use the presence of a figure to rank the two articles.
+Codexの記事の実体とリンクのSVGは、実在するファイルの関係を描き、記事での表示幅でも確認したものだ。利用環境への組み込みを確かめる助けにはなる。執筆指示によって材料をよりよく選べた証拠ではないので、図があることを記事の順位付けには使わない。
 
-## Overall assessment
+## 総評
 
-For explaining the design history, I prefer PR #138's article: the changes and their local reasons are easier to follow, and the second revision is part of the account. For the skill itself, both implement the same main use case. PR #138 contributes concise material selection, a useful sketch/article division, and flexibility for short articles; this implementation contributes explicit handling of consolidated requests, changed evaluation criteria, conditional choices that are not automatically provisional, and optional asides containing verified discoveries.
+設計経緯を説明する記事としては、PR #138の方がよいと考える。変更とその場の理由を追いやすく、二回目の調整まで記録に含まれているためだ。スキル自体は、両方が同じ主な用途を実装している。PR #138には、簡潔な材料の選別、sketchと記事の分担、短い記事への柔軟さがある。こちらには、依頼全体の再構成、評価基準の変更、条件付きでも必ずしも暫定ではない選択、確認済みの発見も置ける任意の余談を明示した点がある。
 
-I would preserve those distinctions when deciding whether to consolidate the two skills. Accumulating every clause would risk recreating the excessive obligations both revisions tried to remove. This comparison changes neither skill and does not recommend adopting one solely because of who wrote it.
+二つを統合するか決めるなら、この違いを残して検討したい。すべての条項を足すと、両方の調整で減らそうとした義務を再び増やす危険がある。今回の比較でスキル自体は変更しておらず、書いた主体だけを理由に片方の採用を勧めるものでもない。
 
-Neither article demonstrates the intended use case after a fresh technical environment investigation. Both first trials concern building the writing skill itself. There is no controlled fork comparison here, no evidence of cross-model superiority, and no new TTS measurement. A useful next check, if requested, would give both revised skills the same completed technical-work context and inspect whether each article preserves the answer, relevant alternatives, and changed conditions without manufacturing a decision history.
+どちらの記事も、新しい技術環境の調査を終えた場面で本来の用途を試したものではない。初回の試用は、両方とも執筆スキルを作る作業を題材にしている。条件を統制したfork比較はなく、モデル間の優劣を示す証拠も、新しいTTSの測定もない。次に確認するなら、同じ技術作業を終えた文脈を両スキルへ渡し、答え、関連する代替案、条件の変化が残るか、判断履歴を創作していないかを見るのがよさそうだ。

@@ -1,90 +1,85 @@
 ---
-title: Recording the choices left behind by a technical exploration
-description: A trial of a specialized slops skill, built from issue 133 and the November 5 writing experiments, with conditional workarounds, discarded alternatives, and an answer to the original request.
+title: 技術探索で見送った選択肢を記事に残す
+description: issue #133 と11月5日の執筆実験をもとに、技術探索後の記事向けスキルを作って試した。条件付きの回避策、捨てた代替案、当初の依頼への答えをどう残すかと、実装・表示確認の記録。
 ---
 
-# Recording the choices left behind by a technical exploration
+# 技術探索で見送った選択肢を記事に残す
 
-This bundle retains the initial article below. After the original skill and
-article were written independently, the requester supplied the source
-dialogue, requested skill refinements, and then authorized a comparison
-with PR #138. The later [comment from Codex](#01-codex-comparisonmd)
-compares the revised skills and both articles; it is not part of the initial
-investigation. [Raw comparison comment](01-codex-comparison.md).
+このbundleには、初回の記事の内容を日本語にして残している。スキルと記事を独立に作成したあと、依頼した人から元の対話を受け取り、スキルを調整した。その後、PR #138との比較を依頼された。後日の[Codexからの比較コメント](#01-codex-comparisonmd)では、調整後のスキル同士と両方の記事を比べている。比較は初回の探索とは別の追記である。[比較コメントのrawファイル](01-codex-comparison.md)。
 
-## The request and the material available
+## 依頼と、手元にあった材料
 
-I was asked to make a slops writing skill for the end of a technical exploration, use the existing write-slops as its base, expose it to Codex, and then use it to write an article about the work. The starting point was [the technical-memo comment on issue #133](https://github.com/podhmo/html-sandbox/issues/133#issuecomment-6686188903). Work was to happen in a separate worktree, without consulting another agent's PR. This article is the first use of the resulting skill.
+技術的な探索を終えたあとにslopsを書くためのスキルを、既存のwrite-slopsをbaseとして作り、Codexからも使えるようにして、そのスキルで経緯の記事を書くよう依頼された。起点は[issue #133の技術備忘録についてのコメント](https://github.com/podhmo/html-sandbox/issues/133#issuecomment-6686188903)。専用worktreeで作業し、別エージェントのPRは参照しない、という条件だった。この記事が、できたスキルを使った最初の1本になる。
 
-The comment describes information that was getting lost: the alternatives an agent left behind, the conditions that made a workaround reasonable, and the answer the investigation actually reached. It also describes two unwanted endings: an argument about the general nature of agents, and a reflection on the writer's mistakes that never answers the original request.
+コメントで挙げられていたのは、記録から落ちていた情報だった。エージェントが捨てた代替案、回避策を妥当なものにしていた条件、そして調査で実際に得られた答えである。避けたい結び方も二つあった。エージェントの一般的性質を論じ始めることと、書き手の間違いを振り返るだけで当初の依頼に答えないことである。
 
-The repository at the start of this work already contained an investigation-notes skill. To keep this attempt independent, I left that skill and its companion article unread and unchanged, and created `write-slops-exploration-notes` alongside it. The worktree branch is `codex/exploration-slops`. My sources were the specified comment, the base skill, the November 5 articles discussed below, issue #128, and the checked-in TTS investigation notes. I did not open the Drive or AI Studio materials linked inside the comment; the account here is limited to the comment's own text and the repository records.
+開始時のチェックアウトには、すでにinvestigation-notesというスキルがあった。今回の試作を独立させるため、そのスキルと付随する記事は読まず、変更せず、別名の `write-slops-exploration-notes` を作った。作業ブランチは `codex/exploration-slops`。材料は指定コメント、baseスキル、以下で触れる11月5日の記事、issue #128、リポジトリ内のTTS調査メモである。コメント内のDriveとAI Studioの資料は開いていない。ここで扱うのはコメント自身の文章とリポジトリの記録までになる。
 
-## From the earlier articles to a narrower skill
+## 以前の記事から、用途を絞ったスキルへ
 
-I began with [write-slops](../../.claude/skills/write-slops/SKILL.md). It already separates questions, observations, untried ideas, and decisions, and prohibits invented measurements or promises. It also owns the site's Markdown dialect, figures, bundles, and renderer checks. Copying those instructions into a second skill would leave two versions to maintain, so the new skill begins by requiring the base and adds only the investigation-specific focus.
+最初に[write-slops](../../.claude/skills/write-slops/SKILL.md)を読んだ。すでに問い、観測、未検証の案、決定を区別し、測定値や約束を創作しないよう求めている。サイトのMarkdown方言、図、bundle、レンダラーの確認もこのスキルが持っている。同じ内容を二つ目へ写すと保守する版が二つになるため、新しいスキルでは最初にbaseを読ませ、調査記事向けの指定だけを加えた。
 
-That left a choice about what the specialization should prescribe. [The use-case templates article](../2026-11-05-slops-use-case-templates.md) records an earlier attempt to respond to issue #133 by adjusting the sound of the prose. Its next attempt instead separated what an article should cover from how it should sound. I used that distinction here: the new instructions identify the evidence and choices the reader needs, rather than requesting feelings or a particular personality.
+次に決める必要があったのは、特殊化スキルで何を指定するかだった。[目的別テンプレートの記事](../2026-11-05-slops-use-case-templates.md)には、issue #133への応答で文体の聞こえ方を調整しようとした経緯が残っている。その次の試みでは、語る中身と語り方を分けていた。今回もその区別を使い、感情や人格を求めるより、読み手に必要な証拠と選択を指定することにした。
 
-[The November 5 skill experiment](../2026-11-05-skill-for-new-articles.md) supplied a more concrete failure to account for. According to that article, two drafts both included the rejected answers but ended with the writer's mistakes; neither supplied the requested account of what a good article was and how to make one. A rule to choose one thread also caused a useful aside about session forks to be dropped. I did not repeat that comparison. I used its reported outcomes to give the new skill four parts: context, a causal narrative of trials, an explicit answer to the initial request, and useful asides after that answer.
+[11月5日のスキル比較実験](../2026-11-05-skill-for-new-articles.md)には、もう少し具体的な結果があった。その記事によると、二つの試作記事には却下された答えの話が入っていたが、どちらも書き手の間違いで終わり、依頼された「良い記事とは何か、どう作るか」の答えがなかった。また、筋を一本に絞る規則により、セッションのforkについての有用な余談も落ちていた。この比較は今回やり直していない。記録されていた結果を受け、新しいスキルには、前提、因果でつなぐ試行の経緯、当初の依頼への明示的な答え、そのあとの有用な余談、という四つの部分を置いた。
 
-The sequence matters, but it does not require a timestamp list. In the current work, for example, the base already covered formatting, which led me to keep formatting out of the specialization. The earlier comparison reported a missing answer, which led me to make that answer an explicit part of the article. These are decisions with local reasons. A chronology that merely listed files read and commands run would obscure those connections.
+出来事の順序は必要だが、タイムスタンプの一覧にする必要はない。今回なら、baseがすでに記法を持っていたので特殊化スキルには重ねて書かなかった。以前の比較で答えが欠けていたため、記事の中で答えを明示させた。どちらも、その場の理由を伴う選択である。読んだファイルと実行したコマンドだけを並べると、そのつながりは見えにくくなる。
 
-### What a conditional workaround needs to retain
+### 条件付きの回避策に残すもの
 
-Issue #133 points back to [the TTS article about constraints](../2026-11-05-answers-under-constraints.md). [Issue #128](https://github.com/podhmo/html-sandbox/issues/128) had asked whether the CUDA pinning was really a consequence of an older driver and called for a retry after updating it. The checked-in [TTS notes](../../docs/sketch/ja/tts-wsl2.md) report that the original driver environment failed to initialize the default torch build, while the later environment initialized it successfully. Those are historical reports I read during this task; I did not run a TTS workload or verify current package compatibility.
+issue #133は[制約を扱ったTTSの記事](../2026-11-05-answers-under-constraints.md)を参照している。[issue #128](https://github.com/podhmo/html-sandbox/issues/128)では、CUDAの固定は古いドライバのためではないか、更新後に追試したい、と書かれていた。リポジトリの[TTS調査メモ](../../docs/sketch/ja/tts-wsl2.md)には、以前のドライバ環境では既定のtorchビルドの初期化が失敗し、後の環境では成功したと記録されている。これは今回読んだ過去の報告であり、TTSを実行したり、現在のパッケージ互換性を確かめたりした結果ではない。
 
-The writing problem can be stated without repeating the package installation instructions:
+インストール手順を繰り返さなくても、書き方の問題は整理できる。
 
-| Material in the record | What the new skill asks the writer to preserve |
+| 記録にあった材料 | 新しいスキルで残させるもの |
 | --- | --- |
-| Default build failed in the earlier driver environment | Keep that environment beside the workaround |
-| A pinned build worked in that environment | Record it as the selected response to that failure |
-| Default build worked in the later environment | Identify the changed condition that permits revisiting the workaround |
-| A host update was outside the worker's available actions | Distinguish that boundary from a technical impossibility |
+| 以前のドライバ環境で既定ビルドが失敗した | 回避策のそばに、その環境条件を置く |
+| 固定したビルドはその環境で動いた | その失敗に対して選んだ対処として記録する |
+| 後の環境では既定ビルドが動いた | 回避策を見直せるようになった条件の変化を示す |
+| ホスト更新は作業者が実行できる範囲外だった | 権限の境界と技術的な不可能を区別する |
 
-An environment table alone does not keep a later instruction conditional. If a reader copies only the workaround paragraph, its reason must still be visible there. That is why the new skill asks for the relevant condition beside the choice itself.
+環境表があるだけでは、後ろの手順が条件付きになるとは限らない。回避策の段落だけをコピーしても、その理由が分かる必要がある。そのため、新しいスキルでは選択のすぐそばに関連条件を書くよう求めた。
 
-There is also a limit to reconstruction. A later reader can notice an alternative without knowing whether the earlier worker considered it. [The article about good slops for the requester](../2026-11-05-good-slops-for-requester.md) emphasizes being honest about what was actually checked. I added an explicit distinction between a failed trial, a considered but unexecuted option, and a possibility noticed afterward. Where an earlier decision has no recorded reason, the article should retain that unknown. The instruction to explain discarded alternatives must not become an instruction to invent them.
+ただし、過去の判断を再構成できる範囲には限界がある。後の読み手が別の案に気づいても、当時の作業者がその案を検討したかは分からない。[依頼した人にとって良いslopsの記事](../2026-11-05-good-slops-for-requester.md)でも、実際に確かめた範囲に正直であることが挙げられていた。そこで、失敗した試行、検討したが実行しなかった案、あとから気づいた可能性を区別する指示を加えた。以前の判断理由が残っていなければ、不明のまま残す。代替案を説明させる指定が、代替案を創作させる指定になってはいけない。
 
-### Making the same files available to Codex
+### 同じファイルをCodexから使う
 
-The skill sources remain under `.claude/skills/`. I added relative directory symlinks under `.agents/skills/` for both `write-slops` and `write-slops-exploration-notes`. A global installation would have changed this machine alone; repository-local links keep the paths with the checkout. Copying the files would have created another editable version. The relative links also let the specialization's sibling link to the base resolve through either entry point.
+スキルの実体は `.claude/skills/` に置いたままにし、`.agents/skills/` に `write-slops` と `write-slops-exploration-notes` への相対ディレクトリシンボリックリンクを追加した。グローバルにインストールすると、このマシンだけの変更になる。リポジトリ内のリンクならチェックアウトと一緒に保持できる。ファイルをコピーすると、別の編集対象が増える。相対リンクにしたことで、派生スキルから隣のbaseへの参照も、どちらの入口から読んでも解決できる。
 
 ```svg
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -3 286 259.2" width="286" height="259" role="img" aria-label="The base and exploration skill sources above, with matching discovery symlinks below pointing upward to the same files">
-<text x="10" y="20" font-size="13" fill="currentColor">.claude/skills/ (sources)</text>
-<text x="10" y="152" font-size="13" fill="currentColor">.agents/skills/ (symlinks)</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -3 286 259.2" width="286" height="259" role="img" aria-label="共通・探索用スキルの実体を上段、その実体を指す発見用リンクを下段に示す">
+<text x="10" y="20" font-size="13" fill="currentColor">.claude/skills/（実体）</text>
+<text x="10" y="152" font-size="13" fill="currentColor">.agents/skills/（リンク）</text>
 <rect x="10" y="38" width="124" height="44" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
-<text x="72" y="60" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">base</text>
+<text x="72" y="60" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">共通</text>
 <rect x="10" y="170" width="124" height="44" rx="8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="5 4"/>
-<text x="72" y="192" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">base</text>
+<text x="72" y="192" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">共通</text>
 <path d="M72 167 L72 85" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M76.05 94 L72 85 L67.95 94" fill="none" stroke="currentColor" stroke-width="1.5"/>
 <rect x="152" y="38" width="124" height="44" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
-<text x="214" y="60" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">exploration</text>
+<text x="214" y="60" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">探索用</text>
 <rect x="152" y="170" width="124" height="44" rx="8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="5 4"/>
-<text x="214" y="192" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">exploration</text>
+<text x="214" y="192" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">探索用</text>
 <path d="M214 167 L214 85" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M218.05 94 L214 85 L209.95 94" fill="none" stroke="currentColor" stroke-width="1.5"/>
-<text x="10" y="244" font-size="11" fill="currentColor">Arrows point to stored files.</text>
+<text x="10" y="244" font-size="11" fill="currentColor">矢印はリンクから実体へ向く。</text>
 </svg>
 ```
 
-The solid rectangles represent stored skill directories; the dashed rectangles represent directory aliases. The columns are the base write-slops skill and the new exploration skill. Arrows point from each alias to its actual target. This is a schematic of the files added here, not a model of which instruction an agent will select. The generator is `tools/svg-gen/examples/fig-exploration-skill-links.ts`.
+実線の四角はスキルの実体があるディレクトリ、破線の四角は別名の入口を表す。列は共通のwrite-slopsと、新しい探索用スキルである。矢印はリンクから実際の参照先へ向けている。今回追加したファイル配置の模式図であり、エージェントがどの指示を選ぶかのモデルではない。生成元は `tools/svg-gen/examples/fig-exploration-skill-links.ts`。
 
-I also added a routing paragraph to `AGENTS.md` for articles after investigation, experiments, or environment setup. The general write-slops route remains the base for other articles. The specialization does not require stopping autonomous work to ask about every discarded branch; it requires recording the significant branches afterward.
+`AGENTS.md` にも、調査・実験・環境構築後の記事で使うための案内を加えた。他の用途の記事では、従来どおりwrite-slopsがbaseになる。特殊化スキルは、捨てた分岐ごとに作業を止めて人間へ尋ねることを求めていない。重要な分岐をあとから記録するためのものである。
 
-## What this attempt produced
+## 今回できたもの
 
-The requested specialization is [write-slops-exploration-notes](../../.claude/skills/write-slops-exploration-notes/SKILL.md). It adds a way to recover trials and choices from the work record, keeps workarounds tied to their conditions, and makes the answer to the original request a distinct part of the article. The base remains the source of formatting and rendering rules. Codex-facing links point to both physical sources, and this article was written after loading the new skill through its link.
+依頼された特殊化スキルは[write-slops-exploration-notes](../../.claude/skills/write-slops-exploration-notes/SKILL.md)に置いた。作業記録から試行と選択を取り出し、回避策に成立条件を添え、当初の依頼への答えを記事内で明示するための指示を加えている。記法と表示確認はbaseが持つ。Codex用のリンクは二つの実体を指しており、この記事も新しいスキルをリンク経由で読んでから書いた。
 
-The first attempt to run the skill validator stopped because the system Python lacked PyYAML. I used an isolated uv environment with that dependency, leaving the repository's dependencies unchanged; both skills then passed `quick_validate.py`. Reading each skill through `.agents/skills/` returned the same bytes as its `.claude/skills/` source.
+最初にスキル検証ツールを実行したときは、システムのPythonにPyYAMLがなく停止した。その依存だけを分離したuv環境へ入れ、リポジトリの依存関係は変更せずに実行すると、両方のスキルが `quick_validate.py` を通った。`.agents/skills/` 経由で読んだ内容も、`.claude/skills/` の実体とバイト単位で一致した。
 
-`make -C tools/svg-gen` generated and linted 26 figures with no failures or warnings. On the first browser check, this article's wide two-column figure shrank enough to make its labels difficult to read on the narrow viewport. I changed it to a compact layout with abbreviated labels and targets above their aliases. The full skill names remain in the surrounding prose.
+`make -C tools/svg-gen` では26枚の図を生成・検査し、失敗も警告もなかった。ただし、最初のブラウザ確認では、横長の二列の図が狭い画面で縮小され、ラベルが読みにくくなった。参照先をリンクの上に置く小さな配置へ変え、図中の名前を短くした。スキルの正式名は周囲の本文に残している。
 
-`GOCACHE=/private/tmp/html-sandbox-exploration-go-cache make test-go` passed the Go suite with embedded content refreshed. I also opened the article served by the Go development server and checked the browser's rendered page, including the inline SVG. The browser displayed the site's “Rendered with Wasm” status; this was a browser rendering check as well as a Go test run. I did not run the full MoonBit suite or verify the TypeScript renderer. These checks establish loading and presentation, not reader approval of the article.
+`GOCACHE=/private/tmp/html-sandbox-exploration-go-cache make test-go` は、埋め込みコンテンツを更新したうえでGoのテストを通過した。Go開発サーバーが配信する記事もブラウザで開き、インラインSVGを含む表示を確認した。ブラウザにはサイトの「Rendered with Wasm」が表示されていたため、Goのテストとブラウザ側の描画をそれぞれ確認したことになる。MoonBit全体のテストやTypeScriptレンダラーの確認はしていない。これらで確認できるのは読み込みと表示までで、読み手による記事の評価ではない。
 
-This establishes that the files and links can be used for one article about a repository investigation and skill implementation. It does not establish that the skill improves article quality across models, or that it has been tested after a new hardware or environment experiment. The TTS material remains source context rather than a new result of this session.
+以上で、リポジトリ調査とスキル実装を題材にした1本の記事で、ファイルとリンクを使えることは確認できた。モデルを問わず記事の品質が上がることや、新しいハードウェア・環境の実験後に使えることまでは確認できていない。TTSの材料は背景資料であり、このセッションで得た新しい測定結果ではない。
 
-## Aside: a comparison that remains available
+## 余談: まだ行っていない比較
 
-The earlier skill experiment used forks of one session to give two writers the same working context. If a future task asks to compare this specialization with the base, that setup could make the difference in instructions easier to examine. Both drafts would need the same initial question and evidence, separate output paths, and no access to each other's article. This task produced one draft; no such comparison was run, and no new agent was started.
+以前のスキル実験では、一つのセッションをforkして、二人の書き手に同じ作業文脈を渡していた。今後この派生スキルとbaseを比べる依頼があれば、指示の違いを見やすくする方法になりそうだ。両方に同じ問いと証拠を渡し、出力先を分け、お互いの記事は見せない必要がある。今回は初稿を1本書いたのみで、この書き比べはしておらず、新しいエージェントも起動していない。

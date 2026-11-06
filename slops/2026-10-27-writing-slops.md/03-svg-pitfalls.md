@@ -116,6 +116,6 @@ n=600 の ECDF を 2 系列そのまま描くと、ステップの頂点が 1200
 
 現在は chart.ts 側で構造的に解決済み。マーク生成が emit 時にドメイン内かを `inside()` で検査して外なら生成を止め、`p.data(() => ...)` で囲んだマークは `<g data-plot="x0 y0 x1 y1">` に入って check.ts がプロット矩形で検査する。残る注意は 2 つ: `p.data()` の外や `c.raw()` 直書きの要素は対象外（概念図など）、そしてドメインの選び方そのもの（0 起点か、切り詰め方）は引き続き人の判断。
 
-## A valid wide SVG can become unreadable when scaled down
+## 検査を通った横長SVGでも、縮小すると読めなくなる
 
-In the [exploration-notes skill article](../2026-11-07-exploration-notes-from-issue-133.md), a roughly 680-unit-wide source/alias diagram passed the bounds and label checks, and its rasterized preview was legible at its original size. On the blog's narrow browser viewport, fitting it into the article column reduced the labels to unreadable sizes. The replacement uses a compact layout, short base/exploration labels, and vertical symlink arrows; full directory names stay in the prose. Check the figure at the article's display width as well as its native size: passing the coordinate lint does not establish readable text after CSS scaling.
+[探索ノート用スキルの記事](../2026-11-07-exploration-notes-from-issue-133.md)で、幅約680の実体とリンクの図は、境界・ラベルの検査を通り、原寸のPNGでも読めていた。しかしブログの狭い画面では、記事幅に収める縮小によってラベルが読みにくくなった。小さな配置に変え、共通・探索用という短いラベルと縦向きのリンクの矢印を使い、正式名は本文に残した。原寸だけでなく記事内の表示幅でも確認する必要がある。座標の検査を通ることは、CSSで縮小したあとも文字が読めることを保証しない。
