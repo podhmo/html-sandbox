@@ -60,6 +60,12 @@ perf version --build-options | grep -E 'dwarf|libelf'
 WSL2 同梱の perf は `/usr/lib/linux-tools/<wsl-kernel>/bin/perf` で PATH の最後にあり、
 `/usr/bin` のほうが先なので、`linux-perf` を入れれば置き換わります。
 
+**2026-11-06 追記**: 現在の WSL では `/usr/bin/perf` 自体が WSL 同梱 perf への
+bind mount になっており、`linux-perf` を入れてもこの「`/usr/bin` が勝つ」は
+成り立ちません（`perf --version` が `6.18.54.1...` のようなカーネルバージョンを
+返したらこの状態です）。この mount のせいで `apt upgrade` も失敗します。現状と
+対処は [wsl2-perf-bind-mount.md](wsl2-perf-bind-mount.md) にまとめました。
+
 スタックとシンボルが出るかの確認:
 
 ```sh
