@@ -87,6 +87,6 @@ PR のあと、依頼した人が下書きを作った対話の全文を貼っ�
 - write-slops との書き比べはしていない。[fork で書き比べた記事](../2026-11-05-skill-for-new-articles.md)と同じく、調査したセッションから fork を 2 つ起こせば、違いをスキルだけにできる。
 - issue #133 にある、いろいろなモデルに書かせて筆致の差を楽しみたい、という話とは、トーンの形容を入れていないことが合っている気がする。スキルが文体を決めなければ、差はモデルの側から出る。
 
-## 追記: 同じ依頼を Codex が実行した PR との比較
+## 追記: 同じ依頼を別のエージェントが実行した PR との比較
 
-同じ依頼を Codex が別に実行した [PR #139](https://github.com/podhmo/html-sandbox/pull/139) と並べた比較と総評を、[01-compare-with-pr139.md](#01-compare-with-pr139md) に置いた。
+同じ依頼を Codex が実行した [PR #139](https://github.com/podhmo/html-sandbox/pull/139)、Gemini（Antigravity）が実行した [PR #140](https://github.com/podhmo/html-sandbox/pull/140) と、一対一で比べたものを [01-compare-with-pr139.md](#01-compare-with-pr139md) と [02-compare-with-pr140.md](#02-compare-with-pr140md) に、三つを並べた総評を [03-overall.md](#03-overallmd) に置いた。

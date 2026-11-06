@@ -1,8 +1,8 @@
-# Claude Code から: PR #139 との比較と総評
+# Claude Code から: PR #139 との比較
 
 🤖 Claude Code
 
-この節は、README のスキルと記事を書いた Claude Code が、あとから依頼されて書き足したもの。同じ依頼（issue #133 のコメントを踏まえて write-slops の特殊化スキルを作り、それで記事を書く）を Codex が別に実行した [PR #139](https://github.com/podhmo/html-sandbox/pull/139) と、こちらの [PR #138](https://github.com/podhmo/html-sandbox/pull/138) を並べた。これは Claude Code による評価で、依頼した人の評価でも、条件をそろえた品質比較でもない。
+この節は、README のスキルと記事を書いた Claude Code が、あとから依頼されて書き足したもの。同じ依頼（issue #133 のコメントを踏まえて write-slops の特殊化スキルを作り、それで記事を書く）を Codex が別に実行した [PR #139](https://github.com/podhmo/html-sandbox/pull/139) と、こちらの [PR #138](https://github.com/podhmo/html-sandbox/pull/138) を一対一で並べた。Gemini の #140 との比較は [02-compare-with-pr140.md](#02-compare-with-pr140md)、三つをまとめた総評は [03-overall.md](#03-overallmd) にある。これは Claude Code による評価で、依頼した人の評価でも、条件をそろえた品質比較でもない。
 
 比べたのは、こちらはコミット `5c08749` の [スキル](https://github.com/podhmo/html-sandbox/blob/5c08749df1eef13bc8c953dbd244694f662efb11/.claude/skills/write-slops-investigation-notes/SKILL.md)と [記事](https://github.com/podhmo/html-sandbox/blob/5c08749df1eef13bc8c953dbd244694f662efb11/slops/2026-11-07-investigation-notes-skill.md)、#139 はコミット `2ce2651` の [スキル](https://github.com/podhmo/html-sandbox/blob/2ce2651957e0ebe54479a280e42609c452bf856a/.claude/skills/write-slops-exploration-notes/SKILL.md)と [記事のバンドル](https://github.com/podhmo/html-sandbox/tree/2ce2651957e0ebe54479a280e42609c452bf856a/slops/2026-11-07-exploration-notes-from-issue-133.md)。#139 のスキルは `a2208c7` 以降変わっていない。#139 のバンドルには、Codex が同じく依頼されて書いた比較（`01-codex-comparison.md`）が入っていて、それも読んだ。
 
@@ -59,7 +59,7 @@ Codex の比較は、こちらの比較と結論の向きがほぼ同じで、�
 
 逆に、Codex の比較に足したいことも一つある。#139 は対話を受けてスキルを直したが、記事は対話前の初稿のままなので、スキルがなぜ今の形なのか（特に対話から何を取ったか）は記事から読めない。Codex 自身も「初稿が調整後スキルの試用だったことにはならない」と書いている。このスキルが求める「途中の転換を経緯に残す」を、記事の側では使っていないことになる。
 
-## 総評
+## 総評（#138 と #139）
 
 対話から取り出したものは、両方で重なりつつ向きが違った。こちらは記事の書き方の決まり（理由を添える、範囲外の選択肢の書き方、sketch との分担）と、必須を減らすほうに寄った。Codex は依頼の書き直しと途中の変更の扱い（後から加わった条件、評価のしかたの変更）を細かくし、余談を任意にした。代替案の選び方の基準は #139 のほうがよい。
 
