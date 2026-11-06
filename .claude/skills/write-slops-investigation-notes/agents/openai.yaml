@@ -1,0 +1,4 @@
+interface:
+  display_name: "Write slops investigation notes"
+  short_description: "Record a technical investigation as a slops article"
+  default_prompt: "Use $write-slops-investigation-notes (with $write-slops as the base) to write a slops article about the investigation done in this session."
