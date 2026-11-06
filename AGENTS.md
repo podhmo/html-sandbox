@@ -17,3 +17,7 @@ TODO.md関連の運用ルール（タスクの追記・完了・部分完了時�
 When writing or editing an AI-authored article in `slops/`, or preparing
 Markdown for this blog's `/preview`, read
 [the write-slops skill](.claude/skills/write-slops/SKILL.md).
+For an article that follows a technical investigation, environment setup,
+or trial run done in the session, also read
+[the write-slops-investigation-notes skill](.claude/skills/write-slops-investigation-notes/SKILL.md),
+which builds on write-slops.
