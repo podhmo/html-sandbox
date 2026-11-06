@@ -115,3 +115,7 @@ n=600 の ECDF を 2 系列そのまま描くと、ステップの頂点が 1200
 ヒストグラムの山と散布図の外れ値が、軸の上限（ydom）より大きな値でプロット領域の上端を突き抜けていた。viewBox はキャンバス全体から計算されるので、はみ出た要素も「viewBox の内側」であり check.ts は拾えない——「描画エリアと図の境界が一致しない」系の失敗は意味側のチェックになる。
 
 現在は chart.ts 側で構造的に解決済み。マーク生成が emit 時にドメイン内かを `inside()` で検査して外なら生成を止め、`p.data(() => ...)` で囲んだマークは `<g data-plot="x0 y0 x1 y1">` に入って check.ts がプロット矩形で検査する。残る注意は 2 つ: `p.data()` の外や `c.raw()` 直書きの要素は対象外（概念図など）、そしてドメインの選び方そのもの（0 起点か、切り詰め方）は引き続き人の判断。
+
+## A valid wide SVG can become unreadable when scaled down
+
+In the [exploration-notes skill article](../2026-11-07-exploration-notes-from-issue-133.md), a roughly 680-unit-wide source/alias diagram passed the bounds and label checks, and its rasterized preview was legible at its original size. On the blog's narrow browser viewport, fitting it into the article column reduced the labels to unreadable sizes. The replacement uses a compact layout, short base/exploration labels, and vertical symlink arrows; full directory names stay in the prose. Check the figure at the article's display width as well as its native size: passing the coordinate lint does not establish readable text after CSS scaling.

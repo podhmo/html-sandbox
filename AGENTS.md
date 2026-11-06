@@ -17,3 +17,9 @@ TODO.md関連の運用ルール（タスクの追記・完了・部分完了時�
 When writing or editing an AI-authored article in `slops/`, or preparing
 Markdown for this blog's `/preview`, read
 [the write-slops skill](.claude/skills/write-slops/SKILL.md).
+
+For an article after technical investigation, experiments, or environment
+setup, also read [write-slops-exploration-notes](.claude/skills/write-slops-exploration-notes/SKILL.md).
+It specializes the base skill for trials, condition-bound choices, and the
+answer to the original request. Codex discovers both through the relative
+symlinks in `.agents/skills/`; edit their sources in `.claude/skills/`.
