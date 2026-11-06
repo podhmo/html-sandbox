@@ -1,7 +1,7 @@
 ---
 title: 技術調査のあとに書く記事のスキルを、issue の下書きから作った
 description: issue #133 のコメントに置かれていた write-slops-investigation-notes の下書きを、直近の slops と PR #135 の書き比べに照らして直し、write-slops の上に載る特殊化したスキルとして置いた。途中で下書きの元になった対話を見せてもらい、取り違えて削った項目を戻し、必須にしすぎた項目を減らした。その経緯と、できたスキルの記録。この記事自体がそのスキルで書いた最初の 1 本。
-prev: 2026-11-05-skill-for-new-articles.md
+prev: ../2026-11-05-skill-for-new-articles.md
 ---
 
 # 技術調査のあとに書く記事のスキルを、issue の下書きから作った
@@ -13,8 +13,8 @@ prev: 2026-11-05-skill-for-new-articles.md
 始めた時点で手元にあったのは次のもの。
 
 - issue #133 のコメント 8 件。最後の 1 件（11-06）が起点で、Q&A 形式の整理と、`write-slops-investigation-notes` という名前の SKILL.md の下書きが載っている。
-- 11-05 の slops 5 本。[答えはその時点の制約から出てくる](2026-11-05-answers-under-constraints.md)、[slops の書き方を読み直した日](2026-11-05-reading-slops-again.md)、[記事を書く目的で分けて、依頼をテンプレートにする](2026-11-05-slops-use-case-templates.md)、[依頼した人にとって良い slops とは](2026-11-05-good-slops-for-requester.md)、[記事を書くスキルを考えて、fork で書き比べた](2026-11-05-skill-for-new-articles.md)。
-- 既存の [write-slops](../.claude/skills/write-slops/SKILL.md)。
+- 11-05 の slops 5 本。[答えはその時点の制約から出てくる](../2026-11-05-answers-under-constraints.md)、[slops の書き方を読み直した日](../2026-11-05-reading-slops-again.md)、[記事を書く目的で分けて、依頼をテンプレートにする](../2026-11-05-slops-use-case-templates.md)、[依頼した人にとって良い slops とは](../2026-11-05-good-slops-for-requester.md)、[記事を書くスキルを考えて、fork で書き比べた](../2026-11-05-skill-for-new-articles.md)。
+- 既存の [write-slops](../../.claude/skills/write-slops/SKILL.md)。
 
 コメントに付いていた Google Drive と AI Studio のリンクは認証が要るので開いていない。だから最初は、下書きがどういう対話から出てきたかを Q&A の範囲でしか知らなかった。
 
@@ -22,10 +22,10 @@ prev: 2026-11-05-skill-for-new-articles.md
 
 下書きの骨組みは、依頼と前提条件、試行と判断の経過、最初の問いへの答え、余談、の 4 節。11-05 の書き比べで依頼した人が示した形（本筋、余談、最後にまとめ）とほぼ同じだったので、並びは変えなかった。変えたのは中身で、それぞれ直近の記事に理由を求めた。
 
-- 冒頭の「Keep the tone matter-of-fact」を削った。[記事を書く目的で分けて…](2026-11-05-slops-use-case-templates.md)に、文体の条件に応えるために観察ではない文が入っていたことが表になっていて、トーンの指定は同じことを起こすと考えた。
+- 冒頭の「Keep the tone matter-of-fact」を削った。[記事を書く目的で分けて…](../2026-11-05-slops-use-case-templates.md)に、文体の条件に応えるために観察ではない文が入っていたことが表になっていて、トーンの指定は同じことを起こすと考えた。
 - その調査についての解釈は書いてよい、と足した。issue の「起きたことの記録と解釈はあってほしい」から。
-- 回避策に加えて計測値にも条件を付けさせた。[答えはその時点の制約から出てくる](2026-11-05-answers-under-constraints.md)の、cu128 固定が「重要」という無条件の規則として残った件と、Piper の RTF 0.13 が測り直すと 0.07 だった件から。
-- 「作業したセッションで書く」を冒頭に足した。[fork で書き比べた記事](2026-11-05-skill-for-new-articles.md)の一回目の却下が、この前提の取り違えだったから。
+- 回避策に加えて計測値にも条件を付けさせた。[答えはその時点の制約から出てくる](../2026-11-05-answers-under-constraints.md)の、cu128 固定が「重要」という無条件の規則として残った件と、Piper の RTF 0.13 が測り直すと 0.07 だった件から。
+- 「作業したセッションで書く」を冒頭に足した。[fork で書き比べた記事](../2026-11-05-skill-for-new-articles.md)の一回目の却下が、この前提の取り違えだったから。
 - `docs/sketch/` との分担（手順は sketch、どう辿り着いたかは記事）を足した。issue の「sketch は情報収集、それを適用した結果の出来事を綴るのが日記の一部」から。
 - 下書き末尾の write-slops の要約を削り、先に write-slops を読ませるだけにした。写しを持つと、[PR #132](https://github.com/podhmo/html-sandbox/pull/132) の `*` 禁止のような変更に追従が漏れる。
 - 余談の各項目に、確かめたかどうかを付けさせた。
@@ -59,7 +59,7 @@ PR のあと、依頼した人が下書きを作った対話の全文を貼っ�
 
 ## できたもの
 
-スキルは [.claude/skills/write-slops-investigation-notes/SKILL.md](../.claude/skills/write-slops-investigation-notes/SKILL.md) にある。`.opencode/skills` は `.claude/skills` へのシンボリックリンクなので OpenCode からも見え、write-slops に合わせて `agents/openai.yaml` も付けている。description は write-slops-threads と違って「名前を指定されたときだけ」にはせず、技術調査（環境構築、実現性の確認、追試、デバッグ）の記事では write-slops の代わりに使う、とした。
+スキルは [.claude/skills/write-slops-investigation-notes/SKILL.md](../../.claude/skills/write-slops-investigation-notes/SKILL.md) にある。`.opencode/skills` は `.claude/skills` へのシンボリックリンクなので OpenCode からも見え、write-slops に合わせて `agents/openai.yaml` も付けている。description は write-slops-threads と違って「名前を指定されたときだけ」にはせず、技術調査（環境構築、実現性の確認、追試、デバッグ）の記事では write-slops の代わりに使う、とした。
 
 下書きとの対応は次のとおり。
 
@@ -84,5 +84,9 @@ PR のあと、依頼した人が下書きを作った対話の全文を貼っ�
 
 - 直近の技術調査は [PR #136](https://github.com/podhmo/html-sandbox/pull/136)（WSL2 の perf の bind mount で `apt upgrade` が失敗した件）だが、Devin のセッションで行われ、記事はない。このセッションには捨てた選択肢の材料がないので、新しい規則に従えば「記録だけから書いている」と断ったうえで sketch をなぞる以上のことは書けない。次に Claude Code で技術調査をしたときに、そのセッションで使うのが順当だと思う。
 - 書く段階のスキルでは、捨てた選択肢の材料が残っていることまでは保証できない。調査が長く、会話が要約されると消えやすいはず（確かめていない）。調査の依頼の側で「捨てた選択肢を sketch に一行ずつ残す」と頼めば残るが、作業を縛る側の指定になる。
-- write-slops との書き比べはしていない。[fork で書き比べた記事](2026-11-05-skill-for-new-articles.md)と同じく、調査したセッションから fork を 2 つ起こせば、違いをスキルだけにできる。
+- write-slops との書き比べはしていない。[fork で書き比べた記事](../2026-11-05-skill-for-new-articles.md)と同じく、調査したセッションから fork を 2 つ起こせば、違いをスキルだけにできる。
 - issue #133 にある、いろいろなモデルに書かせて筆致の差を楽しみたい、という話とは、トーンの形容を入れていないことが合っている気がする。スキルが文体を決めなければ、差はモデルの側から出る。
+
+## 追記: 同じ依頼を Codex が実行した PR との比較
+
+同じ依頼を Codex が別に実行した [PR #139](https://github.com/podhmo/html-sandbox/pull/139) と並べた比較と総評を、[01-compare-with-pr139.md](#01-compare-with-pr139md) に置いた。
