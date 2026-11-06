@@ -5,6 +5,13 @@ description: A trial of a specialized slops skill, built from issue 133 and the 
 
 # Recording the choices left behind by a technical exploration
 
+This bundle retains the initial article below. After the original skill and
+article were written independently, the requester supplied the source
+dialogue, requested skill refinements, and then authorized a comparison
+with PR #138. The later [comment from Codex](#01-codex-comparisonmd)
+compares the revised skills and both articles; it is not part of the initial
+investigation. [Raw comparison comment](01-codex-comparison.md).
+
 ## The request and the material available
 
 I was asked to make a slops writing skill for the end of a technical exploration, use the existing write-slops as its base, expose it to Codex, and then use it to write an article about the work. The starting point was [the technical-memo comment on issue #133](https://github.com/podhmo/html-sandbox/issues/133#issuecomment-6686188903). Work was to happen in a separate worktree, without consulting another agent's PR. This article is the first use of the resulting skill.
@@ -15,17 +22,17 @@ The repository at the start of this work already contained an investigation-note
 
 ## From the earlier articles to a narrower skill
 
-I began with [write-slops](../.claude/skills/write-slops/SKILL.md). It already separates questions, observations, untried ideas, and decisions, and prohibits invented measurements or promises. It also owns the site's Markdown dialect, figures, bundles, and renderer checks. Copying those instructions into a second skill would leave two versions to maintain, so the new skill begins by requiring the base and adds only the investigation-specific focus.
+I began with [write-slops](../../.claude/skills/write-slops/SKILL.md). It already separates questions, observations, untried ideas, and decisions, and prohibits invented measurements or promises. It also owns the site's Markdown dialect, figures, bundles, and renderer checks. Copying those instructions into a second skill would leave two versions to maintain, so the new skill begins by requiring the base and adds only the investigation-specific focus.
 
-That left a choice about what the specialization should prescribe. [The use-case templates article](2026-11-05-slops-use-case-templates.md) records an earlier attempt to respond to issue #133 by adjusting the sound of the prose. Its next attempt instead separated what an article should cover from how it should sound. I used that distinction here: the new instructions identify the evidence and choices the reader needs, rather than requesting feelings or a particular personality.
+That left a choice about what the specialization should prescribe. [The use-case templates article](../2026-11-05-slops-use-case-templates.md) records an earlier attempt to respond to issue #133 by adjusting the sound of the prose. Its next attempt instead separated what an article should cover from how it should sound. I used that distinction here: the new instructions identify the evidence and choices the reader needs, rather than requesting feelings or a particular personality.
 
-[The November 5 skill experiment](2026-11-05-skill-for-new-articles.md) supplied a more concrete failure to account for. According to that article, two drafts both included the rejected answers but ended with the writer's mistakes; neither supplied the requested account of what a good article was and how to make one. A rule to choose one thread also caused a useful aside about session forks to be dropped. I did not repeat that comparison. I used its reported outcomes to give the new skill four parts: context, a causal narrative of trials, an explicit answer to the initial request, and useful asides after that answer.
+[The November 5 skill experiment](../2026-11-05-skill-for-new-articles.md) supplied a more concrete failure to account for. According to that article, two drafts both included the rejected answers but ended with the writer's mistakes; neither supplied the requested account of what a good article was and how to make one. A rule to choose one thread also caused a useful aside about session forks to be dropped. I did not repeat that comparison. I used its reported outcomes to give the new skill four parts: context, a causal narrative of trials, an explicit answer to the initial request, and useful asides after that answer.
 
 The sequence matters, but it does not require a timestamp list. In the current work, for example, the base already covered formatting, which led me to keep formatting out of the specialization. The earlier comparison reported a missing answer, which led me to make that answer an explicit part of the article. These are decisions with local reasons. A chronology that merely listed files read and commands run would obscure those connections.
 
 ### What a conditional workaround needs to retain
 
-Issue #133 points back to [the TTS article about constraints](2026-11-05-answers-under-constraints.md). [Issue #128](https://github.com/podhmo/html-sandbox/issues/128) had asked whether the CUDA pinning was really a consequence of an older driver and called for a retry after updating it. The checked-in [TTS notes](../docs/sketch/ja/tts-wsl2.md) report that the original driver environment failed to initialize the default torch build, while the later environment initialized it successfully. Those are historical reports I read during this task; I did not run a TTS workload or verify current package compatibility.
+Issue #133 points back to [the TTS article about constraints](../2026-11-05-answers-under-constraints.md). [Issue #128](https://github.com/podhmo/html-sandbox/issues/128) had asked whether the CUDA pinning was really a consequence of an older driver and called for a retry after updating it. The checked-in [TTS notes](../../docs/sketch/ja/tts-wsl2.md) report that the original driver environment failed to initialize the default torch build, while the later environment initialized it successfully. Those are historical reports I read during this task; I did not run a TTS workload or verify current package compatibility.
 
 The writing problem can be stated without repeating the package installation instructions:
 
@@ -38,7 +45,7 @@ The writing problem can be stated without repeating the package installation ins
 
 An environment table alone does not keep a later instruction conditional. If a reader copies only the workaround paragraph, its reason must still be visible there. That is why the new skill asks for the relevant condition beside the choice itself.
 
-There is also a limit to reconstruction. A later reader can notice an alternative without knowing whether the earlier worker considered it. [The article about good slops for the requester](2026-11-05-good-slops-for-requester.md) emphasizes being honest about what was actually checked. I added an explicit distinction between a failed trial, a considered but unexecuted option, and a possibility noticed afterward. Where an earlier decision has no recorded reason, the article should retain that unknown. The instruction to explain discarded alternatives must not become an instruction to invent them.
+There is also a limit to reconstruction. A later reader can notice an alternative without knowing whether the earlier worker considered it. [The article about good slops for the requester](../2026-11-05-good-slops-for-requester.md) emphasizes being honest about what was actually checked. I added an explicit distinction between a failed trial, a considered but unexecuted option, and a possibility noticed afterward. Where an earlier decision has no recorded reason, the article should retain that unknown. The instruction to explain discarded alternatives must not become an instruction to invent them.
 
 ### Making the same files available to Codex
 
@@ -68,7 +75,7 @@ I also added a routing paragraph to `AGENTS.md` for articles after investigation
 
 ## What this attempt produced
 
-The requested specialization is [write-slops-exploration-notes](../.claude/skills/write-slops-exploration-notes/SKILL.md). It adds a way to recover trials and choices from the work record, keeps workarounds tied to their conditions, and makes the answer to the original request a distinct part of the article. The base remains the source of formatting and rendering rules. Codex-facing links point to both physical sources, and this article was written after loading the new skill through its link.
+The requested specialization is [write-slops-exploration-notes](../../.claude/skills/write-slops-exploration-notes/SKILL.md). It adds a way to recover trials and choices from the work record, keeps workarounds tied to their conditions, and makes the answer to the original request a distinct part of the article. The base remains the source of formatting and rendering rules. Codex-facing links point to both physical sources, and this article was written after loading the new skill through its link.
 
 The first attempt to run the skill validator stopped because the system Python lacked PyYAML. I used an isolated uv environment with that dependency, leaving the repository's dependencies unchanged; both skills then passed `quick_validate.py`. Reading each skill through `.agents/skills/` returned the same bytes as its `.claude/skills/` source.
 
