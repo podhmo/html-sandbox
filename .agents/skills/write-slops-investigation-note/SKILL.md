@@ -14,7 +14,8 @@ handling of sources, and checking the output all follow
 
 The reader wants to re-run or extend the investigation later, possibly
 under different conditions, and to see which paths were dropped on the
-way. The article records this investigation. It does not argue a thesis,
+way. The article records this investigation as a request and what was
+done and verified to answer it. It does not argue a thesis,
 generalize the episode into properties of coding agents, or evaluate the
 author. Interpretation about this investigation belongs in it: what an
 error seemed to mean at the time, why one path looked cheaper.
@@ -37,15 +38,19 @@ unknown.
 
 ### 1. Request and starting conditions
 
-- The request as it stood at the start. Requirements added or changed
-  midway belong in section 2, at the point where they took effect.
+- The request as it stood at the start. It may be summarized or
+  reshaped; it need not be the prompt verbatim. Requirements added or
+  changed midway belong in section 2, at the point where they took
+  effect.
 - The starting conditions that later choices depend on, such as
   environment, versions, and permissions (what the agent may not change).
 
 ### 2. Trials and decisions, in order
 
 - What happened, in the order it happened, including what led from each
-  step to the next (e.g. which error prompted which next attempt).
+  step to the next (e.g. which error prompted which next attempt). This
+  section is an account of how the work proceeded, not a timeline, a
+  chronology, or a list of commits.
 - The alternatives that changed the course of the work or that explain
   the result's conditions, limits, or how to repeat it, each with the
   concrete reason it was dropped: a permission boundary, a version
@@ -82,5 +87,6 @@ unknown.
   if a constraint were lifted, related observations. It does not go in
   section 2. Omit the section when there is nothing to put in it.
 
-The section titles above name contents, not article headings. A short
-investigation may merge sections 1 and 2.
+The order above is what this skill requires; the section titles name
+contents, not article headings. A short investigation may merge sections
+1 and 2.
