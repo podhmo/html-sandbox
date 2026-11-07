@@ -13,7 +13,7 @@ all: svg check png
 ## svg: run every examples/fig-*.ts generator into build/
 svg: $(FIGS)
 
-build/fig-%.svg: examples/fig-%.ts svg.ts chart.ts examples/data.ts
+build/fig-%.svg: examples/fig-%.ts svg.ts chart.ts examples/data.ts examples/geom.ts
 	@mkdir -p build
 	$(NODE) $<
 

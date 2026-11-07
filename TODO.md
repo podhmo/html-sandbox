@@ -51,6 +51,13 @@
   - [ ] SVG のコードブロックに ` ```svg ` のラベルを補う: `/preview` に渡す tinymarkdown を AI との対話で
     作らせると、指定があってもフェンスの `svg` ラベルが漏れることが多い（ラベルがないと画像にならずコードとして出る）。
     中身が `<svg` で始まるラベルなしのフェンスに `svg` を付ける。
+- [x] **ドロネー三角形分割とボロノイ図の解説記事を書く**: 前提知識（垂直二等分線・外接円・凸包・
+  一般位置）から自己完結する記事。裏テーマ「図を多く載せる記事」の実験台にし、図は
+  tools/svg-gen の生成器内で実際の幾何を計算して描く（スパイク
+  `tools/svg-gen/examples/fig-voronoi-dual.ts` 済み）。前提知識の棚卸し、下書きの精査結果、
+  図の計画、構成案は[調査メモ](docs/sketch/ja/delaunay-voronoi.md)に蓄えた。
+  → [記事](slops/2026-11-07-delaunay-voronoi.md/README.md)として公開（全18図、参照は
+  [01-references.md](slops/2026-11-07-delaunay-voronoi.md/01-references.md)に分離）。
 
 ### Future work
 
