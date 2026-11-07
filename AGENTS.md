@@ -17,6 +17,13 @@ TODO.md関連の運用ルール（タスクの追記・完了・部分完了時�
 When writing or editing an AI-authored article in `slops/`, or preparing
 Markdown for this blog's `/preview`, read
 [the write-slops skill](.claude/skills/write-slops/SKILL.md).
-When writing technical investigation notes documenting trials, discarded
-alternatives, and environmental constraints, read
-[the write-slops-investigation-note--gemini skill](.claude/skills/write-slops-investigation-note--gemini/SKILL.md).
+
+For technical investigation articles, select one experimental variant for
+the task; each inherits the base skill above:
+
+- [Claude variant](.claude/skills/write-slops-investigation-note--claude/SKILL.md)
+- [GPT variant](.claude/skills/write-slops-investigation-note--gpt/SKILL.md)
+- [Gemini variant](.claude/skills/write-slops-investigation-note--gemini/SKILL.md)
+
+Sources live in `.claude/skills/`; `.agents/skills/` contains relative
+discovery links to those sources.
