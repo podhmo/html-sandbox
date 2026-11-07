@@ -504,7 +504,7 @@ prev: ../2026-11-07-investigation-note-skill.md
 ドロネー辺の正確な特徴づけを確認しておこう。辺 pq がドロネーなのは「p, q を通る空円が存在する」ときで、「両端点を直径とする円が空」ではない。後者はより強い条件で、その辺は Gabriel 辺と呼ばれる別物だ（Gabriel ならドロネーだが、逆は成り立たない）。最小の反例は鈍角三角形1枚: 最長辺は外接円が空なのでドロネーだが、直径円は向かいの鈍角頂点を含む。円周角の定理で、直径を見込む角は円周上ならちょうど90°、円の内側からだと鈍角になる。だから鈍角の対辺は Gabriel になれない。
 
 ```svg
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="33.849999999999994 50.9556876849735 177.3 180.088624630053" width="177" height="180" role="img" aria-label="longest edge of an obtuse triangle: its circumcircle is empty (Delaunay) but its diameter circle holds the third vertex (not Gabriel)">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="6.624999999999943 52.5 231.7500000000001 210.7443123150265" width="232" height="211" role="img" aria-label="longest edge of an obtuse triangle: its circumcircle is empty (Delaunay) but its diameter circle holds the third vertex (not Gabriel)">
 <path d="M55 130 L190 130" fill="none" stroke="currentColor" stroke-width="1.5"/>
 <path d="M190 130 L125 80" fill="none" stroke="currentColor" stroke-width="1.5"/>
 <path d="M125 80 L55 130" fill="none" stroke="currentColor" stroke-width="1.5"/>
@@ -514,8 +514,8 @@ prev: ../2026-11-07-investigation-note-skill.md
 <circle cx="55" cy="130" r="4" fill="currentColor"/>
 <circle cx="190" cy="130" r="4" fill="currentColor"/>
 <circle cx="125" cy="80" r="4" fill="#D55E00"/>
-<text x="122.5" y="211.5" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.7">diameter circle contains r</text>
-<text x="122.5" y="71.9556876849735" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.7">circumcircle: empty</text>
+<text x="122.5" y="237.0443123150265" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.7">solid circle: circumcircle, empty</text>
+<text x="122.5" y="251.0443123150265" font-size="11" text-anchor="middle" fill="currentColor" opacity="0.7">dashed circle: diameter, contains r</text>
 </svg>
 ```
 

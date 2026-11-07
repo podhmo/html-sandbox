@@ -27,8 +27,9 @@ c.circle(cc.o[0], cc.o[1], cc.r, { opacity: 0.5 });
 c.circle(mid[0], mid[1], dr, { dash: "5 3", width: 1.5, color: c.color(3) });
 for (const x of [p, q]) c.raw(`<circle cx="${x[0]}" cy="${x[1]}" r="4" fill="currentColor"/>`, [x]);
 c.raw(`<circle cx="${r[0]}" cy="${r[1]}" r="4" fill="${c.color(3)}"/>`, [r]);
-c.text(mid[0], mid[1] + dr + 14, "diameter circle contains r", { anchor: "middle", size: 11, opacity: 0.7 });
-c.text(cc.o[0], cc.o[1] - cc.r - 8, "circumcircle: empty", { anchor: "middle", size: 11, opacity: 0.7 });
+// keep labels below every circle: text inside a circle bounds must fit it.
+c.text(mid[0], cc.o[1] + cc.r + 16, "solid circle: circumcircle, empty", { anchor: "middle", size: 11, opacity: 0.7 });
+c.text(mid[0], cc.o[1] + cc.r + 30, "dashed circle: diameter, contains r", { anchor: "middle", size: 11, opacity: 0.7 });
 
 await writeFile(
   new URL("../build/fig-gabriel.svg", import.meta.url),
