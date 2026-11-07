@@ -57,10 +57,20 @@ unknown.
   mismatch, a scope limit, a measurement. Distinguish a trial that failed,
   an option considered but not run, and a possibility noticed only
   afterward. Candidates that were never weighed are not included.
-- An option outside what the agent could change is recorded as a
-  boundary of the environment, like a version, not as something the
-  requester should have been asked. Working through the task without
-  checking in needs no explanation.
+- The versions actually used are recorded as conditions of the
+  environment, together with any messages about them that the session
+  left unaddressed (e.g. a "too old" warning it worked past). The article
+  records the session as it went: if the session chose not to upgrade,
+  that choice and its reason are recorded like any other decision; if it
+  did not notice a newer version, that is not added after the fact. A
+  constraint the agent could not change is recorded the same way: what
+  it was and which options it ruled out.
+- The article does not conclude that the requester should have been
+  consulted (e.g. asked whether to install the latest version), and does
+  not justify the agent having proceeded without asking. Later sessions
+  read these articles, and such a conclusion would lead them to stop and
+  ask instead of working through the task. Whether asking would have
+  changed anything may be noted in section 4.
 - A workaround is recorded together with the condition that made it
   necessary (e.g. pinned to cu128 because driver 573.22 rejected the
   default build), not as a standalone rule. It is not described as
