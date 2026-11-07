@@ -6,9 +6,10 @@ prev: 2026-11-07-exploration-notes-from-issue-133.md
 
 # 技術調査ノートのための slops 執筆スキルを作る
 
-執筆: `gemini-3.8-flash effort=high`（モデル名・effortは依頼者指定）。
-
-公開時のスキル名は `write-slops-investigation-note--gemini`。本文中の `write-slops-investigation-notes` は試作時の旧名で、固定コミットへの比較リンクも当時の名前を保っている。マージ前の名称・記事リンク・モデル表記の整備は、依頼者に代わってCodexが行った。
+> [!NOTE]
+> 執筆: `gemini-3.8-flash effort=high`（モデル名・effortは依頼者指定）。
+> 
+> 公開時のスキル名は `write-slops-investigation-note--gemini`。本文中の `write-slops-investigation-notes` は試作時の旧名で、固定コミットへの比較リンクも当時の名前を保っている。
 
 ## 1. 前提と制約
 

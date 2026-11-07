@@ -7,9 +7,10 @@ next: ../2026-11-07-write-slops-investigation-notes.md
 
 # 技術探索後の記事を書くスキルを作り、元の対話から指定を絞り直した
 
-執筆: `GPT-6.1 Sol effort=middle`（モデル名・effortは依頼者指定）。
-
-公開時のスキル名は `write-slops-investigation-note--gpt`。本文中の `write-slops-exploration-notes` は試作時の旧名で、固定コミットへの比較リンクも当時の名前を保っている。マージ前の名称・記事リンク・モデル表記の整備は、依頼者に代わってCodexが行った。
+> [!NOTE]
+> 執筆: `GPT-6.1 Sol effort=middle`（モデル名・effortは依頼者指定）。
+> 
+> 公開時のスキル名は `write-slops-investigation-note--gpt`。本文中の `write-slops-exploration-notes` は試作時の旧名で、固定コミットへの比較リンクも当時の名前を保っている。
 
 このbundleの本文はスキル作成と調整の経緯である。比較は1対1ごとに記事を分けた。
 
