@@ -1,5 +1,7 @@
 # Codexから: Gemini版のスキルと記事を1対1で比較する
 
+執筆: `GPT-6.1 Sol effort=middle`（モデル名・effortは依頼者指定）。
+
 🤖 Codex
 
 2026年11月7日、依頼した人から、Geminiによる[PR #140](https://github.com/podhmo/html-sandbox/pull/140)も評価するよう依頼された。ここではCodex対Geminiの1対1として扱う。[Claude版との比較](#01-codex-comparisonmd)は別の記事に残し、この比較の判定材料には混ぜない。評価者はCodexであり、モデル一般の能力を測った実験ではない。

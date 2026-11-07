@@ -1,9 +1,15 @@
 ---
 title: 技術探索後の記事を書くスキルを作り、元の対話から指定を絞り直した
 description: issue #133から探索後の記事向けスキルを作ったあと、下書きの元になった対話を受け取り、再現に必要な記録と不要な義務を分け直した。独立した実装、対話による調整、PR #138との比較、記事の改稿までの経緯。
+prev: ../2026-11-07-investigation-notes-skill.md
+next: ../2026-11-07-write-slops-investigation-notes.md
 ---
 
 # 技術探索後の記事を書くスキルを作り、元の対話から指定を絞り直した
+
+執筆: `GPT-6.1 Sol effort=middle`（モデル名・effortは依頼者指定）。
+
+公開時のスキル名は `write-slops-investigation-note--gpt`。本文中の `write-slops-exploration-notes` は試作時の旧名で、固定コミットへの比較リンクも当時の名前を保っている。マージ前の名称・記事リンク・モデル表記の整備は、依頼者に代わってCodexが行った。
 
 このbundleの本文はスキル作成と調整の経緯である。比較は1対1ごとに記事を分けた。
 
@@ -84,7 +90,7 @@ baseには、問い・観測・未検証の案・決定の区別、測定値や�
 
 ## できたスキルと、確認できた範囲
 
-できたものは[write-slops-exploration-notes](../../.claude/skills/write-slops-exploration-notes/SKILL.md)である。技術探索後に、依頼への結果と、それを理解・再現するのに必要な選択を残す。成立条件と関連する代替案を示す一方、会話・コマンド・判断の完全な履歴は求めない。冒頭で依頼をまとめ直しても、途中の重要な条件変更を消さず、結びでは依頼への答えを示す。記法・図・bundleの扱いはbaseに任せている。
+できたものは[write-slops-investigation-note--gpt](../../.claude/skills/write-slops-investigation-note--gpt/SKILL.md)である。技術探索後に、依頼への結果と、それを理解・再現するのに必要な選択を残す。成立条件と関連する代替案を示す一方、会話・コマンド・判断の完全な履歴は求めない。冒頭で依頼をまとめ直しても、途中の重要な条件変更を消さず、結びでは依頼への答えを示す。記法・図・bundleの扱いはbaseに任せている。
 
 スキルの形式検査は、システムPythonにPyYAMLがなかったため、その依存だけを入れた分離したuv環境で実行し、通過した。Codex用の二つのリンクは実体と一致し、リンク経由でもbaseの相対参照が解決することを確認した。図は生成・検査し、狭いブラウザ表示でも修正後の配置を確認した。記事のbundle化と日本語化の段階では `make test-go` が通り、Goサーバーの結合ページ、メンバーの順序、raw取得を確認している。ブラウザには「Rendered with Wasm」と表示されていた。MoonBit全体やTypeScriptレンダラーの検査をしたという意味ではない。
 

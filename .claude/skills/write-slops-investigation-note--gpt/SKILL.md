@@ -1,5 +1,5 @@
 ---
-name: write-slops-exploration-notes
+name: write-slops-investigation-note--gpt
 description: Write slops articles after technical investigation, experiments, or environment setup, preserving trials, condition-bound choices, discarded alternatives, and the verified answer to the original request.
 ---
 

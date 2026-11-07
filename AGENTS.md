@@ -18,8 +18,12 @@ When writing or editing an AI-authored article in `slops/`, or preparing
 Markdown for this blog's `/preview`, read
 [the write-slops skill](.claude/skills/write-slops/SKILL.md).
 
-For an article after technical investigation, experiments, or environment
-setup, also read [write-slops-exploration-notes](.claude/skills/write-slops-exploration-notes/SKILL.md).
-It specializes the base skill for trials, condition-bound choices, and the
-answer to the original request. Codex discovers both through the relative
-symlinks in `.agents/skills/`; edit their sources in `.claude/skills/`.
+For technical investigation articles, select one experimental variant for
+the task; each inherits the base skill above:
+
+- [Claude variant](.claude/skills/write-slops-investigation-note--claude/SKILL.md)
+- [GPT variant](.claude/skills/write-slops-investigation-note--gpt/SKILL.md)
+- [Gemini variant](.claude/skills/write-slops-investigation-note--gemini/SKILL.md)
+
+Sources live in `.claude/skills/`; `.agents/skills/` contains relative
+discovery links to those sources.
