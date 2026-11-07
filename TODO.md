@@ -43,6 +43,13 @@
 - [ ] **slops-nav が同じ日付の既存記事で prev/next の食い違いを 22 件報告する**: `cd tools/slops-nav && go run . ../../slops`
   が 10-24〜10-29 と 11-05 の同日記事について、git の追加順（`go/pkg/gitorder`）と front matter の prev/next が
   合わないと報告する（2026-11-07 時点、新しい記事とは無関係）。`-w` で直すか、並びが意図どおりなら追加順の判定側を見直すかを決める。
+- [ ] **slops の Markdown を整える normalizer を作る**: `*` の太字・強調（`**bold**`、`*em*`）は
+  write-slops で禁止しているが、AI の出力に残りやすい。lint で見つけて書き直させるのではなく、
+  gofmt のように通すだけで `*` の強調を外した文に直す normalizer を作る（`* ` のリスト記号はそのまま）
+  （[issue #142](https://github.com/podhmo/html-sandbox/issues/142)）。
+  - [ ] SVG のコードブロックに ` ```svg ` のラベルを補う: `/preview` に渡す tinymarkdown を AI との対話で
+    作らせると、指定があってもフェンスの `svg` ラベルが漏れることが多い（ラベルがないと画像にならずコードとして出る）。
+    中身が `<svg` で始まるラベルなしのフェンスに `svg` を付ける。
 
 ### Future work
 
