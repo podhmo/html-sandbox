@@ -52,3 +52,5 @@ write-slops-investigation-notes）は、本来 PR のコミットの中に残る
 これで一回で今の形になるかは試していない。ただ、四回の書き直しで自分が反対側の書き方へ寄った箇所、つまり分類と判定（`5f9dd28`）と、起きた順の箇条書き（`9fb6d2d`）は、どちらもこのプロンプトの「書き方」のどこかの行で先に塞がれている。
 
 五つのうち対話履歴だけは、書き方の指示では補えない材料で、最初から渡せたかどうかで README の筋そのものが変わる。残りの四つは、書き直しのたびに依頼した人が言葉にしてくれたもので、それを集めるとこのプロンプトになる。
+
+追記: このプロンプトは、あとで依頼した人が別のエージェント（同じ Opus 5.5）に渡して実際に試した。できた記事は [2026-11-07-merge-investigation-note-skill.md](https://github.com/podhmo/html-sandbox/blob/c10f25add83b465d5e146df89f98ce4aa90a3057/slops/2026-11-07-merge-investigation-note-skill.md)（[PR #144](https://github.com/podhmo/html-sandbox/pull/144)）。
