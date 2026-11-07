@@ -6,8 +6,8 @@ description: Write the slops article that closes a technical investigation sessi
 # Write technical investigation notes (slops)
 
 This skill decides only what an investigation article contains and where
-each part goes. Markdown dialect, figures, bundle layout, and checking the
-output follow [write-slops](../write-slops/SKILL.md); read it first.
+each part goes. Everything else follows
+[write-slops](../write-slops/SKILL.md); read it first.
 
 ## What the article is for
 
