@@ -12,13 +12,21 @@ handling of sources, and checking the output all follow
 
 ## What the article is for
 
-The reader wants to re-run or extend the investigation later, possibly
-under different conditions, and to see which paths were dropped on the
-way. The article records this investigation as a request and what was
-done and verified to answer it. It does not argue a thesis,
-generalize the episode into properties of coding agents, or evaluate the
-author. Interpretation about this investigation belongs in it: what an
-error seemed to mean at the time, why one path looked cheaper.
+The article is a technical log of the investigation, read as a request
+and what was done and verified to answer it. The reader wants to re-run
+or extend the investigation later, possibly under different conditions.
+Beyond the log, the article keeps what the session knew but the PR and
+the sketch do not carry, such as options that were not taken.
+
+Everything in the article comes from the session as it went.
+Interpretations made at the time belong in it: what an error seemed to
+mean, why one path looked cheaper. Writing the article is not a new
+round of investigation or judgment: it does not add alternatives,
+assessments, lessons, or recommendations that did not arise in the
+session, and it does not argue a thesis, generalize the episode into
+properties of coding agents, or evaluate the author. Later sessions read
+these articles, and a conclusion formed while writing would act as
+guidance for them.
 
 The session usually has already collected what it found in
 `docs/sketch/`. The sketch holds the gathered facts and any reproducible
@@ -45,32 +53,16 @@ unknown.
 - The starting conditions that later choices depend on, such as
   environment, versions, and permissions (what the agent may not change).
 
-### 2. Trials and decisions, in order
+### 2. What was done, in order
 
-- What happened, in the order it happened, including what led from each
-  step to the next (e.g. which error prompted which next attempt). This
-  section is an account of how the work proceeded, not a timeline, a
-  chronology, or a list of commits.
-- The alternatives that changed the course of the work or that explain
-  the result's conditions, limits, or how to repeat it, each with the
-  concrete reason it was dropped: a permission boundary, a version
-  mismatch, a scope limit, a measurement. Distinguish a trial that failed,
-  an option considered but not run, and a possibility noticed only
-  afterward. Candidates that were never weighed are not included.
-- The versions actually used are recorded as conditions of the
-  environment, together with any messages about them that the session
-  left unaddressed (e.g. a "too old" warning it worked past). The article
-  records the session as it went: if the session chose not to upgrade,
-  that choice and its reason are recorded like any other decision; if it
-  did not notice a newer version, that is not added after the fact. A
-  constraint the agent could not change is recorded the same way: what
-  it was and which options it ruled out.
-- The article does not conclude that the requester should have been
-  consulted (e.g. asked whether to install the latest version), and does
-  not justify the agent having proceeded without asking. Later sessions
-  read these articles, and such a conclusion would lead them to stop and
-  ask instead of working through the task. Whether asking would have
-  changed anything may be noted in section 4.
+- What was done, in the order it was done, including trials that failed
+  and what led from each step to the next (e.g. which error prompted
+  which next attempt). This section is an account of how the work
+  proceeded, not a timeline, a chronology, or a list of commits.
+- The reasons behind the choices that set the course: a permission
+  boundary, a version mismatch, a scope limit, a measurement. A
+  constraint the agent could not change is recorded as a condition of
+  the environment: what it was and what it ruled out.
 - A workaround is recorded together with the condition that made it
   necessary (e.g. pinned to cu128 because driver 573.22 rejected the
   default build), not as a standalone rule. It is not described as
@@ -92,10 +84,13 @@ unknown.
 
 ### 4. Asides (optional)
 
-- Material worth keeping that did not fit the main line goes in a
-  closing section after the answer: ideas not pursued, what would change
-  if a constraint were lifted, related observations. It does not go in
-  section 2. Omit the section when there is nothing to put in it.
+- Anything worth keeping that does not belong in the main line goes in
+  a closing section after the answer. For example: a surprising finding
+  or a tip that is valuable but off the main line; an explanation of, or
+  a reservation about, something in the main text; options considered
+  but not taken and why, messages or warnings left unaddressed, things
+  noticed but not pursued. Omit the section when there is nothing to put
+  in it.
 
 The order above is what this skill requires; the section titles name
 contents, not article headings. A short investigation may merge sections
