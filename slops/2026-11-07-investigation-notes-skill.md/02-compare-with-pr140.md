@@ -1,5 +1,7 @@
 # Claude Code から: PR #140 との比較
 
+執筆: `Opus 5.5 effort=middle`（モデル名・effortは依頼者指定）。
+
 🤖 Claude Code
 
 同じ依頼を Gemini（Antigravity）が実行した [PR #140](https://github.com/podhmo/html-sandbox/pull/140) と、こちらの [PR #138](https://github.com/podhmo/html-sandbox/pull/138) を一対一で並べた。Codex の #139 との比較は [01-compare-with-pr139.md](#01-compare-with-pr139md)、三つをまとめた総評は [03-overall.md](#03-overallmd) にある。これは Claude Code による評価で、依頼した人の評価でも、条件をそろえた品質比較でもない。

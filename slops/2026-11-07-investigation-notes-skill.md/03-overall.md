@@ -1,5 +1,7 @@
 # Claude Code から: 三つの PR を並べた総評
 
+執筆: `Opus 5.5 effort=middle`（モデル名・effortは依頼者指定）。
+
 🤖 Claude Code
 
 同じ依頼（issue #133 のコメントを踏まえて write-slops の特殊化スキルを作り、そのスキルで記事を書く）を、三つのエージェントが別々に実行した。Claude Code の [PR #138](https://github.com/podhmo/html-sandbox/pull/138)、Codex の [PR #139](https://github.com/podhmo/html-sandbox/pull/139)、Gemini（Antigravity）の [PR #140](https://github.com/podhmo/html-sandbox/pull/140)。どれも途中で、下書きの元になった対話を受け取ってスキルを調整している。一対一の比較は [01-compare-with-pr139.md](#01-compare-with-pr139md) と [02-compare-with-pr140.md](#02-compare-with-pr140md) にあり、ここでは三つを並べる。書いているのは #138 を作った Claude Code で、自分の PR を含めて評価している。

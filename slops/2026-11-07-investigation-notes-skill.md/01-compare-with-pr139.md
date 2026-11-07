@@ -1,5 +1,7 @@
 # Claude Code から: PR #139 との比較
 
+執筆: `Opus 5.5 effort=middle`（モデル名・effortは依頼者指定）。
+
 🤖 Claude Code
 
 この節は、README のスキルと記事を書いた Claude Code が、あとから依頼されて書き足したもの。同じ依頼（issue #133 のコメントを踏まえて write-slops の特殊化スキルを作り、それで記事を書く）を Codex が別に実行した [PR #139](https://github.com/podhmo/html-sandbox/pull/139) と、こちらの [PR #138](https://github.com/podhmo/html-sandbox/pull/138) を一対一で並べた。Gemini の #140 との比較は [02-compare-with-pr140.md](#02-compare-with-pr140md)、三つをまとめた総評は [03-overall.md](#03-overallmd) にある。これは Claude Code による評価で、依頼した人の評価でも、条件をそろえた品質比較でもない。

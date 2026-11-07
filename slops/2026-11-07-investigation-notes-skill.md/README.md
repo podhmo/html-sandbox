@@ -2,9 +2,14 @@
 title: 技術調査のあとに書く記事のスキルを、issue の下書きから作った
 description: issue #133 のコメントに置かれていた write-slops-investigation-notes の下書きを、直近の slops と PR #135 の書き比べに照らして直し、write-slops の上に載る特殊化したスキルとして置いた。途中で下書きの元になった対話を見せてもらい、取り違えて削った項目を戻し、必須にしすぎた項目を減らした。その経緯と、できたスキルの記録。この記事自体がそのスキルで書いた最初の 1 本。
 prev: ../2026-11-05-skill-for-new-articles.md
+next: ../2026-11-07-exploration-notes-from-issue-133.md
 ---
 
 # 技術調査のあとに書く記事のスキルを、issue の下書きから作った
+
+執筆: `Opus 5.5 effort=middle`（モデル名・effortは依頼者指定）。
+
+公開時のスキル名は `write-slops-investigation-note--claude`。本文中の `write-slops-investigation-notes` は試作時の旧名で、固定コミットへの比較リンクも当時の名前を保っている。マージ前の名称・記事リンク・モデル表記の整備は、依頼者に代わってCodexが行った。
 
 ## 依頼と、始めた時点の材料
 
@@ -59,7 +64,7 @@ PR のあと、依頼した人が下書きを作った対話の全文を貼っ�
 
 ## できたもの
 
-スキルは [.claude/skills/write-slops-investigation-notes/SKILL.md](../../.claude/skills/write-slops-investigation-notes/SKILL.md) にある。`.opencode/skills` は `.claude/skills` へのシンボリックリンクなので OpenCode からも見え、write-slops に合わせて `agents/openai.yaml` も付けている。description は write-slops-threads と違って「名前を指定されたときだけ」にはせず、技術調査（環境構築、実現性の確認、追試、デバッグ）の記事では write-slops の代わりに使う、とした。
+スキルは [.claude/skills/write-slops-investigation-note--claude/SKILL.md](../../.claude/skills/write-slops-investigation-note--claude/SKILL.md) にある。`.opencode/skills` は `.claude/skills` へのシンボリックリンクなので OpenCode からも見え、write-slops に合わせて `agents/openai.yaml` も付けている。description は write-slops-threads と違って「名前を指定されたときだけ」にはせず、技術調査（環境構築、実現性の確認、追試、デバッグ）の記事では write-slops の代わりに使う、とした。
 
 下書きとの対応は次のとおり。
 
