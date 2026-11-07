@@ -32,7 +32,7 @@ Focus the narrative on the concrete friction between intent and environment. Rat
 
 ## Base rules from write-slops
 
-Follow all formatting and tooling specifications defined in `write-slops` (`.claude/skills/write-slops/SKILL.md`):
+Follow all formatting and tooling specifications defined in `write-slops` (`.agents/skills/write-slops/SKILL.md`):
 - Markdown syntax: strict tinymarkdown (no unsupported block types; never use `*` for bold or emphasis).
 - SVG diagrams: prioritize `tools/svg-gen`, place in ` ```svg ` fences, and document newly encountered failure modes in `03-svg-pitfalls.md`.
 - Bundle organization: flat bundles using `YYYY-MM-DD-slug/` with numbered members (`01-`, `02-`) where appropriate.

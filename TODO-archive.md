@@ -1,7 +1,7 @@
 # TODO archive
 
 > **What this file is:** append-only history of completed work moved out of
-> `TODO.md` by a periodic GC sweep (`make todo-gc`; see `.claude/skills/todo-md/SKILL.md` —
+> `TODO.md` by a periodic GC sweep (`make todo-gc`; see `.agents/skills/todo-md/SKILL.md` —
 > feature PRs never write here, so this file never conflicts). Each item
 > lands at the end of the file as one line, prefixed with its ancestor
 > chain (`- [x] A > B > **C**: ...`), so a grep hit names the whole path.

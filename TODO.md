@@ -1,7 +1,7 @@
 # TODO
 
 > **このファイルの更新について:** 運用ルールは
-> [`.claude/skills/todo-md/SKILL.md`](.claude/skills/todo-md/SKILL.md) にある。
+> [`.agents/skills/todo-md/SKILL.md`](.agents/skills/todo-md/SKILL.md) にある。
 > タスクを追加・完了するときは必ずそれに従う。要点: このファイルには着手できる
 > 作業だけを書く（`[ ]` / `[-]`）。終わった作業は `[x]` にし、定期的な GC で
 > `TODO-archive.md` に移す。

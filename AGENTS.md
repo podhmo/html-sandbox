@@ -10,20 +10,22 @@
 
 # TODO.md
 
-TODO.md関連の運用ルール（タスクの追記・完了・部分完了時の操作）は `.claude/skills/todo-md/SKILL.md` を参照し、必ずそれに従ってください。タスクとは関係のないバグを見つけた場合も同じ手順で記録してください。
+TODO.md関連の運用ルール（タスクの追記・完了・部分完了時の操作）は `.agents/skills/todo-md/SKILL.md` を参照し、必ずそれに従ってください。タスクとは関係のないバグを見つけた場合も同じ手順で記録してください。
 
 # AI-written articles
 
 When writing or editing an AI-authored article in `slops/`, or preparing
 Markdown for this blog's `/preview`, read
-[the write-slops skill](.claude/skills/write-slops/SKILL.md).
+[the write-slops skill](.agents/skills/write-slops/SKILL.md).
 
 For technical investigation articles, select one experimental variant for
 the task; each inherits the base skill above:
 
-- [Claude variant](.claude/skills/write-slops-investigation-note--claude/SKILL.md)
-- [GPT variant](.claude/skills/write-slops-investigation-note--gpt/SKILL.md)
-- [Gemini variant](.claude/skills/write-slops-investigation-note--gemini/SKILL.md)
+- [Claude variant](.agents/skills/write-slops-investigation-note--claude/SKILL.md)
+- [GPT variant](.agents/skills/write-slops-investigation-note--gpt/SKILL.md)
+- [Gemini variant](.agents/skills/write-slops-investigation-note--gemini/SKILL.md)
 
-Sources live in `.claude/skills/`; `.agents/skills/` contains relative
-discovery links to those sources.
+Skills live in `.agents/skills/` (read directly by Codex, OpenCode, Devin
+CLI, Gemini CLI and Antigravity). `.claude/skills` is a symlink to it for
+Claude Code, and `.agent` is a symlink to `.agents` for older Antigravity
+builds that look in `.agent/skills/`. Do not add per-agent skill directories.
