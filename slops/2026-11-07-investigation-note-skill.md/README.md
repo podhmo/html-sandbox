@@ -2,6 +2,7 @@
 title: 技術調査のあとに書く記事のスキル write-slops-investigation-note を作った
 description: 技術的な備忘録とは何かを詰めた対話から下書きができ、その下書きを Claude Code、Codex、Gemini がそれぞれスキルにした。下書きだけでは理由が見えず、対話を渡すと三つの揃うところと割れるところが見え、割れたところを比べて一本のスキルを取り出した。
 prev: ../2026-11-05-skill-for-new-articles.md
+next: ../2026-11-07-delaunay-voronoi.md
 ---
 
 # 技術調査のあとに書く記事のスキル write-slops-investigation-note を作った
