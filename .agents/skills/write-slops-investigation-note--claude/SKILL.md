@@ -1,6 +1,6 @@
 ---
 name: write-slops-investigation-note--claude
-description: Write a slops article after a technical investigation (environment setup, a feasibility check, a retest, a debugging session) - what was asked, what was tried, which alternatives were dropped under which constraints, and the answer to the original question. Layered on write-slops; use it instead of plain write-slops when the article records such an investigation.
+description: "[Claude] Experimental variant of write-slops-investigation-note, kept as a record of the 2026-11-07 comparison. Use only when this variant is named explicitly; otherwise use write-slops-investigation-note."
 ---
 
 # Write technical investigation notes (slops)

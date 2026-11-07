@@ -40,6 +40,9 @@
   RTF 1.5〜1.9 で、GPU 使用率 25% 前後のまま Python の生成ループが律速している。WSL2 + RTX 5060 8GB
   （root なし）で vLLM が sm_120 / cu13 で入るか、RTF が 1.0 を切るかを測って追記する
   （[調査メモ](docs/sketch/ja/tts-wsl2.md)、[PR #127](https://github.com/podhmo/html-sandbox/pull/127)）。
+- [ ] **slops-nav が同じ日付の既存記事で prev/next の食い違いを 22 件報告する**: `cd tools/slops-nav && go run . ../../slops`
+  が 10-24〜10-29 と 11-05 の同日記事について、git の追加順（`go/pkg/gitorder`）と front matter の prev/next が
+  合わないと報告する（2026-11-07 時点、新しい記事とは無関係）。`-w` で直すか、並びが意図どおりなら追加順の判定側を見直すかを決める。
 
 ### Future work
 

@@ -17,15 +17,5 @@ TODO.md関連の運用ルール（タスクの追記・完了・部分完了時�
 When writing or editing an AI-authored article in `slops/`, or preparing
 Markdown for this blog's `/preview`, read
 [the write-slops skill](.agents/skills/write-slops/SKILL.md).
-
-For technical investigation articles, select one experimental variant for
-the task; each inherits the base skill above:
-
-- [Claude variant](.agents/skills/write-slops-investigation-note--claude/SKILL.md)
-- [GPT variant](.agents/skills/write-slops-investigation-note--gpt/SKILL.md)
-- [Gemini variant](.agents/skills/write-slops-investigation-note--gemini/SKILL.md)
-
-Skills live in `.agents/skills/` (read directly by Codex, OpenCode, Devin
-CLI, Gemini CLI and Antigravity). `.claude/skills` is a symlink to it for
-Claude Code, and `.agent` is a symlink to `.agents` for older Antigravity
-builds that look in `.agent/skills/`. Do not add per-agent skill directories.
+Derived skills for specific use cases (`write-slops-*`) build on it; use
+one only when the user names it.

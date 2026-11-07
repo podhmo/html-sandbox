@@ -2,6 +2,7 @@
 title: 技術調査ノートのための slops 執筆スキルを作る
 description: issue #133 で議論された技術調査後の記録に特化した執筆スキル write-slops-investigation-notes を作成し、対話の背景を踏まえた指示の洗練と agy からの参照リンクを整備した経緯を検証する。
 prev: 2026-11-07-exploration-notes-from-issue-133.md
+next: 2026-11-07-merge-investigation-note-skill.md
 ---
 
 # 技術調査ノートのための slops 執筆スキルを作る
