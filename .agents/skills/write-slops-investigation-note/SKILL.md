@@ -1,6 +1,6 @@
 ---
 name: write-slops-investigation-note
-description: Write a slops article after a technical investigation (environment setup, a feasibility check, a retest, a debugging session) - what was asked, what was tried, which alternatives were dropped under which constraints, and the answer to the original question. Layered on write-slops; use it instead of plain write-slops when the article records such an investigation.
+description: A variant of write-slops for the report written after a technical investigation session.
 ---
 
 # Write technical investigation notes (slops)
@@ -19,15 +19,19 @@ generalize the episode into properties of coding agents, or evaluate the
 author. Interpretation about this investigation belongs in it: what an
 error seemed to mean at the time, why one path looked cheaper.
 
-If the investigation also produced a reproducible procedure in
-`docs/sketch/`, the sketch keeps the procedure and the facts; the article
-links to it and tells how the procedure was reached. The sketch's content
-is not duplicated in the article.
+The session usually has already collected what it found in
+`docs/sketch/`. The sketch holds the gathered facts and any reproducible
+procedure; the article links to it and covers what the sketch does not:
+the request, how the work proceeded and why, and the answer to the
+request. Facts already in the sketch are linked rather than restated,
+except where the article needs them to follow the course of the work or
+to state the answer.
 
-If you are writing from records (commits, docs, a summary) rather than
-from the context of the session that did the work, say so. Do not fill in
-alternatives or reasons the records do not show; when the reason for a
-decision is not recorded, say it is unknown.
+The article is normally written in the session that did the work, from
+its context. If it is written instead from records (the sketch, commits,
+a summary), say so. Do not fill in alternatives or reasons the records do
+not show; when the reason for a decision is not recorded, say it is
+unknown.
 
 ## Article structure
 
