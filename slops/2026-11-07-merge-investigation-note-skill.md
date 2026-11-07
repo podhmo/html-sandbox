@@ -1,7 +1,7 @@
 ---
 title: 三つの試作から、技術調査の記事を書くスキルを一本にした
 description: Claude、GPT、Gemini がそれぞれ作った investigation-note の試作を、Claude 版を土台に一本の write-slops-investigation-note にまとめた。最初は総評の推奨に沿って足し、今日の記事を全部読み直して足しすぎた分を外し、最後に元の対話と突き合わせた経緯の記録。この記事自体が、まとめたスキルで書いた最初の 1 本。
-prev: 2026-11-07-write-slops-investigation-notes.md
+prev: 2026-11-05-skill-for-new-articles.md
 ---
 
 # 三つの試作から、技術調査の記事を書くスキルを一本にした
