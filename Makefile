@@ -13,8 +13,9 @@ test-go:
 test-moonbit:
 	$(MAKE) -C moonbit test
 
-## test-tools: run the tools' own checks (slops-nav and todo-gc tests, svg-gen lint)
+## test-tools: run the tools' own checks (slops-fmt, slops-nav and todo-gc tests, svg-gen lint)
 test-tools:
+	cd tools/slops-fmt && go test ./...
 	cd tools/slops-nav && go test ./...
 	cd tools/todo-gc && go test ./...
 	$(MAKE) -C tools/svg-gen check

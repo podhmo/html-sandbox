@@ -148,6 +148,20 @@ source files, not as a mandatory structure for every article. Read the
 [bundle prompt](../../../slops/2026-10-27-writing-slops.md/02-bundle-prompt.md)
 when asking an agent to create several files.
 
+## Normalize the draft with tools/slops-fmt
+
+After writing — an article member or the Markdown for `/preview` — pass the
+result through `tools/slops-fmt`, which fixes the two artifacts that keep
+slipping in: stray `*` emphasis is unwrapped, and an unlabelled fence whose
+body starts with `<svg` gains the `svg` label. From the repository root,
+`go run ./tools/slops-fmt` reads stdin and writes to stdout (pipe a draft
+through it before pasting into `/preview`), and `go run ./tools/slops-fmt
+-w <file or dir>` rewrites article files in place.
+
+A literal `*` belongs in a `code span`; to keep an intentionally
+unlabelled fence unlabelled, as a counterexample does, start its body
+with a comment rather than `<svg`.
+
 ## Check the intended output
 
 Use `/preview` for one document's actual rendering; paste raw Markdown or

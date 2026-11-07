@@ -41,10 +41,10 @@ workerd には、これを有効にする互換性フラグ `wasm_esm_integratio
 
 ## ついでに直したこと
 
-- **`wasm-opt -Oz`**: moon に同梱の `moon-wasm-opt` で、依存を増やさずにかけられた。wasm は 6.3% 小さくなった。
-- **メソッド**: 前の Worker は POST にも同じページを 200 で返していた。メソッドを wasm に渡し、Go 版と同じく GET と HEAD 以外は 404 にした。
-- **パスのデコード**: JS の `decodeURIComponent` をやめ、wasm でデコードするようにした。`/%FF` のような、UTF-8 でないパスにも Go 版と同じ 404 を返す。デプロイした Worker では、`/%zz` のような壊れたエスケープは、Cloudflare の前段が Worker に届く前に 400 で止める。
-- **キャッシュ**: 記事は wasm に埋め込んであって変わらないので、GET と HEAD への 200 の応答を、isolate の中でパスごとに持つことにした。2 回目からは wasm を呼ばない。
+- `wasm-opt -Oz`: moon に同梱の `moon-wasm-opt` で、依存を増やさずにかけられた。wasm は 6.3% 小さくなった。
+- メソッド: 前の Worker は POST にも同じページを 200 で返していた。メソッドを wasm に渡し、Go 版と同じく GET と HEAD 以外は 404 にした。
+- パスのデコード: JS の `decodeURIComponent` をやめ、wasm でデコードするようにした。`/%FF` のような、UTF-8 でないパスにも Go 版と同じ 404 を返す。デプロイした Worker では、`/%zz` のような壊れたエスケープは、Cloudflare の前段が Worker に届く前に 400 で止める。
+- キャッシュ: 記事は wasm に埋め込んであって変わらないので、GET と HEAD への 200 の応答を、isolate の中でパスごとに持つことにした。2 回目からは wasm を呼ばない。
 
 ## 結果
 

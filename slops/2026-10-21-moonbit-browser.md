@@ -30,8 +30,8 @@ MoonBit が生成した JS を 1 行も読み込まずに、`render(src.value)` 
 
 2 つの wasm をつなぐのも、思ったより素直だった。
 
-- **同じスレッドで呼び合う。** `linked.wasm` が import として宣言した `render` に、`html.wasm` の export をそのまま渡すと、wasm から別の wasm の関数を呼べた。MoonBit の側は `fn render(json : String) -> String = "html" "render"` と書くだけ。
-- **Worker に分ける。** parser と html をそれぞれ Web Worker に置き、MessageChannel で Worker 同士をつないだ。ブラウザーの中で 2 つの小さなサービスが動いている形になる。
+- 同じスレッドで呼び合う。 `linked.wasm` が import として宣言した `render` に、`html.wasm` の export をそのまま渡すと、wasm から別の wasm の関数を呼べた。MoonBit の側は `fn render(json : String) -> String = "html" "render"` と書くだけ。
+- Worker に分ける。 parser と html をそれぞれ Web Worker に置き、MessageChannel で Worker 同士をつないだ。ブラウザーの中で 2 つの小さなサービスが動いている形になる。
 
 約 210 万文字の Markdown を通すと、同じスレッドの形は処理のあいだ（約 360 ms）ページを止めた。
 Worker の形で止まったのは 11 ms だけだった。

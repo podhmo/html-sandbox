@@ -7,7 +7,7 @@ next: ../2026-10-24-alerts.md
 
 # Bundle demo
 
-This post is a *bundle*: the directory `posts/2026-10-22-bundle-demo.md/`
+This post is a bundle: the directory `posts/2026-10-22-bundle-demo.md/`
 holds several files, and all of them appear on this single page — like a
 gist. This `README.md` is the face of the bundle and provides the title,
 the description, and the `prev`/`next` navigation.
@@ -37,10 +37,11 @@ image itself, rendered inline:
 Any other fence name stays a code block:
 
 ```
+<!-- unlabeled on purpose: this stays a code block -->
 <svg>this is only text</svg>
 ```
 
-## What does *not* work
+## What does not work
 
 Standard Markdown image syntax is not parsed — `!` is just a character
 and the `[...](...)` part is an ordinary link — the line below renders
