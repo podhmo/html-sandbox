@@ -20,7 +20,12 @@ fn blocks(bs : Array[@tinymarkdown.Block]) -> Array[@el.Node] {
         @picoel.section([h, ..blocks(children)])
       }
       Paragraph(text) => @picoel.p(inlines(text))
-      List(items) => @picoel.list(items.map(it => @picoel.li(inlines(it.text))))
+      List(items) =>
+        if items is [first, ..] && first.num > 0 {
+          @el.el(@el.ol, items.map(it => @picoel.li(inlines(it.text))))
+        } else {
+          @picoel.list(items.map(it => @picoel.li(inlines(it.text))))
+        }
       Quote(children) => @picoel.blockquote(blocks(children))
       Alert(kind~, children~) =>
         @el.el(@el.blockquote, [

@@ -470,8 +470,9 @@ func alertTitle(kind string) string {
 	return strings.ToUpper(kind[:1]) + kind[1:]
 }
 
-// renderList renders items as a list, with the children of an item as a
-// list inside its <li>.
+// renderList renders items as a list — an <ol> when the first item is a
+// numbered one, a <ul> otherwise — with the children of an item as a list
+// inside its <li>.
 func renderList(items []tinymarkdown.Item, link linker, fn *footnotes) pe.Node {
 	lis := make([]pe.Node, 0, len(items))
 	for _, it := range items {
@@ -480,6 +481,12 @@ func renderList(items []tinymarkdown.Item, link linker, fn *footnotes) pe.Node {
 			li = append(li, renderList(it.Children, link, fn))
 		}
 		lis = append(lis, pe.Li(li...))
+	}
+	if len(items) > 0 && items[0].Num > 0 {
+		if items[0].Num != 1 {
+			lis = append([]pe.Node{el.Attr(el.AttrName("start"), strconv.Itoa(items[0].Num))}, lis...)
+		}
+		return el.El(el.Ol, lis...)
 	}
 	return pe.List(lis...)
 }

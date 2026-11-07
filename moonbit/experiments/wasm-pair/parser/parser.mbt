@@ -47,7 +47,11 @@ fn block(b : @tinymarkdown.Block) -> Json {
 
 ///|
 fn item(it : @tinymarkdown.Item) -> Json {
-  { "text": inlines(it.text), "children": Json::array(it.children.map(item)) }
+  {
+    "text": inlines(it.text),
+    "num": Json(it.num),
+    "children": Json::array(it.children.map(item)),
+  }
 }
 
 ///|

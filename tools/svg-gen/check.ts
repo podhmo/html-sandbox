@@ -222,6 +222,10 @@ async function check(file: string): Promise<void> {
             : svg
                 .slice(m.index! + m[0].length, close)
                 .replace(/<[^>]*>/g, "")
+                .replace(/&lt;/g, "<")
+                .replace(/&gt;/g, ">")
+                .replace(/&quot;/g, '"')
+                .replace(/&amp;/g, "&")
                 .trim();
         const w = textWidth(body, size);
         const ax = a["text-anchor"];

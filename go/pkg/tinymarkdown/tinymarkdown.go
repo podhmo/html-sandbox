@@ -1,8 +1,8 @@
 // Package tinymarkdown parses a tiny subset of Markdown into a pure-data tree.
 //
 // Supported: headings "#" to "#####" (which open nested sections), "- " or "* "
-// list items (which may continue on indented lines and nest by
-// indentation), paragraphs, "> "
+// list items and "N. " numbered items (which may continue on indented lines
+// and nest by indentation), paragraphs, "> "
 // quotes, "|" tables, code blocks fenced by exactly "```", "<details>"
 // blocks, and "[^label]" footnotes. Anything else is treated as paragraph
 // text.
@@ -43,19 +43,22 @@ type Paragraph struct {
 	Text string
 }
 
-// List is a run of consecutive "- " or "* " lines. Each item is nested under the
-// nearest item above it whose marker is indented less, as "b" is under "a" in
-// "- a\n  - b"; with no such item, it is at the top level. Indentation
-// counts leading spaces and tabs, one column each.
+// List is a run of consecutive "- ", "* ", or "N. " lines. Each item is nested
+// under the nearest item above it whose marker is indented less, as "b" is
+// under "a" in "- a\n  - b"; with no such item, it is at the top level.
+// Indentation counts leading spaces and tabs, one column each.
 type List struct {
 	Items []Item
 }
 
-// Item is a list item: the text after the "- " or "* " marker, with nested items.
-// Indented lines that follow an item without a list marker continue its text,
-// joined with "\n".
+// Item is a list item: the text after the marker, with nested items. Num is
+// the number of a "N. " marker — "3" in "3. a" — or 0 for a "- " or "* "
+// marker. A list is an ordered list when its first item has Num > 0, and
+// that Num is its start number. Indented lines that follow an item without
+// a list marker continue its text, joined with "\n".
 type Item struct {
 	Text     string
+	Num      int
 	Children []Item
 }
 
@@ -275,6 +278,7 @@ func scan(src string, notes *footnoteSet) []Block {
 			}
 		}
 		label, footText, isFoot := footnoteDef(line)
+		num, itemText, isItem := listItem(trimmed)
 		switch {
 		case strings.HasPrefix(trimmed, fence):
 			flush()
@@ -300,11 +304,11 @@ func scan(src string, notes *footnoteSet) []Block {
 			}
 			rest := line[strings.IndexByte(line, '>')+1:]
 			quote = append(quote, strings.TrimPrefix(rest, " "))
-		case strings.HasPrefix(trimmed, "- ") || strings.HasPrefix(trimmed, "* "):
+		case isItem:
 			if len(para) > 0 || len(quote) > 0 || len(table) > 0 {
 				flush()
 			}
-			items = append(items, rawItem{indent: indent(line), text: strings.TrimSpace(trimmed[2:])})
+			items = append(items, rawItem{indent: indent(line), num: num, text: itemText})
 		case trimmed == "<details>":
 			flush()
 			details, detailsDepth, detailsCode, inDetails = nil, 1, false, true
@@ -417,7 +421,32 @@ func asciiLower(s string) string {
 // the nested lists.
 type rawItem struct {
 	indent int
+	num    int
 	text   string
+}
+
+// listItem splits a list marker — "- ", "* ", or "N. " — off the trimmed
+// line, returning the marker's number (0 for "- " and "* ") and the text
+// after it. N is a run of up to 9 digits, as CommonMark allows, and may not
+// be 0: "0." stays paragraph text.
+func listItem(line string) (num int, text string, ok bool) {
+	if strings.HasPrefix(line, "- ") || strings.HasPrefix(line, "* ") {
+		return 0, strings.TrimSpace(line[2:]), true
+	}
+	i := 0
+	for i < len(line) && line[i] >= '0' && line[i] <= '9' {
+		i++
+	}
+	if i == 0 || i > 9 || i+1 >= len(line) || line[i] != '.' || line[i+1] != ' ' {
+		return 0, "", false
+	}
+	for j := 0; j < i; j++ {
+		num = num*10 + int(line[j]-'0')
+	}
+	if num == 0 {
+		return 0, "", false
+	}
+	return num, strings.TrimSpace(line[i+2:]), true
 }
 
 // indent counts the leading spaces and tabs of line.
@@ -442,7 +471,7 @@ func dedent(line string, n int) string {
 func nestItems(flat []rawItem, i, parent int) ([]Item, int) {
 	var out []Item
 	for i < len(flat) && flat[i].indent > parent {
-		it := Item{Text: flat[i].text}
+		it := Item{Text: flat[i].text, Num: flat[i].num}
 		it.Children, i = nestItems(flat, i+1, flat[i].indent)
 		out = append(out, it)
 	}

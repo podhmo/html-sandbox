@@ -651,26 +651,35 @@ fn alert_title(kind : String) -> String {
 }
 
 ///|
-/// render_list renders items as a list, with the children of an item as a
-/// list inside its <li>.
+/// render_list renders items as a list — an <ol> when the first item is a
+/// numbered one, a <ul> otherwise — with the children of an item as a list
+/// inside its <li>.
 fn render_list(
   items : Array[@tinymarkdown.Item],
   link : Linker,
   notes : Footnotes,
 ) -> @el.Node {
-  @picoel.list(
-    items.map(it => {
-      let li = render_inlines(
-        @tinymarkdown.inlines(it.text),
-        link,
-        notes=Some(notes),
-      )
-      if !it.children.is_empty() {
-        li.push(render_list(it.children, link, notes))
-      }
-      @picoel.li(li)
-    }),
-  )
+  let lis = items.map(it => {
+    let li = render_inlines(
+      @tinymarkdown.inlines(it.text),
+      link,
+      notes=Some(notes),
+    )
+    if !it.children.is_empty() {
+      li.push(render_list(it.children, link, notes))
+    }
+    @picoel.li(li)
+  })
+  if items is [first, ..] && first.num > 0 {
+    let children = if first.num == 1 {
+      lis
+    } else {
+      [@el.Attr(@el.AttrName("start"), "\{first.num}"), ..lis]
+    }
+    @el.el(@el.ol, children)
+  } else {
+    @picoel.list(lis)
+  }
 }
 
 ///|

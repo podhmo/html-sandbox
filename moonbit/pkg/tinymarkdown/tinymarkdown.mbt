@@ -3,8 +3,8 @@
 // including the cases its tests pin down.
 //
 // Supported: headings "#" to "#####" (which open nested sections), "- " or "* "
-// list items (which may continue on indented lines and nest by
-// indentation), paragraphs, "> "
+// list items and "N. " numbered items (which may continue on indented lines
+// and nest by indentation), paragraphs, "> "
 // quotes, "|" tables, code blocks fenced by exactly "```", "<details>"
 // blocks, and "[^label]" footnotes. Anything else is treated as paragraph
 // text. Block parsing keeps inline syntax as text; inlines splits out code
@@ -44,10 +44,10 @@ pub extend Document with Debug::{to_repr}
 /// - Section is a heading together with everything up to the next heading
 ///   of the same or a shallower level (level is 1..5).
 /// - Paragraph is a run of consecutive non-blank lines, joined with "\n".
-/// - List is a run of consecutive "- " or "* " lines. Each item is nested under the
-///   nearest item above it whose marker is indented less, as "b" is under "a"
-///   in "- a\n  - b"; with no such item, it is at the top level.
-///   Indentation counts leading spaces and tabs, one column each.
+/// - List is a run of consecutive "- ", "* ", or "N. " lines. Each item is
+///   nested under the nearest item above it whose marker is indented less,
+///   as "b" is under "a" in "- a\n  - b"; with no such item, it is at the
+///   top level. Indentation counts leading spaces and tabs, one column each.
 /// - Quote is a run of consecutive lines starting with ">". The text after
 ///   ">" and one optional space is parsed again as a document.
 /// - Alert is a quote whose first line is a GitHub-style alert marker such
@@ -88,11 +88,14 @@ pub extend Block with Eq::{not_equal, equal}
 pub extend Block with Debug::{to_repr}
 
 ///|
-/// Item is a list item: the text after the "- " or "* " marker, with nested items.
-/// Indented lines that follow an item without a list marker continue its text,
-/// joined with "\n".
+/// Item is a list item: the text after the marker, with nested items. num is
+/// the number of a "N. " marker — "3" in "3. a" — or 0 for a "- " or "* "
+/// marker. A list is an ordered list when its first item has num > 0, and
+/// that num is its start number. Indented lines that follow an item without
+/// a list marker continue its text, joined with "\n".
 pub(all) struct Item {
   text : String
+  num : Int32
   children : Array[Item]
 } derive(Eq, Debug)
 
@@ -360,11 +363,11 @@ fn scan(src : String, notes : FootnoteSet) -> Array[Flat] {
       }
       let rest = line[line.find(">").unwrap() + 1:]
       quote.push(rest.strip_prefix(" ").unwrap_or(rest).to_owned())
-    } else if trimmed is ([.. "- ", .. rest] | [.. "* ", .. rest]) {
+    } else if list_item(trimmed) is Some((num, text)) {
       if !para.is_empty() || !quote.is_empty() || !table.is_empty() {
         flush()
       }
-      items.push({ indent: indent(line), text: trim_space(rest).to_owned(), })
+      items.push({ indent: indent(line), num, text: text.to_owned(), })
     } else if trimmed == "<details>" {
       flush()
       details_depth = 1
@@ -504,7 +507,35 @@ fn ascii_lower(c : UInt16) -> UInt16 {
 /// builds the nested lists.
 priv struct RawItem {
   indent : Int32
+  num : Int32
   mut text : String
+}
+
+///|
+/// list_item splits a list marker — "- ", "* ", or "N. " — off the
+/// trimmed line, returning the marker's number (0 for "- " and "* ") and
+/// the text after it. N is a run of up to 9 digits, as CommonMark allows,
+/// and may not be 0: "0." stays paragraph text.
+fn list_item(line : StringView) -> (Int32, StringView)? {
+  if line is ([.. "- ", .. rest] | [.. "* ", .. rest]) {
+    return Some((0, trim_space(rest)))
+  }
+  let n = line.length()
+  let mut i = 0
+  while i < n && line[i] >= '0' && line[i] <= '9' {
+    i = i + 1
+  }
+  if i == 0 || i > 9 || i + 1 >= n || line[i] != '.' || line[i + 1] != ' ' {
+    return None
+  }
+  let mut num = 0
+  for j = 0; j < i; j = j + 1 {
+    num = num * 10 + (line[j].to_int() - '0'.to_int())
+  }
+  if num == 0 {
+    return None
+  }
+  Some((num, trim_space(line[i + 2:])))
 }
 
 ///|
@@ -542,7 +573,7 @@ fn nest_items(
   let out = []
   for i = from; i < flat.length() && flat[i].indent > parent; {
     let (children, next) = nest_items(flat, from=i + 1, parent=flat[i].indent)
-    out.push({ text: flat[i].text, children, })
+    out.push({ text: flat[i].text, num: flat[i].num, children, })
     continue next
   } nobreak {
     (out, i)
