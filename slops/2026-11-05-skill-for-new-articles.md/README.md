@@ -2,6 +2,7 @@
 title: 記事を書くスキルを考えて、fork で書き比べた
 description: slops の品質を上げるために、何を語るかの決め方だけを変えたスキル write-slops-threads を作り、同じセッションから fork した 2 つのサブエージェントに write-slops と書き比べさせた。スキルの前提になった対話（良い記事を探して 3 回却下された）と、比べて気づいたこと、今の時点での良い記事とその作り方の記録。
 prev: ../2026-11-05-good-slops-for-requester.md
+next: ../2026-11-07-investigation-notes-skill.md
 ---
 
 # 記事を書くスキルを考えて、fork で書き比べた
