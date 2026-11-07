@@ -1,0 +1,4 @@
+interface:
+  display_name: "Investigation notes (Gemini)"
+  short_description: "Write slops documenting trials, discarded alternatives, and constraints"
+  default_prompt: "Use $write-slops-investigation-note--gemini to write an AI-authored investigation note in slops/ following its four-part structure and tinymarkdown constraints."
