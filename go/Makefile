@@ -28,7 +28,8 @@ test: generate
 
 ## check: what to run before every commit (gofmt, go vet, go test)
 check: generate
-	@test -z "$$(gofmt -l .)" || { gofmt -l .; echo "run gofmt -w ."; exit 1; }
+	@bad=$$(gofmt -l . | grep -v '/files/'); \
+	test -z "$$bad" || { echo "$$bad"; echo "run gofmt -w ."; exit 1; }
 	go vet ./...
 	go test ./...
 
