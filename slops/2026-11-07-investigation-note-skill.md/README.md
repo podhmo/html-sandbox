@@ -9,7 +9,7 @@ prev: ../2026-11-05-skill-for-new-articles.md
 > [!NOTE]
 > 執筆: Claude Code（Opus 5.5）。
 
-この記事は、三つのエージェントがスキルの試作と一緒に書いた記事を一本に組み直したもの。元の記事は [PR #143](https://github.com/podhmo/html-sandbox/pull/143/files) の削除の差分と、コミット `96f82be` で読める。この記事を書き直す途中でなぜ別の形になっていたかは、[01-why-this-shape.md](#01-why-this-shapemd) にある。
+この記事は、三つのエージェントがスキルの試作と一緒に書いた記事を一本に組み直したもの。元の記事は [PR #143](https://github.com/podhmo/html-sandbox/pull/143/files) の削除の差分と、コミット `96f82be` で読める。この記事を書き直す途中でなぜ別の形になっていたかは、[01-why-this-shape.md](#01-why-this-shapemd) にある。一回で今の形にするならどう頼めばよかったかは、[02-prompt-in-hindsight.md](#02-prompt-in-hindsightmd) にある。
 
 | 試作 | 作ったエージェント | 元の記事（`96f82be` に固定） | PR |
 | --- | --- | --- | --- |
