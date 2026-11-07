@@ -60,6 +60,11 @@
   が `slops/` を `examples/blog/slops/files/` にコピーするため、`gofmt -l .` が記事の添付
   （例: `slops/2026-10-30-pi-sarashina-dogfooding.md/04-main.go` の行末空白）を拾って落ちる。
   gofmt の対象から files/ を外すか、添付側を直すかを決める。
+- [x] **svg-gen の check.ts が `<text>` の実体参照をエスケープ後のまま幅を見積もる**:
+  `&lt;` などをそのまま文字として数えるため、`<ol>` のようなラベルが容器からはみ出す偽陽性で
+  FAIL になった。実体参照をデコードしてから `textWidth` で比較するように直した。番号付きリストの
+  記事の図（`tools/svg-gen/examples/fig-olist-first-item.ts`）で発見（[PR #152](https://github.com/podhmo/html-sandbox/pull/152)、
+  [落とし穴](slops/2026-10-27-writing-slops.md/03-svg-pitfalls.md)）。
 - [x] **ドロネー三角形分割とボロノイ図の解説記事を書く**: 前提知識（垂直二等分線・外接円・凸包・
   一般位置）から自己完結する記事。裏テーマ「図を多く載せる記事」の実験台にし、図は
   tools/svg-gen の生成器内で実際の幾何を計算して描く（スパイク
