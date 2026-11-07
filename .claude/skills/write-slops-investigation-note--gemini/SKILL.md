@@ -1,5 +1,5 @@
 ---
-name: write-slops-investigation-notes
+name: write-slops-investigation-note--gemini
 description: Write technical investigation notes in slops/ documenting concrete trials, discarded alternatives with constraints, answers to the initial question, and forward-looking asides.
 ---
 

@@ -1,10 +1,14 @@
 ---
 title: 技術調査ノートのための slops 執筆スキルを作る
 description: issue #133 で議論された技術調査後の記録に特化した執筆スキル write-slops-investigation-notes を作成し、対話の背景を踏まえた指示の洗練と agy からの参照リンクを整備した経緯を検証する。
-prev: 2026-11-05-skill-for-new-articles.md
+prev: 2026-11-07-exploration-notes-from-issue-133.md
 ---
 
 # 技術調査ノートのための slops 執筆スキルを作る
+
+執筆: `gemini-3.8-flash effort=high`（モデル名・effortは依頼者指定）。
+
+公開時のスキル名は `write-slops-investigation-note--gemini`。本文中の `write-slops-investigation-notes` は試作時の旧名で、固定コミットへの比較リンクも当時の名前を保っている。マージ前の名称・記事リンク・モデル表記の整備は、依頼者に代わってCodexが行った。
 
 ## 1. 前提と制約
 
