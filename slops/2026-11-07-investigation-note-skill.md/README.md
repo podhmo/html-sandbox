@@ -1,7 +1,7 @@
 ---
 title: 技術調査のあとに書く記事のスキル write-slops-investigation-note を作った
 description: 技術的な備忘録とは何かを AI と対話して下書きにし、それを入力に Claude Code、Codex、Gemini にスキルを作らせ、対話履歴を渡して書き直させ、互いに比べさせ、その比較から一本のスキルを取り出した。三つの試作の作り方と、一本にした経緯。
-prev: 2026-11-05-skill-for-new-articles.md
+prev: ../2026-11-05-skill-for-new-articles.md
 ---
 
 # 技術調査のあとに書く記事のスキル write-slops-investigation-note を作った
@@ -9,7 +9,7 @@ prev: 2026-11-05-skill-for-new-articles.md
 > [!NOTE]
 > 執筆: Claude Code（Opus 5.5）。
 
-この記事は、三つのエージェントがスキルの試作と一緒に書いた記事を一本に組み直したもの。元の記事は [PR #143](https://github.com/podhmo/html-sandbox/pull/143/files) の削除の差分と、コミット `96f82be` で読める。
+この記事は、三つのエージェントがスキルの試作と一緒に書いた記事を一本に組み直したもの。元の記事は [PR #143](https://github.com/podhmo/html-sandbox/pull/143/files) の削除の差分と、コミット `96f82be` で読める。この記事がなぜこういう書き方になったかは、[01-why-this-shape.md](#01-why-this-shapemd) にある。
 
 | 試作 | 作ったエージェント | 元の記事（`96f82be` に固定） | PR |
 | --- | --- | --- | --- |
@@ -19,7 +19,7 @@ prev: 2026-11-05-skill-for-new-articles.md
 
 ## ここまでの流れ
 
-[issue #133](https://github.com/podhmo/html-sandbox/issues/133) は、[答えはその時点の制約から出てくる](2026-11-05-answers-under-constraints.md)の論じる文体が鼻につく、というところから始まった。11-05 にはそれを受けた slops が続けて書かれ、最後の [記事を書くスキルを考えて、fork で書き比べた](2026-11-05-skill-for-new-articles.md) では、語る対象が複雑になって何を語るかを選べなくなっていた、という見立てと、それに合わせたスキル write-slops-threads の試作と fork での書き比べが記録された。
+[issue #133](https://github.com/podhmo/html-sandbox/issues/133) は、[答えはその時点の制約から出てくる](../2026-11-05-answers-under-constraints.md)の論じる文体が鼻につく、というところから始まった。11-05 にはそれを受けた slops が続けて書かれ、最後の [記事を書くスキルを考えて、fork で書き比べた](../2026-11-05-skill-for-new-articles.md) では、語る対象が複雑になって何を語るかを選べなくなっていた、という見立てと、それに合わせたスキル write-slops-threads の試作と fork での書き比べが記録された。
 
 その後、依頼した人は 11-05 の記事群を材料に、AI と対話して「自分が欲しい技術的な備忘録とは何か」を詰めた。対話は次のように進んでいる。
 
@@ -102,7 +102,7 @@ Gemini は、ペダンティックの禁止を外し、文体の否定命令は�
 
 最後に `AGENTS.md` の案内を外した。技術的な備忘録を書かせたいときは依頼した人がスキルを名前で指定するので、自動で選ばせる案内は要らない。`AGENTS.md` には、用途ごとの派生スキル（`write-slops-*`）があり、名前で指定されたときだけ使う、という一文だけを置いた。
 
-できたスキルは [.agents/skills/write-slops-investigation-note/SKILL.md](../.agents/skills/write-slops-investigation-note/SKILL.md)。`--claude` からの差分は次のとおり。
+できたスキルは [.agents/skills/write-slops-investigation-note/SKILL.md](../../.agents/skills/write-slops-investigation-note/SKILL.md)。`--claude` からの差分は次のとおり。
 
 | 項目 | `--claude` | 一本にしたスキル | 出どころ |
 | --- | --- | --- | --- |
@@ -118,7 +118,7 @@ Gemini は、ペダンティックの禁止を外し、文体の否定命令は�
 
 ## 余談: 元の記事にあったこと
 
-- Codex は、リンク構造の図を svg-gen の検査に通し、原寸の PNG でも読めることを確かめたが、ブログの狭い画面では縮小でラベルが読めなくなった。縦向きの小さな配置に直し、[SVG の落とし穴](2026-10-27-writing-slops.md/03-svg-pitfalls.md)に記録している。
+- Codex は、リンク構造の図を svg-gen の検査に通し、原寸の PNG でも読めることを確かめたが、ブログの狭い画面では縮小でラベルが読めなくなった。縦向きの小さな配置に直し、[SVG の落とし穴](../2026-10-27-writing-slops.md/03-svg-pitfalls.md)に記録している。
 - Codex は、スキルを他のエージェントから見せる方法として、グローバルへのインストール（そのマシンだけの設定になる）、コピー（編集対象が増える）、リポジトリ内の相対シンボリックリンク（チェックアウトと一緒に持ち運べ、base への相対参照も保てる）を比べて最後を選んだ。のちに実体を `.agents/skills/` に置いて `.claude/skills` をリンクにする構成（`cadb3df`）になった。
 - Gemini は、`.agents/skills` 自体を `.claude/skills` へのリンクにする案と、スキルごとにリンクを置く案を比べて後者を選び、単数形の `.agent` へのリンクも足した。svg-gen にラベルを `\n` 入りの文字列で渡すと幅の計算が崩れ、`labelLines` の配列で渡すと通った。
 - Codex のスキル検査は、システムの Python に PyYAML がなかったので、その依存だけを入れた uv の環境で走らせている。
