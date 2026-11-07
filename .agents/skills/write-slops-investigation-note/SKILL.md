@@ -1,6 +1,6 @@
 ---
 name: write-slops-investigation-note
-description: Write the slops article that closes a technical investigation session - the request as understood, what was done and why, the answer, and asides - from what happened in the session. Fixes what the article contains and where each part goes, not how it is written. Layered on write-slops.
+description: A variant of write-slops for the report written after a technical investigation session.
 ---
 
 # Write technical investigation notes (slops)
