@@ -67,6 +67,7 @@ pub fn Inline::to_repr(Self) -> @debug.Repr
 
 pub(all) struct Item {
   text : String
+  num : Int32
   children : Array[Item]
 } derive(Eq, @debug.Debug)
 #deprecated

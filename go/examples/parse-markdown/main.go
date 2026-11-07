@@ -113,12 +113,18 @@ func dump(w io.Writer, bs []tinymarkdown.Block, depth int) error {
 	return nil
 }
 
-// dumpItems writes one item per line, with the items nested under an item
-// indented below it.
+// dumpItems writes one item per line — "item N" for a numbered item —
+// with the items nested under an item indented below it.
 func dumpItems(w io.Writer, items []tinymarkdown.Item, depth int) error {
 	indent := strings.Repeat("  ", depth)
 	for _, it := range items {
-		if _, err := fmt.Fprintf(w, "%sitem %q\n", indent, it.Text); err != nil {
+		var err error
+		if it.Num > 0 {
+			_, err = fmt.Fprintf(w, "%sitem %d %q\n", indent, it.Num, it.Text)
+		} else {
+			_, err = fmt.Fprintf(w, "%sitem %q\n", indent, it.Text)
+		}
+		if err != nil {
 			return err
 		}
 		if err := dumpItems(w, it.Children, depth+1); err != nil {

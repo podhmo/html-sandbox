@@ -198,7 +198,7 @@ func TestCodeBlocks(t *testing.T) {
 			Document{Children: []Block{CodeBlock{Code: "a\n  b\nc"}}}},
 		{"a fence under a list item dedents by the fence", "1. step\n   ```sh\n   run this\n   ```",
 			Document{Children: []Block{
-				Paragraph{Text: "1. step"}, CodeBlock{Code: "run this", Info: "sh"},
+				List{Items: []Item{{Text: "step", Num: 1}}}, CodeBlock{Code: "run this", Info: "sh"},
 			}}},
 		{"an unclosed indented fence still dedents", "   ```\n   a",
 			Document{Children: []Block{CodeBlock{Code: "a"}}}},
@@ -447,6 +447,67 @@ func TestFootnoteDefs(t *testing.T) {
 			}},
 		{"a definition inside a code block is code", "```\n[^a]: note\n```",
 			Document{Children: []Block{CodeBlock{Code: "[^a]: note"}}}},
+	})
+}
+
+// nitems makes numbered list items without children, numbered from start.
+func nitems(start int, texts ...string) []Item {
+	out := make([]Item, 0, len(texts))
+	for i, t := range texts {
+		out = append(out, Item{Text: t, Num: start + i})
+	}
+	return out
+}
+
+func TestNumberedLists(t *testing.T) {
+	run(t, []testCase{
+		{"numbered items", "1. a\n2.   b  \n3. c",
+			Document{Children: []Block{List{Items: nitems(1, "a", "b", "c")}}}},
+		{"the first number is kept", "3. a\n4. b",
+			Document{Children: []Block{List{Items: nitems(3, "a", "b")}}}},
+		{"numbers after the first are kept too", "1. a\n9. b",
+			Document{Children: []Block{List{Items: []Item{{Text: "a", Num: 1}, {Text: "b", Num: 9}}}}}},
+		{"numbers need not ascend", "2. a\n1. b",
+			Document{Children: []Block{List{Items: []Item{{Text: "a", Num: 2}, {Text: "b", Num: 1}}}}}},
+		{"multi-digit numbers", "10. a\n11. b",
+			Document{Children: []Block{List{Items: nitems(10, "a", "b")}}}},
+		{"leading zeros are still a marker", "007. a",
+			Document{Children: []Block{List{Items: nitems(7, "a")}}}},
+		{"ten digits is too many for a marker", "1234567890. a",
+			Document{Children: []Block{Paragraph{Text: "1234567890. a"}}}},
+		{"zero is not a marker", "0. a",
+			Document{Children: []Block{Paragraph{Text: "0. a"}}}},
+		{"a number alone is not a marker", "1.",
+			Document{Children: []Block{Paragraph{Text: "1."}}}},
+		{"a number without a space is paragraph text", "1.a\n1) b",
+			Document{Children: []Block{Paragraph{Text: "1.a\n1) b"}}}},
+		{"blank line splits numbered lists", "1. a\n\n2. b",
+			Document{Children: []Block{List{Items: nitems(1, "a")}, List{Items: nitems(2, "b")}}}},
+		{"list after paragraph without a blank line", "intro\n1. a\n2. b",
+			Document{Children: []Block{Paragraph{Text: "intro"}, List{Items: nitems(1, "a", "b")}}}},
+		{"paragraph after list without a blank line", "1. a\nafter",
+			Document{Children: []Block{List{Items: nitems(1, "a")}, Paragraph{Text: "after"}}}},
+		{"indented lines continue an item", "1. a\n   more\n\tand more\n2. b\n   b2",
+			Document{Children: []Block{List{Items: []Item{
+				{Text: "a\nmore\nand more", Num: 1}, {Text: "b\nb2", Num: 2},
+			}}}}},
+		{"mixed markers merge", "- a\n1. b\n* c",
+			Document{Children: []Block{List{Items: []Item{
+				{Text: "a"}, {Text: "b", Num: 1}, {Text: "c"},
+			}}}}},
+		{"a numbered item under a bullet nests", "- a\n  1. x\n  2. y\n- d",
+			Document{Children: []Block{List{Items: []Item{
+				{Text: "a", Children: nitems(1, "x", "y")},
+				{Text: "d"},
+			}}}}},
+		{"a bullet under a numbered item nests", "1. a\n   - x\n   - y",
+			Document{Children: []Block{List{Items: []Item{
+				{Text: "a", Num: 1, Children: items("x", "y")},
+			}}}}},
+		{"numbered list in a quote", "> 1. a\n>    2. b",
+			Document{Children: []Block{Quote{Children: []Block{List{Items: []Item{
+				{Text: "a", Num: 1, Children: nitems(2, "b")},
+			}}}}}}},
 	})
 }
 

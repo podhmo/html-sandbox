@@ -106,6 +106,7 @@ fn list_items(items : Array[@tinymarkdown.Item]) -> Js {
   array(items, it => {
     let o = new_object()
     set(o, "text", of_string(it.text))
+    set(o, "num", of_int(it.num))
     set(o, "children", list_items(it.children))
     o
   })

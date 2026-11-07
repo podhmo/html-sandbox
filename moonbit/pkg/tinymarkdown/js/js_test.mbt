@@ -10,7 +10,7 @@ test "parse builds the TS port's Document" {
       ),
     ),
     content=(
-      #|{"children":[{"kind":"section","level":1,"title":"A","children":[{"kind":"paragraph","text":"b"},{"kind":"list","items":[{"text":"x","children":[{"text":"y","children":[]}]}]},{"kind":"quote","children":[{"kind":"paragraph","text":"q"}]},{"kind":"alert","alert":"note","children":[{"kind":"paragraph","text":"n"}]},{"kind":"table","header":["h"],"rows":[["c"]]},{"kind":"code","code":"z"}]}],"footnotes":[]}
+      #|{"children":[{"kind":"section","level":1,"title":"A","children":[{"kind":"paragraph","text":"b"},{"kind":"list","items":[{"text":"x","num":0,"children":[{"text":"y","num":0,"children":[]}]}]},{"kind":"quote","children":[{"kind":"paragraph","text":"q"}]},{"kind":"alert","alert":"note","children":[{"kind":"paragraph","text":"n"}]},{"kind":"table","header":["h"],"rows":[["c"]]},{"kind":"code","code":"z"}]}],"footnotes":[]}
     ),
   )
 }

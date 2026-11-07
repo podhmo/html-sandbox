@@ -21,7 +21,13 @@ fn run(
 ///|
 /// items makes list items without children.
 fn items(texts : Array[String]) -> Array[@tinymarkdown.Item] {
-  texts.map(text => { text, children: [], })
+  texts.map(text => { text, num: 0, children: [], })
+}
+
+///|
+/// nitems makes numbered list items without children, numbered from start.
+fn nitems(start : Int32, texts : Array[String]) -> Array[@tinymarkdown.Item] {
+  texts.mapi((i, text) => { text, num: start + i, children: [], })
 }
 
 ///|
@@ -158,7 +164,11 @@ test "nested lists" {
     (
       "indented item nests under the one above",
       "- a\n  - b\n  - c\n- d",
-      [List([{ text: "a", children: items(["b", "c"]), }, ..items(["d"])])],
+      [
+        List(
+          [{ text: "a", num: 0, children: items(["b", "c"]), }, ..items(["d"])],
+        ),
+      ],
     ),
     (
       "deeper nesting",
@@ -166,7 +176,11 @@ test "nested lists" {
       [
         List(
           [
-            { text: "a", children: [{ text: "b", children: items(["c"]), }], },
+            {
+              text: "a",
+              num: 0,
+              children: [{ text: "b", num: 0, children: items(["c"]), }],
+            },
             ..items(["d"]),
           ],
         ),
@@ -179,7 +193,11 @@ test "nested lists" {
         List([
           {
             text: "a",
-            children: [{ text: "b", children: items(["c"]), }, ..items(["d"])],
+            num: 0,
+            children: [
+              { text: "b", num: 0, children: items(["c"]), },
+              ..items(["d"]),
+            ],
           },
         ]),
       ],
@@ -187,21 +205,24 @@ test "nested lists" {
     (
       "any deeper indent nests, a shallower one is a sibling",
       "- a\n    - b\n  - c\n\t- d",
-      [List([{ text: "a", children: items(["b", "c", "d"]), }])],
+      [List([{ text: "a", num: 0, children: items(["b", "c", "d"]), }])],
     ),
     (
       "indented lines continue the nearest item",
       "- a\n  more\n  - b\n    b2\n  b3\n- c",
       [
         List(
-          [{ text: "a\nmore", children: items(["b\nb2\nb3"]), }, ..items(["c"])],
+          [
+            { text: "a\nmore", num: 0, children: items(["b\nb2\nb3"]), },
+            ..items(["c"]),
+          ],
         ),
       ],
     ),
     (
       "an indented first item is the top level",
       "  - a\n- b\n  - c",
-      [List([..items(["a"]), { text: "b", children: items(["c"]), }])],
+      [List([..items(["a"]), { text: "b", num: 0, children: items(["c"]), }])],
     ),
     (
       "indented item after a paragraph starts a list",
@@ -216,12 +237,12 @@ test "nested lists" {
     (
       "checkboxes are text",
       "- [ ] a\n  - [x] b",
-      [List([{ text: "[ ] a", children: items(["[x] b"]), }])],
+      [List([{ text: "[ ] a", num: 0, children: items(["[x] b"]), }])],
     ),
     (
       "nested list in a quote",
       "> - a\n>   - b",
-      [Quote([List([{ text: "a", children: items(["b"]), }])])],
+      [Quote([List([{ text: "a", num: 0, children: items(["b"]), }])])],
     ),
   ])
 }
@@ -300,7 +321,10 @@ test "code blocks" {
     (
       "a fence under a list item dedents by the fence",
       "1. step\n   ```sh\n   run this\n   ```",
-      [Paragraph("1. step"), CodeBlock("run this", info="sh")],
+      [
+        List([{ text: "step", num: 1, children: [], }]),
+        CodeBlock("run this", info="sh"),
+      ],
     ),
     (
       "an unclosed indented fence still dedents",
@@ -526,9 +550,10 @@ test "asterisk lists" {
         List([
           {
             text: "a",
-            children: [{ text: "b", children: items(["c\nmore"]), }],
+            num: 0,
+            children: [{ text: "b", num: 0, children: items(["c\nmore"]), }],
           },
-          { text: "d", children: [], },
+          { text: "d", num: 0, children: [], },
         ]),
       ],
     ),
@@ -545,7 +570,7 @@ test "asterisk lists" {
     (
       "asterisk list in a quote",
       "> * a\n>   * b",
-      [Quote([List([{ text: "a", children: items(["b"]), }])])],
+      [Quote([List([{ text: "a", num: 0, children: items(["b"]), }])])],
     ),
     (
       "asterisks without a space stay text",
@@ -559,6 +584,109 @@ test "asterisk lists" {
     ),
   ]
   run(cases)
+}
+
+///|
+// The cases of TestNumberedLists in go/pkg/tinymarkdown.
+test "numbered lists" {
+  run([
+    (
+      "numbered items",
+      "1. a\n2.   b  \n3. c",
+      [List(nitems(1, ["a", "b", "c"]))],
+    ),
+    ("the first number is kept", "3. a\n4. b", [List(nitems(3, ["a", "b"]))]),
+    (
+      "numbers after the first are kept too",
+      "1. a\n9. b",
+      [
+        List([
+          { text: "a", num: 1, children: [], },
+          { text: "b", num: 9, children: [], },
+        ]),
+      ],
+    ),
+    (
+      "numbers need not ascend",
+      "2. a\n1. b",
+      [
+        List([
+          { text: "a", num: 2, children: [], },
+          { text: "b", num: 1, children: [], },
+        ]),
+      ],
+    ),
+    ("multi-digit numbers", "10. a\n11. b", [List(nitems(10, ["a", "b"]))]),
+    ("leading zeros are still a marker", "007. a", [List(nitems(7, ["a"]))]),
+    (
+      "ten digits is too many for a marker",
+      "1234567890. a",
+      [Paragraph("1234567890. a")],
+    ),
+    ("zero is not a marker", "0. a", [Paragraph("0. a")]),
+    ("a number alone is not a marker", "1.", [Paragraph("1.")]),
+    (
+      "a number without a space is paragraph text",
+      "1.a\n1) b",
+      [Paragraph("1.a\n1) b")],
+    ),
+    (
+      "blank line splits numbered lists",
+      "1. a\n\n2. b",
+      [List(nitems(1, ["a"])), List(nitems(2, ["b"]))],
+    ),
+    (
+      "list after paragraph without a blank line",
+      "intro\n1. a\n2. b",
+      [Paragraph("intro"), List(nitems(1, ["a", "b"]))],
+    ),
+    (
+      "paragraph after list without a blank line",
+      "1. a\nafter",
+      [List(nitems(1, ["a"])), Paragraph("after")],
+    ),
+    (
+      "indented lines continue an item",
+      "1. a\n   more\n\tand more\n2. b\n   b2",
+      [
+        List([
+          { text: "a\nmore\nand more", num: 1, children: [], },
+          { text: "b\nb2", num: 2, children: [], },
+        ]),
+      ],
+    ),
+    (
+      "mixed markers merge",
+      "- a\n1. b\n* c",
+      [
+        List([
+          { text: "a", num: 0, children: [], },
+          { text: "b", num: 1, children: [], },
+          { text: "c", num: 0, children: [], },
+        ]),
+      ],
+    ),
+    (
+      "a numbered item under a bullet nests",
+      "- a\n  1. x\n  2. y\n- d",
+      [
+        List([
+          { text: "a", num: 0, children: nitems(1, ["x", "y"]), },
+          { text: "d", num: 0, children: [], },
+        ]),
+      ],
+    ),
+    (
+      "a bullet under a numbered item nests",
+      "1. a\n   - x\n   - y",
+      [List([{ text: "a", num: 1, children: items(["x", "y"]), }])],
+    ),
+    (
+      "numbered list in a quote",
+      "> 1. a\n>    2. b",
+      [Quote([List([{ text: "a", num: 1, children: nitems(2, ["b"]), }])])],
+    ),
+  ])
 }
 
 ///|

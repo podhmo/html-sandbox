@@ -261,6 +261,19 @@ test "post" {
 }
 
 ///|
+test "numbered lists" {
+  // A list is an <ol> when its first item is a "N. " item; a start number
+  // other than 1 becomes the start attribute. Nested lists check their
+  // own first item.
+  let s = new_site([
+    ("2026-10-14-n.md", "# T\n1. a\n2. b\n\n3. c\n   1. x\n   - y\n   - z"),
+  ])
+  assert_contains(body(s, "/posts/n"), [
+    "<ol><li>a</li><li>b</li></ol>", "<ol start=\"3\"><li>c<ol><li>x</li><li>y</li><li>z</li></ol></li></ol>",
+  ])
+}
+
+///|
 test "footnotes" {
   let s = new_site([
     (

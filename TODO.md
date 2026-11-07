@@ -51,6 +51,15 @@
   - [ ] SVG のコードブロックに ` ```svg ` のラベルを補う: `/preview` に渡す tinymarkdown を AI との対話で
     作らせると、指定があってもフェンスの `svg` ラベルが漏れることが多い（ラベルがないと画像にならずコードとして出る）。
     中身が `<svg` で始まるラベルなしのフェンスに `svg` を付ける。
+- [x] **tinymarkdown で `N. ` の番号付きリストを許可する**: `/preview` 用に tinymarkdown の
+  範囲で文書を書かせても、他の AI は番号付きリストを出力しがちなので対応する。`- `/`* ` と同じ
+  仕組みで `1. ` のような項目をリストにし、Go と MoonBit の両方のパーサ・描画（`<ol>`）と、
+  write-slops や preview 用プロンプトの「番号付きリストに頼らない」指定を更新する
+  （[issue #141](https://github.com/podhmo/html-sandbox/issues/141)）。
+- [ ] **`make -C go check` が埋め込み記事の添付 `.go` で gofmt に失敗する**: `go generate`
+  が `slops/` を `examples/blog/slops/files/` にコピーするため、`gofmt -l .` が記事の添付
+  （例: `slops/2026-10-30-pi-sarashina-dogfooding.md/04-main.go` の行末空白）を拾って落ちる。
+  gofmt の対象から files/ を外すか、添付側を直すかを決める。
 - [x] **ドロネー三角形分割とボロノイ図の解説記事を書く**: 前提知識（垂直二等分線・外接円・凸包・
   一般位置）から自己完結する記事。裏テーマ「図を多く載せる記事」の実験台にし、図は
   tools/svg-gen の生成器内で実際の幾何を計算して描く（スパイク

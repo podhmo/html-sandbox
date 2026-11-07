@@ -3,7 +3,7 @@
 Prints the tree that [`pkg/tinymarkdown`](../../pkg/tinymarkdown) builds
 from Markdown, one block per line. Use it to check how a document is
 understood before rendering it: anything tinymarkdown does not support
-(numbered lists, tables without a delimiter row, ...) shows up as paragraph
+(images, tables without a delimiter row, ...) shows up as paragraph
 text.
 
 ```sh

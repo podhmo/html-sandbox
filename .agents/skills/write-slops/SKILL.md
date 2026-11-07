@@ -19,15 +19,15 @@ one Markdown document, without a chat introduction or an outer code fence.
 Read the [ready-to-paste preview prompt](../../../slops/2026-10-27-writing-slops.md/01-preview-prompt.md)
 when a reusable instruction for another LLM is needed.
 
-- Use headings `#` through `#####`, paragraphs, `- ` or `* ` lists,
-  indented list continuations, quotes, tables with a delimiter row,
-  inline code, and `[label](URL)` links.
+- Use headings `#` through `#####`, paragraphs, `- ` or `* ` lists and
+  `1. ` numbered lists, indented list continuations, quotes, tables with
+  a delimiter row, inline code, and `[label](URL)` links.
 - Code fences use exactly three backticks. Other fence lengths and `~~~`
   are not supported. A literal HTML fragment outside an SVG fence is text.
 - Never use `*` for bold or emphasis (`**bold**`, `*em*`, `***both***`),
   in prose, lists, tables, or quotes. tinymarkdown will not support it and
   the literal asterisks are hard to read. A `* ` list marker is fine.
-- Do not rely on other emphasis, numbered lists, `![]()` images, `data:` images,
+- Do not rely on other emphasis, `![]()` images, `data:` images,
   Mermaid rendering, or syntax highlighting. Explain or simplify instead
   of extending the renderer as part of an article-writing task.
 - Front matter, if used, is simple `key: value`, not general YAML.

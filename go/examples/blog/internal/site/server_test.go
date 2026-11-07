@@ -108,6 +108,24 @@ func TestPost(t *testing.T) {
 	}
 }
 
+func TestPostNumberedList(t *testing.T) {
+	// A list is an <ol> when its first item is a "N. " item; a start number
+	// other than 1 becomes the start attribute. Nested lists check their
+	// own first item.
+	h := newTestServer(t, fstest.MapFS{
+		"2026-10-14-n.md": file("# T\n1. a\n2. b\n\n3. c\n   1. x\n   - y\n   - z"),
+	})
+	_, body := get(t, h, "/posts/n")
+	for _, want := range []string{
+		`<ol><li>a</li><li>b</li></ol>`,
+		`<ol start="3"><li>c<ol><li>x</li><li>y</li><li>z</li></ol></li></ol>`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Errorf("body does not contain %q", want)
+		}
+	}
+}
+
 func TestPostPageText(t *testing.T) {
 	posts, err := LoadPosts(testPosts)
 	if err != nil {
