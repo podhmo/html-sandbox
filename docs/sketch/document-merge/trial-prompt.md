@@ -14,7 +14,8 @@ The user invoked the skill `/document-merge`. Its definition is at <WT>/.agents/
 
 Rules of the experiment:
 - The user is not available. Run to completion automatically. Wherever a skill tells you to ask the user, make the best provisional decision, proceed, and list those questions in your final reply.
-- Do not consult anything created after commit 96f82be: no other branches, no other worktrees, no origin/main, no GitHub PRs or issues numbered 141 or higher. You may use git history up to 96f82be and `gh` read-only on earlier issues/PRs (e.g. #133, #137–#140) if the articles point to them. Do not post anything to GitHub, do not push.
+- Use whatever you can read from the environment (git history, `gh` read-only on issues and PRs) to understand the articles, with one exception: do not look at anything that already contains an answer to this task. That means PRs #143 and #144 and their branches, issue #146, the branches `document-merge-trials*` and `trial-*` other than your own, other worktrees, and any version of `slops/2026-11-07-investigation-note-skill.md` or `docs/sketch/document-merge/`. If you come across such material anyway, do not use it, and say so in your final reply.
+- Do not post anything to GitHub, do not push.
 - When done, commit your changes in the worktree on branch <BRANCH>.
 - Also write your final reply to the user (everything the skill says to output to the user besides the article files themselves, e.g. a merge report) to <WT>-reply.md, and return that same reply as your final message.
 
