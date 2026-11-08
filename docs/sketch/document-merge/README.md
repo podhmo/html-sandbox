@@ -62,7 +62,7 @@ The inputs total about 110 KB (9 files). The manual merge is a 4-file bundle of 
 All three deleted the three input articles, repointed `next` of `2026-11-05-skill-for-new-articles` and the link in `03-svg-pitfalls.md`, ran `make test-go` and `tools/slops-nav`, and rendered the page on the local Go blog.
 None renamed the file or turned the article into a bundle; the manual merge did both on request during the session.
 
-Isolation leak: draft3's `gh issue view 133 --json comments` also returned a comment posted after 96f82be (2026-11-07T07:58Z). It reports not using it and reading only the earlier comment afterwards. `trial-prompt.md` could forbid `gh issue view --comments` and ask for `gh api .../comments/<id>` instead.
+These trials ran under an earlier, stricter rule: nothing created after 96f82be (PRs/issues #141+, other branches). draft3 still saw one later comment on #133 (2026-11-07T07:58Z) through `gh issue view 133 --json comments` and reports not using it; under the current rule that comment is allowed.
 
 Points the agents raised about the skills themselves (from `reply.md`):
 
