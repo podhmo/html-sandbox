@@ -47,13 +47,13 @@ Collect the outcome into `results/<agent>-<draft>/` (e.g. `results/claude-draft1
 Each directory under `results/` holds `article.md` (the merged article as committed), `reply.md` (the final reply), `files.txt` (diff stat against 96f82be) and `other-changes.diff` (edits outside the article).
 The worktree commits (`trial-draft1` 7aede84, `trial-draft2` 2f13f8d, `trial-draft3` d9b5724) were not pushed; these files are their full content apart from the deletions.
 
-The inputs total about 110 KB (9 files). The manual merge is a 4-file bundle of about 41 KB.
+The inputs total about 110 KB (9 files). For the manual merge only its `README.md` (20 KB) is compared: the bundle members 01–03 were added later in that session and are off the merge itself.
 
 | | draft1 | draft2 | draft3 | manual (#143) |
 | --- | --- | --- | --- | --- |
-| article | [article.md](results/claude-draft1/article.md) | [article.md](results/claude-draft2/article.md) | [article.md](results/claude-draft3/article.md) | `slops/2026-11-07-investigation-note-skill.md/` |
-| size | 66 KB, 375 lines | 39 KB, 237 lines | 41 KB, 205 lines | 41 KB, 4 files |
-| shape | single file, 4 sections, 13 subsections | single file, 8 sections | single file, 4 sections, 5 subsections | bundle; sections by what was learned |
+| article | [article.md](results/claude-draft1/article.md) | [article.md](results/claude-draft2/article.md) | [article.md](results/claude-draft3/article.md) | `slops/2026-11-07-investigation-note-skill.md/README.md` |
+| size | 66 KB, 375 lines | 39 KB, 237 lines | 41 KB, 205 lines | 20 KB, 101 lines |
+| shape | single file, 4 sections, 13 subsections | single file, 8 sections | single file, 4 sections, 5 subsections | 4 sections by what was learned, plus an aside |
 | title | 技術調査のあとに書く記事のスキルを、三つの試作を経て一本にした | 技術調査の記事を書くスキルを、下書きから三つの試作を経て一本にした | 技術調査の記事を書くスキルを、三つの試作から一本にするまで | 技術調査のあとに書く記事のスキル write-slops-investigation-note を作った |
 | filename | kept | kept | kept | renamed |
 | three input articles | deleted | deleted | deleted | deleted |
