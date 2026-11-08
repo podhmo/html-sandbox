@@ -1,13 +1,13 @@
 # Trial prompt
 
-Give this to the agent under test, replacing `<DRAFT>` (draft1, draft2, draft3) and `<WT>` (the worktree path).
+Give this to the agent under test, replacing `<BRANCH>` (e.g. trial-codex-draft1) and `<WT>` (the worktree path).
 Start it fresh: no context other than this prompt.
 
 ---
 
 You are running one trial of an experiment that tests a draft skill. Act exactly as if you were a coding-agent session in the repository below and the user had just typed the message given at the end.
 
-Repository (a git worktree, branch trial-<DRAFT>, checked out at commit 96f82be): <WT>
+Repository (a git worktree, branch <BRANCH>, checked out at commit 96f82be): <WT>
 Work only inside that directory. Read its AGENTS.md and follow it (think/write code in English, articles in slops/ are Japanese, reply to the user in Japanese).
 
 The user invoked the skill `/document-merge`. Its definition is at <WT>/.agents/skills/document-merge/SKILL.md — read it (and any files under that directory it refers to) and follow it. The user's message also names `/write-slops-investigation-note`; that skill is at .agents/skills/write-slops-investigation-note/SKILL.md and builds on .agents/skills/write-slops/SKILL.md — read and follow those too.
@@ -15,7 +15,7 @@ The user invoked the skill `/document-merge`. Its definition is at <WT>/.agents/
 Rules of the experiment:
 - The user is not available. Run to completion automatically. Wherever a skill tells you to ask the user, make the best provisional decision, proceed, and list those questions in your final reply.
 - Do not consult anything created after commit 96f82be: no other branches, no other worktrees, no origin/main, no GitHub PRs or issues numbered 141 or higher. You may use git history up to 96f82be and `gh` read-only on earlier issues/PRs (e.g. #133, #137–#140) if the articles point to them. Do not post anything to GitHub, do not push.
-- When done, commit your changes in the worktree on branch trial-<DRAFT>.
+- When done, commit your changes in the worktree on branch <BRANCH>.
 - Also write your final reply to the user (everything the skill says to output to the user besides the article files themselves, e.g. a merge report) to <WT>-reply.md, and return that same reply as your final message.
 
 The user's message:

@@ -25,13 +25,13 @@ What happens when the article merge done by hand in #143 is run again with each 
 From the repository root, for each draft:
 
 ```sh
-DRAFT=draft1                      # draft1 | draft2 | draft3
-WT=/tmp/html-sandbox/trial-$DRAFT # anywhere outside the repo
-git worktree add -b trial-$DRAFT "$WT" 96f82be
+AGENT=codex DRAFT=draft1            # draft1 | draft2 | draft3
+WT=/tmp/html-sandbox/trial-$AGENT-$DRAFT # anywhere outside the repo
+git worktree add -b trial-$AGENT-$DRAFT "$WT" 96f82be
 cp -R docs/sketch/document-merge/skills/$DRAFT "$WT/.agents/skills/document-merge"
 ```
 
-Then start the agent fresh with [trial-prompt.md](trial-prompt.md) (fill in `<DRAFT>` and `<WT>`).
+Then start the agent fresh with [trial-prompt.md](trial-prompt.md) (fill in `<BRANCH>` and `<WT>`).
 The worktree at 96f82be contains neither the other drafts nor the manual result.
 
 Collect the outcome into `results/<agent>-<draft>/` (e.g. `results/claude-draft1/`):
