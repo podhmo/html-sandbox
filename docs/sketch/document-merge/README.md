@@ -42,4 +42,30 @@ Collect the outcome into `results/<agent>-<draft>/` (e.g. `results/claude-draft1
 
 ## Results
 
-See `results/`.
+### Claude Code (Opus 5.5), 2026-11-08
+
+Each directory under `results/` holds `article.md` (the merged article as committed), `reply.md` (the final reply), `files.txt` (diff stat against 96f82be) and `other-changes.diff` (edits outside the article).
+The worktree commits (`trial-draft1` 7aede84, `trial-draft2` 2f13f8d, `trial-draft3` d9b5724) were not pushed; these files are their full content apart from the deletions.
+
+The inputs total about 110 KB (9 files). The manual merge is a 4-file bundle of about 41 KB.
+
+| | draft1 | draft2 | draft3 | manual (#143) |
+| --- | --- | --- | --- | --- |
+| article | [article.md](results/claude-draft1/article.md) | [article.md](results/claude-draft2/article.md) | [article.md](results/claude-draft3/article.md) | `slops/2026-11-07-investigation-note-skill.md/` |
+| size | 66 KB, 375 lines | 39 KB, 237 lines | 41 KB, 205 lines | 41 KB, 4 files |
+| shape | single file, 4 sections, 13 subsections | single file, 8 sections | single file, 4 sections, 5 subsections | bundle; sections by what was learned |
+| title | 技術調査のあとに書く記事のスキルを、三つの試作を経て一本にした | 技術調査の記事を書くスキルを、下書きから三つの試作を経て一本にした | 技術調査の記事を書くスキルを、三つの試作から一本にするまで | 技術調査のあとに書く記事のスキル write-slops-investigation-note を作った |
+| filename | kept | kept | kept | renamed |
+| three input articles | deleted | deleted | deleted | deleted |
+| report in reply | scope, chapter map, bridges B1–B4, conflicts | theme, chapter map, asides, dropped items | what was done and dropped; no chapter map (the skill outputs only the document) | — |
+
+All three deleted the three input articles, repointed `next` of `2026-11-05-skill-for-new-articles` and the link in `03-svg-pitfalls.md`, ran `make test-go` and `tools/slops-nav`, and rendered the page on the local Go blog.
+None renamed the file or turned the article into a bundle; the manual merge did both on request during the session.
+
+Isolation leak: draft3's `gh issue view 133 --json comments` also returned a comment posted after 96f82be (2026-11-07T07:58Z). It reports not using it and reading only the earlier comment afterwards. `trial-prompt.md` could forbid `gh issue view --comments` and ask for `gh api .../comments/<id>` instead.
+
+Points the agents raised about the skills themselves (from `reply.md`):
+
+- draft1 and draft2: "leave no trace of the sources" conflicts with write-slops-investigation-note's "say it if you write from records" and "who tried what is the history itself".
+- draft1: "do not summarize" conflicts with "a full trace is not needed"; the result is the longest. Its bridge B3 brings in facts from git history, against "bridges add no new facts".
+- draft2 and draft3: none of the drafts says what to do when the destination is also one of the inputs, or whether to delete the inputs and fix links to them.
