@@ -63,7 +63,7 @@
     → `String?`（`priv` なので `Ref::parse` と `resolve` の中で完結する）
   - [x] `nav.mbt` の `page_title` の `""` 返しと `views.mbt` の
     `PageMeta.title` の `""`（トップページ）→ `String?`
-  - [ ] `worker.mbt` と adapter-abi 各種が「未ロード/ロード済み」を `base_url`
+  - [x] `worker.mbt` と adapter-abi 各種が「未ロード/ロード済み」を `base_url`
     と `site` の2変数の同期で表現 → `Unloaded | Loaded(base~, result~)` enum
   - [x] `inline.mbt` の `closing_run` と `tinymarkdown.mbt` の
     `nest_items(parent=-1)` の `-1` → `Int32?`

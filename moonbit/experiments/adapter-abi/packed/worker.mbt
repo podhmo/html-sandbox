@@ -52,22 +52,24 @@ pub fn path_push(code : Int32) -> Unit {
 }
 
 ///|
-/// base_url is the public origin set by set_base_url.
-let base_url : Ref[String] = Ref("")
+/// SiteState is the state of the content being served: Unloaded with the
+/// public origin set_base_url pushed until the first request, then Loaded
+/// with either the site or why it could not be loaded.
+priv enum SiteState {
+  Unloaded(base~ : String)
+  Loaded(result~ : Result[@site.Site, String])
+}
 
 ///|
-/// site is the content being served, loaded on the first request, or why
-/// it could not be.
-let site : Ref[Result[@site.Site, String]?] = Ref(None)
+let site_state : Ref[SiteState] = Ref(Unloaded(base=""))
 
 ///|
 /// set_base_url takes what path_push pushed as the public origin for the
 /// OGP tags (BASE_URL in wrangler.jsonc). The host calls it once, before
 /// the first serve.
 pub fn set_base_url() -> Unit {
-  base_url.val = path.to_string()
+  site_state.val = Unloaded(base=path.to_string())
   path.reset()
-  site.val = None
 }
 
 ///|
@@ -86,13 +88,11 @@ pub fn set_query() -> Unit {
 ///|
 /// load returns the site, loading it on first use.
 fn load() -> Result[@site.Site, String] {
-  match site.val {
-    Some(s) => s
-    None => {
-      let s = Ok(@content.site(base_url=base_url.val)) catch {
-        e => Err("\{e}")
-      }
-      site.val = Some(s)
+  match site_state.val {
+    Loaded(result=s) => s
+    Unloaded(base~) => {
+      let s = Ok(@content.site(base_url=base)) catch { e => Err("\{e}") }
+      site_state.val = Loaded(result=s)
       s
     }
   }
