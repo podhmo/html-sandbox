@@ -17,12 +17,14 @@ fn Post::source(self : Post) -> String {
 
 ///|
 /// Ref is a URL as Go's url.Parse splits it, keeping what the linker
-/// needs.
+/// needs; a component absent from the raw URL is None (a bare "?" or
+/// "#" is Some(""), which resolve treats the same as absent, as Go's
+/// url.URL.String() does without ForceQuery).
 priv struct Ref {
-  scheme : String
+  scheme : String?
   path : String // unescaped
-  raw_query : String
-  fragment : String // unescaped
+  raw_query : String?
+  fragment : String? // unescaped
 }
 
 ///|
@@ -35,27 +37,30 @@ fn Ref::parse(raw : String) -> Ref? {
     return None
   }
   let (rest, fragment) = match raw.find("#") {
-    Some(i) => (raw[:i], @http.unescape(raw[i + 1:]))
-    None => (raw, Some(""))
+    Some(i) =>
+      match @http.unescape(raw[i + 1:]) {
+        Some(f) => (raw[:i], Some(f))
+        None => return None
+      }
+    None => (raw, None)
   }
-  guard fragment is Some(fragment) else { return None }
   let (scheme, rest) = for i, c in rest {
     match c {
       'a'..<='z' | 'A'..<='Z' => continue
       '0'..<='9' | '+' | '-' | '.' if i > 0 => continue
       ':' if i == 0 => return None
-      ':' => break (rest[:i].to_lower().to_owned(), rest[i + 1:])
-      _ => break ("", rest)
+      ':' => break (Some(rest[:i].to_lower().to_owned()), rest[i + 1:])
+      _ => break (None, rest)
     }
   } nobreak {
-    ("", rest)
+    (None, rest)
   }
   let (rest, raw_query) = match rest.find("?") {
-    Some(i) => (rest[:i], rest[i + 1:].to_owned())
-    None => (rest, "")
+    Some(i) => (rest[:i], Some(rest[i + 1:].to_owned()))
+    None => (rest, None)
   }
   if !rest.has_prefix("/") {
-    if scheme != "" {
+    if scheme is Some(_) {
       // Opaque, such as mailto:a@example.com.
       return Some({ scheme, path: "", raw_query, fragment, })
     }
@@ -68,7 +73,7 @@ fn Ref::parse(raw : String) -> Ref? {
     }
   }
   let rest = if rest is [.. "//", .. after] &&
-    (scheme != "" || !after.has_prefix("/")) {
+    (scheme is Some(_) || !after.has_prefix("/")) {
     match after.find("/") {
       Some(i) => after[i:]
       None => ""
@@ -255,8 +260,8 @@ fn resolve(
 ) -> Linker {
   raw => {
     guard Ref::parse(raw) is Some(u) else { return None }
-    if u.scheme != "" {
-      return if u.scheme is ("http" | "https" | "mailto") {
+    if u.scheme is Some(scheme) {
+      return if scheme is ("http" | "https" | "mailto") {
         Some(raw)
       } else {
         None
@@ -275,13 +280,13 @@ fn resolve(
       // The file on the main branch on GitHub, which redirects blob/ to
       // tree/ for directories.
       let path = join([REPO_PATH, p])
-      let query = if u.raw_query != "" { "?\{u.raw_query}" } else { "" }
+      let query = if u.raw_query is Some(q) && q != "" { "?\{q}" } else { "" }
       "https://\{REPO_HOST}\{escape(path, fragment=false)}\{query}"
     } else {
       return None
     }
-    let fragment = if u.fragment != "" {
-      "#\{escape(u.fragment, fragment=true)}"
+    let fragment = if u.fragment is Some(f) && f != "" {
+      "#\{escape(f, fragment=true)}"
     } else {
       ""
     }
