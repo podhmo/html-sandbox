@@ -79,8 +79,8 @@ enum で「今の状態」を表せても、遷移の規則がループ本体に
 | 場所 | 形 | 当たる項目 | 判断 |
 | ---- | ---- | ---- | ---- |
 | `pkg/http/router.mbt` の `Route` | `subtree : Bool` と、`Segment` の `End`（`{$}`）・`Rest`（`{x...}`）が、どれも「パターンの末尾の形」を表す。3つは排他で、`End`/`Rest` は最後の位置にしか現れないが、型はどちらも許す。`match_path` は末尾の判定を `last() is Some(End)` と `self.subtree` の if 連鎖で再構成している | どの構造を 2 | 実施済み。`Route.tail : Tail { Exact; End; Subtree; Rest(String) }` に畳み、`Segment` は途中の位置の `Literal`/`Wildcard` だけになった。末尾判定と `rank` は `tail` の match |
-| `pkg/tinymarkdown/tinymarkdown.mbt` の `scan` | `Mode` と `Pending` の2つの enum。`Mode` が `Normal` 以外に入る前に必ず `flush()` するので、`Pending` が非空なのは `Normal` のときだけ | どの構造を 2 | 候補。`Pending` を `Normal` の payload にすると起こらない組が消える。`flush` の書き方が変わるので、次の行と一緒に考える |
-| 同じく `scan` | `Code` と `Footnote` を閉じる処理が、閉じる行のときと入力の終わりの2か所にある。`Code` の `info` を `""` なら `None` にする変換も2回書かれている | state machine 4 | 候補。`close(mode)` に寄せれば重複が消える。`info` は `Code` に入るときに `StringView?` にしてもよい |
+| `pkg/tinymarkdown/tinymarkdown.mbt` の `scan` | `Mode` と `Pending` の2つの enum。`Mode` が `Normal` 以外に入る前に必ず `flush()` するので、`Pending` が非空なのは `Normal` のときだけ | どの構造を 2 | 実施済み。`Pending` は `Normal` の payload になり、スキャナの状態は `Scan { out, notes, mode }` の1値に。1行の処理は `Scan::step`、モードごとの遷移が `self.mode` の1つの match に収まる |
+| 同じく `scan` | `Code` と `Footnote` を閉じる処理が、閉じる行のときと入力の終わりの2か所にある。`Code` の `info` を `""` なら `None` にする変換も2回書かれている | state machine 4 | 実施済み。閉じる処理は `Scan::close` に寄せ、ループ後は `close` を呼ぶだけになった。`info` は `Code` に入る時点で `String?` にし、閉じる側の変換は消えた |
 | `nest_items` の `parent.unwrap_or(-1)` | API は `Int32?`、関数の中で下限として `-1` | しない方が 8 | このままでよい |
 | `content.mbt` の `rank.unwrap_or(-1)` | ソートキー | しない方が 8 | このままでよい（本文と同じ判断） |
 | `content.mbt` の `first_paragraph` | 見つからないときに `""` を返し、再帰の中で `!= ""` を再判定する | 再解釈が関数内で閉じる | 低優先。呼び出し側は `""` を説明文としてそのまま使うので、外では値として扱われている |

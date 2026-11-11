@@ -306,192 +306,209 @@ priv enum Pending {
 }
 
 ///|
-/// Mode is the multi-line construct scan is inside, if any: a code fence,
-/// a "<details>" block, or a footnote definition. Each variant holds the
-/// state that exists only while that mode is open.
+/// Mode is the construct scan is inside: normal input, a code fence, a
+/// "<details>" block, or a footnote definition. Each variant holds the
+/// state that exists only while that mode is open — Normal carries the
+/// pending block, since lines accumulate only outside the other modes.
 priv enum Mode {
-  Normal
-  Code(info~ : StringView, indent~ : Int32, lines~ : Array[StringView])
+  Normal(Pending)
+  Code(info~ : String?, indent~ : Int32, lines~ : Array[StringView])
   Details(mut depth~ : Int32, mut in_code~ : Bool, lines~ : Array[StringView])
   Footnote(label~ : String, mut blank~ : Int32, lines~ : Array[String])
 }
 
 ///|
+/// Scan is the state of one scan pass: the flat blocks emitted so far,
+/// the footnote definitions shared with the documents it recurses into,
+/// and the mode it is in.
+priv struct Scan {
+  out : Array[Flat]
+  notes : FootnoteSet
+  mut mode : Mode
+}
+
+///|
+/// Scan::flush emits the block Normal was accumulating, if any, leaving
+/// pending empty. Other modes have nothing to flush.
+fn Scan::flush(self : Scan) -> Unit {
+  match self.mode {
+    Normal(pending) => {
+      match pending {
+        Nothing => ()
+        Para(lines) => self.out.push(Block(Paragraph(lines.join("\n"))))
+        Items(items) =>
+          self.out.push(
+            Block(List(nest_items(items, from=0, parent=None).0.unwrap())),
+          )
+        Quote(lines) =>
+          match alert_kind(lines[0]) {
+            Some(kind) => {
+              ignore(lines.remove(0))
+              self.out.push(
+                Block(
+                  Alert(
+                    kind~,
+                    children=parse_children(lines.join("\n"), self.notes),
+                  ),
+                ),
+              )
+            }
+            None =>
+              self.out.push(
+                Block(Quote(parse_children(lines.join("\n"), self.notes))),
+              )
+          }
+        Table(lines) =>
+          match parse_table(lines) {
+            Some(t) => self.out.push(Block(t))
+            None => self.out.push(Block(Paragraph(lines.join("\n"))))
+          }
+      }
+      self.mode = Normal(Nothing)
+    }
+    _ => ()
+  }
+}
+
+///|
+/// Scan::close ends the open construct, if any: it emits the block or
+/// footnote the mode was collecting — an unclosed "```" or "<details>"
+/// runs to the end of the input — and flushes the pending block of
+/// Normal. The scanner is left in Normal.
+fn Scan::close(self : Scan) -> Unit {
+  match self.mode {
+    Code(info~, lines~, ..) =>
+      self.out.push(Block(CodeBlock(lines.join("\n"), info~)))
+    Details(lines~, ..) =>
+      self.out.push(Block(parse_details(lines, self.notes)))
+    Footnote(label~, lines~, ..) =>
+      self.notes.add(label, parse_children(lines.join("\n"), self.notes))
+    Normal(_) => self.flush()
+  }
+  self.mode = Normal(Nothing)
+}
+
+///|
+/// Scan::step feeds one line to the scanner: the line is handled by the
+/// open mode, or — in Normal — dispatched to a pending block or a new
+/// mode. A line that ends a footnote definition is seen twice: it closes
+/// the definition, then runs as normal input.
+fn Scan::step(self : Scan, line : StringView) -> Unit {
+  let trimmed = trim_space(line)
+  match self.mode {
+    Code(indent~, lines~, ..) =>
+      if trimmed == FENCE {
+        self.close()
+      } else {
+        lines.push(dedent(line, indent))
+      }
+    Details(..) as d => {
+      if d.in_code {
+        if trimmed == FENCE {
+          d.in_code = false
+        }
+      } else if trimmed.has_prefix(FENCE) {
+        d.in_code = true
+      } else if trimmed == "<details>" {
+        d.depth += 1
+      } else if trimmed == "</details>" {
+        d.depth -= 1
+        if d.depth == 0 {
+          self.close()
+          return
+        }
+      }
+      d.lines.push(line)
+    }
+    Footnote(..) as f =>
+      // Inside a footnote definition: an indented line continues it, and
+      // a blank line keeps it open for one more indented line.
+      if trimmed == "" {
+        f.blank += 1
+      } else if line[0] is (' ' | '\t') {
+        for _ in 0..<f.blank {
+          f.lines.push("")
+        }
+        f.blank = 0
+        f.lines.push(trimmed.to_owned())
+      } else {
+        self.close()
+        self.step(line)
+      }
+    Normal(pending) =>
+      if trimmed.has_prefix(FENCE) {
+        self.flush()
+        let info = trim_space(trimmed[FENCE.length():])
+        self.mode = Code(
+          info=if info == "" { None } else { Some(info.to_owned()) },
+          indent=indent(line),
+          lines=[],
+        )
+      } else if trimmed == "" {
+        self.flush()
+      } else if is_heading(trimmed) {
+        self.flush()
+        self.out.push(parse_heading(trimmed))
+      } else if footnote_def(line) is Some((label, text)) {
+        self.flush()
+        self.mode = Footnote(label~, blank=0, lines=[text])
+      } else if trimmed.has_prefix("|") {
+        match pending {
+          Table(lines) => lines.push(trimmed)
+          _ => {
+            self.flush()
+            self.mode = Normal(Table([trimmed]))
+          }
+        }
+      } else if trimmed.has_prefix(">") {
+        let rest = line[line.find(">").unwrap() + 1:]
+        let text = rest.strip_prefix(" ").unwrap_or(rest).to_owned()
+        match pending {
+          Quote(lines) => lines.push(text)
+          _ => {
+            self.flush()
+            self.mode = Normal(Quote([text]))
+          }
+        }
+      } else if list_item(trimmed) is Some((kind, text)) {
+        let it = RawItem::{ indent: indent(line), kind, text: text.to_owned(), }
+        match pending {
+          Items(items) => items.push(it)
+          _ => {
+            self.flush()
+            self.mode = Normal(Items([it]))
+          }
+        }
+      } else if trimmed == "<details>" {
+        self.flush()
+        self.mode = Details(depth=1, in_code=false, lines=[])
+      } else if pending is Items(items) &&
+        line.length() != trimmed.length() &&
+        line[0] is (' ' | '\t') {
+        // An indented line continues the item above it.
+        items[items.length() - 1].text += "\n\{trimmed}"
+      } else {
+        match pending {
+          Para(lines) => lines.push(trimmed)
+          _ => {
+            self.flush()
+            self.mode = Normal(Para([trimmed]))
+          }
+        }
+      }
+  }
+}
+
+///|
 /// scan splits src into a flat list of blocks, with headings as markers.
 fn scan(src : String, notes : FootnoteSet) -> Array[Flat] {
-  let out : Array[Flat] = []
-  let mut pending = Pending::Nothing
-  let mut mode = Mode::Normal
-  fn flush() {
-    match pending {
-      Nothing => ()
-      Para(lines) => out.push(Block(Paragraph(lines.join("\n"))))
-      Items(items) =>
-        out.push(Block(List(nest_items(items, from=0, parent=None).0.unwrap())))
-      Quote(lines) =>
-        match alert_kind(lines[0]) {
-          Some(kind) => {
-            ignore(lines.remove(0))
-            out.push(
-              Block(
-                Alert(kind~, children=parse_children(lines.join("\n"), notes)),
-              ),
-            )
-          }
-          None =>
-            out.push(Block(Quote(parse_children(lines.join("\n"), notes))))
-        }
-      Table(lines) =>
-        match parse_table(lines) {
-          Some(t) => out.push(Block(t))
-          None => out.push(Block(Paragraph(lines.join("\n"))))
-        }
-    }
-    pending = Nothing
-  }
-
+  let s = Scan::{ out: [], notes, mode: Normal(Nothing), }
   for raw in src.split("\n") {
     // line stays a view: only the lines that are kept are copied to a String.
-    let line = raw.strip_suffix("\r").unwrap_or(raw)
-    let trimmed = trim_space(line)
-    match mode {
-      Code(info~, indent~, lines~) => {
-        if trimmed == FENCE {
-          out.push(
-            Block(
-              CodeBlock(
-                lines.join("\n"),
-                info=if info == "" { None } else { Some(info.to_owned()) },
-              ),
-            ),
-          )
-          mode = Normal
-        } else {
-          lines.push(dedent(line, indent))
-        }
-        continue
-      }
-      Details(..) as d => {
-        if d.in_code {
-          if trimmed == FENCE {
-            d.in_code = false
-          }
-        } else if trimmed.has_prefix(FENCE) {
-          d.in_code = true
-        } else if trimmed == "<details>" {
-          d.depth += 1
-        } else if trimmed == "</details>" {
-          d.depth -= 1
-          if d.depth == 0 {
-            out.push(Block(parse_details(d.lines, notes)))
-            mode = Normal
-            continue
-          }
-        }
-        d.lines.push(line)
-        continue
-      }
-      Footnote(..) as f => {
-        // Inside a footnote definition: an indented line continues it, and
-        // a blank line keeps it open for one more indented line.
-        if trimmed == "" {
-          f.blank += 1
-          continue
-        }
-        if line[0] is (' ' | '\t') {
-          for _ in 0..<f.blank {
-            f.lines.push("")
-          }
-          f.blank = 0
-          f.lines.push(trimmed.to_owned())
-          continue
-        }
-        notes.add(f.label, parse_children(f.lines.join("\n"), notes))
-        mode = Normal
-      }
-      Normal => ()
-    }
-    if trimmed.has_prefix(FENCE) {
-      flush()
-      mode = Code(
-        info=trim_space(trimmed[FENCE.length():]),
-        indent=indent(line),
-        lines=[],
-      )
-    } else if trimmed == "" {
-      flush()
-    } else if is_heading(trimmed) {
-      flush()
-      out.push(parse_heading(trimmed))
-    } else if footnote_def(line) is Some((label, text)) {
-      flush()
-      mode = Footnote(label~, blank=0, lines=[text])
-    } else if trimmed.has_prefix("|") {
-      match pending {
-        Table(lines) => lines.push(trimmed)
-        _ => {
-          flush()
-          pending = Table([trimmed])
-        }
-      }
-    } else if trimmed.has_prefix(">") {
-      let rest = line[line.find(">").unwrap() + 1:]
-      let text = rest.strip_prefix(" ").unwrap_or(rest).to_owned()
-      match pending {
-        Quote(lines) => lines.push(text)
-        _ => {
-          flush()
-          pending = Quote([text])
-        }
-      }
-    } else if list_item(trimmed) is Some((kind, text)) {
-      let it = RawItem::{ indent: indent(line), kind, text: text.to_owned(), }
-      match pending {
-        Items(items) => items.push(it)
-        _ => {
-          flush()
-          pending = Items([it])
-        }
-      }
-    } else if trimmed == "<details>" {
-      flush()
-      mode = Details(depth=1, in_code=false, lines=[])
-    } else if pending is Items(items) &&
-      line.length() != trimmed.length() &&
-      line[0] is (' ' | '\t') {
-      // An indented line continues the item above it.
-      items[items.length() - 1].text += "\n\{trimmed}"
-    } else {
-      match pending {
-        Para(lines) => lines.push(trimmed)
-        _ => {
-          flush()
-          pending = Para([trimmed])
-        }
-      }
-    }
+    s.step(raw.strip_suffix("\r").unwrap_or(raw))
   }
-  match mode {
-    Code(info~, lines~, ..) =>
-      // An unclosed fence runs to the end of the document.
-      out.push(
-        Block(
-          CodeBlock(
-            lines.join("\n"),
-            info=if info == "" { None } else { Some(info.to_owned()) },
-          ),
-        ),
-      )
-    Details(..) as d =>
-      // An unclosed "<details>" runs to the end of the document.
-      out.push(Block(parse_details(d.lines, notes)))
-    Footnote(..) as f =>
-      // A footnote definition open at the end closes there.
-      notes.add(f.label, parse_children(f.lines.join("\n"), notes))
-    Normal => ()
-  }
-  flush()
-  out
+  s.close()
+  s.out
 }
 
 ///|
