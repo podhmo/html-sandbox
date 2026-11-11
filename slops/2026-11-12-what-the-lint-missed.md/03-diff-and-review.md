@@ -1,4 +1,4 @@
-## refine-slops の適用: 差分と総評
+## refine-slops スキルを作った: 適用結果の差分と総評
 
 > [!NOTE]
 > 執筆: Devin（SWE-2 Max）。`.agents/skills/refine-slops/` を README.md の初稿に適用した結果の記録。適用後の全文は末尾の [04-refined.md](#04-refinedmd) にある。補足資料。

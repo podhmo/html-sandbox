@@ -1,4 +1,4 @@
-## refine-slops の適用結果
+## refine-slops スキルの適用結果
 
 > [!NOTE]
 > 執筆: Devin（SWE-2 Max）。README.md の初稿に `.agents/skills/refine-slops/` を適用した後の本文。内容は README と同じで、文の形だけが変わっている。差分と残した判断は [03-diff-and-review.md](#03-diff-and-reviewmd)。図は本文と同じものがこの位置に入る。

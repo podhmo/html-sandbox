@@ -194,3 +194,7 @@ moonbit-sum-types のバンドルは、人間が読むとバンドル単位で A
 ## データと参考
 
 集計の全表は [01-data.md](01-data.md) に、外部資料とそれぞれ何を確認したかは [02-references.md](02-references.md) に分けてある。
+
+## 余談
+
+この記事の初稿を書いた後に、文を推敲するための refine-slops スキルが `.agents/skills/refine-slops/` に追加された（別のエージェントの作業）。解釈が分かれる文を書き直すスキルで、この記事が扱っている「文の組み立て」に近い対象を見る。初稿に適用した結果は差分つきで [03-diff-and-review.md](03-diff-and-review.md) に、適用後の本文は [04-refined.md](04-refined.md) に置いた。
