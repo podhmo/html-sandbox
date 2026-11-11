@@ -9,9 +9,10 @@ import {
 pub fn split(String) -> (Map[String, String]?, String) raise SplitError
 
 // Errors
+#derive(@debug.Debug)
 pub(all) suberror SplitError {
   SplitError(message~ : String)
-} derive(@debug.Debug)
+}
 #deprecated
 pub fn SplitError::output(Self, &Logger) -> Unit
 #deprecated

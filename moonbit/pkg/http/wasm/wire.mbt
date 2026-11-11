@@ -104,9 +104,10 @@ fn is_token(name : String) -> Bool {
 
 ///|
 /// FileError is a file the host wrote that cannot be read.
+#derive(Debug)
 pub(all) suberror FileError {
   FileError(message~ : String)
-} derive(Debug)
+}
 
 ///|
 /// output writes the message alone, so "\{e}" reads as the error text.

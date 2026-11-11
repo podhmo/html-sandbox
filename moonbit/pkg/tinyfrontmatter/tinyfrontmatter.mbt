@@ -18,9 +18,10 @@ const SPACES = "\t\n\u{0B}\u{0C}\r \u{85}\u{A0}\u{1680}\u{2000}\u{2001}\u{2002}\
 ///|
 /// SplitError is a malformed front matter block; the message says which
 /// line and why, as the Go version's error does.
+#derive(Debug)
 pub(all) suberror SplitError {
   SplitError(message~ : String)
-} derive(Debug)
+}
 
 ///|
 /// output writes the message alone, so "\{e}" reads as the error text.

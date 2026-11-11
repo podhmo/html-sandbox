@@ -10,12 +10,13 @@
 /// - Footnote is a [^label] footnote reference, holding the label of a
 ///   FootnoteDef of the document; resolving and numbering it is up to the
 ///   renderer.
+#derive(Eq, Debug)
 pub(all) enum Inline {
   Text(String)
   Code(String)
   Link(children~ : Array[Inline], url~ : String)
   Footnote(String)
-} derive(Eq, Debug)
+}
 
 ///|
 #deprecated("Use == and != instead")
