@@ -229,6 +229,24 @@ test "Router" {
 }
 
 ///|
+test "Router orders the kinds of tail" {
+  // Registered from the least specific tail on purpose: the wins are by
+  // rank, not by registration order.
+  let r = @http.Router()
+  let says = (name : String) => {
+    (_ : @http.Request) => @http.Response::text(200, name)
+  }
+  r.handle("/a/", says("a-sub"))
+  r.handle("/a/{p...}", says("a-rest"))
+  r.handle("/a/{x}", says("a-wild"))
+  r.handle("/a/{$}", says("a-end"))
+  let get = (url : String) => body_text(r.serve(request("GET", url)))
+  assert_eq(get("/a/"), "a-end") // {$} beats {p...} and a trailing "/"
+  assert_eq(get("/a/x"), "a-wild") // {x} beats {p...} and a trailing "/"
+  assert_eq(get("/a/x/y"), "a-rest") // {p...} beats a trailing "/"
+}
+
+///|
 test "Router with decoded_path" {
   let r = @http.Router(decoded_path=true)
   r.handle("GET /posts/{slug}", req => {

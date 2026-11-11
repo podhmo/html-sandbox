@@ -75,7 +75,7 @@
   [指針](slops/2026-11-11-moonbit-sum-types.md/01-guidelines.md)の末尾の表で
   「候補」とした2件。どちらも1つの状態が型の違う2か所に分かれている形
   （指針の「どの構造を」2）。振る舞いは変えず、`make check` と `make compare` で確かめる。
-  - [ ] `pkg/http/router.mbt`: `Route.subtree : Bool` と `Segment` の `End`/`Rest` が
+  - [x] `pkg/http/router.mbt`: `Route.subtree : Bool` と `Segment` の `End`/`Rest` が
     どれもパターン末尾の形を表し排他。`Tail { Exact; End; Subtree; Rest(String) }`
     に畳み、`match_path` の末尾判定の if 連鎖と `rank` を match にする。上の #158 の
     項目で `subtree` を見送った判断を、排他性の観点で覆すもの
