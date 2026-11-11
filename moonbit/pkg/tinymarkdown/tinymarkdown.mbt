@@ -21,10 +21,11 @@
 /// holds it. Where they are written does not matter — a definition may
 /// sit anywhere, inside a quote or a details block too — and the first
 /// definition of a label wins.
+#derive(Eq, Debug)
 pub(all) struct Document {
   children : Array[Block]
   footnotes : Array[FootnoteDef]
-} derive(Eq, Debug)
+}
 
 // The derived Eq and Debug are meant for == and assert_eq, not as methods;
 // the #deprecated extends below (and in inline.mbt) mark the implicitly
@@ -44,16 +45,17 @@ pub extend Document with Debug::{to_repr}
 /// - Section is a heading together with everything up to the next heading
 ///   of the same or a shallower level (level is 1..5).
 /// - Paragraph is a run of consecutive non-blank lines, joined with "\n".
-/// - List is a run of consecutive "- ", "* ", or "N. " lines. Each item is
-///   nested under the nearest item above it whose marker is indented less,
-///   as "b" is under "a" in "- a\n  - b"; with no such item, it is at the
-///   top level. Indentation counts leading spaces and tabs, one column each.
+/// - List is a run of consecutive "- ", "* ", or "N. " lines, an ItemList
+///   whose kind is what the first marker makes it. Each item is nested
+///   under the nearest item above it whose marker is indented less, as "b"
+///   is under "a" in "- a\n  - b"; with no such item, it is at the top
+///   level. Indentation counts leading spaces and tabs, one column each.
 /// - Quote is a run of consecutive lines starting with ">". The text after
 ///   ">" and one optional space is parsed again as a document.
 /// - Alert is a quote whose first line is a GitHub-style alert marker such
 ///   as "[!NOTE]": the marker is taken off the content and kept as kind,
-///   the marker's lowercase type — "note", "tip", "important", "warning",
-///   or "caution". The rest is parsed again as a document, as in Quote.
+///   the marker's type. The rest is parsed again as a document, as in
+///   Quote.
 /// - Table is a run of consecutive lines starting with "|": a header row, a
 ///   delimiter row such as "| --- | --- |", and body rows. Cells are trimmed
 ///   and "\|" is unescaped to "|"; every row has as many cells as the
@@ -65,19 +67,21 @@ pub extend Document with Debug::{to_repr}
 ///   trimmed — usually a language name such as "go" or "svg".
 /// - Details is a "<details>" line through its matching "</details>"
 ///   line, which may nest. A first non-blank line of the form
-///   "<summary>...</summary>" is kept as summary; the rest is parsed again
-///   as a document, as in Quote. The tags are the whole line:
+///   "<summary>...</summary>" is kept as summary, None without one; the
+///   rest is parsed again as a document, as in Quote. The tags are the
+///   whole line:
 ///   "<details open>" and the like stay paragraph text.
+#derive(Eq, Debug)
 pub(all) enum Block {
   Section(level~ : Int32, title~ : String, children~ : Array[Block])
   Paragraph(String)
-  List(Array[Item])
+  List(ItemList)
   Quote(Array[Block])
-  Alert(kind~ : String, children~ : Array[Block])
+  Alert(kind~ : AlertKind, children~ : Array[Block])
   Table(header~ : Array[String], rows~ : Array[Array[String]])
-  CodeBlock(String, info~ : String)
-  Details(summary~ : String, children~ : Array[Block])
-} derive(Eq, Debug)
+  CodeBlock(String, info~ : String?)
+  Details(summary~ : String?, children~ : Array[Block])
+}
 
 ///|
 #deprecated("Use == and != instead")
@@ -88,16 +92,48 @@ pub extend Block with Eq::{not_equal, equal}
 pub extend Block with Debug::{to_repr}
 
 ///|
-/// Item is a list item: the text after the marker, with nested items. num is
-/// the number of a "N. " marker — "3" in "3. a" — or 0 for a "- " or "* "
-/// marker. A list is an ordered list when its first item has num > 0, and
-/// that num is its start number. Indented lines that follow an item without
-/// a list marker continue its text, joined with "\n".
+/// ListKind is what the first marker of a list run makes it: "- " and
+/// "* " a bullet list, "N. " an ordered list starting at N. The numbers
+/// of the items after the first do not matter — HTML numbers them.
+#derive(Eq, Debug)
+pub(all) enum ListKind {
+  Bullet
+  Ordered(start~ : Int32)
+}
+
+///|
+#deprecated("Use == and != instead")
+pub extend ListKind with Eq::{not_equal, equal}
+
+///|
+#deprecated("Use Debug::to_repr instead")
+pub extend ListKind with Debug::{to_repr}
+
+///|
+/// ItemList is a run of list items and the kind its first marker gives it.
+#derive(Eq, Debug)
+pub(all) struct ItemList {
+  kind : ListKind
+  items : Array[Item]
+}
+
+///|
+#deprecated("Use == and != instead")
+pub extend ItemList with Eq::{not_equal, equal}
+
+///|
+#deprecated("Use Debug::to_repr instead")
+pub extend ItemList with Debug::{to_repr}
+
+///|
+/// Item is a list item: the text after the marker, with the nested list
+/// under it, if any. Indented lines that follow an item without a list
+/// marker continue its text, joined with "\n".
+#derive(Eq, Debug)
 pub(all) struct Item {
   text : String
-  num : Int32
-  children : Array[Item]
-} derive(Eq, Debug)
+  children : ItemList?
+}
 
 ///|
 #deprecated("Use == and != instead")
@@ -108,6 +144,39 @@ pub extend Item with Eq::{not_equal, equal}
 pub extend Item with Debug::{to_repr}
 
 ///|
+/// AlertKind is the type a "[!KIND]" marker gives its quote block.
+#derive(Eq, Debug)
+pub(all) enum AlertKind {
+  Note
+  Tip
+  Important
+  Warning
+  Caution
+}
+
+///|
+#deprecated("Use == and != instead")
+pub extend AlertKind with Eq::{not_equal, equal}
+
+///|
+#deprecated("Use Debug::to_repr instead")
+pub extend AlertKind with Debug::{to_repr}
+
+///|
+/// AlertKind::name is the kind's lowercase name — "note", "tip",
+/// "important", "warning", or "caution" — as the "[!KIND]" marker writes
+/// it. It is also the HTML class suffix and the name the JS bridge emits.
+pub fn AlertKind::name(self : AlertKind) -> String {
+  match self {
+    Note => "note"
+    Tip => "tip"
+    Important => "important"
+    Warning => "warning"
+    Caution => "caution"
+  }
+}
+
+///|
 /// FootnoteDef is a "[^label]: text" definition. The label is the text
 /// between "[^" and "]"; it may not be empty or hold brackets or a line
 /// break. The text after ":" is the start of the body; the indented lines
@@ -115,10 +184,11 @@ pub extend Item with Debug::{to_repr}
 /// whole body is parsed again as a document, as in Quote. The definition
 /// line must start at the first column: an indented "[^label]:" continues
 /// a list item or stays paragraph text.
+#derive(Eq, Debug)
 pub(all) struct FootnoteDef {
   label : String
   children : Array[Block]
-} derive(Eq, Debug)
+}
 
 ///|
 #deprecated("Use == and != instead")
@@ -225,123 +295,129 @@ fn parse_children(src : String, notes : FootnoteSet) -> Array[Block] {
 }
 
 ///|
+/// Pending is the block kind scan is accumulating lines for; at most one
+/// is open at a time. A line of a different kind flushes it first.
+priv enum Pending {
+  Nothing
+  Para(Array[StringView])
+  Items(Array[RawItem])
+  Quote(Array[StringView])
+  Table(Array[StringView])
+}
+
+///|
+/// Mode is the multi-line construct scan is inside, if any: a code fence,
+/// a "<details>" block, or a footnote definition. Each variant holds the
+/// state that exists only while that mode is open.
+priv enum Mode {
+  Normal
+  Code(info~ : StringView, indent~ : Int32, lines~ : Array[StringView])
+  Details(mut depth~ : Int32, mut in_code~ : Bool, lines~ : Array[StringView])
+  Footnote(label~ : String, mut blank~ : Int32, lines~ : Array[String])
+}
+
+///|
 /// scan splits src into a flat list of blocks, with headings as markers.
 fn scan(src : String, notes : FootnoteSet) -> Array[Flat] {
   let out : Array[Flat] = []
-  let para : Array[StringView] = []
-  let items : Array[RawItem] = []
-  let quote : Array[StringView] = []
-  let table : Array[StringView] = []
+  let mut pending = Pending::Nothing
+  let mut mode = Mode::Normal
   fn flush() {
-    if !para.is_empty() {
-      out.push(Block(Paragraph(para.join("\n"))))
-      para.clear()
+    match pending {
+      Nothing => ()
+      Para(lines) => out.push(Block(Paragraph(lines.join("\n"))))
+      Items(items) =>
+        out.push(Block(List(nest_items(items, from=0, parent=-1).0.unwrap())))
+      Quote(lines) =>
+        match alert_kind(lines[0]) {
+          Some(kind) => {
+            ignore(lines.remove(0))
+            out.push(
+              Block(
+                Alert(kind~, children=parse_children(lines.join("\n"), notes)),
+              ),
+            )
+          }
+          None =>
+            out.push(Block(Quote(parse_children(lines.join("\n"), notes))))
+        }
+      Table(lines) =>
+        match parse_table(lines) {
+          Some(t) => out.push(Block(t))
+          None => out.push(Block(Paragraph(lines.join("\n"))))
+        }
     }
-    if !items.is_empty() {
-      out.push(Block(List(nest_items(items, from=0, parent=-1).0)))
-      items.clear()
-    }
-    if !quote.is_empty() {
-      let kind = alert_kind(quote[0])
-      if kind != "" {
-        ignore(quote.remove(0))
-        out.push(
-          Block(Alert(kind~, children=parse_children(quote.join("\n"), notes))),
-        )
-      } else {
-        out.push(Block(Quote(parse_children(quote.join("\n"), notes))))
-      }
-      quote.clear()
-    }
-    if !table.is_empty() {
-      match parse_table(table) {
-        Some(t) => out.push(Block(t))
-        None => out.push(Block(Paragraph(table.join("\n"))))
-      }
-      table.clear()
-    }
+    pending = Nothing
   }
 
-  let code : Array[StringView] = []
-  let mut code_info : StringView = ""
-  let mut code_indent = 0
-  let mut in_code = false
-  let details : Array[StringView] = []
-  let mut details_depth = 0
-  let mut details_code = false
-  let mut in_details = false
-  let foot : Array[String] = []
-  let mut foot_label = ""
-  let mut foot_blank = 0
-  let mut in_foot = false
   for raw in src.split("\n") {
     // line stays a view: only the lines that are kept are copied to a String.
     let line = raw.strip_suffix("\r").unwrap_or(raw)
     let trimmed = trim_space(line)
-    if in_code {
-      if trimmed == FENCE {
-        out.push(Block(CodeBlock(code.join("\n"), info=code_info.to_owned())))
-        code.clear()
-        code_info = ""
-        code_indent = 0
-        in_code = false
-      } else {
-        code.push(dedent(line, code_indent))
-      }
-      continue
-    }
-    if in_details {
-      if details_code {
+    match mode {
+      Code(info~, indent~, lines~) => {
         if trimmed == FENCE {
-          details_code = false
-        }
-        details.push(line)
-      } else if trimmed.has_prefix(FENCE) {
-        details_code = true
-        details.push(line)
-      } else if trimmed == "<details>" {
-        details_depth += 1
-        details.push(line)
-      } else if trimmed == "</details>" {
-        details_depth -= 1
-        if details_depth == 0 {
-          out.push(Block(parse_details(details, notes)))
-          details.clear()
-          in_details = false
+          out.push(
+            Block(
+              CodeBlock(
+                lines.join("\n"),
+                info=if info == "" { None } else { Some(info.to_owned()) },
+              ),
+            ),
+          )
+          mode = Normal
         } else {
-          details.push(line)
+          lines.push(dedent(line, indent))
         }
-      } else {
-        details.push(line)
-      }
-      continue
-    }
-    if in_foot {
-      // Inside a footnote definition: an indented line continues it, and
-      // a blank line keeps it open for one more indented line.
-      if trimmed == "" {
-        foot_blank += 1
         continue
-      } else if line[0] is (' ' | '\t') {
-        for _ in 0..<foot_blank {
-          foot.push("")
+      }
+      Details(..) as d => {
+        if d.in_code {
+          if trimmed == FENCE {
+            d.in_code = false
+          }
+        } else if trimmed.has_prefix(FENCE) {
+          d.in_code = true
+        } else if trimmed == "<details>" {
+          d.depth += 1
+        } else if trimmed == "</details>" {
+          d.depth -= 1
+          if d.depth == 0 {
+            out.push(Block(parse_details(d.lines, notes)))
+            mode = Normal
+            continue
+          }
         }
-        foot_blank = 0
-        foot.push(trimmed.to_owned())
+        d.lines.push(line)
         continue
-      } else {
-        notes.add(foot_label, parse_children(foot.join("\n"), notes))
-        foot.clear()
-        foot_label = ""
-        foot_blank = 0
-        in_foot = false
       }
+      Footnote(..) as f => {
+        // Inside a footnote definition: an indented line continues it, and
+        // a blank line keeps it open for one more indented line.
+        if trimmed == "" {
+          f.blank += 1
+          continue
+        }
+        if line[0] is (' ' | '\t') {
+          for _ in 0..<f.blank {
+            f.lines.push("")
+          }
+          f.blank = 0
+          f.lines.push(trimmed.to_owned())
+          continue
+        }
+        notes.add(f.label, parse_children(f.lines.join("\n"), notes))
+        mode = Normal
+      }
+      Normal => ()
     }
     if trimmed.has_prefix(FENCE) {
       flush()
-      code_info = trim_space(trimmed[FENCE.length():])
-      code_indent = indent(line)
-      in_code = true
+      mode = Code(
+        info=trim_space(trimmed[FENCE.length():]),
+        indent=indent(line),
+        lines=[],
+      )
     } else if trimmed == "" {
       flush()
     } else if is_heading(trimmed) {
@@ -349,53 +425,70 @@ fn scan(src : String, notes : FootnoteSet) -> Array[Flat] {
       out.push(parse_heading(trimmed))
     } else if footnote_def(line) is Some((label, text)) {
       flush()
-      foot_label = label
-      foot.push(text)
-      in_foot = true
+      mode = Footnote(label~, blank=0, lines=[text])
     } else if trimmed.has_prefix("|") {
-      if !para.is_empty() || !items.is_empty() || !quote.is_empty() {
-        flush()
+      match pending {
+        Table(lines) => lines.push(trimmed)
+        _ => {
+          flush()
+          pending = Table([trimmed])
+        }
       }
-      table.push(trimmed)
     } else if trimmed.has_prefix(">") {
-      if !para.is_empty() || !items.is_empty() || !table.is_empty() {
-        flush()
-      }
       let rest = line[line.find(">").unwrap() + 1:]
-      quote.push(rest.strip_prefix(" ").unwrap_or(rest).to_owned())
-    } else if list_item(trimmed) is Some((num, text)) {
-      if !para.is_empty() || !quote.is_empty() || !table.is_empty() {
-        flush()
+      let text = rest.strip_prefix(" ").unwrap_or(rest).to_owned()
+      match pending {
+        Quote(lines) => lines.push(text)
+        _ => {
+          flush()
+          pending = Quote([text])
+        }
       }
-      items.push({ indent: indent(line), num, text: text.to_owned(), })
+    } else if list_item(trimmed) is Some((kind, text)) {
+      let it = RawItem::{ indent: indent(line), kind, text: text.to_owned(), }
+      match pending {
+        Items(items) => items.push(it)
+        _ => {
+          flush()
+          pending = Items([it])
+        }
+      }
     } else if trimmed == "<details>" {
       flush()
-      details_depth = 1
-      details_code = false
-      in_details = true
-    } else if !items.is_empty() &&
+      mode = Details(depth=1, in_code=false, lines=[])
+    } else if pending is Items(items) &&
       line.length() != trimmed.length() &&
       line[0] is (' ' | '\t') {
       // An indented line continues the item above it.
       items[items.length() - 1].text += "\n\{trimmed}"
     } else {
-      if !items.is_empty() || !quote.is_empty() || !table.is_empty() {
-        flush()
+      match pending {
+        Para(lines) => lines.push(trimmed)
+        _ => {
+          flush()
+          pending = Para([trimmed])
+        }
       }
-      para.push(trimmed)
     }
   }
-  if in_code {
-    // An unclosed fence runs to the end of the document.
-    out.push(Block(CodeBlock(code.join("\n"), info=code_info.to_owned())))
-  }
-  if in_details {
-    // An unclosed "<details>" runs to the end of the document.
-    out.push(Block(parse_details(details, notes)))
-  }
-  if in_foot {
-    // A footnote definition open at the end closes there.
-    notes.add(foot_label, parse_children(foot.join("\n"), notes))
+  match mode {
+    Code(info~, lines~, ..) =>
+      // An unclosed fence runs to the end of the document.
+      out.push(
+        Block(
+          CodeBlock(
+            lines.join("\n"),
+            info=if info == "" { None } else { Some(info.to_owned()) },
+          ),
+        ),
+      )
+    Details(..) as d =>
+      // An unclosed "<details>" runs to the end of the document.
+      out.push(Block(parse_details(d.lines, notes)))
+    Footnote(..) as f =>
+      // A footnote definition open at the end closes there.
+      notes.add(f.label, parse_children(f.lines.join("\n"), notes))
+    Normal => ()
   }
   flush()
   out
@@ -407,14 +500,14 @@ fn scan(src : String, notes : FootnoteSet) -> Array[Flat] {
 /// "<summary>...</summary>" is kept as summary; the rest is parsed again
 /// as a document, as in Quote.
 fn parse_details(lines : Array[StringView], notes : FootnoteSet) -> Block {
-  let mut summary = ""
+  let mut summary : String? = None
   let mut body = lines[:]
   for i, line in lines {
     if trim_space(line) == "" {
       continue
     }
     if summary_text(line) is Some(s) {
-      summary = s
+      summary = Some(s)
       body = lines[i + 1:]
     }
     break
@@ -456,11 +549,11 @@ fn summary_text(line : StringView) -> String? {
 }
 
 ///|
-/// alert_kind returns the lowercase type of a GitHub-style alert marker —
+/// alert_kind returns the type of a GitHub-style alert marker —
 /// "[!NOTE]", "[!TIP]", "[!IMPORTANT]", "[!WARNING]", or "[!CAUTION]" —
-/// or "" when line is not a marker. The marker is matched ASCII
+/// or None when line is not a marker. The marker is matched ASCII
 /// case-insensitively and must be the whole line, trailing space aside.
-fn alert_kind(line : StringView) -> String {
+fn alert_kind(line : StringView) -> AlertKind? {
   let mut end = line.length()
   while end > 0 && (line[end - 1] == ' ' || line[end - 1] == '\t') {
     end = end - 1
@@ -470,15 +563,15 @@ fn alert_kind(line : StringView) -> String {
     line[0] == '[' &&
     line[1] == '!' &&
     line[end - 1] == ']' else {
-    return ""
+    return None
   }
   let inner = line[2:end - 1]
-  for kind in ["note", "tip", "important", "warning", "caution"] {
-    if ascii_eq_fold(inner, kind) {
-      return kind
+  for kind in [Note, Tip, Important, Warning, Caution] {
+    if ascii_eq_fold(inner, kind.name()) {
+      return Some(kind)
     }
   }
-  ""
+  None
 }
 
 ///|
@@ -507,18 +600,18 @@ fn ascii_lower(c : UInt16) -> UInt16 {
 /// builds the nested lists.
 priv struct RawItem {
   indent : Int32
-  num : Int32
+  kind : ListKind
   mut text : String
 }
 
 ///|
 /// list_item splits a list marker — "- ", "* ", or "N. " — off the
-/// trimmed line, returning the marker's number (0 for "- " and "* ") and
+/// trimmed line, returning the kind the marker would give its list and
 /// the text after it. N is a run of up to 9 digits, as CommonMark allows,
 /// and may not be 0: "0." stays paragraph text.
-fn list_item(line : StringView) -> (Int32, StringView)? {
+fn list_item(line : StringView) -> (ListKind, StringView)? {
   if line is ([.. "- ", .. rest] | [.. "* ", .. rest]) {
-    return Some((0, trim_space(rest)))
+    return Some((Bullet, trim_space(rest)))
   }
   let n = line.length()
   let mut i = 0
@@ -535,7 +628,7 @@ fn list_item(line : StringView) -> (Int32, StringView)? {
   if num == 0 {
     return None
   }
-  Some((num, trim_space(line[i + 2:])))
+  Some((Ordered(start=num), trim_space(line[i + 2:])))
 }
 
 ///|
@@ -564,19 +657,23 @@ fn dedent(line : StringView, n : Int32) -> StringView {
 ///|
 /// nest_items turns indentation in flat into nested lists. It consumes
 /// items from flat[from:] while they are indented deeper than parent,
-/// returning them and the index where it stopped.
+/// returning the list — its kind taken from its first item's marker —
+/// and the index where it stopped, or None when nothing is deeper.
 fn nest_items(
   flat : Array[RawItem],
   from~ : Int32,
   parent~ : Int32,
-) -> (Array[Item], Int32) {
-  let out = []
+) -> (ItemList?, Int32) {
+  guard from < flat.length() && flat[from].indent > parent else {
+    return (None, from)
+  }
+  let items = []
   for i = from; i < flat.length() && flat[i].indent > parent; {
     let (children, next) = nest_items(flat, from=i + 1, parent=flat[i].indent)
-    out.push({ text: flat[i].text, num: flat[i].num, children, })
+    items.push({ text: flat[i].text, children, })
     continue next
   } nobreak {
-    (out, i)
+    (Some({ kind: flat[from].kind, items, }), i)
   }
 }
 

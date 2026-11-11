@@ -8,16 +8,19 @@
 ///|
 /// Tag is an element name such as "div". Build a one-off dynamic name
 /// directly: Tag("my-widget").
-pub(all) struct Tag(String) derive(Eq, Debug)
+#derive(Eq, Debug)
+pub(all) struct Tag(String)
 
 ///|
 /// AttrName is an attribute name such as "class". Build a one-off dynamic
 /// name directly: AttrName("data-id").
-pub(all) struct AttrName(String) derive(Eq, Debug)
+#derive(Eq, Debug)
+pub(all) struct AttrName(String)
 
 ///|
 /// Node is a piece of HTML. Element children that are Attr or BoolAttr go
 /// into the start tag; every other child becomes content.
+#derive(Eq, Debug)
 pub(all) enum Node {
   /// Text is text content. It is escaped when rendered as HTML.
   Text(String)
@@ -29,7 +32,7 @@ pub(all) enum Node {
   Attr(AttrName, String)
   /// BoolAttr is an attribute without a value, such as hidden.
   BoolAttr(AttrName)
-} derive(Eq, Debug)
+}
 
 ///|
 /// el returns an element with the given children.

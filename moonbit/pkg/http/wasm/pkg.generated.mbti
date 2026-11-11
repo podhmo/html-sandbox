@@ -14,9 +14,10 @@ pub fn read_file(Int32) -> (String, String) raise FileError
 pub fn write_error(String) -> Int32
 
 // Errors
+#derive(@debug.Debug)
 pub(all) suberror FileError {
   FileError(message~ : String)
-} derive(@debug.Debug)
+}
 #deprecated
 pub fn FileError::output(Self, &Logger) -> Unit
 #deprecated

@@ -76,7 +76,7 @@ fn embedded_site() -> @site.Site raise @site.LoadError {
     base_url="https://example.com",
     posts=[
       ..@site.load_posts(@posts.files),
-      ..@site.load_posts(@slops.files, collection="slops"),
+      ..@site.load_posts(@slops.files, collection=Slops),
     ],
     docs=@site.load_docs(@repodocs.files),
   )
@@ -754,8 +754,12 @@ test "load post bundle" {
   assert_eq([ for m in p.members => m.name ], [
     "README.md", "00-memo.md", "diagram.svg", "hello.go",
   ])
-  assert_eq([ for m in p.members => m.is_markdown ], [true, true, false, false])
-  assert_eq([ for m in p.members => m.is_svg ], [false, false, true, false])
+  assert_eq([ for m in p.members => m.body is @site.Markdown(..) ], [
+    true, true, false, false,
+  ])
+  assert_eq([ for m in p.members => m.body is @site.Svg ], [
+    false, false, true, false,
+  ])
 }
 
 ///|

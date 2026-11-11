@@ -6,7 +6,7 @@
 /// it resolved to.
 pub struct NavItem {
   label : Array[@tinymarkdown.Inline]
-  href : String // "" when the label is shown as text without a link
+  href : String? // None when the label is shown as text without a link
 }
 
 ///|
@@ -16,16 +16,14 @@ pub struct NavItem {
 /// shown as text without a link. For a bare URL the label is the title of
 /// the page it points to, or the URL itself when it does not point at a
 /// page of this site.
-fn Site::nav_item(self : Site, source : String, value : String) -> NavItem? {
-  if value == "" {
-    return None
-  }
+fn Site::nav_item(self : Site, source : String, value : String?) -> NavItem? {
+  guard value is Some(value) && value != "" else { return None }
   let ins = @tinymarkdown.inlines(value)
   let (label, raw) = match ins {
     [Link(children~, url~)] => (Some(children), url)
     [Text(t)] if !t.contains_any(chars=" \t\n") => (None, t)
     // Not a single link nor a single URL: show the value as text.
-    _ => return Some({ label: [Text(value)], href: "", })
+    _ => return Some({ label: [Text(value)], href: None, })
   }
   // An empty label ("[](url)") is filled like a bare URL's.
   let label = if label is Some([]) { None } else { label }
@@ -38,7 +36,7 @@ fn Site::nav_item(self : Site, source : String, value : String) -> NavItem? {
         Some(l) => l
         None => [Text(raw)]
       }
-      Some({ label, href: "", })
+      Some({ label, href: None, })
     }
     Some(href) => {
       let label = match label {
@@ -49,7 +47,7 @@ fn Site::nav_item(self : Site, source : String, value : String) -> NavItem? {
             t => @tinymarkdown.inlines(t)
           }
       }
-      Some({ label, href, })
+      Some({ label, href: Some(href), })
     }
   }
 }

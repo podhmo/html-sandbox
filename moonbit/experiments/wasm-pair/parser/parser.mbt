@@ -20,13 +20,13 @@ fn block(b : @tinymarkdown.Block) -> Json {
         "children": Json::array(children.map(block)),
       }
     Paragraph(text) => { "t": "p", "text": inlines(text) }
-    List(items) => { "t": "list", "items": Json::array(items.map(item)) }
+    List(list) => { "t": "list", "list": item_list(list) }
     Quote(children) =>
       { "t": "quote", "children": Json::array(children.map(block)) }
     Alert(kind~, children~) =>
       {
         "t": "alert",
-        "kind": Json(kind),
+        "kind": Json(kind.name()),
         "children": Json::array(children.map(block)),
       }
     Table(header~, rows~) =>
@@ -39,9 +39,24 @@ fn block(b : @tinymarkdown.Block) -> Json {
     Details(summary~, children~) =>
       {
         "t": "details",
-        "summary": inlines(summary),
+        "summary": match summary {
+          Some(s) => inlines(s)
+          None => Json::null()
+        },
         "children": Json::array(children.map(block)),
       }
+  }
+}
+
+///|
+/// item_list is the JSON shape of an ItemList: kind and items, with
+/// start added when the list is ordered.
+fn item_list(list : @tinymarkdown.ItemList) -> Json {
+  let items = Json::array(list.items.map(item))
+  match list.kind {
+    Bullet => { "kind": "bullet", "items": items }
+    Ordered(start~) =>
+      { "kind": "ordered", "start": Json(start), "items": items }
   }
 }
 
@@ -49,8 +64,10 @@ fn block(b : @tinymarkdown.Block) -> Json {
 fn item(it : @tinymarkdown.Item) -> Json {
   {
     "text": inlines(it.text),
-    "num": Json(it.num),
-    "children": Json::array(it.children.map(item)),
+    "children": match it.children {
+      Some(children) => item_list(children)
+      None => Json::null()
+    },
   }
 }
 

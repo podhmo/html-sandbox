@@ -19,15 +19,22 @@ fn run(
 }
 
 ///|
-/// items makes list items without children.
-fn items(texts : Array[String]) -> Array[@tinymarkdown.Item] {
-  texts.map(text => { text, num: 0, children: [], })
+/// item makes a list item without a nested list.
+fn item(text : String) -> @tinymarkdown.Item {
+  { text, children: None, }
 }
 
 ///|
-/// nitems makes numbered list items without children, numbered from start.
-fn nitems(start : Int32, texts : Array[String]) -> Array[@tinymarkdown.Item] {
-  texts.mapi((i, text) => { text, num: start + i, children: [], })
+/// items makes a bullet list of items without nested lists.
+fn items(texts : Array[String]) -> @tinymarkdown.ItemList {
+  { kind: Bullet, items: texts.map(item), }
+}
+
+///|
+/// nitems makes an ordered list of items without nested lists, starting
+/// at start.
+fn nitems(start : Int32, texts : Array[String]) -> @tinymarkdown.ItemList {
+  { kind: Ordered(start~), items: texts.map(item), }
 }
 
 ///|
@@ -165,64 +172,81 @@ test "nested lists" {
       "indented item nests under the one above",
       "- a\n  - b\n  - c\n- d",
       [
-        List(
-          [{ text: "a", num: 0, children: items(["b", "c"]), }, ..items(["d"])],
-        ),
+        List({
+          kind: Bullet,
+          items: [{ text: "a", children: Some(items(["b", "c"])), }, item("d")],
+        }),
       ],
     ),
     (
       "deeper nesting",
       "- a\n  - b\n    - c\n- d",
       [
-        List(
-          [
+        List({
+          kind: Bullet,
+          items: [
             {
               text: "a",
-              num: 0,
-              children: [{ text: "b", num: 0, children: items(["c"]), }],
+              children: Some({
+                kind: Bullet,
+                items: [{ text: "b", children: Some(items(["c"])), }],
+              }),
             },
-            ..items(["d"]),
+            item("d"),
           ],
-        ),
+        }),
       ],
     ),
     (
       "dedent goes back to the matching level",
       "- a\n  - b\n    - c\n  - d",
       [
-        List([
-          {
-            text: "a",
-            num: 0,
-            children: [
-              { text: "b", num: 0, children: items(["c"]), },
-              ..items(["d"]),
-            ],
-          },
-        ]),
+        List({
+          kind: Bullet,
+          items: [
+            {
+              text: "a",
+              children: Some({
+                kind: Bullet,
+                items: [{ text: "b", children: Some(items(["c"])), }, item("d")],
+              }),
+            },
+          ],
+        }),
       ],
     ),
     (
       "any deeper indent nests, a shallower one is a sibling",
       "- a\n    - b\n  - c\n\t- d",
-      [List([{ text: "a", num: 0, children: items(["b", "c", "d"]), }])],
+      [
+        List({
+          kind: Bullet,
+          items: [{ text: "a", children: Some(items(["b", "c", "d"])), }],
+        }),
+      ],
     ),
     (
       "indented lines continue the nearest item",
       "- a\n  more\n  - b\n    b2\n  b3\n- c",
       [
-        List(
-          [
-            { text: "a\nmore", num: 0, children: items(["b\nb2\nb3"]), },
-            ..items(["c"]),
+        List({
+          kind: Bullet,
+          items: [
+            { text: "a\nmore", children: Some(items(["b\nb2\nb3"])), },
+            item("c"),
           ],
-        ),
+        }),
       ],
     ),
     (
       "an indented first item is the top level",
       "  - a\n- b\n  - c",
-      [List([..items(["a"]), { text: "b", num: 0, children: items(["c"]), }])],
+      [
+        List({
+          kind: Bullet,
+          items: [item("a"), { text: "b", children: Some(items(["c"])), }],
+        }),
+      ],
     ),
     (
       "indented item after a paragraph starts a list",
@@ -237,12 +261,24 @@ test "nested lists" {
     (
       "checkboxes are text",
       "- [ ] a\n  - [x] b",
-      [List([{ text: "[ ] a", num: 0, children: items(["[x] b"]), }])],
+      [
+        List({
+          kind: Bullet,
+          items: [{ text: "[ ] a", children: Some(items(["[x] b"])), }],
+        }),
+      ],
     ),
     (
       "nested list in a quote",
       "> - a\n>   - b",
-      [Quote([List([{ text: "a", num: 0, children: items(["b"]), }])])],
+      [
+        Quote([
+          List({
+            kind: Bullet,
+            items: [{ text: "a", children: Some(items(["b"])), }],
+          }),
+        ]),
+      ],
     ),
   ])
 }
@@ -254,82 +290,82 @@ test "code blocks" {
     (
       "code block",
       "```\nfmt.Println(1)\n```",
-      [CodeBlock("fmt.Println(1)", info="")],
+      [CodeBlock("fmt.Println(1)", info=None)],
     ),
     (
       "language name is kept as info",
       "```go\nx := 1\n```",
-      [CodeBlock("x := 1", info="go")],
+      [CodeBlock("x := 1", info=Some("go"))],
     ),
     (
       "info is the trimmed text after the fence",
       "``` svg \nx\n```",
-      [CodeBlock("x", info="svg")],
+      [CodeBlock("x", info=Some("svg"))],
     ),
     (
       "info is everything after the fence",
       "```go fmt\nx\n```",
-      [CodeBlock("x", info="go fmt")],
+      [CodeBlock("x", info=Some("go fmt"))],
     ),
     (
       "unclosed fence keeps the info",
       "```mermaid\nx",
-      [CodeBlock("x", info="mermaid")],
+      [CodeBlock("x", info=Some("mermaid"))],
     ),
     (
       "contents are kept verbatim",
       "```\n# not a heading\n- not a list\n\n\tindented  \n```",
-      [CodeBlock("# not a heading\n- not a list\n\n\tindented  ", info="")],
+      [CodeBlock("# not a heading\n- not a list\n\n\tindented  ", info=None)],
     ),
-    ("empty code block", "```\n```", [CodeBlock("", info="")]),
+    ("empty code block", "```\n```", [CodeBlock("", info=None)]),
     (
       "closing fence may have surrounding spaces",
       "```\na\n  ```  \nafter",
-      [CodeBlock("a", info=""), Paragraph("after")],
+      [CodeBlock("a", info=None), Paragraph("after")],
     ),
     (
       "closing fence must be bare",
       "```\n```go\n```",
-      [CodeBlock("```go", info="")],
+      [CodeBlock("```go", info=None)],
     ),
-    ("CRLF line endings", "```\r\na\r\n```\r\n", [CodeBlock("a", info="")]),
+    ("CRLF line endings", "```\r\na\r\n```\r\n", [CodeBlock("a", info=None)]),
     (
       "unclosed fence runs to EOF",
       "```\na\n\n# b",
-      [CodeBlock("a\n\n# b", info="")],
+      [CodeBlock("a\n\n# b", info=None)],
     ),
     (
       "fence ends a paragraph and a list",
       "p\n```\nc\n```\n- a\n```\nd\n```",
       [
         Paragraph("p"),
-        CodeBlock("c", info=""),
+        CodeBlock("c", info=None),
         List(items(["a"])),
-        CodeBlock("d", info=""),
+        CodeBlock("d", info=None),
       ],
     ),
     (
       "code block inside a section",
       "# A\n```\n## x\n```",
-      [Section(level=1, title="A", children=[CodeBlock("## x", info="")])],
+      [Section(level=1, title="A", children=[CodeBlock("## x", info=None)])],
     ),
     (
       "an indented fence dedents its content",
       "  ```\n  a\n    b\n c\n  ```",
-      [CodeBlock("a\n  b\nc", info="")],
+      [CodeBlock("a\n  b\nc", info=None)],
     ),
     (
       "a fence under a list item dedents by the fence",
       "1. step\n   ```sh\n   run this\n   ```",
       [
-        List([{ text: "step", num: 1, children: [], }]),
-        CodeBlock("run this", info="sh"),
+        List({ kind: Ordered(start=1), items: [item("step")], }),
+        CodeBlock("run this", info=Some("sh")),
       ],
     ),
     (
       "an unclosed indented fence still dedents",
       "   ```\n   a",
-      [CodeBlock("a", info="")],
+      [CodeBlock("a", info=None)],
     ),
   ])
 }
@@ -348,7 +384,7 @@ test "quotes" {
     (
       "blocks inside a quote",
       "> - x\n>   y\n> ```\n>   code\n> ```",
-      [Quote([List(items(["x\ny"])), CodeBlock("  code", info="")])],
+      [Quote([List(items(["x\ny"])), CodeBlock("  code", info=None)])],
     ),
     (
       "nested quote",
@@ -383,7 +419,7 @@ test "quotes" {
     (
       "> inside a code block is code",
       "```\n> x\n```",
-      [CodeBlock("> x", info="")],
+      [CodeBlock("> x", info=None)],
     ),
   ])
 }
@@ -395,33 +431,33 @@ test "alerts" {
     (
       "note alert",
       "> [!NOTE]\n> hello",
-      [Alert(kind="note", children=[Paragraph("hello")])],
+      [Alert(kind=Note, children=[Paragraph("hello")])],
     ),
     (
       "every kind",
       "> [!NOTE]\n> n\n\n> [!TIP]\n> t\n\n> [!IMPORTANT]\n> i\n\n> [!WARNING]\n> w\n\n> [!CAUTION]\n> c",
       [
-        Alert(kind="note", children=[Paragraph("n")]),
-        Alert(kind="tip", children=[Paragraph("t")]),
-        Alert(kind="important", children=[Paragraph("i")]),
-        Alert(kind="warning", children=[Paragraph("w")]),
-        Alert(kind="caution", children=[Paragraph("c")]),
+        Alert(kind=Note, children=[Paragraph("n")]),
+        Alert(kind=Tip, children=[Paragraph("t")]),
+        Alert(kind=Important, children=[Paragraph("i")]),
+        Alert(kind=Warning, children=[Paragraph("w")]),
+        Alert(kind=Caution, children=[Paragraph("c")]),
       ],
     ),
     (
       "the marker is case-insensitive",
       "> [!warning]\n> w",
-      [Alert(kind="warning", children=[Paragraph("w")])],
+      [Alert(kind=Warning, children=[Paragraph("w")])],
     ),
     (
       "a marker alone has no children",
       "> [!TIP]",
-      [Alert(kind="tip", children=[])],
+      [Alert(kind=Tip, children=[])],
     ),
     (
       "blocks inside an alert",
       "> [!NOTE]\n> - x\n>   y",
-      [Alert(kind="note", children=[List(items(["x\ny"]))])],
+      [Alert(kind=Note, children=[List(items(["x\ny"]))])],
     ),
     (
       "a marker only leads the quote",
@@ -446,14 +482,14 @@ test "alerts" {
     (
       "nested alert",
       "> a\n>\n> > [!NOTE]\n> > b",
-      [Quote([Paragraph("a"), Alert(kind="note", children=[Paragraph("b")])])],
+      [Quote([Paragraph("a"), Alert(kind=Note, children=[Paragraph("b")])])],
     ),
     (
       "alert inside a section",
       "# A\n> [!NOTE]\n> q",
       [
         Section(level=1, title="A", children=[
-          Alert(kind="note", children=[Paragraph("q")]),
+          Alert(kind=Note, children=[Paragraph("q")]),
         ]),
       ],
     ),
@@ -547,14 +583,19 @@ test "asterisk lists" {
       "mixed nested markers and continuation",
       "* a\n  - b\n    * c\n      more\n* d",
       [
-        List([
-          {
-            text: "a",
-            num: 0,
-            children: [{ text: "b", num: 0, children: items(["c\nmore"]), }],
-          },
-          { text: "d", num: 0, children: [], },
-        ]),
+        List({
+          kind: Bullet,
+          items: [
+            {
+              text: "a",
+              children: Some({
+                kind: Bullet,
+                items: [{ text: "b", children: Some(items(["c\nmore"])), }],
+              }),
+            },
+            item("d"),
+          ],
+        }),
       ],
     ),
     (
@@ -570,7 +611,14 @@ test "asterisk lists" {
     (
       "asterisk list in a quote",
       "> * a\n>   * b",
-      [Quote([List([{ text: "a", num: 0, children: items(["b"]), }])])],
+      [
+        Quote([
+          List({
+            kind: Bullet,
+            items: [{ text: "a", children: Some(items(["b"])), }],
+          }),
+        ]),
+      ],
     ),
     (
       "asterisks without a space stay text",
@@ -580,7 +628,7 @@ test "asterisk lists" {
     (
       "fenced asterisks stay code",
       "```\n* code\n```",
-      [CodeBlock("* code", info="")],
+      [CodeBlock("* code", info=None)],
     ),
   ]
   run(cases)
@@ -597,24 +645,14 @@ test "numbered lists" {
     ),
     ("the first number is kept", "3. a\n4. b", [List(nitems(3, ["a", "b"]))]),
     (
-      "numbers after the first are kept too",
+      "numbers after the first are dropped",
       "1. a\n9. b",
-      [
-        List([
-          { text: "a", num: 1, children: [], },
-          { text: "b", num: 9, children: [], },
-        ]),
-      ],
+      [List({ kind: Ordered(start=1), items: [item("a"), item("b")], })],
     ),
     (
       "numbers need not ascend",
       "2. a\n1. b",
-      [
-        List([
-          { text: "a", num: 2, children: [], },
-          { text: "b", num: 1, children: [], },
-        ]),
-      ],
+      [List({ kind: Ordered(start=2), items: [item("a"), item("b")], })],
     ),
     ("multi-digit numbers", "10. a\n11. b", [List(nitems(10, ["a", "b"]))]),
     ("leading zeros are still a marker", "007. a", [List(nitems(7, ["a"]))]),
@@ -649,42 +687,51 @@ test "numbered lists" {
       "indented lines continue an item",
       "1. a\n   more\n\tand more\n2. b\n   b2",
       [
-        List([
-          { text: "a\nmore\nand more", num: 1, children: [], },
-          { text: "b\nb2", num: 2, children: [], },
-        ]),
+        List({
+          kind: Ordered(start=1),
+          items: [item("a\nmore\nand more"), item("b\nb2")],
+        }),
       ],
     ),
     (
       "mixed markers merge",
       "- a\n1. b\n* c",
-      [
-        List([
-          { text: "a", num: 0, children: [], },
-          { text: "b", num: 1, children: [], },
-          { text: "c", num: 0, children: [], },
-        ]),
-      ],
+      [List({ kind: Bullet, items: [item("a"), item("b"), item("c")], })],
     ),
     (
       "a numbered item under a bullet nests",
       "- a\n  1. x\n  2. y\n- d",
       [
-        List([
-          { text: "a", num: 0, children: nitems(1, ["x", "y"]), },
-          { text: "d", num: 0, children: [], },
-        ]),
+        List({
+          kind: Bullet,
+          items: [
+            { text: "a", children: Some(nitems(1, ["x", "y"])), },
+            item("d"),
+          ],
+        }),
       ],
     ),
     (
       "a bullet under a numbered item nests",
       "1. a\n   - x\n   - y",
-      [List([{ text: "a", num: 1, children: items(["x", "y"]), }])],
+      [
+        List({
+          kind: Ordered(start=1),
+          items: [{ text: "a", children: Some(items(["x", "y"])), }],
+        }),
+      ],
     ),
     (
       "numbered list in a quote",
       "> 1. a\n>    2. b",
-      [Quote([List([{ text: "a", num: 1, children: nitems(2, ["b"]), }])])],
+      [
+        Quote([
+          List({
+            kind: Ordered(start=1),
+            items: [{ text: "a", children: Some(nitems(2, ["b"])), }],
+          }),
+        ]),
+      ],
     ),
   ])
 }
@@ -696,72 +743,74 @@ test "details" {
     (
       "details",
       "<details>\n<summary>answer</summary>\n\nhidden\n</details>",
-      [Details(summary="answer", children=[Paragraph("hidden")])],
+      [Details(summary=Some("answer"), children=[Paragraph("hidden")])],
     ),
     (
       "details without a summary",
       "<details>\nhidden\n</details>",
-      [Details(summary="", children=[Paragraph("hidden")])],
+      [Details(summary=None, children=[Paragraph("hidden")])],
     ),
     (
       "blocks inside details",
       "<details>\n<summary>s</summary>\n\n- a\n- b\n\n```\ncode\n```\n</details>",
       [
-        Details(summary="s", children=[
+        Details(summary=Some("s"), children=[
           List(items(["a", "b"])),
-          CodeBlock("code", info=""),
+          CodeBlock("code", info=None),
         ]),
       ],
     ),
     (
       "summary needs blank lines nowhere",
       "<details>\n\n<summary>s</summary>\ntext\n</details>",
-      [Details(summary="s", children=[Paragraph("text")])],
+      [Details(summary=Some("s"), children=[Paragraph("text")])],
     ),
     (
       "a summary not first stays text",
       "<details>\ntext\n<summary>s</summary>\n</details>",
-      [Details(summary="", children=[Paragraph("text\n<summary>s</summary>")])],
+      [
+        Details(summary=None, children=[Paragraph("text\n<summary>s</summary>")]),
+      ],
     ),
     (
       "summary text is trimmed",
       "<details>\n<summary>  s  </summary>\n</details>",
-      [Details(summary="s", children=[])],
+      [Details(summary=Some("s"), children=[])],
     ),
     (
       "summary must fill the line",
       "<details>\n<summary>s</summary> tail\n</details>",
-      [Details(summary="", children=[Paragraph("<summary>s</summary> tail")])],
+      [Details(summary=None, children=[Paragraph("<summary>s</summary> tail")])],
     ),
     (
       "nested details",
       "<details>\n<summary>outer</summary>\n\n<details>\n<summary>inner</summary>\n\ndeep\n</details>\n\n</details>",
       [
-        Details(summary="outer", children=[
-          Details(summary="inner", children=[Paragraph("deep")]),
+        Details(summary=Some("outer"), children=[
+          Details(summary=Some("inner"), children=[Paragraph("deep")]),
         ]),
       ],
     ),
     (
       "a fence inside details keeps </details> as code",
       "<details>\n```\n</details>\n```\n</details>",
-      [Details(summary="", children=[CodeBlock("</details>", info="")])],
+      [Details(summary=None, children=[CodeBlock("</details>", info=None)])],
     ),
     (
       "details ends a paragraph and a list",
       "p\n<details>\nx\n</details>\n- a\n<details>\ny\n</details>",
       [
         Paragraph("p"),
-        Details(summary="", children=[Paragraph("x")]),
+        Details(summary=None, children=[Paragraph("x")]),
         List(items(["a"])),
-        Details(summary="", children=[Paragraph("y")]),
+        Details(summary=None, children=[Paragraph("y")]),
       ],
     ),
     (
       "unclosed details runs to EOF",
       "<details>\na\n\n# b",
       [
-        Details(summary="", children=[
+        Details(summary=None, children=[
           Paragraph("a"),
           Section(level=1, title="b", children=[]),
         ]),
@@ -772,19 +821,19 @@ test "details" {
       "# A\n<details>\nx\n</details>",
       [
         Section(level=1, title="A", children=[
-          Details(summary="", children=[Paragraph("x")]),
+          Details(summary=None, children=[Paragraph("x")]),
         ]),
       ],
     ),
     (
       "details inside a quote",
       "> <details>\n> <summary>s</summary>\n>\n> x\n> </details>",
-      [Quote([Details(summary="s", children=[Paragraph("x")])])],
+      [Quote([Details(summary=Some("s"), children=[Paragraph("x")])])],
     ),
     (
       "<details> inside a code block is code",
       "```\n<details>\n```",
-      [CodeBlock("<details>", info="")],
+      [CodeBlock("<details>", info=None)],
     ),
     (
       "a tag with attributes stays a paragraph",
@@ -887,7 +936,7 @@ test "footnote defs" {
     (
       "definitions collect from inside details",
       "<details>\n[^a]: note\n</details>",
-      [Details(summary="", children=[])],
+      [Details(summary=None, children=[])],
     ),
   ])
 }
@@ -923,7 +972,7 @@ test "not footnote defs" {
     (
       "a definition inside a code block is code",
       "```\n[^a]: note\n```",
-      [CodeBlock("[^a]: note", info="")],
+      [CodeBlock("[^a]: note", info=None)],
     ),
   ])
 }

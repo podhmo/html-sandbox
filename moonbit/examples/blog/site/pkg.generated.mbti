@@ -11,14 +11,15 @@ import {
 // Values
 pub fn load_docs(ReadOnlyArray[(String, String)]) -> Array[Doc] raise LoadError
 
-pub fn load_posts(ReadOnlyArray[(String, String)], collection? : String) -> Array[Post] raise LoadError
+pub fn load_posts(ReadOnlyArray[(String, String)], collection? : Collection) -> Array[Post] raise LoadError
 
 pub fn preview(String, Array[String]) -> @el.Node
 
 // Errors
+#derive(@debug.Debug)
 pub(all) suberror LoadError {
   LoadError(message~ : String)
-} derive(@debug.Debug)
+}
 #deprecated
 pub fn LoadError::output(Self, &Logger) -> Unit
 #deprecated
@@ -28,13 +29,26 @@ pub fn LoadError::to_string(Self) -> String
 pub impl Show for LoadError
 
 // Types and methods
+#derive(Eq, @debug.Debug)
+pub(all) enum Collection {
+  Posts
+  Slops
+}
+#deprecated
+pub fn Collection::equal(Self, Self) -> Bool
+pub fn Collection::name(Self) -> String
+#deprecated
+pub fn Collection::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn Collection::to_repr(Self) -> @debug.Repr
+
 pub struct Doc {
   path : String
   source : String
   title : String
   description : String
-  prev : String
-  next : String
+  prev : String?
+  next : String?
   mut prev_nav : NavItem?
   mut next_nav : NavItem?
   doc : @tinymarkdown.Document
@@ -45,27 +59,30 @@ pub struct Doc {
 pub struct Member {
   name : String
   source : String
-  is_markdown : Bool
-  is_svg : Bool
-  meta : Map[String, String]
-  doc : @tinymarkdown.Document
   raw : String
+  body : MemberBody
+}
+
+pub(all) enum MemberBody {
+  Markdown(meta~ : Map[String, String], doc~ : @tinymarkdown.Document)
+  Svg
+  Text
 }
 
 pub struct NavItem {
   label : Array[@tinymarkdown.Inline]
-  href : String
+  href : String?
 }
 
 pub struct Post {
-  collection : String
+  collection : Collection
   slug : String
   file : String
   date : String
   title : String
   description : String
-  prev : String
-  next : String
+  prev : String?
+  next : String?
   mut prev_nav : NavItem?
   mut next_nav : NavItem?
   doc : @tinymarkdown.Document

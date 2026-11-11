@@ -185,15 +185,16 @@ test "nav item" {
     ("[title] (url)", "[title] (url)", ""),
   ]
   for (value, label, href) in cases {
-    match s.nav_item(src, value) {
+    match s.nav_item(src, Some(value)) {
       None => fail("\{value}: got None")
       Some(it) => {
         assert_eq(plain_inlines(it.label), label, msg=value)
-        assert_eq(it.href, href, msg=value)
+        assert_eq(it.href.unwrap_or(""), href, msg=value)
       }
     }
   }
-  assert_true(s.nav_item(src, "") is None)
+  assert_true(s.nav_item(src, Some("")) is None)
+  assert_true(s.nav_item(src, None) is None)
 }
 
 ///|
@@ -252,7 +253,7 @@ test "collections isolate identical slugs and retain bundle links" {
       ),
       ("2026-10-19-same.md/article.md", "# AI member"),
     ],
-    collection="slops",
+    collection=Slops,
   )
   let s = Site(base_url="https://example.com", posts=[..human, ..ai], docs=[])
   let home = s.render("/").body.text()

@@ -13,16 +13,33 @@ pub fn parse(String) -> Document
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug)
+pub(all) enum AlertKind {
+  Note
+  Tip
+  Important
+  Warning
+  Caution
+}
+#deprecated
+pub fn AlertKind::equal(Self, Self) -> Bool
+pub fn AlertKind::name(Self) -> String
+#deprecated
+pub fn AlertKind::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn AlertKind::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
 pub(all) enum Block {
   Section(level~ : Int32, title~ : String, children~ : Array[Block])
   Paragraph(String)
-  List(Array[Item])
+  List(ItemList)
   Quote(Array[Block])
-  Alert(kind~ : String, children~ : Array[Block])
+  Alert(kind~ : AlertKind, children~ : Array[Block])
   Table(header~ : Array[String], rows~ : Array[Array[String]])
-  CodeBlock(String, info~ : String)
-  Details(summary~ : String, children~ : Array[Block])
-} derive(Eq, @debug.Debug)
+  CodeBlock(String, info~ : String?)
+  Details(summary~ : String?, children~ : Array[Block])
+}
 #deprecated
 pub fn Block::equal(Self, Self) -> Bool
 #deprecated
@@ -30,10 +47,11 @@ pub fn Block::not_equal(Self, Self) -> Bool
 #deprecated
 pub fn Block::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct Document {
   children : Array[Block]
   footnotes : Array[FootnoteDef]
-} derive(Eq, @debug.Debug)
+}
 #deprecated
 pub fn Document::equal(Self, Self) -> Bool
 #deprecated
@@ -41,10 +59,11 @@ pub fn Document::not_equal(Self, Self) -> Bool
 #deprecated
 pub fn Document::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct FootnoteDef {
   label : String
   children : Array[Block]
-} derive(Eq, @debug.Debug)
+}
 #deprecated
 pub fn FootnoteDef::equal(Self, Self) -> Bool
 #deprecated
@@ -52,12 +71,13 @@ pub fn FootnoteDef::not_equal(Self, Self) -> Bool
 #deprecated
 pub fn FootnoteDef::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) enum Inline {
   Text(String)
   Code(String)
   Link(children~ : Array[Inline], url~ : String)
   Footnote(String)
-} derive(Eq, @debug.Debug)
+}
 #deprecated
 pub fn Inline::equal(Self, Self) -> Bool
 #deprecated
@@ -65,17 +85,41 @@ pub fn Inline::not_equal(Self, Self) -> Bool
 #deprecated
 pub fn Inline::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) struct Item {
   text : String
-  num : Int32
-  children : Array[Item]
-} derive(Eq, @debug.Debug)
+  children : ItemList?
+}
 #deprecated
 pub fn Item::equal(Self, Self) -> Bool
 #deprecated
 pub fn Item::not_equal(Self, Self) -> Bool
 #deprecated
 pub fn Item::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub(all) struct ItemList {
+  kind : ListKind
+  items : Array[Item]
+}
+#deprecated
+pub fn ItemList::equal(Self, Self) -> Bool
+#deprecated
+pub fn ItemList::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn ItemList::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, @debug.Debug)
+pub(all) enum ListKind {
+  Bullet
+  Ordered(start~ : Int32)
+}
+#deprecated
+pub fn ListKind::equal(Self, Self) -> Bool
+#deprecated
+pub fn ListKind::not_equal(Self, Self) -> Bool
+#deprecated
+pub fn ListKind::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

@@ -16,10 +16,32 @@ const REPO_HOME_URL = "https://github.com/podhmo/html-sandbox"
 priv struct PageMeta {
   title : String // page title without the site name; empty for the top page
   description : String
-  // url is the absolute URL of the page. OGP tags are written only when
-  // it is set, so error pages have none.
+  // og is the page's Open Graph data; error pages have none, so they
+  // carry no OGP tags.
+  og : Og?
+}
+
+///|
+/// Og is a page's Open Graph data: its absolute URL and type.
+priv struct Og {
   url : String
-  type_ : String // OGP type: "website" or "article"
+  type_ : OgType
+}
+
+///|
+/// OgType is the og:type of a page.
+priv enum OgType {
+  Website
+  Article
+}
+
+///|
+/// OgType::name is the og:type content: "website" or "article".
+fn OgType::name(self : OgType) -> String {
+  match self {
+    Website => "website"
+    Article => "article"
+  }
 }
 
 ///|
@@ -98,18 +120,17 @@ fn document_title(title : String) -> String {
 }
 
 ///|
-/// ogp returns Open Graph <meta> tags, or none when meta has no URL.
+/// ogp returns Open Graph <meta> tags, or none when the page has no OGP
+/// data.
 fn ogp(meta : PageMeta) -> Array[@el.Node] {
-  if meta.url == "" {
-    return []
-  }
+  guard meta.og is Some(og) else { return [] }
   [
     @picoel.meta_property(
       "og:title",
       content=if meta.title == "" { SITE_NAME } else { meta.title },
     ),
-    @picoel.meta_property("og:type", content=meta.type_),
-    @picoel.meta_property("og:url", content=meta.url),
+    @picoel.meta_property("og:type", content=og.type_.name()),
+    @picoel.meta_property("og:url", content=og.url),
     @picoel.meta_property("og:description", content=meta.description),
     @picoel.meta_property("og:site_name", content=SITE_NAME),
   ]
@@ -120,14 +141,12 @@ fn ogp(meta : PageMeta) -> Array[@el.Node] {
 /// the date below it is muted by hgroup. Each collection identifies its authors.
 fn Site::post_list(
   self : Site,
-  collection~ : String = "posts",
+  collection~ : Collection = Posts,
   list_path~ : String = "/",
 ) -> @el.Node {
-  let title = if collection == "slops" { "Slops" } else { "Posts" }
-  let subtitle = if collection == "slops" {
-    "blog by AI"
-  } else {
-    "blog by human"
+  let (title, subtitle) = match collection {
+    Slops => ("Slops", "blog by AI")
+    Posts => ("Posts", "blog by human")
   }
   let body = [
     @picoel.hgroup([
@@ -160,8 +179,7 @@ fn Site::post_list(
       } else {
         subtitle
       },
-      url: "\{self.base_url}\{list_path}",
-      type_: "website",
+      og: Some({ url: "\{self.base_url}\{list_path}", type_: Website, }),
     },
     body,
   )
@@ -183,8 +201,7 @@ fn Site::post_page(self : Site, p : Post) -> @el.Node {
   let meta = PageMeta::{
     title: p.title,
     description: p.description,
-    url: "\{self.base_url}\{p.page_path()}",
-    type_: "article",
+    og: Some({ url: "\{self.base_url}\{p.page_path()}", type_: Article, }),
   }
   let page = [
     page_header(@picoel.date(p.date), href=p.markdown_path(), filename=p.file),
@@ -219,8 +236,7 @@ fn Site::doc_list(self : Site) -> @el.Node {
   let meta = PageMeta::{
     title: "Docs",
     description: "Documents of this repository.",
-    url: "\{self.base_url}/docs/",
-    type_: "website",
+    og: Some({ url: "\{self.base_url}/docs/", type_: Website, }),
   }
   layout(meta, body)
 }
@@ -240,8 +256,7 @@ fn Site::doc_page(self : Site, d : Doc) -> @el.Node {
   let meta = PageMeta::{
     title: d.title,
     description: d.description,
-    url: "\{self.base_url}\{d.page_path()}",
-    type_: "article",
+    og: Some({ url: "\{self.base_url}\{d.page_path()}", type_: Article, }),
   }
   let page = [
     page_header(
@@ -271,8 +286,8 @@ fn render_face(
   doc : @tinymarkdown.Document,
   gen : AnchorIds,
 ) -> Array[@el.Node] {
-  if !members.is_empty() && !members[0].is_markdown {
-    return [@picoel.pre(members[0].raw)]
+  if members is [face, ..] && !(face.body is Markdown(..)) {
+    return [@picoel.pre(face.raw)]
   }
   render_document(doc, link, gen)
 }
@@ -302,7 +317,7 @@ fn render_document(
 /// documents on one page cannot share an anchor.
 priv struct Footnotes {
   gen : AnchorIds
-  mut scope : String // assigned lazily, only once a defined reference renders
+  mut scope : String? // assigned lazily, only once a defined reference renders
   defs : Map[String, Array[@tinymarkdown.Block]]
   order : Array[String] // labels in first-reference order
   num : Map[String, Int32] // label -> its number
@@ -315,7 +330,7 @@ fn Footnotes::new(gen : AnchorIds, doc : @tinymarkdown.Document) -> Footnotes {
   for d in doc.footnotes {
     defs[d.label] = d.children
   }
-  { gen, scope: "", defs, order: [], num: {}, refs: {}, }
+  { gen, scope: None, defs, order: [], num: {}, refs: {}, }
 }
 
 ///|
@@ -323,10 +338,14 @@ fn Footnotes::new(gen : AnchorIds, doc : @tinymarkdown.Document) -> Footnotes {
 /// drawn from the page's anchor generator so every rendered document's
 /// are distinct.
 fn Footnotes::prefix(self : Footnotes) -> String {
-  if self.scope == "" {
-    self.scope = self.gen.id("fn")
+  match self.scope {
+    Some(scope) => scope
+    None => {
+      let scope = self.gen.id("fn")
+      self.scope = Some(scope)
+      scope
+    }
   }
-  self.scope
 }
 
 ///|
@@ -447,17 +466,16 @@ fn member_section(
       permalink(id),
     ]),
   ]
-  if m.is_markdown {
-    body.push_iter(render_document(m.doc, link, gen).iter())
-  } else if m.is_svg {
-    body.push(
-      @el.el(@el.img, [
-        @el.Attr(@el.src, "\{base}/\{m.name}"),
-        @el.Attr(@el.alt, m.name),
-      ]),
-    )
-  } else {
-    body.push(@picoel.pre(m.raw))
+  match m.body {
+    Markdown(doc~, ..) => body.push_iter(render_document(doc, link, gen).iter())
+    Svg =>
+      body.push(
+        @el.el(@el.img, [
+          @el.Attr(@el.src, "\{base}/\{m.name}"),
+          @el.Attr(@el.alt, m.name),
+        ]),
+      )
+    Text => body.push(@picoel.pre(m.raw))
   }
   @picoel.article(body)
 }
@@ -480,10 +498,9 @@ fn rel_nav(prev : NavItem?, next : NavItem?) -> @el.Node? {
           @el.el(@el.br, []),
         ]
         let label = render_inlines(it.label, no_links)
-        if it.href != "" {
-          children.push(@picoel.a(it.href, label))
-        } else {
-          children.push_iter(label.iter())
+        match it.href {
+          Some(href) => children.push(@picoel.a(href, label))
+          None => children.push_iter(label.iter())
         }
         @el.el(@el.ul, [@el.el(@el.li, children)])
       }
@@ -499,7 +516,7 @@ let no_links : Linker = _ => None
 
 ///|
 fn Post::page_path(self : Post) -> String {
-  "/\{self.collection}/\{self.slug}"
+  "/\{self.collection.name()}/\{self.slug}"
 }
 
 ///|
@@ -544,7 +561,7 @@ fn status_text(status : Int32) -> String {
 ///|
 fn error_page(status : Int32, message : String) -> @el.Node {
   let title = "\{status} \{status_text(status)}"
-  layout({ title, description: message, url: "", type_: "", }, [
+  layout({ title, description: message, og: None, }, [
     @picoel.h1([@picoel.text(title)]),
     @picoel.p([@picoel.text(message)]),
     @picoel.p([@picoel.a("/", [@picoel.text("Back to all posts")])]),
@@ -589,14 +606,14 @@ fn render_blocks(
         )
       }
       Paragraph(text) => @picoel.p(inlines(text))
-      List(items) => render_list(items, link, notes)
+      List(list) => render_list(list, link, notes)
       Quote(children) =>
         @picoel.blockquote(render_blocks(children, link, gen, notes))
       Alert(kind~, children~) =>
         @el.el(
           @el.blockquote,
           [
-            @el.Attr(@el.class, "markdown-alert markdown-alert-\{kind}"),
+            @el.Attr(@el.class, "markdown-alert markdown-alert-\{kind.name()}"),
             @el.el(@el.p, [
               @el.Attr(@el.class, "markdown-alert-title"),
               @picoel.text(alert_title(kind)),
@@ -611,14 +628,14 @@ fn render_blocks(
       CodeBlock(code, info~) =>
         // A ```svg block is the image itself: its content is
         // author-controlled markup, so it may be written out raw.
-        if info == "svg" {
+        if info is Some("svg") {
           @el.Raw(code)
         } else {
           @picoel.pre(code)
         }
       Details(summary~, children~) => {
         let body = render_blocks(children, link, gen, notes)
-        if summary != "" {
+        if summary is Some(summary) {
           body.insert(
             0,
             @el.el(
@@ -640,45 +657,40 @@ fn render_blocks(
 ///|
 /// alert_title is the heading text of an alert block — the kind with its
 /// first letter capitalized, as GitHub writes it.
-fn alert_title(kind : String) -> String {
+fn alert_title(kind : @tinymarkdown.AlertKind) -> String {
   match kind {
-    "note" => "Note"
-    "tip" => "Tip"
-    "important" => "Important"
-    "warning" => "Warning"
-    _ => "Caution"
+    Note => "Note"
+    Tip => "Tip"
+    Important => "Important"
+    Warning => "Warning"
+    Caution => "Caution"
   }
 }
 
 ///|
-/// render_list renders items as a list — an <ol> when the first item is a
-/// numbered one, a <ul> otherwise — with the children of an item as a list
-/// inside its <li>.
+/// render_list renders a list — an <ol> for an ordered kind, a <ul> for a
+/// bullet — with the nested list of an item inside its <li>.
 fn render_list(
-  items : Array[@tinymarkdown.Item],
+  list : @tinymarkdown.ItemList,
   link : Linker,
   notes : Footnotes,
 ) -> @el.Node {
-  let lis = items.map(it => {
+  let lis = list.items.map(it => {
     let li = render_inlines(
       @tinymarkdown.inlines(it.text),
       link,
       notes=Some(notes),
     )
-    if !it.children.is_empty() {
-      li.push(render_list(it.children, link, notes))
+    if it.children is Some(children) {
+      li.push(render_list(children, link, notes))
     }
     @picoel.li(li)
   })
-  if items is [first, ..] && first.num > 0 {
-    let children = if first.num == 1 {
-      lis
-    } else {
-      [@el.Attr(@el.AttrName("start"), "\{first.num}"), ..lis]
-    }
-    @el.el(@el.ol, children)
-  } else {
-    @picoel.list(lis)
+  match list.kind {
+    Ordered(start=1) => @el.el(@el.ol, lis)
+    Ordered(start~) =>
+      @el.el(@el.ol, [@el.Attr(@el.AttrName("start"), "\{start}"), ..lis])
+    Bullet => @picoel.list(lis)
   }
 }
 

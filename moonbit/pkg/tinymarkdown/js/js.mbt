@@ -25,6 +25,9 @@ extern "js" fn of_string(s : String) -> Js = "(s) => s"
 extern "js" fn of_int(n : Int32) -> Js = "(n) => n"
 
 ///|
+extern "js" fn js_null() -> Js = "() => null"
+
+///|
 fn[T] array(xs : Array[T], f : (T) -> Js) -> Js {
   let a = new_array()
   for x in xs {
@@ -79,11 +82,11 @@ fn blocks(bs : Array[@tinymarkdown.Block]) -> Js {
           ("children", blocks(children)),
         ])
       Paragraph(text) => object("paragraph", [("text", of_string(text))])
-      List(items) => object("list", [("items", list_items(items))])
+      List(list) => object("list", [("list", item_list(list))])
       Quote(children) => object("quote", [("children", blocks(children))])
       Alert(kind~, children~) =>
         object("alert", [
-          ("alert", of_string(kind)),
+          ("alert", of_string(kind.name())),
           ("children", blocks(children)),
         ])
       Table(header~, rows~) =>
@@ -94,7 +97,13 @@ fn blocks(bs : Array[@tinymarkdown.Block]) -> Js {
       CodeBlock(code, ..) => object("code", [("code", of_string(code))])
       Details(summary~, children~) =>
         object("details", [
-          ("summary", of_string(summary)),
+          (
+            "summary",
+            match summary {
+              Some(s) => of_string(s)
+              None => js_null()
+            },
+          ),
           ("children", blocks(children)),
         ])
     }
@@ -102,14 +111,30 @@ fn blocks(bs : Array[@tinymarkdown.Block]) -> Js {
 }
 
 ///|
-fn list_items(items : Array[@tinymarkdown.Item]) -> Js {
-  array(items, it => {
-    let o = new_object()
-    set(o, "text", of_string(it.text))
-    set(o, "num", of_int(it.num))
-    set(o, "children", list_items(it.children))
-    o
-  })
+/// item_list is the JS shape of an ItemList: kind and items, with start
+/// added when the list is ordered.
+fn item_list(list : @tinymarkdown.ItemList) -> Js {
+  let o = new_object()
+  match list.kind {
+    Bullet => set(o, "kind", of_string("bullet"))
+    Ordered(start~) => {
+      set(o, "kind", of_string("ordered"))
+      set(o, "start", of_int(start))
+    }
+  }
+  set(o, "items", array(list.items, item))
+  o
+}
+
+///|
+fn item(it : @tinymarkdown.Item) -> Js {
+  let o = new_object()
+  set(o, "text", of_string(it.text))
+  match it.children {
+    Some(children) => set(o, "children", item_list(children))
+    None => set(o, "children", js_null())
+  }
+  o
 }
 
 ///|

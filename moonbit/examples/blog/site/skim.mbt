@@ -128,8 +128,7 @@ fn Site::skim_page(self : Site) -> @el.Node {
   let meta = PageMeta::{
     title: "Skim",
     description,
-    url: "\{self.base_url}/skim",
-    type_: "website",
+    og: Some({ url: "\{self.base_url}/skim", type_: Website, }),
   }
   let outline = @el.Attr(@el.class, "outline")
   layout(meta, [

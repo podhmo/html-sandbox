@@ -3,9 +3,10 @@
 ///|
 /// BadRequest is raised for a request that cannot be parsed, such as a
 /// path with a malformed %XX escape. Hosts answer it with 400.
+#derive(Debug)
 pub(all) suberror BadRequest {
   BadRequest(message~ : String)
-} derive(Debug)
+}
 
 ///|
 /// output writes the message alone, so "\{e}" reads as the error text.

@@ -137,10 +137,10 @@ fn Site::new_router(self : Site) -> @http.Router {
   let r = @http.Router(decoded_path=true, not_found=_ => {
     not_found("Page not found.")
   })
-  r.handle("GET /{$}", _ => page(200, self.post_list(collection="slops")))
+  r.handle("GET /{$}", _ => page(200, self.post_list(collection=Slops)))
   r.handle("GET /posts/{$}", _ => page(200, self.post_list(list_path="/posts/")))
   r.handle("GET /slops/{$}", _ => {
-    page(200, self.post_list(collection="slops", list_path="/slops/"))
+    page(200, self.post_list(collection=Slops, list_path="/slops/"))
   })
   r.handle("GET /docs/{$}", _ => page(200, self.doc_list()))
   // Pages link to it without a version, so it is cached for a day.
@@ -198,27 +198,28 @@ fn Site::new_router(self : Site) -> @http.Router {
   })
   // A pattern cannot end in ".md" after a wildcard, so the handlers look
   // at the suffix.
-  for collection in ["posts", "slops"] {
-    r.handle("GET /\{collection}/{slug}", req => {
+  for collection in [Posts, Slops] {
+    let prefix = collection.name()
+    r.handle("GET /\{prefix}/{slug}", req => {
       let slug = req.param("slug")
       match slug {
         [.. s, .. ".md"] =>
-          match self.by_slug.get("/\{collection}/\{s}") {
+          match self.by_slug.get("/\{prefix}/\{s}") {
             Some(p) => markdown(p.markdown)
             None => not_found("Post not found.")
           }
         _ =>
-          match self.by_slug.get("/\{collection}/\{slug}") {
+          match self.by_slug.get("/\{prefix}/\{slug}") {
             Some(p) => page(200, self.post_page(p))
             None => not_found("Post not found.")
           }
       }
     })
     // /posts/<slug>/<member> serves the raw member of a bundle.
-    r.handle("GET /\{collection}/{slug}/{member}", req => {
+    r.handle("GET /\{prefix}/{slug}/{member}", req => {
       let slug = req.param("slug")
       let name = req.param("member")
-      match self.by_slug.get("/\{collection}/\{slug}") {
+      match self.by_slug.get("/\{prefix}/\{slug}") {
         Some(p) =>
           match member_of(p.members, name) {
             Some(m) => raw_member(m)
@@ -305,12 +306,10 @@ fn markdown(src : String) -> @http.Response {
 /// members, image/svg+xml for .svg members so that pages can show them
 /// with <img>, and text/plain otherwise, with nosniff.
 fn raw_member(m : Member) -> @http.Response {
-  let content_type = if m.is_markdown {
-    "text/markdown; charset=utf-8"
-  } else if m.is_svg {
-    "image/svg+xml"
-  } else {
-    "text/plain; charset=utf-8"
+  let content_type = match m.body {
+    Markdown(..) => "text/markdown; charset=utf-8"
+    Svg => "image/svg+xml"
+    Text => "text/plain; charset=utf-8"
   }
   @http.Response::typed(200, content_type, Text(m.raw))..header(
     "x-content-type-options",
