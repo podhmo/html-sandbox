@@ -19,3 +19,12 @@ Markdown for this blog's `/preview`, read
 [the write-slops skill](.agents/skills/write-slops/SKILL.md).
 Derived skills for specific use cases (`write-slops-*`) build on it; use
 one only when the user names it.
+
+# Go and MoonBit implementations
+
+The Go and MoonBit implementations must agree in behavior — what they
+parse and the pages they render — not in shape. Write each in
+the idioms of its own language: in MoonBit, model closed sets of states with
+enums and absence with Option rather than copying Go's structs, sentinel
+values, and Bool flags. Keep the JS bridge as thin as possible; its output
+follows the MoonBit types. See issue #158.
