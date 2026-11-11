@@ -29,6 +29,90 @@
 | 閉じた語彙 | payload のない enum。文字列への変換は出力の境界で |
 | 性質の置き場所 | 持ち主の型へ移す。sum type の問題ではないが、移すと sum type の置き場所ができることが多い |
 
+2 に当たった実例が、末尾の表にある router と `scan` の2件。「型の違う2か所」を縦横に掛け合わせると、意味のある組は直積の一部だけだった。enum に畳むと ○ の組だけが残る。
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="14 17 733.05 179.2" width="733" height="179" role="img" aria-label="product grids of the two split states; O marks combinations that occur, x marks ones the types allow but no input produces">
+<text x="24" y="40" font-size="13" fill="currentColor">Route: subtree x 最後の segment</text>
+<path d="M24 44.6 L241.75000000000009 44.6" fill="none" stroke="currentColor" stroke-width="2"/>
+<text x="139.64999999999998" y="56" font-size="11" text-anchor="middle" fill="currentColor">lit/{x}</text>
+<text x="197.64999999999998" y="56" font-size="11" text-anchor="middle" fill="currentColor">{$}</text>
+<text x="255.64999999999998" y="56" font-size="11" text-anchor="middle" fill="currentColor">{x...}</text>
+<text x="313.65" y="56" font-size="11" text-anchor="middle" fill="currentColor">(empty)</text>
+<text x="104.64999999999999" y="75" font-size="11" text-anchor="end" dominant-baseline="central" fill="currentColor">subtree=false</text>
+<rect x="110.64999999999999" y="62" width="58" height="26" rx="2" fill="none" stroke="currentColor" stroke-width="1.5" opacity="1"/>
+<text x="139.64999999999998" y="75" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor" opacity="1">O</text>
+<rect x="168.64999999999998" y="62" width="58" height="26" rx="2" fill="none" stroke="currentColor" stroke-width="1.5" opacity="1"/>
+<text x="197.64999999999998" y="75" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor" opacity="1">O</text>
+<rect x="226.64999999999998" y="62" width="58" height="26" rx="2" fill="none" stroke="currentColor" stroke-width="1.5" opacity="1"/>
+<text x="255.64999999999998" y="75" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor" opacity="1">O</text>
+<rect x="284.65" y="62" width="58" height="26" rx="2" fill="none" stroke="currentColor" stroke-width="1" opacity="0.25"/>
+<text x="313.65" y="75" font-size="12" text-anchor="middle" dominant-baseline="central" fill="currentColor" opacity="0.35">x</text>
+<text x="104.64999999999999" y="101" font-size="11" text-anchor="end" dominant-baseline="central" fill="currentColor">subtree=true</text>
+<rect x="110.64999999999999" y="88" width="58" height="26" rx="2" fill="none" stroke="currentColor" stroke-width="1.5" opacity="1"/>
+<text x="139.64999999999998" y="101" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor" opacity="1">O</text>
+<rect x="168.64999999999998" y="88" width="58" height="26" rx="2" fill="none" stroke="currentColor" stroke-width="1" opacity="0.25"/>
+<text x="197.64999999999998" y="101" font-size="12" text-anchor="middle" dominant-baseline="central" fill="currentColor" opacity="0.35">x</text>
+<rect x="226.64999999999998" y="88" width="58" height="26" rx="2" fill="none" stroke="currentColor" stroke-width="1" opacity="0.25"/>
+<text x="255.64999999999998" y="101" font-size="12" text-anchor="middle" dominant-baseline="central" fill="currentColor" opacity="0.35">x</text>
+<rect x="284.65" y="88" width="58" height="26" rx="2" fill="none" stroke="currentColor" stroke-width="1.5" opacity="1"/>
+<text x="313.65" y="101" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor" opacity="1">O</text>
+<text x="24" y="132" font-size="11" fill="currentColor" opacity="0.75">5 of 8 occur -&gt; Tail { Exact; End; Subtree; Rest }</text>
+<text x="390.65" y="40" font-size="13" fill="currentColor">scan: mode x pending</text>
+<path d="M390.65 44.6 L533.6500000000001 44.6" fill="none" stroke="currentColor" stroke-width="2"/>
+<text x="476.04999999999995" y="56" font-size="11" text-anchor="middle" fill="currentColor">Nothing</text>
+<text x="534.05" y="56" font-size="11" text-anchor="middle" fill="currentColor">Para</text>
+<text x="592.05" y="56" font-size="11" text-anchor="middle" fill="currentColor">Items</text>
+<text x="650.05" y="56" font-size="11" text-anchor="middle" fill="currentColor">Quote</text>
+<text x="708.05" y="56" font-size="11" text-anchor="middle" fill="currentColor">Table</text>
+<text x="441.04999999999995" y="75" font-size="11" text-anchor="end" dominant-baseline="central" fill="currentColor">Normal</text>
+<rect x="447.04999999999995" y="62" width="58" height="26" rx="2" fill="none" stroke="currentColor" stroke-width="1.5" opacity="1"/>
+<text x="476.04999999999995" y="75" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor" opacity="1">O</text>
+<rect x="505.04999999999995" y="62" width="58" height="26" rx="2" fill="none" stroke="currentColor" stroke-width="1.5" opacity="1"/>
+<text x="534.05" y="75" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor" opacity="1">O</text>
+<rect x="563.04999999999995" y="62" width="58" height="26" rx="2" fill="none" stroke="currentColor" stroke-width="1.5" opacity="1"/>
+<text x="592.05" y="75" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor" opacity="1">O</text>
+<rect x="621.05" y="62" width="58" height="26" rx="2" fill="none" stroke="currentColor" stroke-width="1.5" opacity="1"/>
+<text x="650.05" y="75" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor" opacity="1">O</text>
+<rect x="679.05" y="62" width="58" height="26" rx="2" fill="none" stroke="currentColor" stroke-width="1.5" opacity="1"/>
+<text x="708.05" y="75" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor" opacity="1">O</text>
+<text x="441.04999999999995" y="101" font-size="11" text-anchor="end" dominant-baseline="central" fill="currentColor">Code</text>
+<rect x="447.04999999999995" y="88" width="58" height="26" rx="2" fill="none" stroke="currentColor" stroke-width="1.5" opacity="1"/>
+<text x="476.04999999999995" y="101" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor" opacity="1">O</text>
+<rect x="505.04999999999995" y="88" width="58" height="26" rx="2" fill="none" stroke="currentColor" stroke-width="1" opacity="0.25"/>
+<text x="534.05" y="101" font-size="12" text-anchor="middle" dominant-baseline="central" fill="currentColor" opacity="0.35">x</text>
+<rect x="563.05" y="88" width="58" height="26" rx="2" fill="none" stroke="currentColor" stroke-width="1" opacity="0.25"/>
+<text x="592.05" y="101" font-size="12" text-anchor="middle" dominant-baseline="central" fill="currentColor" opacity="0.35">x</text>
+<rect x="621.05" y="88" width="58" height="26" rx="2" fill="none" stroke="currentColor" stroke-width="1" opacity="0.25"/>
+<text x="650.05" y="101" font-size="12" text-anchor="middle" dominant-baseline="central" fill="currentColor" opacity="0.35">x</text>
+<rect x="679.05" y="88" width="58" height="26" rx="2" fill="none" stroke="currentColor" stroke-width="1" opacity="0.25"/>
+<text x="708.05" y="101" font-size="12" text-anchor="middle" dominant-baseline="central" fill="currentColor" opacity="0.35">x</text>
+<text x="441.04999999999995" y="127" font-size="11" text-anchor="end" dominant-baseline="central" fill="currentColor">Details</text>
+<rect x="447.04999999999995" y="114" width="58" height="26" rx="2" fill="none" stroke="currentColor" stroke-width="1.5" opacity="1"/>
+<text x="476.04999999999995" y="127" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor" opacity="1">O</text>
+<rect x="505.04999999999995" y="114" width="58" height="26" rx="2" fill="none" stroke="currentColor" stroke-width="1" opacity="0.25"/>
+<text x="534.05" y="127" font-size="12" text-anchor="middle" dominant-baseline="central" fill="currentColor" opacity="0.35">x</text>
+<rect x="563.05" y="114" width="58" height="26" rx="2" fill="none" stroke="currentColor" stroke-width="1" opacity="0.25"/>
+<text x="592.05" y="127" font-size="12" text-anchor="middle" dominant-baseline="central" fill="currentColor" opacity="0.35">x</text>
+<rect x="621.05" y="114" width="58" height="26" rx="2" fill="none" stroke="currentColor" stroke-width="1" opacity="0.25"/>
+<text x="650.05" y="127" font-size="12" text-anchor="middle" dominant-baseline="central" fill="currentColor" opacity="0.35">x</text>
+<rect x="679.05" y="114" width="58" height="26" rx="2" fill="none" stroke="currentColor" stroke-width="1" opacity="0.25"/>
+<text x="708.05" y="127" font-size="12" text-anchor="middle" dominant-baseline="central" fill="currentColor" opacity="0.35">x</text>
+<text x="441.04999999999995" y="153" font-size="11" text-anchor="end" dominant-baseline="central" fill="currentColor">Footnote</text>
+<rect x="447.04999999999995" y="140" width="58" height="26" rx="2" fill="none" stroke="currentColor" stroke-width="1.5" opacity="1"/>
+<text x="476.04999999999995" y="153" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor" opacity="1">O</text>
+<rect x="505.04999999999995" y="140" width="58" height="26" rx="2" fill="none" stroke="currentColor" stroke-width="1" opacity="0.25"/>
+<text x="534.05" y="153" font-size="12" text-anchor="middle" dominant-baseline="central" fill="currentColor" opacity="0.35">x</text>
+<rect x="563.05" y="140" width="58" height="26" rx="2" fill="none" stroke="currentColor" stroke-width="1" opacity="0.25"/>
+<text x="592.05" y="153" font-size="12" text-anchor="middle" dominant-baseline="central" fill="currentColor" opacity="0.35">x</text>
+<rect x="621.05" y="140" width="58" height="26" rx="2" fill="none" stroke="currentColor" stroke-width="1" opacity="0.25"/>
+<text x="650.05" y="153" font-size="12" text-anchor="middle" dominant-baseline="central" fill="currentColor" opacity="0.35">x</text>
+<rect x="679.05" y="140" width="58" height="26" rx="2" fill="none" stroke="currentColor" stroke-width="1" opacity="0.25"/>
+<text x="708.05" y="153" font-size="12" text-anchor="middle" dominant-baseline="central" fill="currentColor" opacity="0.35">x</text>
+<text x="390.65" y="184" font-size="11" fill="currentColor" opacity="0.75">8 of 20 occur -&gt; Normal(Pending)</text>
+</svg>
+```
+
 ## sum type にしない方がよい状況
 
 1. 範囲のある数値。見出しの level 1..5 を5 variant にしても値の写しになるだけで、算術（`level + 1`）が書けなくなる。構築時の検査で足りる。その代わり、数値で分岐する match には `_ =>` が残る。これは7の例外として受け入れる
