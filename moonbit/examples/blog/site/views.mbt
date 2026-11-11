@@ -14,7 +14,7 @@ const REPO_HOME_URL = "https://github.com/podhmo/html-sandbox"
 /// PageMeta describes a page for <head>. title and description may hold
 /// inline Markdown, which layout reduces to plain text.
 priv struct PageMeta {
-  title : String // page title without the site name; empty for the top page
+  title : String? // page title without the site name; None for the top page
   description : String
   // og is the page's Open Graph data; error pages have none, so they
   // carry no OGP tags.
@@ -61,7 +61,7 @@ fn code_copy_js_path() -> String {
 /// layout is the frame shared by every page. The doctype is written by
 /// Response::page.
 fn layout(meta : PageMeta, body : Array[@el.Node]) -> @el.Node {
-  let title = plain_text(meta.title)
+  let title = meta.title.map(plain_text)
   let description = plain_text(meta.description)
   let head = [
     @picoel.title(document_title(title)),
@@ -111,11 +111,10 @@ fn more_tools() -> @el.Node {
 ///|
 /// document_title is the <title> text: the page title followed by the site
 /// name.
-fn document_title(title : String) -> String {
-  if title == "" {
-    SITE_NAME
-  } else {
-    "\{title} - \{SITE_NAME}"
+fn document_title(title : String?) -> String {
+  match title {
+    Some(title) => "\{title} - \{SITE_NAME}"
+    None => SITE_NAME
   }
 }
 
@@ -125,10 +124,7 @@ fn document_title(title : String) -> String {
 fn ogp(meta : PageMeta) -> Array[@el.Node] {
   guard meta.og is Some(og) else { return [] }
   [
-    @picoel.meta_property(
-      "og:title",
-      content=if meta.title == "" { SITE_NAME } else { meta.title },
-    ),
+    @picoel.meta_property("og:title", content=meta.title.unwrap_or(SITE_NAME)),
     @picoel.meta_property("og:type", content=og.type_.name()),
     @picoel.meta_property("og:url", content=og.url),
     @picoel.meta_property("og:description", content=meta.description),
@@ -170,9 +166,9 @@ fn Site::post_list(
   layout(
     {
       title: if list_path == "/" {
-        ""
+        None
       } else {
-        title
+        Some(title)
       },
       description: if list_path == "/" {
         SITE_DESCRIPTION
@@ -199,7 +195,7 @@ fn Site::post_page(self : Site, p : Post) -> @el.Node {
   }
   body.push_iter(render_face(link, p.members, p.doc, gen).iter())
   let meta = PageMeta::{
-    title: p.title,
+    title: Some(p.title),
     description: p.description,
     og: Some({ url: "\{self.base_url}\{p.page_path()}", type_: Article, }),
   }
@@ -234,7 +230,7 @@ fn Site::doc_list(self : Site) -> @el.Node {
     )
   }
   let meta = PageMeta::{
-    title: "Docs",
+    title: Some("Docs"),
     description: "Documents of this repository.",
     og: Some({ url: "\{self.base_url}/docs/", type_: Website, }),
   }
@@ -254,7 +250,7 @@ fn Site::doc_page(self : Site, d : Doc) -> @el.Node {
   }
   body.push_iter(render_face(link, d.members, d.doc, gen).iter())
   let meta = PageMeta::{
-    title: d.title,
+    title: Some(d.title),
     description: d.description,
     og: Some({ url: "\{self.base_url}\{d.page_path()}", type_: Article, }),
   }
@@ -561,7 +557,7 @@ fn status_text(status : Int32) -> String {
 ///|
 fn error_page(status : Int32, message : String) -> @el.Node {
   let title = "\{status} \{status_text(status)}"
-  layout({ title, description: message, og: None, }, [
+  layout({ title: Some(title), description: message, og: None, }, [
     @picoel.h1([@picoel.text(title)]),
     @picoel.p([@picoel.text(message)]),
     @picoel.p([@picoel.a("/", [@picoel.text("Back to all posts")])]),
