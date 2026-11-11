@@ -7,11 +7,11 @@ prev: ../2026-11-11-moonbit-sum-types.md
 # 全記事を lint に通して執筆者の違いを測ったが、欲しかった数値は取れなかった
 
 > [!NOTE]
-> 執筆: Devin（SWE-2 Max）。issue #169 での集計作業の記録で、執筆者表記そのものではなく集計と解釈が対象。
+> 執筆: Devin（SWE-2 Max）。[issue #169](https://github.com/podhmo/html-sandbox/issues/169) での集計作業の記録で、執筆者表記そのものではなく集計と解釈が対象。
 
 ## 問い
 
-issue #167 で「LLM の文章がなぜひどいか」の調査をして、yomiyasu（日本語 AI 文向けの推敲スキルと lint）が対象に近いことが分かった。そこで issue #169 として、yomiyasu の lint を slops の記事全体に適用してみた。問いは 2 つある。
+[issue #167](https://github.com/podhmo/html-sandbox/issues/167) で「LLM の文章がなぜひどいか」の調査をして、yomiyasu（日本語 AI 文向けの推敲スキルと lint）が対象に近いことが分かった。そこで [issue #169](https://github.com/podhmo/html-sandbox/issues/169) として、yomiyasu の lint を slops の記事全体に適用してみた。問いは 2 つある。
 
 1. 記事を書いた生成ツール（Devin・Claude Code・Codex・opencode）の違いは、lint の候補の分布に現れるか。
 2. Claude Code の出力する文章に残る特有の読みにくさは、lint の数値として取得できるか。
@@ -20,7 +20,7 @@ issue #167 で「LLM の文章がなぜひどいか」の調査をして、yomiy
 
 `yomiyasu_lint.py` v3.0.1 を `--doc-type article --json` で、全 59 の `.md` メンバー（単独記事 24、バンドルメンバー 35）に適用した。コード・SVG・txt のメンバーは対象外。
 
-帰属は各記事の冒頭にある「執筆」表記に従った。この表記自体は並行して行った別の作業（PR #170）で、本文を書いたコミットの `Co-Authored-By` トレーラーと PR 本文の 🤖 マーカーから推定したもの。`writing-slops/03-svg-pitfalls` と `moonbit-sum-types/01-guidelines` はバンドル内で執筆者が違うので、メンバー単位で Claude Code に上書きした。帰属が確定できない 2 記事は「不明」として別集計にした（後で中身から Claude Code おそらくと判断されたが、集計時の区分はそのままにしている）。
+帰属は各記事の冒頭にある「執筆」表記に従った。この表記自体は並行して行った別の作業（[PR #170](https://github.com/podhmo/html-sandbox/pull/170)）で、本文を書いたコミットの `Co-Authored-By` トレーラーと PR 本文の 🤖 マーカーから推定したもの。`writing-slops/03-svg-pitfalls` と `moonbit-sum-types/01-guidelines` はバンドル内で執筆者が違うので、メンバー単位で Claude Code に上書きした。帰属が確定できない 2 記事は「不明」として別集計にした（後で中身から Claude Code おそらくと判断されたが、集計時の区分はそのままにしている）。
 
 集計は 2 段で行った。まず全規則を含めた集計、次に「機械的に変換できる不備」（読点・ダッシュ・コロン・絵文字・箇条書き率）と「直接の訳語が分かる語」（calque・translated_term・katakana_term）の 9 規則を除外した再集計。除外した側に 379 候補中 263 候補（69%）が集まった。
 
@@ -180,13 +180,13 @@ moonbit-sum-types のバンドルは、人間が読むとバンドル単位で A
 - 特徴量として集める層（文書レベル）: excess_list・list_ratio・bold_per_1000、negative_parallelism_density、summary_restatement・short_summary_heading・sentence_end_repetition。直す対象ではないが、文書の形を見る代理メトリクス。
 - 対象外: 機械的変換の規則群、訳語既知の規則群、metaphor_label（誤検出優勢）、slop_vocabulary（言い換えを意識すれば読める、との判断）。
 
-この「届かない層」を補うために、自作 lint の構想を issue #171 に切り出した。形態素・係受け解析で文レベルの構造特徴を取り、文書は木構造＋役割付けで扱う。語彙リストは持たない方針（kuden の「言葉尻より構造」と同じ立場）で、判定ではなく特徴量を集める設計にする。
+この「届かない層」を補うために、自作 lint の構想を [issue #171](https://github.com/podhmo/html-sandbox/issues/171) に切り出した。形態素・係受け解析で文レベルの構造特徴を取り、文書は木構造＋役割付けで扱う。語彙リストは持たない方針（kuden の「言葉尻より構造」と同じ立場）で、判定ではなく特徴量を集める設計にする。
 
-さらに lint の実装の前に、計測フェーズとして issue #172 を分けた。#169 と同じ「全記事に適用して執筆者別に集計」を、今度は節数/文・係受け深さ・名詞化率・文書構造メトリクスといった新しい特徴量でやる。分離度が見えた特徴量だけが lint の規則候補になる、という順番にした。
+さらに lint の実装の前に、計測フェーズとして [issue #172](https://github.com/podhmo/html-sandbox/issues/172) を分けた。[#169](https://github.com/podhmo/html-sandbox/issues/169) と同じ「全記事に適用して執筆者別に集計」を、今度は節数/文・係受け深さ・名詞化率・文書構造メトリクスといった新しい特徴量でやる。分離度が見えた特徴量だけが lint の規則候補になる、という順番にした。
 
 ## 試していないこと
 
-- 形態素・係受けベースの特徴量はまだ実装していない。ツール選定のメモは #172 にある（形態素・係受けの両方を pip だけで取れる GiNZA 系が第一候補、n-best が取れる JUMAN++ 系は意味情報の豊かさで別の強み）。
+- 形態素・係受けベースの特徴量はまだ実装していない。ツール選定のメモは [#172](https://github.com/podhmo/html-sandbox/issues/172) にある（形態素・係受けの両方を pip だけで取れる GiNZA 系が第一候補、n-best が取れる JUMAN++ 系は意味情報の豊かさで別の強み）。
 - n-best 解析で「best と 2nd の係り先が違う文」を曖昧さの指標にする案はアイデア段階。係受け層で n-best を出せるツールが少なく、parser 間の不一致を代用する案も検討中。
 - 「直したい層」の規則で記事を実際に直す運用は試していない。今回は収集と分類だけ。
 - IdeaLens 型の文書→役割付きアウトライン変換（LLM 判定層）は未検証。日本語記事で outline が成立するかも分かっていない。

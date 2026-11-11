@@ -1,5 +1,5 @@
 > [!NOTE]
-> 執筆: Devin（SWE-2 Max）。このメンバーは集計結果の転載で、issue #169 の集計コメントと同じ数値。
+> 執筆: Devin（SWE-2 Max）。このメンバーは集計結果の転載で、[issue #169](https://github.com/podhmo/html-sandbox/issues/169) の集計コメントと同じ数値。
 
 ## 全体集計（全規則）
 
