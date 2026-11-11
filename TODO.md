@@ -55,6 +55,21 @@
   inline-block にするため、空白のないパスなどが本文の幅を超えていた。site.css で
   `pre` 外の `code` に `overflow-wrap: anywhere` を付けた
   （[issue #153](https://github.com/podhmo/html-sandbox/issues/153)）。
+- [ ] **MoonBit 側に残った sentinel 値とフラグを sum types / Option に寄せる**:
+  [issue #158](https://github.com/podhmo/html-sandbox/issues/158) の対応で
+  `moonbit/` 全体を走査して見つかった未対応の候補。判定基準と「enum にしない
+  もの」の線引きは[記事](slops/2026-11-11-moonbit-sum-types.md)に整理済み。
+  - [ ] `links.mbt` の `Ref` が無い `scheme`/`query`/`fragment` を `""` で保持
+    → `String?`（`priv` なので `Ref::parse` と `resolve` の中で完結する）
+  - [ ] `nav.mbt` の `page_title` の `""` 返しと `views.mbt` の
+    `PageMeta.title` の `""`（トップページ）→ `String?`
+  - [ ] `worker.mbt` と adapter-abi 各種が「未ロード/ロード済み」を `base_url`
+    と `site` の2変数の同期で表現 → `Unloaded | Loaded(base~, result~)` enum
+  - [ ] `inline.mbt` の `closing_run` と `tinymarkdown.mbt` の
+    `nest_items(parent=-1)` の `-1` → `Int32?`
+  - [ ] 弱い候補: `content.mbt` の `Doc.members` を `Array[Member]?` にするか
+    どうか決める。`router` の `Route.subtree : Bool` は固有フィールドを持た
+    ないので見送り方向
 
 ### Future work
 
