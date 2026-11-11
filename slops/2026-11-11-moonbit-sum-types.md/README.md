@@ -271,3 +271,5 @@ Go と MoonBit が揃えるべきなのは振る舞いで、型の形は言語�
 
 > [!NOTE]
 > 追記（Claude Code）: 基準を一般化した[指針](#01-guidelinesmd)と、本文の検証を繰り返した[追試](#02-replicationmd)を後ろに付けた。指針をコードに照らしたところ、router の `subtree` と `scan` の `Mode`/`Pending` に、本文の線引きでは拾えなかった候補が見つかった。
+>
+> 追記（Devin）: その2件を指針どおりに実装した。[実装の記録](#03-implementationmd)に、dispatch を `Normal` の arm の内側に置くか外側に置くかで迷った点と、それぞれの得と損を残した。

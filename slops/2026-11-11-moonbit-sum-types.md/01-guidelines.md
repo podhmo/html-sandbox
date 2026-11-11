@@ -60,6 +60,7 @@ enum で「今の状態」を表せても、遷移の規則がループ本体に
 ## MoonBit で書くときの道具
 
 - variant の payload を更新するには、`mut` ラベル付きフィールドと `as` 束縛を使う。`Details(..) as d` と束縛して `d.depth -= 1`。これを知らないと enum 化を諦めて mutable 変数に戻しがち
+- variant の payload だけを触る処理は、その variant の match arm の内側に置く。外に置くと「ここでは必ずこの variant」が型に言えず、到達しない `else` を `abort` か `continue` で埋めることになる
 - `is` パターンで「この variant のときだけ」を式の中に書ける（`if it.children is Some(sub)`）
 - 文字列への変換は enum のメソッド（`name()` など）に1か所だけ置く
 - JS や JSON への出力は内部の型に従わせる。ワイヤ形式のために内部の型を崩さない
