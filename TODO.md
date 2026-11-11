@@ -65,7 +65,7 @@
     `PageMeta.title` の `""`（トップページ）→ `String?`
   - [ ] `worker.mbt` と adapter-abi 各種が「未ロード/ロード済み」を `base_url`
     と `site` の2変数の同期で表現 → `Unloaded | Loaded(base~, result~)` enum
-  - [ ] `inline.mbt` の `closing_run` と `tinymarkdown.mbt` の
+  - [x] `inline.mbt` の `closing_run` と `tinymarkdown.mbt` の
     `nest_items(parent=-1)` の `-1` → `Int32?`
   - [ ] 弱い候補: `content.mbt` の `Doc.members` を `Array[Member]?` にするか
     どうか決める。`router` の `Route.subtree : Bool` は固有フィールドを持た

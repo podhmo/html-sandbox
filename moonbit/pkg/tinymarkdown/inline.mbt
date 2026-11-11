@@ -60,17 +60,20 @@ fn split_inlines(s : String, links~ : Bool) -> Array[Inline] {
   while i < n {
     if s[i] == '`' {
       let m = backquotes(s, i)
-      let end = closing_run(s, from=i + m, n=m)
-      if end < 0 {
-        i += m
-        continue
+      match closing_run(s, from=i + m, n=m) {
+        None => {
+          i += m
+          continue
+        }
+        Some(end) => {
+          if text < i {
+            out.push(Text(s[text:i].to_owned()))
+          }
+          out.push(Code(code_text(s[i + m:end])))
+          i = end + m
+          text = i
+        }
       }
-      if text < i {
-        out.push(Text(s[text:i].to_owned()))
-      }
-      out.push(Code(code_text(s[i + m:end])))
-      i = end + m
-      text = i
     } else if s[i] == '[' && links {
       match footnote_ref(s, i) {
         Some((label, end)) => {
@@ -132,8 +135,10 @@ fn link(s : String, i : Int32) -> (String, String, Int32)? {
     }
     if s[j] == '`' {
       let n = backquotes(s, j)
-      let c = closing_run(s, from=j + n, n~)
-      continue if c >= 0 { c + n } else { j + n }
+      continue match closing_run(s, from=j + n, n~) {
+          Some(c) => c + n
+          None => j + n
+        }
     }
   } nobreak {
     j
@@ -166,19 +171,19 @@ fn backquotes(s : String, i : Int32) -> Int32 {
 
 ///|
 /// closing_run returns the index of the first run of exactly n backquotes
-/// in s[from:], or -1.
-fn closing_run(s : String, from~ : Int32, n~ : Int32) -> Int32 {
+/// in s[from:], or None when there is none.
+fn closing_run(s : String, from~ : Int32, n~ : Int32) -> Int32? {
   for j = from; j < s.length(); {
     if s[j] != '`' {
       continue j + 1
     }
     let m = backquotes(s, j)
     if m == n {
-      return j
+      return Some(j)
     }
     continue j + m
   } nobreak {
-    -1
+    None
   }
 }
 
