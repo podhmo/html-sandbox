@@ -59,7 +59,7 @@
   [issue #158](https://github.com/podhmo/html-sandbox/issues/158) の対応で
   `moonbit/` 全体を走査して見つかった未対応の候補。判定基準と「enum にしない
   もの」の線引きは[記事](slops/2026-11-11-moonbit-sum-types.md)に整理済み。
-  - [ ] `links.mbt` の `Ref` が無い `scheme`/`query`/`fragment` を `""` で保持
+  - [x] `links.mbt` の `Ref` が無い `scheme`/`query`/`fragment` を `""` で保持
     → `String?`（`priv` なので `Ref::parse` と `resolve` の中で完結する）
   - [ ] `nav.mbt` の `page_title` の `""` 返しと `views.mbt` の
     `PageMeta.title` の `""`（トップページ）→ `String?`
