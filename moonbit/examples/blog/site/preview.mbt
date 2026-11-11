@@ -146,7 +146,7 @@ pub fn preview(src : String, files : Array[String]) -> @el.Node {
 /// inject markup).
 fn Site::preview_page(self : Site) -> @el.Node {
   let meta = PageMeta::{
-    title: "Preview",
+    title: Some("Preview"),
     description: "Markdown rendered the way this site renders it. Nothing is saved.",
     og: Some({ url: "\{self.base_url}/preview", type_: Website, }),
   }

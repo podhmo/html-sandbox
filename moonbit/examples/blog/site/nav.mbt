@@ -43,8 +43,8 @@ fn Site::nav_item(self : Site, source : String, value : String?) -> NavItem? {
         Some(l) => l
         None =>
           match self.page_title(href) {
-            "" => [Text(raw)]
-            t => @tinymarkdown.inlines(t)
+            None => [Text(raw)]
+            Some(t) => @tinymarkdown.inlines(t)
           }
       }
       Some({ label, href: Some(href), })
@@ -54,9 +54,9 @@ fn Site::nav_item(self : Site, source : String, value : String?) -> NavItem? {
 
 ///|
 /// Site::page_title returns the title of the post or document at href, a
-/// URL that page_linker resolved, or "" when it is not a page of this
+/// URL that page_linker resolved, or None when it is not a page of this
 /// site.
-fn Site::page_title(self : Site, href : String) -> String {
+fn Site::page_title(self : Site, href : String) -> String? {
   let p = match href.find("?") {
     Some(i) => href[:i].to_owned()
     None => href
@@ -66,14 +66,11 @@ fn Site::page_title(self : Site, href : String) -> String {
     None => p
   }
   if self.by_slug.get(p) is Some(post) {
-    return post.title
+    return Some(post.title)
   }
   match p {
     [.. "/docs/", .. path] =>
-      match self.by_path.get(path.to_owned()) {
-        Some(d) => d.title
-        None => ""
-      }
-    _ => ""
+      self.by_path.get(path.to_owned()).map(d => d.title)
+    _ => None
   }
 }
