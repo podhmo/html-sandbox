@@ -6,7 +6,7 @@ next: 2026-10-27-pkg-graph.md
 # LLMで生成したイラストを小さなSVGに変換する実験
 
 > [!NOTE]
-> 執筆: Claude Code（Opus 5.5）。おそらく。
+> 執筆: 不明。
 
 Markdownで書く個人ブログに、ちょっとしたイラストを埋め込みたくなった。
 
