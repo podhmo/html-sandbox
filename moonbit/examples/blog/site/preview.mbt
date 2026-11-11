@@ -38,8 +38,8 @@ fn Site::preview_files(self : Site) -> Array[String] {
 /// serve (a post file not named like one, a member in a subdirectory, a
 /// file outside the documents' roots) is not a URL.
 fn preview_url(source : String) -> String? {
-  let collection = if source.has_prefix("slops/") { "slops" } else { "posts" }
-  if source.strip_prefix("\{collection}/") is Some(name) {
+  let collection = Collection::of_source(source)
+  if source.strip_prefix("\{collection.name()}/") is Some(name) {
     let (dir, file) = match name.find("/") {
       None => (name, None)
       Some(i) => (name[:i], Some(name[i + 1:]))
@@ -49,8 +49,8 @@ fn preview_url(source : String) -> String? {
     }
     guard post_name(dir.to_owned()) is Some((_, slug)) else { return None }
     match file {
-      None => Some("/\{collection}/\{slug}")
-      Some(f) => Some("/\{collection}/\{slug}/\{f}")
+      None => Some("/\{collection.name()}/\{slug}")
+      Some(f) => Some("/\{collection.name()}/\{slug}/\{f}")
     }
   } else {
     // The documents live at doc_sources: TODO.md and everything under
@@ -148,8 +148,7 @@ fn Site::preview_page(self : Site) -> @el.Node {
   let meta = PageMeta::{
     title: "Preview",
     description: "Markdown rendered the way this site renders it. Nothing is saved.",
-    url: "\{self.base_url}/preview",
-    type_: "website",
+    og: Some({ url: "\{self.base_url}/preview", type_: Website, }),
   }
   layout(meta, [
     @picoel.h1([@picoel.text("Preview")]),

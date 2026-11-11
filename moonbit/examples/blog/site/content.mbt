@@ -5,9 +5,10 @@
 ///|
 /// LoadError is content that cannot be served; the message names the
 /// file and the problem, as the Go blog's errors do.
+#derive(Debug)
 pub(all) suberror LoadError {
   LoadError(message~ : String)
-} derive(Debug)
+}
 
 ///|
 /// output writes the message alone, so "\{e}" reads as the error text.
@@ -25,16 +26,53 @@ pub extend LoadError with Show::{to_string, output}
 pub extend LoadError with Debug::{to_repr}
 
 ///|
+/// Collection is the group a post belongs to: the directory its file
+/// lives under and the URL prefix of its page.
+#derive(Eq, Debug)
+pub(all) enum Collection {
+  Posts
+  Slops
+}
+
+///|
+#deprecated("Use == and != instead")
+pub extend Collection with Eq::{not_equal, equal}
+
+///|
+#deprecated("Use Debug::to_repr instead")
+pub extend Collection with Debug::{to_repr}
+
+///|
+/// Collection::name is the collection's directory and URL prefix.
+pub fn Collection::name(self : Collection) -> String {
+  match self {
+    Posts => "posts"
+    Slops => "slops"
+  }
+}
+
+///|
+/// Collection::of_source is the collection a repository path belongs to:
+/// anything under "slops/" is a slop, everything else a post.
+fn Collection::of_source(source : String) -> Collection {
+  if source.has_prefix("slops/") {
+    Slops
+  } else {
+    Posts
+  }
+}
+
+///|
 /// Post is one blog post loaded from a YYYY-MM-DD-slug.md file.
 pub struct Post {
-  collection : String
+  collection : Collection
   slug : String
   file : String // file name, e.g. 2026-10-14-hello.md
   date : String // YYYY-MM-DD
   title : String // front matter "title", or the first "#" heading
   description : String // front matter "description", or the first paragraph
-  prev : String // front matter "prev", as written
-  next : String // front matter "next", as written
+  prev : String? // front matter "prev", as written
+  next : String? // front matter "next", as written
   mut prev_nav : NavItem? // "prev" resolved by Site::Site
   mut next_nav : NavItem? // "next" resolved by Site::Site
   doc : @tinymarkdown.Document
@@ -86,12 +124,30 @@ fn check_meta(
 pub struct Member {
   name : String // file name inside the bundle, e.g. "memo.md"
   source : String // its path in the repository
-  is_markdown : Bool // name ends in .md: rendered as Markdown
-  // name ends in .svg: served as image/svg+xml, shown as an image
-  is_svg : Bool
-  meta : Map[String, String] // front matter, when is_markdown
-  doc : @tinymarkdown.Document
   raw : String // the file as written
+  body : MemberBody
+}
+
+///|
+/// MemberBody is what a member's file is, read from its name's suffix:
+/// a ".md" file is rendered as Markdown, a ".svg" file is shown as an
+/// image, and any other file is shown as text.
+pub(all) enum MemberBody {
+  Markdown(meta~ : Map[String, String], doc~ : @tinymarkdown.Document)
+  Svg
+  Text
+}
+
+///|
+/// Member::markdown is the member's front matter and parsed document
+/// when it is a Markdown file.
+fn Member::markdown(
+  self : Member,
+) -> (Map[String, String], @tinymarkdown.Document)? {
+  match self.body {
+    Markdown(meta~, doc~) => Some((meta, doc))
+    _ => None
+  }
 }
 
 ///|
@@ -120,15 +176,8 @@ fn load_member(
     )
   }
   if !member_name.has_suffix(".md") {
-    return {
-      name: member_name,
-      source,
-      is_markdown: false,
-      is_svg: member_name.has_suffix(".svg"),
-      meta: Map([]),
-      doc: @tinymarkdown.parse(""),
-      raw: src,
-    }
+    let body = if member_name.has_suffix(".svg") { Svg } else { Text }
+    return { name: member_name, source, raw: src, body, }
   }
   let (meta, body) = @tinyfrontmatter.split(src) catch {
     e => raise LoadError(message="\{dir_name}/\{member_name}: \{e}")
@@ -138,11 +187,8 @@ fn load_member(
   {
     name: member_name,
     source,
-    is_markdown: true,
-    is_svg: false,
-    meta,
-    doc: @tinymarkdown.parse(body),
     raw: src,
+    body: Markdown(meta~, doc=@tinymarkdown.parse(body)),
   }
 }
 
@@ -185,14 +231,22 @@ fn load_post_bundle(
   date : String,
   slug : String,
   entries : Array[(String, String)],
-  collection : String,
+  collection : Collection,
 ) -> Post raise LoadError {
-  let members = load_members(dir_name, "\{collection}/\{dir_name}", entries)
+  let members = load_members(
+    dir_name,
+    "\{collection.name()}/\{dir_name}",
+    entries,
+  )
   let face = members[0]
-  let meta = face.meta
+  // A non-Markdown face has no front matter and no document; it fails
+  // the title check below as a file without a title would.
+  let (meta, doc) = face
+    .markdown()
+    .unwrap_or((Map([]), @tinymarkdown.parse("")))
   let title = match meta {
     { "title": t, .. } if t != "" => t
-    _ => first_title(face.doc).unwrap_or("")
+    _ => first_title(doc).unwrap_or("")
   }
   if title == "" {
     raise LoadError(
@@ -201,7 +255,7 @@ fn load_post_bundle(
   }
   let description = match meta {
     { "description": d, .. } if d != "" => d
-    _ => first_paragraph(face.doc.children)
+    _ => first_paragraph(doc.children)
   }
   {
     collection,
@@ -210,11 +264,11 @@ fn load_post_bundle(
     date,
     title,
     description,
-    prev: meta.get("prev").unwrap_or(""),
-    next: meta.get("next").unwrap_or(""),
+    prev: meta.get("prev"),
+    next: meta.get("next"),
     prev_nav: None,
     next_nav: None,
-    doc: face.doc,
+    doc,
     markdown: face.raw,
     members,
   }
@@ -227,7 +281,7 @@ fn load_post_bundle(
 /// content.
 pub fn load_posts(
   files : ReadOnlyArray[(String, String)],
-  collection~ : String = "posts",
+  collection~ : Collection = Posts,
 ) -> Array[Post] raise LoadError {
   // A top-level ".order" file, when the pack carried one, ranks each
   // article by when it was added to the repository, the most recently
@@ -304,8 +358,8 @@ pub fn load_posts(
       date,
       title,
       description,
-      prev: meta.get("prev").unwrap_or(""),
-      next: meta.get("next").unwrap_or(""),
+      prev: meta.get("prev"),
+      next: meta.get("next"),
       prev_nav: None,
       next_nav: None,
       doc,
@@ -443,8 +497,8 @@ pub struct Doc {
   source : String // file path in the repository
   title : String // front matter "title", the first "#" heading, or source
   description : String // front matter "description", or the first paragraph
-  prev : String // front matter "prev", as written
-  next : String // front matter "next", as written
+  prev : String? // front matter "prev", as written
+  next : String? // front matter "next", as written
   mut prev_nav : NavItem? // "prev" resolved by Site::Site
   mut next_nav : NavItem? // "next" resolved by Site::Site
   doc : @tinymarkdown.Document
@@ -553,8 +607,8 @@ pub fn load_docs(
       source: name,
       title,
       description,
-      prev: meta.get("prev").unwrap_or(""),
-      next: meta.get("next").unwrap_or(""),
+      prev: meta.get("prev"),
+      next: meta.get("next"),
       prev_nav: None,
       next_nav: None,
       doc,
@@ -580,25 +634,30 @@ fn load_doc_bundle(
 ) -> Doc raise LoadError {
   let members = load_members(dir_name, dir_name, entries)
   let face = members[0]
-  let meta = face.meta
+  // A non-Markdown face has no front matter and no document; the page
+  // falls back to its directory name for the title and gets no
+  // description.
+  let (meta, doc) = face
+    .markdown()
+    .unwrap_or((Map([]), @tinymarkdown.parse("")))
   let title = match meta {
     { "title": t, .. } if t != "" => t
-    _ => first_title(face.doc).unwrap_or(dir_name)
+    _ => first_title(doc).unwrap_or(dir_name)
   }
   let description = match meta {
     { "description": d, .. } if d != "" => d
-    _ => first_paragraph(face.doc.children)
+    _ => first_paragraph(doc.children)
   }
   {
     path: p,
     source: dir_name,
     title,
     description,
-    prev: meta.get("prev").unwrap_or(""),
-    next: meta.get("next").unwrap_or(""),
+    prev: meta.get("prev"),
+    next: meta.get("next"),
     prev_nav: None,
     next_nav: None,
-    doc: face.doc,
+    doc,
     markdown: face.raw,
     members,
   }

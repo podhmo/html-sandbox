@@ -33,7 +33,7 @@ fn block(j : Json) -> @el.Node? {
       Some(@picoel.section([h, ..cs.filter_map(block)]))
     }
     { "t": "p", "text": t, .. } => Some(@picoel.p(inlines(t)))
-    { "t": "list", "items": Array(items), .. } => Some(list(items))
+    { "t": "list", "list": l, .. } => Some(list(l))
     { "t": "quote", "children": Array(cs), .. } =>
       Some(@picoel.blockquote(cs.filter_map(block)))
     { "t": "alert", "kind": String(kind), "children": Array(cs), .. } =>
@@ -87,17 +87,33 @@ fn alert_title(kind : String) -> String {
 }
 
 ///|
-fn list(items : Array[Json]) -> @el.Node {
-  @picoel.list(
-    items.map(it => {
-      guard it is Object(it) else { return @picoel.li([]) }
-      let li = inlines(it.get("text").unwrap_or(Json::null()))
-      if it.get("children") is Some(Array(cs)) && !cs.is_empty() {
-        li.push(list(cs))
-      }
-      @picoel.li(li)
-    }),
-  )
+///|
+/// list renders an item_list from the parser — an <ol> for an ordered
+/// kind (with a start attribute when it does not start at 1), a <ul>
+/// otherwise.
+fn list(j : Json) -> @el.Node {
+  guard j is { "items": Array(items), .. } else { return @picoel.list([]) }
+  let lis = items.map(it => {
+    guard it is Object(it) else { return @picoel.li([]) }
+    let li = inlines(it.get("text").unwrap_or(Json::null()))
+    if it.get("children") is Some(children) &&
+      children is { "items": Array(_), .. } {
+      li.push(list(children))
+    }
+    @picoel.li(li)
+  })
+  if j is { "kind": "ordered", .. } {
+    match j {
+      { "start": Number(start, ..), .. } if start != 1.0 =>
+        @el.el(
+          @el.ol,
+          [@el.Attr(@el.AttrName("start"), "\{start.to_int()}"), ..lis],
+        )
+      _ => @el.el(@el.ol, lis)
+    }
+  } else {
+    @picoel.list(lis)
+  }
 }
 
 ///|

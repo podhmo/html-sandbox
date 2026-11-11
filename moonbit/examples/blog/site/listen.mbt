@@ -88,8 +88,7 @@ fn Site::listen_page(self : Site) -> @el.Node {
   let meta = PageMeta::{
     title: "Listen",
     description,
-    url: "\{self.base_url}/listen",
-    type_: "website",
+    og: Some({ url: "\{self.base_url}/listen", type_: Website, }),
   }
   layout(meta, [
     @picoel.h1([@picoel.text("Listen")]),

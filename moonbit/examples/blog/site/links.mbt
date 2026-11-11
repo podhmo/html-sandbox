@@ -12,7 +12,7 @@ const REPO_PATH = "/podhmo/html-sandbox/blob/main"
 ///|
 /// Post::source is the file path of the post in the repository.
 fn Post::source(self : Post) -> String {
-  "\{self.collection}/\{self.file}"
+  "\{self.collection.name()}/\{self.file}"
 }
 
 ///|

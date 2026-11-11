@@ -91,7 +91,7 @@ fn load_site(base : String) -> @site.Site raise @site.LoadError {
       ..@site.load_posts(ReadOnlyArray::from_array(post_files.val)),
       ..@site.load_posts(
         ReadOnlyArray::from_array(slop_files.val),
-        collection="slops",
+        collection=Slops,
       ),
     ],
     docs=@site.load_docs(ReadOnlyArray::from_array(doc_files.val)),

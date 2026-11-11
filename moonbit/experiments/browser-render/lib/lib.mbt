@@ -20,16 +20,17 @@ fn blocks(bs : Array[@tinymarkdown.Block]) -> Array[@el.Node] {
         @picoel.section([h, ..blocks(children)])
       }
       Paragraph(text) => @picoel.p(inlines(text))
-      List(items) =>
-        if items is [first, ..] && first.num > 0 {
-          @el.el(@el.ol, items.map(it => @picoel.li(inlines(it.text))))
-        } else {
-          @picoel.list(items.map(it => @picoel.li(inlines(it.text))))
+      List(list) =>
+        match list.kind {
+          Ordered(..) =>
+            @el.el(@el.ol, list.items.map(it => @picoel.li(inlines(it.text))))
+          Bullet =>
+            @picoel.list(list.items.map(it => @picoel.li(inlines(it.text))))
         }
       Quote(children) => @picoel.blockquote(blocks(children))
       Alert(kind~, children~) =>
         @el.el(@el.blockquote, [
-          @el.Attr(@el.class, "markdown-alert markdown-alert-\{kind}"),
+          @el.Attr(@el.class, "markdown-alert markdown-alert-\{kind.name()}"),
           @el.el(@el.p, [
             @el.Attr(@el.class, "markdown-alert-title"),
             @picoel.text(alert_title(kind)),
@@ -43,7 +44,7 @@ fn blocks(bs : Array[@tinymarkdown.Block]) -> Array[@el.Node] {
       CodeBlock(code, ..) => @picoel.pre(code)
       Details(summary~, children~) => {
         let body = blocks(children)
-        if summary != "" {
+        if summary is Some(summary) {
           body.insert(0, @el.el(@el.Tag("summary"), inlines(summary)))
         }
         @el.el(@el.Tag("details"), body)
@@ -55,13 +56,13 @@ fn blocks(bs : Array[@tinymarkdown.Block]) -> Array[@el.Node] {
 ///|
 /// alert_title is the heading text of an alert block — the kind with its
 /// first letter capitalized, as GitHub writes it.
-fn alert_title(kind : String) -> String {
+fn alert_title(kind : @tinymarkdown.AlertKind) -> String {
   match kind {
-    "note" => "Note"
-    "tip" => "Tip"
-    "important" => "Important"
-    "warning" => "Warning"
-    _ => "Caution"
+    Note => "Note"
+    Tip => "Tip"
+    Important => "Important"
+    Warning => "Warning"
+    Caution => "Caution"
   }
 }
 
