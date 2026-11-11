@@ -8,18 +8,28 @@
 pub type Handler = (Request) -> Response
 
 ///|
+/// Segment is one pattern part before the end: a literal, or {name}
+/// matching one non-empty segment.
 priv enum Segment {
   Literal(String)
   Wildcard(String)
-  Rest(String)
+}
+
+///|
+/// Tail is the shape of the end of a pattern: an exact end, "{$}", a
+/// trailing "/" (the whole subtree), or "{name...}".
+priv enum Tail {
+  Exact
   End
+  Subtree
+  Rest(String)
 }
 
 ///|
 priv struct Route {
   verb : String? // None matches every method
   segments : Array[Segment]
-  subtree : Bool // the pattern ends in "/" without {$}
+  tail : Tail
   handler : Handler
 }
 
@@ -74,19 +84,18 @@ pub fn Router::handle(
   }
   let parts = path[1:].split("/").collect()
   let segments = []
-  let mut subtree = false
+  let mut tail = Exact
   for i, part in parts {
     let last = i == parts.length() - 1
     match part {
-      "" if last => subtree = true
-      "{$}" if last => segments.push(End)
-      [.. "{", .. name, .. "...}"] if last =>
-        segments.push(Rest(name.to_owned()))
+      "" if last => tail = Subtree
+      "{$}" if last => tail = End
+      [.. "{", .. name, .. "...}"] if last => tail = Rest(name.to_owned())
       [.. "{", .. name, .. "}"] => segments.push(Wildcard(name.to_owned()))
       _ => segments.push(Literal(part.to_owned()))
     }
   }
-  let route = Route::{ verb, segments, subtree, handler, }
+  let route = Route::{ verb, segments, tail, handler, }
   // Keep the routes from the most specific, after the equal ones.
   let at = self.routes
     .search_by(r => more_specific(route, r))
@@ -95,27 +104,36 @@ pub fn Router::handle(
 }
 
 ///|
-/// rank orders the kinds of segment from the most specific.
-fn rank(s : Segment?, subtree : Bool) -> Int32 {
-  match s {
+/// rank orders the kinds of unit from the most specific: a literal, then
+/// "{$}", a wildcard, "{name...}", a trailing "/", and an exact end. The
+/// unit at i is the i-th segment, or the tail just past them.
+fn rank(route : Route, i : Int32) -> Int32 {
+  match route.segments.get(i) {
     Some(Literal(_)) => 4
-    Some(End) => 3
     Some(Wildcard(_)) => 2
-    Some(Rest(_)) => 1
-    None => if subtree { 0 } else { -1 }
+    None =>
+      if i == route.segments.length() {
+        match route.tail {
+          End => 3
+          Rest(_) => 1
+          Subtree => 0
+          Exact => -1
+        }
+      } else {
+        -1
+      }
   }
 }
 
 ///|
 /// more_specific tells whether a matches fewer paths than b, comparing
-/// segment by segment, and a method over none.
+/// segment by segment, then the tails, and a method over none.
 fn more_specific(a : Route, b : Route) -> Bool {
   let n = a.segments.length().max(b.segments.length())
-  // One past the longer, so that a subtree is less specific than the
-  // same path alone.
+  // One past the longer, so that the tail of the shorter is compared too.
   for i in 0..<=n {
-    let ra = rank(a.segments.get(i), a.subtree)
-    let rb = rank(b.segments.get(i), b.subtree)
+    let ra = rank(a, i)
+    let rb = rank(b, i)
     if ra != rb {
       return ra > rb
     }
@@ -141,26 +159,23 @@ fn Route::match_path(
         guard segs.get(i) is Some(seg) && seg != "" else { return None }
         params[name] = seg
       }
-      Rest(name) => {
-        params[name] = segs[i:].join("/")
-        return Some(params)
-      }
-      End => if !(i == segs.length() - 1 && segs[i] == "") { return None }
     }
   }
   let n = self.segments.length()
-  if self.segments.last() is Some(End) {
-    Some(params)
-  } else if self.subtree {
-    if segs.length() > n {
+  match self.tail {
+    Exact => if segs.length() == n { Some(params) } else { None }
+    // "{$}" is the empty segment a path ends in "/" with.
+    End =>
+      if segs.length() == n + 1 && segs[n] == "" {
+        Some(params)
+      } else {
+        None
+      }
+    Subtree => if segs.length() > n { Some(params) } else { None }
+    Rest(name) => {
+      params[name] = segs[n:].join("/")
       Some(params)
-    } else {
-      None
     }
-  } else if segs.length() == n {
-    Some(params)
-  } else {
-    None
   }
 }
 
