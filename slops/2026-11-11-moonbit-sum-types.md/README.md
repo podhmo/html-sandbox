@@ -2,6 +2,7 @@
 title: Goの形を脱いでMoonBitのsum typesに寄せた
 description: issue #158 の対応で tinymarkdown と blog site を Go 風の struct + sentinel から MoonBit の enum / Option に書き直した記録。点検に使った基準、書き換えた箇所、あえて手を付けなかった過剰適用の例、実装中の気づき、範囲外で見つかった残りの候補まで。
 prev: ../2026-11-07-numbered-lists.md
+next: ../2026-11-12-what-the-lint-missed.md
 ---
 
 # Goの形を脱いでMoonBitのsum typesに寄せた
