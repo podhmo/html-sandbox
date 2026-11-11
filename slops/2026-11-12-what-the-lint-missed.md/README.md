@@ -193,7 +193,7 @@ moonbit-sum-types のバンドルは、人間が読むとバンドル単位で A
 
 ## データと参考
 
-集計の全表は [01-data.md](01-data.md) に、外部資料とそれぞれ何を確認したかは [02-references.md](02-references.md) に分けてある。
+集計の全表へのリンクは [01-data.md](01-data.md) に、外部資料とそれぞれ何を確認したかは [02-references.md](02-references.md) に分けてある。
 
 ## 余談
 

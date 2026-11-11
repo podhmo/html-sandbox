@@ -5,7 +5,7 @@
 
 ### 問い
 
-[issue #167](https://github.com/podhmo/html-sandbox/issues/167) で「LLM の文章がなぜひどいか」の調査をして、yomiyasu（日本語 AI 文向けの推敲スキルと lint）が対象に近いことが分かった。issue #169 では、yomiyasu の lint を slops の記事全体に適用してみた。問いは 2 つある。
+[issue #167](https://github.com/podhmo/html-sandbox/issues/167) で「LLM の文章がなぜひどいか」の調査をして、yomiyasu（日本語 AI 文向けの推敲スキルと lint）が対象に近いことが分かった。[issue #169](https://github.com/podhmo/html-sandbox/issues/169) では、yomiyasu の lint を slops の記事全体に適用してみた。問いは 2 つある。
 
 1. 記事を書いた生成ツール（Devin・Claude Code・Codex・opencode）の違いは、lint の候補の分布に現れるか。
 2. Claude Code の出力する文章に残る特有の読みにくさは、lint の数値として取得できるか。
@@ -62,4 +62,4 @@ moonbit-sum-types のバンドルは、人間が読むとバンドル単位で A
 
 ### データと参考
 
-集計の全表は [01-data.md](01-data.md) に、外部資料とそれぞれ何を確認したかは [02-references.md](02-references.md) に分けてある。
+集計の全表へのリンクは [01-data.md](01-data.md) に、外部資料とそれぞれ何を確認したかは [02-references.md](02-references.md) に分けてある。
