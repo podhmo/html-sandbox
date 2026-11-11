@@ -71,6 +71,19 @@
     空はパターンマッチ（`is [face, ..]` / `is []`）で表せるので `Option` 化は
     しない（`ItemList?` は `kind` 無しに空を作れないので必要だった）。`router`
     の `Route.subtree : Bool` も固有フィールドを持たないので見送り
+- [ ] **sum types の指針に照らして残った MoonBit の候補を直す**:
+  [指針](slops/2026-11-11-moonbit-sum-types.md/01-guidelines.md)の末尾の表で
+  「候補」とした2件。どちらも1つの状態が型の違う2か所に分かれている形
+  （指針の「どの構造を」2）。振る舞いは変えず、`make check` と `make compare` で確かめる。
+  - [ ] `pkg/http/router.mbt`: `Route.subtree : Bool` と `Segment` の `End`/`Rest` が
+    どれもパターン末尾の形を表し排他。`Tail { Exact; End; Subtree; Rest(String) }`
+    に畳み、`match_path` の末尾判定の if 連鎖と `rank` を match にする。上の #158 の
+    項目で `subtree` を見送った判断を、排他性の観点で覆すもの
+  - [ ] `pkg/tinymarkdown/tinymarkdown.mbt` の `scan`: `Pending` が非空なのは
+    `Mode::Normal` のときだけなので `Normal(Pending)` の payload にする。あわせて
+    `Code`/`Footnote` を閉じる処理が閉じる行と入力の終わりの2か所にあるのを
+    `close(mode)` に寄せる（指針の state machine 4）。`Code.info` の `""` → `None`
+    変換の重複も消える
 
 ### Future work
 
