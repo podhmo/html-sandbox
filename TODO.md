@@ -84,6 +84,19 @@
     `Code`/`Footnote` を閉じる処理が閉じる行と入力の終わりの2か所にあるのを
     `close(mode)` に寄せる（指針の state machine 4）。`Code.info` の `""` → `None`
     変換の重複も消える
+- [ ] **隠れたキャラクター・文書構造を検査する自作 lint を作る**: slops 記事への
+  yomiyasu lint 適用で、文レベルの欠陥は候補に出るが文書レベル（網羅的対称・
+  足場構造・一様リズム）は届かないことが分かった。文単位は Zonder の hidden
+  characters and actions（行為の名詞化・無生物主語・行為者が格を外される形）を
+  形態素・係受け解析で検出し、文書単位は木構造＋役割付け＋分岐解釈で扱う。
+  語彙リストは持たない（kuden 的な構造基準）。
+  [issue #171](https://github.com/podhmo/html-sandbox/issues/171)・
+  [issue #169](https://github.com/podhmo/html-sandbox/issues/169)
+  - [ ] **形態素・係受け・文書構造の特徴量を slops 全体で集計する**:
+    lint 化の前に各特徴量（節数/文・係受け深さ・名詞化率・無生物主語・
+    文書構造メトリクス）を執筆者別に集計し、分ける力があるか眺める。
+    分離度が見えた特徴量だけを lint の規則候補にする。
+    [issue #172](https://github.com/podhmo/html-sandbox/issues/172)
 
 ### Future work
 
