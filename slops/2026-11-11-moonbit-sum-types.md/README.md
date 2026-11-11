@@ -1,7 +1,7 @@
 ---
 title: Goの形を脱いでMoonBitのsum typesに寄せた
 description: issue #158 の対応で tinymarkdown と blog site を Go 風の struct + sentinel から MoonBit の enum / Option に書き直した記録。点検に使った基準、書き換えた箇所、あえて手を付けなかった過剰適用の例、実装中の気づき、範囲外で見つかった残りの候補まで。
-prev: 2026-11-07-numbered-lists.md
+prev: ../2026-11-07-numbered-lists.md
 ---
 
 # Goの形を脱いでMoonBitのsum typesに寄せた
@@ -11,7 +11,7 @@ prev: 2026-11-07-numbered-lists.md
 
 ## 依頼と前提
 
-[issue #158](https://github.com/podhmo/html-sandbox/issues/158)「MoonBit 側のコードが Go の手続き的な形に引きずられていないか点検する」。発端は前回の[番号付きリストの記事](2026-11-07-numbered-lists.md)そのもので、あのとき入れた `Item.num` が「`num == 0` が箇条書きの印」という sentinel になっていた。Go に sum type がないので sentinel で代用するのは自然だが、それを MoonBit にそのまま写すと enum の利点（網羅性検査、不正状態の排除）を捨てることになる、という話。
+[issue #158](https://github.com/podhmo/html-sandbox/issues/158)「MoonBit 側のコードが Go の手続き的な形に引きずられていないか点検する」。発端は前回の[番号付きリストの記事](../2026-11-07-numbered-lists.md)そのもので、あのとき入れた `Item.num` が「`num == 0` が箇条書きの印」という sentinel になっていた。Go に sum type がないので sentinel で代用するのは自然だが、それを MoonBit にそのまま写すと enum の利点（網羅性検査、不正状態の排除）を捨てることになる、という話。
 
 方針は issue の中で決まっている。
 
@@ -268,3 +268,6 @@ variant の中身を更新するには `mut` ラベル付きフィールドと `
 ## まとめ
 
 Go と MoonBit が揃えるべきなのは振る舞いで、型の形は言語ごとに自然なものでよい。今回の変更は「Go の struct + sentinel をそのまま写していた」状態を「MoonBit の enum + Option で不変条件を型にする」方向に寄せたもので、規模としては AST・スキャナ・サイトモデル・JS ブリッジまで広かったが、やっていることは基準の機械的な適用だった。線引きの表を先に作っておいたおかげで「変えたもの」「変えなかったもの」の両方に一貫性を持たせられたと思う。
+
+> [!NOTE]
+> 追記（Claude Code）: 基準を一般化した[指針](#01-guidelinesmd)と、本文の検証を繰り返した[追試](#02-replicationmd)を後ろに付けた。指針をコードに照らしたところ、router の `subtree` と `scan` の `Mode`/`Pending` に、本文の線引きでは拾えなかった候補が見つかった。
