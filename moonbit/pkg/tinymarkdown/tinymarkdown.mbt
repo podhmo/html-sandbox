@@ -327,7 +327,7 @@ fn scan(src : String, notes : FootnoteSet) -> Array[Flat] {
       Nothing => ()
       Para(lines) => out.push(Block(Paragraph(lines.join("\n"))))
       Items(items) =>
-        out.push(Block(List(nest_items(items, from=0, parent=-1).0.unwrap())))
+        out.push(Block(List(nest_items(items, from=0, parent=None).0.unwrap())))
       Quote(lines) =>
         match alert_kind(lines[0]) {
           Some(kind) => {
@@ -656,20 +656,27 @@ fn dedent(line : StringView, n : Int32) -> StringView {
 
 ///|
 /// nest_items turns indentation in flat into nested lists. It consumes
-/// items from flat[from:] while they are indented deeper than parent,
-/// returning the list — its kind taken from its first item's marker —
-/// and the index where it stopped, or None when nothing is deeper.
+/// items from flat[from:] while they are indented deeper than parent —
+/// None at the top level, where every item is deeper — returning the
+/// list, its kind taken from its first item's marker, and the index
+/// where it stopped, or None when nothing is deeper.
 fn nest_items(
   flat : Array[RawItem],
   from~ : Int32,
-  parent~ : Int32,
+  parent~ : Int32?,
 ) -> (ItemList?, Int32) {
+  // Indents are 0 or more, so no parent behaves like an indent of -1.
+  let parent = parent.unwrap_or(-1)
   guard from < flat.length() && flat[from].indent > parent else {
     return (None, from)
   }
   let items = []
   for i = from; i < flat.length() && flat[i].indent > parent; {
-    let (children, next) = nest_items(flat, from=i + 1, parent=flat[i].indent)
+    let (children, next) = nest_items(
+      flat,
+      from=i + 1,
+      parent=Some(flat[i].indent),
+    )
     items.push({ text: flat[i].text, children, })
     continue next
   } nobreak {
