@@ -1,17 +1,23 @@
 ///|
-let base_url : Ref[String] = Ref("")
+/// SiteState is the state of the content being served: Unloaded until the
+/// first request, then Loaded with the base it was loaded under — loaded
+/// again when the base changes — and either the site or why it could not
+/// load.
+priv enum SiteState {
+  Unloaded
+  Loaded(base~ : String, result~ : Result[@site.Site, String])
+}
 
 ///|
-let site : Ref[Result[@site.Site, String]?] = Ref(None)
+let site_state : Ref[SiteState] = Ref(Unloaded)
 
 ///|
 fn load(base : String) -> Result[@site.Site, String] {
-  match site.val {
-    Some(s) if base == base_url.val => s
+  match site_state.val {
+    Loaded(base=b, result=s) if b == base => s
     _ => {
-      base_url.val = base
       let s = Ok(@content.site(base_url=base)) catch { e => Err("\{e}") }
-      site.val = Some(s)
+      site_state.val = Loaded(base~, result=s)
       s
     }
   }

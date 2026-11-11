@@ -1,8 +1,4 @@
 ///|
-/// base_url is the public origin the site was loaded with.
-let base_url : Ref[String] = Ref("")
-
-///|
 /// post_files and doc_files hold the content the host
 /// (../../../cloudflare/worker.mjs) loaded from Static Assets, as pairs of
 /// the name and the file: post names are relative to the repository's
@@ -16,9 +12,17 @@ let slop_files : Ref[Array[(String, String)]] = Ref([])
 let doc_files : Ref[Array[(String, String)]] = Ref([])
 
 ///|
-/// site is the content being served, loaded on the first request (and
-/// again if BASE_URL changes), or why it could not be.
-let site : Ref[Result[@site.Site, String]?] = Ref(None)
+/// SiteState is the state of the content being served: Unloaded until the
+/// first request, then Loaded with the base it was loaded under — loaded
+/// again when the base changes — and either the site or why it could not
+/// load.
+priv enum SiteState {
+  Unloaded
+  Loaded(base~ : String, result~ : Result[@site.Site, String])
+}
+
+///|
+let site_state : Ref[SiteState] = Ref(Unloaded)
 
 ///|
 /// put replaces the file named name, or adds it: the host may load the
@@ -64,12 +68,11 @@ pub fn file(n : Int32) -> Int32 {
 ///|
 /// load returns the site for base, loading it on first use.
 fn load(base : String) -> Result[@site.Site, String] {
-  match site.val {
-    Some(s) if base == base_url.val => s
+  match site_state.val {
+    Loaded(base=b, result=s) if b == base => s
     _ => {
-      base_url.val = base
       let s = Ok(load_site(base)) catch { e => Err("\{e}") }
-      site.val = Some(s)
+      site_state.val = Loaded(base~, result=s)
       s
     }
   }
