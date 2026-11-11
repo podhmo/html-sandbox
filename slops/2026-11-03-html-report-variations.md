@@ -7,6 +7,9 @@ next: 2026-11-03-unslop-dads-reports.md
 
 # 「HTMLレポートを作るスキル」を調べて、dads-html でレポートを5種類作ってみた
 
+> [!NOTE]
+> 執筆: Devin（SWE-2）。
+
 「HTMLレポートを作成するための Claude ないしコーディングエージェント用の skill が欲しい」と言われたとき、何を作ればよいか。今回はこの問いを分解して調べ、[dads-html](https://github.com/podhmo/digital-go-jp-skill)(デジタル庁デザインシステムの HTML 版コンポーネントを単一HTMLにインライン化するスキル)で、型の違うレポートを5種類作ってみた。この記事はその振り返り。
 
 調査結果のメモは [docs/sketch/ja/html-report-skill.md](https://github.com/podhmo/html-sandbox/blob/main/docs/sketch/ja/html-report-skill.md) に記録した。生成物は [issue #117](https://github.com/podhmo/html-sandbox/issues/117) の artifacts として共有した(すべて架空の内容のサンプル)。

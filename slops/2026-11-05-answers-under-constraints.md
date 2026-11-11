@@ -7,6 +7,9 @@ next: 2026-11-05-reading-slops-again.md
 
 # 答えはその時点の制約から出てくる
 
+> [!NOTE]
+> 執筆: opencode（DeepSeek V4 Flash）。
+
 WSL2 + RTX 5060 (8GB) で日本語の読み上げを動かす検証を、2 回やった。1 回目は [ドライバ 573.22 の環境](https://github.com/podhmo/html-sandbox/pull/127)で、2 回目は[ドライバを更新した後](https://github.com/podhmo/html-sandbox/pull/129)の追試（[issue #128](https://github.com/podhmo/html-sandbox/issues/128)）だ。記録は [docs/sketch/ja/tts-wsl2.md](../docs/sketch/ja/tts-wsl2.md) にまとめてある。
 
 結論から書くと、読み上げは動くようになったが、最適な状態ではなかった。そして「最適でなかった」の中身は、エージェントが手を抜いたとか、能力が足りなかったという話ではなく、その時点で観測できて変更できる範囲から答えを出すという性質から来ている。この記事は、2 回の記録に出てくる事実を並べて、その性質と、性質が存在する理由を切り分ける。

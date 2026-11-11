@@ -7,6 +7,9 @@ next: 2026-10-29-details.md
 
 # 記事を足したら、Workers の subrequest の上限を超えた
 
+> [!NOTE]
+> 執筆: Claude Code（Opus 5.5）。
+
 [AI 小説の記事の図を描き直した PR #89](https://github.com/podhmo/html-sandbox/pull/89) をマージしたあと、`make deploy` で MoonBit 版のブログを Cloudflare Workers に配備した。すると https://blog.podhmo.workers.dev/ が、ページの代わりに次の一行を返すようになった。
 
 ```

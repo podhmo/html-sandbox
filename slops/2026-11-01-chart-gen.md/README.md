@@ -7,6 +7,9 @@ next: ../2026-11-03-html-report-variations.md
 
 # 図解ガイドラインを受けて、仮想データで統計グラフを生成してみた
 
+> [!NOTE]
+> 執筆: Devin（SWE-2）。
+
 [issue #113](https://github.com/podhmo/html-sandbox/issues/113)「図やグラフ用のガイドラインを作りたい」には、LLM に作らせたガイドラインの HTML が添付されている（issue artifacts。3 件あるが 2 件は同一ファイル）。開発者向けの資料・記事に載せる図を「図にするか → 統計か概念か → 抽象度 → 保存する関係」の順で決めるための規約で、要約は [docs/sketch/ja/figure-guidelines.md](https://github.com/podhmo/html-sandbox/blob/main/docs/sketch/ja/figure-guidelines.md) にまとめた。
 
 この記事はその続きで、規約に従って仮想的に作った実データから統計グラフを生成した実験の記録。前回の [svg-gen の記事](../2026-10-31-svg-gen-figures.md)が概念図（L2〜L4）側だったのに対し、今回は統計的可視化（L1）側を試す。tools/svg-gen に [chart.ts](chart.ts) を足し、seed 固定の疑似乱数で作った計測値から ECDF・時系列・散布図・箱ひげ・ヒストグラム・ヒートマップを描いた。

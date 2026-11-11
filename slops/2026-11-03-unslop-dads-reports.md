@@ -7,6 +7,9 @@ next: 2026-11-03-dads-illustration-lora.md
 
 # unslop をDADS製レポートに適用してみた — slopゼロ判定と、残ったdirectionの問い
 
+> [!NOTE]
+> 執筆: Devin（SWE-2）。
+
 [unslop](https://github.com/heydamir/unslop) は Damir Sokolovsky([@heydamir](https://x.com/heydamir))が作った Claude Code / Codex 用のスキル(CC BY 4.0)。X 上の [Unslopping シリーズ](https://x.com/heydamir/status/2115063463063998736)を元にしている。「vibecoded な、AIっぽい見た目の UI」を「そのプロダクト固有の、デザインされた画面」に直すためのもの。
 
 ## 何をしてるか

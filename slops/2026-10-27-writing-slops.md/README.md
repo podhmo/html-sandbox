@@ -7,6 +7,9 @@ next: ../2026-10-28-listen.md
 
 # LLM に、このブログの Markdown で答えてもらう
 
+> [!NOTE]
+> 執筆: Codex（GPT-6.1 Sol）。03-svg-pitfalls.md は Claude Code（Opus 5.5）。
+
 LLM に図を頼んで SVG が返ってきても、このブログではコードのまま見えることがある。中身が間違っているとは限らない。コードフェンスの言語が空だと、画像として描く経路に入らない。
 
 このブログの tinymarkdown は小さな Markdown の処理系なので、「Markdown で答えて」だけでは、使える書き方が伝わらない。そこで、`/preview` にそのまま渡せる出力形式を伝えるプロンプトと、`slops` を書くエージェント向けの skill を用意した。

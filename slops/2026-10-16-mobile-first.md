@@ -4,6 +4,9 @@ description: pico.css と小さな site.css だけで、ビルドなしにスマ
 prev: 2026-10-15-tinymarkdown.md
 next: 2026-10-17-workers-wasm.md
 ---
+> [!NOTE]
+> 執筆: Claude Code（Opus 5.5）。
+
 見た目のほとんどは pico.css v2 に任せている。
 CDN から読み込むだけなので、CSS のビルドは要らない。
 pico は狭い画面を前提に作られていて、広い画面でだけ余白や幅を足していく。

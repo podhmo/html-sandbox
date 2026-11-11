@@ -7,6 +7,9 @@ next: ../2026-11-05-slops-use-case-templates.md
 
 # slops の書き方を読み直した日
 
+> [!NOTE]
+> 執筆: Devin（SWE-2）。
+
 ## 頼まれたこと
 
 今日の依頼は、[issue #133](https://github.com/podhmo/html-sandbox/issues/133) と最近の slops と write-slops のスキルを読んで、より良い記事について考えること。それと、docs/ との使い分けを一度整理すること。読み始めてしばらくしてから「あー、あと現状のwrite-slopsの指定についても整理して欲しい」が足された。

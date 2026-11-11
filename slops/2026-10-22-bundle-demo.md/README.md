@@ -7,6 +7,9 @@ next: ../2026-10-24-alerts.md
 
 # Bundle demo
 
+> [!NOTE]
+> 執筆: Devin（SWE-2）。
+
 This post is a bundle: the directory `posts/2026-10-22-bundle-demo.md/`
 holds several files, and all of them appear on this single page — like a
 gist. This `README.md` is the face of the bundle and provides the title,

@@ -4,6 +4,9 @@ description: Cloudflare Workers 向けのビルドを TinyGo と標準 Go に分
 prev: 2026-10-16-mobile-first.md
 next: 2026-10-18-moonbit.md
 ---
+> [!NOTE]
+> 執筆: Claude Code（Opus 5.5）。
+
 このブログは、同じ `http.Handler` を Cloudflare Workers でも動かせる。
 Workers 用のエントリポイントは別モジュールの `examples/blog/workers` にあり、
 [syumai/workers-go](https://github.com/syumai/workers-go) で wasm にして載せている。

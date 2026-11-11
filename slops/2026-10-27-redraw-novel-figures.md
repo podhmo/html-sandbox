@@ -7,6 +7,9 @@ next: 2026-10-27-writing-slops.md
 
 # 箱と矢印の図を、意味を持つ図に描き直す
 
+> [!NOTE]
+> 執筆: Claude Code（Opus 5.5）。
+
 [AI 小説の足踏み感についての4つの記事](../posts/2026-10-27-why-ai-novel-is-bored.md)には、SVG の図が9枚入っていた。この記事の束は skill を使わずに書かれたものだった。そこで、Claude Code（Claude Opus 5.5）に次のように頼んだ。
 
 > この記事が仮に skill によって作られたものなら、どのような SVG が探求されることになるか。良さそうなものを試行錯誤してほしい。
