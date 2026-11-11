@@ -235,6 +235,7 @@ variant の中身を更新するには `mut` ラベル付きフィールドと `
 - `wire.mbt` の `in_env : Bool`、`el` の `LineWriter.at_line_start`。同じく素直な2値
 - `resolver(repo_files~ : Bool)`。GitHub へのフォールバックを切るかどうかの ON/OFF。名前付き引数で読み方が決まっている
 - `router` の `Route.subtree : Bool`。型のフィールドの中のフラグではあるが、「subtree のときだけ意味を持つフィールド」が存在しない。`Exact | Subtree` の variant にしても命名が明瞭になるだけで、新たに守れる不変条件は増えない。フラグと状態固有のフィールド群が揃って初めて sum type 化の利になる
+- `Post.members`/`Doc.members`。空配列が「単一ファイル」を表しているが、コレクションの空はパターンマッチ（`is [face, ..]` / `is []`）で素直に書ける。`Option` が要るのは `ItemList` のように「空を作るには必須フィールドの値を捏造しないといけない」型だけ。一度 `Array[Member]?` にしてみて（[#165](https://github.com/podhmo/html-sandbox/pull/165)）、この線引きで見送った
 
 空文字列や `-1` が「無い」の意味でなく、値としての意味を持つなら残す。「`== ""` がある = 悪い」ではなく、「`""` が欠落を表していて呼び出し側がそれを再解釈しているか」が判断点だった。
 
@@ -250,17 +251,17 @@ variant の中身を更新するには `mut` ラベル付きフィールドと `
 
 ## issue の範囲外で見つかった候補
 
-依頼の延長で `moonbit/` 全体を走査した。基準に照らして残っているもの（未対応）。
+依頼の延長で `moonbit/` 全体を走査した。基準に照らして残っていたものと、その後の対応（#160 の上に積んだ stacked PRs #161-#164。同じ一覧を TODO.md のタスクとしても管理）。
 
-| 場所 | 形 | 案 |
+| 場所 | 形 | 結果 |
 | ---- | --- | --- |
-| `links.mbt` の `Ref` | 無い `scheme`/`query`/`fragment` を `""` で保持 | `String?`（`priv` なので `parse`/`resolve` 内で完結） |
-| `nav.mbt` の `page_title` | 「サイトのページでない」に `""` を返し、呼び出し側が `"" =>` で分岐 | `String?` |
-| `views.mbt` の `PageMeta.title` | `""` が「トップページ=タイトル無し」で、`document_title`/`ogp` が `== ""` を再判定 | `String?` |
-| worker 系の `base_url` + `site` | 「未ロード/ロード済み」を2つの `Ref` の同期で表現（worker.mbt、adapter-abi 各種） | `Unloaded \| Loaded(base~, result~)` |
-| `inline.mbt` の `closing_run` | 「見つからない」に `-1` を返す | `Int32?`（ループ sentinel としては妥当でもある） |
-| `tinymarkdown.mbt` の `nest_items(parent=-1)` | 「親なし」に `-1`（今回のリファクタで残った） | `Int32?` |
-| `content.mbt` の `Doc.members` | 空配列が「単一ファイル」、非空なら先頭が bundle の face | `Array[Member]?`（他フィールドは両ケースで有効なので弱い候補） |
+| `links.mbt` の `Ref` | 無い `scheme`/`query`/`fragment` を `""` で保持 | `String?`（[#161](https://github.com/podhmo/html-sandbox/pull/161)） |
+| `nav.mbt` の `page_title` | 「サイトのページでない」に `""` を返し、呼び出し側が `"" =>` で分岐 | `String?`（[#163](https://github.com/podhmo/html-sandbox/pull/163)） |
+| `views.mbt` の `PageMeta.title` | `""` が「トップページ=タイトル無し」で、`document_title`/`ogp` が `== ""` を再判定 | `String?`（#163） |
+| worker 系の `base_url` + `site` | 「未ロード/ロード済み」を2つの `Ref` の同期で表現（worker.mbt、adapter-abi 各種） | `Unloaded \| Loaded` の enum に畳んだ（[#164](https://github.com/podhmo/html-sandbox/pull/164)） |
+| `inline.mbt` の `closing_run` | 「見つからない」に `-1` を返す | `Int32?`（[#162](https://github.com/podhmo/html-sandbox/pull/162)） |
+| `tinymarkdown.mbt` の `nest_items(parent=-1)` | 「親なし」に `-1`（今回のリファクタで残った） | `Int32?`（#162） |
+| `content.mbt` の `Doc.members` | 空配列が「単一ファイル」、非空なら先頭が bundle の face | 見送り（上の線引き参照） |
 
 逆に `pkg/el`（`Node`/`Tag`/`AttrName`）、`pkg/http`（`Body` enum、`Headers::get` の `String?`、`router` の `Segment` enum）、`tinyfrontmatter` は元から enum/Option を使えていて触るものがなかった。
 
