@@ -73,6 +73,14 @@ article li {
   line-height: 1.4;
 }
 
+/* pico makes inline code an inline-block, so a long path or call with no
+   space in it is one unbreakable box wider than a phone screen, and the
+   whole page scrolls sideways. Let it break anywhere inside its box. Code
+   in a pre keeps its own horizontal scroll. */
+article :not(pre) > code {
+  overflow-wrap: anywhere;
+}
+
 /* Every section heading carries a permalink. It stays a small muted "#",
    so it can be long-pressed and copied on a phone, where nothing hovers. */
 article .heading-permalink {

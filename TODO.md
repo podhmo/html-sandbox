@@ -51,6 +51,10 @@
   - [x] SVG のコードブロックに ` ```svg ` のラベルを補う: `/preview` に渡す tinymarkdown を AI との対話で
     作らせると、指定があってもフェンスの `svg` ラベルが漏れることが多い（ラベルがないと画像にならずコードとして出る）。
     中身が `<svg` で始まるラベルなしのフェンスに `svg` を付ける。
+- [x] **モバイルで長いインラインコードが横スクロールを起こす**: pico が `code` を
+  inline-block にするため、空白のないパスなどが本文の幅を超えていた。site.css で
+  `pre` 外の `code` に `overflow-wrap: anywhere` を付けた
+  （[issue #153](https://github.com/podhmo/html-sandbox/issues/153)）。
 
 ### Future work
 
