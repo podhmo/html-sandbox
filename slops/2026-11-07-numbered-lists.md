@@ -7,7 +7,7 @@ prev: 2026-11-07-delaunay-voronoi.md
 # 耐えかねて番号付きリストを実装した
 
 > [!NOTE]
-> 執筆: Devin。
+> 執筆: Devin（SWE-2）。
 
 ## 依頼と前提
 

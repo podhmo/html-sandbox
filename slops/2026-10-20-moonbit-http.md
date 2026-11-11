@@ -4,6 +4,9 @@ description: ブログ専用だった MoonBit の wasm と Worker のあいだ�
 prev: 2026-10-19-moonbit-memory.md
 next: [同じ wasm をブラウザーと Worker で動かしたい](2026-10-21-moonbit-browser.md)
 ---
+> [!NOTE]
+> 執筆: Claude Code（Opus 5.5）。
+
 [前の記事](./2026-10-19-moonbit-memory.md)の受け渡しは、このブログのためだけのものだった。
 wasm に届くのは `BASE_URL`、メソッド、クエリー、パスだけで、POST の本文もヘッダーも届かない。
 これを、ほかの Worker でも使える形に切り出せるかを試した。

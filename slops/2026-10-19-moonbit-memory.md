@@ -4,6 +4,9 @@ description: MoonBit の wasm と Worker のあいだの受け渡しを、コー
 prev: 2026-10-18-moonbit.md
 next: 2026-10-20-moonbit-http.md
 ---
+> [!NOTE]
+> 執筆: Claude Code（Opus 5.5）。
+
 [前の記事](./2026-10-18-moonbit.md)で、MoonBit の wasm と JS のあいだでは、文字列を UTF-16 のコード単位ごとに 1 つずつ受け渡していると書いた。
 遅そうに見えるが、往復の時間ではほとんど差が出ない、とも書いた。
 測り直すと、そうでもなかった。

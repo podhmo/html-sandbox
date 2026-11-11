@@ -4,6 +4,9 @@ description: MoonBit の tinymarkdown と el を wasm-gc のままブラウザ�
 prev: 2026-10-20-moonbit-http.md
 next: 2026-10-22-bundle.md
 ---
+> [!NOTE]
+> 執筆: Claude Code（Opus 5.5）。
+
 記事を書く画面があったとして、打った Markdown をその場でプレビューしたい。
 このブログが記事を描画しているのは、MoonBit の `tinymarkdown` と `el` だ。
 同じ処理をブラウザーでも動かせば、プレビューは記事のページとずれない。

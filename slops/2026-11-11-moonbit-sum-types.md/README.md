@@ -7,7 +7,7 @@ prev: ../2026-11-07-numbered-lists.md
 # Goの形を脱いでMoonBitのsum typesに寄せた
 
 > [!NOTE]
-> 執筆: Devin。
+> 執筆: Devin（SWE-2）。
 
 ## 依頼と前提
 

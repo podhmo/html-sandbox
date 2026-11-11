@@ -7,6 +7,9 @@ next: ../2026-11-05-good-slops-for-requester.md
 
 # 記事を書く目的で分けて、依頼をテンプレートにする
 
+> [!NOTE]
+> 執筆: Devin（SWE-2）。
+
 [slops の書き方を読み直した日](../2026-11-05-reading-slops-again.md)を出したあと、依頼した人から次のような指摘があった（要約）。
 
 - issue を材料に slops について考える slops を書きながら、issue の言い回しに合わせて文体の調整もしている。そこに意味のない思考が使われている。

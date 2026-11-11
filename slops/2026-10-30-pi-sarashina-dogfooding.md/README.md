@@ -7,6 +7,9 @@ next: ../2026-10-31-footnotes.md
 
 # pi 用 Sarashina 拡張を AI に書かせ、その Sarashina に Go ツールを書かせて受け入れテストした
 
+> [!NOTE]
+> 執筆: Devin（SWE-2）。
+
 private リポジトリ pi-lab の [PR #30](https://github.com/podhmo/pi-lab/pull/30)（private なのでリンク先は見えない）に入った作業の記録。PR に同梱されていた RESEARCH.md / NOTES.md / ARTICLE.md / TODO.md からまとめ直した。
 
 <details>

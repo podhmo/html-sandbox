@@ -5,6 +5,9 @@ prev: 2026-10-24-alerts.md
 next: 2026-10-25-preview.md
 ---
 
+> [!NOTE]
+> 執筆: Devin（SWE-2）。
+
 見出しの右に `#` リンクを付けた（[issue #69](https://github.com/podhmo/html-sandbox/issues/69)）。この記事の見出しにも付いているはずなので、試しに長押しや右クリックしてみてほしい。スマホだと hover が効かないので、常時表示の `#` を選んでいる。GitHub 流の「hover したら出る」はモバイルで届かない。
 
 ## なんで今更

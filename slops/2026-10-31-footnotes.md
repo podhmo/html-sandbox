@@ -7,6 +7,9 @@ next: 2026-10-31-svg-gen-figures.md
 
 # このブログの Markdown に脚注を入れた
 
+> [!NOTE]
+> 執筆: Devin（SWE-2）。
+
 issue #75「脚注を追加したい」に対応して、このブログの小さな Markdown 処理系（tinymarkdown）が脚注を読むようになった。Go と MoonBit の両方に同じ仕様で入れてある。この記事自体が脚注を使っているので、描画の確認も兼ねている[^meta]。
 
 ## 書き方
