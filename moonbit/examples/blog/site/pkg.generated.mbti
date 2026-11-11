@@ -53,7 +53,7 @@ pub struct Doc {
   mut next_nav : NavItem?
   doc : @tinymarkdown.Document
   markdown : String
-  members : Array[Member]
+  members : Array[Member]?
 }
 
 pub struct Member {
@@ -87,7 +87,7 @@ pub struct Post {
   mut next_nav : NavItem?
   doc : @tinymarkdown.Document
   markdown : String
-  members : Array[Member]
+  members : Array[Member]?
 }
 
 type Site

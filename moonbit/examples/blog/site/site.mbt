@@ -63,13 +63,17 @@ pub fn Site::Site(
   }
   let by_member = Map([])
   for p in posts {
-    for m in p.members {
-      by_member[m.source] = "\{p.page_path()}/\{m.name}"
+    if p.members is Some(members) {
+      for m in members {
+        by_member[m.source] = "\{p.page_path()}/\{m.name}"
+      }
     }
   }
   for d in docs {
-    for m in d.members {
-      by_member[m.source] = "\{d.page_path()}/\{m.name}"
+    if d.members is Some(members) {
+      for m in members {
+        by_member[m.source] = "\{d.page_path()}/\{m.name}"
+      }
     }
   }
   let st = Site::{

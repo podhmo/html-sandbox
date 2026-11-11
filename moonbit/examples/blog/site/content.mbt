@@ -78,8 +78,8 @@ pub struct Post {
   doc : @tinymarkdown.Document
   markdown : String // the file as written, front matter included
   // members holds every file of a bundle (a directory named like a post
-  // file), face first; empty for a single-file post.
-  members : Array[Member]
+  // file), face first; None for a single-file post.
+  members : Array[Member]?
 }
 
 ///|
@@ -87,7 +87,7 @@ pub struct Post {
 /// resolve against: for a bundle the face member's own file, so relative
 /// links stay inside the bundle directory.
 fn Post::link_base(self : Post) -> String {
-  if self.members is [face, ..] {
+  if self.members is Some([face, ..]) {
     face.source
   } else {
     self.source()
@@ -151,8 +151,10 @@ fn Member::markdown(
 }
 
 ///|
-/// member_of returns the member named name, or None.
-fn member_of(ms : Array[Member], name : String) -> Member? {
+/// member_of returns the member named name, or None — always None for a
+/// page that is not a bundle.
+fn member_of(ms : Array[Member]?, name : String) -> Member? {
+  guard ms is Some(ms) else { return None }
   for m in ms {
     if m.name == name {
       return Some(m)
@@ -270,7 +272,7 @@ fn load_post_bundle(
     next_nav: None,
     doc,
     markdown: face.raw,
-    members,
+    members: Some(members),
   }
 }
 
@@ -364,7 +366,7 @@ pub fn load_posts(
       next_nav: None,
       doc,
       markdown: src,
-      members: [],
+      members: None,
     })
   }
   for dir_name in bundle_dirs {
@@ -504,8 +506,8 @@ pub struct Doc {
   doc : @tinymarkdown.Document
   markdown : String // the file as written, front matter included
   // members holds every file of a bundle (a directory named like a
-  // document file), face first; empty for a single-file document.
-  members : Array[Member]
+  // document file), face first; None for a single-file document.
+  members : Array[Member]?
 }
 
 ///|
@@ -513,7 +515,7 @@ pub struct Doc {
 /// resolve against: for a bundle the face member's own file, so relative
 /// links stay inside the bundle directory.
 fn Doc::link_base(self : Doc) -> String {
-  if self.members is [face, ..] {
+  if self.members is Some([face, ..]) {
     face.source
   } else {
     self.source
@@ -613,7 +615,7 @@ pub fn load_docs(
       next_nav: None,
       doc,
       markdown: src,
-      members: [],
+      members: None,
     })
   }
   match files.iter().find_first(f => f.0 == metadata_file) {
@@ -659,7 +661,7 @@ fn load_doc_bundle(
     next_nav: None,
     doc,
     markdown: face.raw,
-    members,
+    members: Some(members),
   }
 }
 

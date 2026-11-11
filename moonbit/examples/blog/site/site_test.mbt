@@ -751,13 +751,14 @@ test "load post bundle" {
   let posts = @site.load_posts(test_bundle)
   let p = posts[0]
   assert_eq("\{p.date} \{p.slug} \{p.title}", "2026-10-22 bundle Bundle")
-  assert_eq([ for m in p.members => m.name ], [
+  guard p.members is Some(members) else { fail("want members") }
+  assert_eq([ for m in members => m.name ], [
     "README.md", "00-memo.md", "diagram.svg", "hello.go",
   ])
-  assert_eq([ for m in p.members => m.body is @site.Markdown(..) ], [
+  assert_eq([ for m in members => m.body is @site.Markdown(..) ], [
     true, true, false, false,
   ])
-  assert_eq([ for m in p.members => m.body is @site.Svg ], [
+  assert_eq([ for m in members => m.body is @site.Svg ], [
     false, false, true, false,
   ])
 }
@@ -770,7 +771,8 @@ test "load post bundle without README" {
   ])
   let p = posts[0]
   assert_eq(p.title, "Face")
-  assert_eq([ for m in p.members => m.name ], ["00-face.md", "02-extra.md"])
+  guard p.members is Some(members) else { fail("want members") }
+  assert_eq([ for m in members => m.name ], ["00-face.md", "02-extra.md"])
 }
 
 ///|
@@ -924,9 +926,8 @@ test "README hoisting keeps member order" {
     ("2026-10-15-b.md/a.md", "# A"),
     ("2026-10-15-b.md/b.md", "# B"),
   ])
-  assert_eq([ for m in posts[0].members => m.name ], [
-    "README.md", "a.md", "b.md",
-  ])
+  guard posts[0].members is Some(members) else { fail("want members") }
+  assert_eq([ for m in members => m.name ], ["README.md", "a.md", "b.md"])
 }
 
 ///|

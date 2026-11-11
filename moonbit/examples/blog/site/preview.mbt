@@ -18,14 +18,18 @@ fn Site::preview_files(self : Site) -> Array[String] {
   let files = []
   for p in self.posts {
     files.push(p.source())
-    for m in p.members {
-      files.push(m.source)
+    if p.members is Some(members) {
+      for m in members {
+        files.push(m.source)
+      }
     }
   }
   for d in self.docs {
     files.push(d.source)
-    for m in d.members {
-      files.push(m.source)
+    if d.members is Some(members) {
+      for m in members {
+        files.push(m.source)
+      }
     }
   }
   files

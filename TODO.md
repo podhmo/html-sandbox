@@ -67,9 +67,8 @@
     と `site` の2変数の同期で表現 → `Unloaded | Loaded(base~, result~)` enum
   - [x] `inline.mbt` の `closing_run` と `tinymarkdown.mbt` の
     `nest_items(parent=-1)` の `-1` → `Int32?`
-  - [ ] 弱い候補: `content.mbt` の `Doc.members` を `Array[Member]?` にするか
-    どうか決める。`router` の `Route.subtree : Bool` は固有フィールドを持た
-    ないので見送り方向
+  - [ ] `router` の `Route.subtree : Bool` を variant 化するかどうか決める
+    （固有フィールドを持たないので現状は見送り方向）
 
 ### Future work
 

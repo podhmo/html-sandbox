@@ -203,9 +203,10 @@ fn Site::post_page(self : Site, p : Post) -> @el.Node {
     page_header(@picoel.date(p.date), href=p.markdown_path(), filename=p.file),
     @picoel.article(body),
   ]
-  for i = 1; i < p.members.length(); i = i + 1 {
-    let m = p.members[i]
-    page.push(member_section(self.linker(m.source), p.page_path(), m, gen))
+  if p.members is Some([_, .. members]) {
+    for m in members {
+      page.push(member_section(self.linker(m.source), p.page_path(), m, gen))
+    }
   }
   match rel_nav(p.prev_nav, p.next_nav) {
     Some(nav) => page.push(nav)
@@ -262,9 +263,10 @@ fn Site::doc_page(self : Site, d : Doc) -> @el.Node {
     ),
     @picoel.article(body),
   ]
-  for i = 1; i < d.members.length(); i = i + 1 {
-    let m = d.members[i]
-    page.push(member_section(self.linker(m.source), d.page_path(), m, gen))
+  if d.members is Some([_, .. members]) {
+    for m in members {
+      page.push(member_section(self.linker(m.source), d.page_path(), m, gen))
+    }
   }
   match rel_nav(d.prev_nav, d.next_nav) {
     Some(nav) => page.push(nav)
@@ -278,11 +280,11 @@ fn Site::doc_page(self : Site, d : Doc) -> @el.Node {
 /// raw text in a pre block when the face is not a Markdown file.
 fn render_face(
   link : Linker,
-  members : Array[Member],
+  members : Array[Member]?,
   doc : @tinymarkdown.Document,
   gen : AnchorIds,
 ) -> Array[@el.Node] {
-  if members is [face, ..] && !(face.body is Markdown(..)) {
+  if members is Some([face, ..]) && !(face.body is Markdown(..)) {
     return [@picoel.pre(face.raw)]
   }
   render_document(doc, link, gen)
