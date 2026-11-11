@@ -61,7 +61,7 @@
   もの」の線引きは[記事](slops/2026-11-11-moonbit-sum-types.md)に整理済み。
   - [x] `links.mbt` の `Ref` が無い `scheme`/`query`/`fragment` を `""` で保持
     → `String?`（`priv` なので `Ref::parse` と `resolve` の中で完結する）
-  - [ ] `nav.mbt` の `page_title` の `""` 返しと `views.mbt` の
+  - [x] `nav.mbt` の `page_title` の `""` 返しと `views.mbt` の
     `PageMeta.title` の `""`（トップページ）→ `String?`
   - [ ] `worker.mbt` と adapter-abi 各種が「未ロード/ロード済み」を `base_url`
     と `site` の2変数の同期で表現 → `Unloaded | Loaded(base~, result~)` enum

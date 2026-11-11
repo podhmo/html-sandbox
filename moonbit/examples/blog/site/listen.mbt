@@ -86,7 +86,7 @@ fn listen_button(
 fn Site::listen_page(self : Site) -> @el.Node {
   let description = "Articles read aloud by your browser's speech synthesis. The settings stay in this browser."
   let meta = PageMeta::{
-    title: "Listen",
+    title: Some("Listen"),
     description,
     og: Some({ url: "\{self.base_url}/listen", type_: Website, }),
   }

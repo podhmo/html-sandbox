@@ -126,7 +126,7 @@ fn skim_pace() -> @el.Node {
 fn Site::skim_page(self : Site) -> @el.Node {
   let description = "Articles shown a few words at a time in the middle of the screen. The speed stays in this browser."
   let meta = PageMeta::{
-    title: "Skim",
+    title: Some("Skim"),
     description,
     og: Some({ url: "\{self.base_url}/skim", type_: Website, }),
   }
