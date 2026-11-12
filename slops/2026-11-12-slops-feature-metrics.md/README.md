@@ -145,7 +145,7 @@ prev: ../2026-11-12-what-the-lint-missed.md
 - claude 側の署名は「節を読点でつなぐ」型。文末「た」率 (28% vs 13%, d+1.12)、節数/文 (1.80 vs 1.52, d+0.95)、読点@文節末 (d+0.90)、読点 (d+0.80)、連用形+読点 (d+0.79)、て形接続 (d+0.67)、文節数/文 (d+0.65)、接続詞 (d+0.63)、形式名詞 (d+0.52)。
 - devin 側にも別の署名がある。サ変名詞 (d−1.11)、括弧 (d−1.03)、形態素/文節 (d−0.95)、文末の体言止め率 (36% vs 18%, d−0.81)、名詞3連積み上げ (d−0.62)。claude が「節接続型」で devin が「名詞密度型」という対称的な形。
 - 読点・連用形+読点・て形接続は codex が claude をさらに上回るので「claude 固有」ではない。AI 共有の節接続スタイルの強い版と読むのが正確そうだ。
-- 論文特徴との対応では、無生物主語+動作動詞(「記事は〜書いている」「見出しが開く」型)が claude 12.2 > codex 10.6 > devin 9.4 件/千字で一番まっすぐな対応になった。名詞積み上げは逆に devin が最多 (1.91 vs 0.47)。係り距離には差がなかった。
+- 論文特徴との対応では、無生物主語+動作動詞(「記事は〜書いている」「見出しが開く」型)が claude 12.2 > codex 10.6 > devin 9.4 件/千字で一番まっすぐな対応になった。名詞積み上げは逆に devin が最多 (1.91 vs 0.47)。係り距離には差がなかった。なお論文 (Clark, Martin & Mahowald, arXiv:2610.29162) 自体は未読で、ここで言う「論文特徴」は [issue #167](https://github.com/podhmo/html-sandbox/issues/167) の調査メモ内の要約から取った特徴名であり、元論文の定義そのものではない。
 
 論文との対応を見たあと、「記事のテーマによるものかもしれない」という依頼者の指摘でジャンル統制を行った。[use-cases 記事](../2026-11-05-slops-use-case-templates.md/) の目的分類を流用し、それ以降の 7 記事は同じ基準でこちらが仮分類した。メンバーは所属記事の目的を継承する。
 
@@ -256,7 +256,7 @@ prev: ../2026-11-12-what-the-lint-missed.md
 - [論文特徴との対応](https://github.com/podhmo/html-sandbox/issues/172#issuecomment-6814971661)
 - [ジャンル統制の分析](https://github.com/podhmo/html-sandbox/issues/172#issuecomment-6815282354)
 - 生データ: `tools/slops-metrics/out/members.jsonl`、集計 `out/report.md`、ジャンル別 `out/genre.md`
-- 抜粋の表は [01-tables.md](01-tables.md) に、外部資料とそれぞれ何を確認したかは [02-references.md](02-references.md) にある。
+- 抜粋の表は [01-tables.md](01-tables.md) に、環境の構築と落とし穴は `docs/sketch/ja/slops-172-measure.md` にある。
 
 ## 余談
 
