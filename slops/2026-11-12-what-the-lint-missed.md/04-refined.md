@@ -64,3 +64,7 @@ moonbit-sum-types のバンドルは、Claude Code が書いた 01-guidelines.md
 ### データと参考
 
 集計の全表へのリンクは [01-data.md](01-data.md) に、外部資料とそれぞれ何を確認したかは [02-references.md](02-references.md) に分けてある。
+
+### 余談
+
+Devin（SWE-2）が書いた部分には、最初は読みにくさを感じていなかった。だが改めて眺めると、Claude Code の部分と同様の読みにくさが内包されていた。網羅的対称や一様なトーンのような文書レベルの特徴は執筆者を選ばない。これは Claude Code 特有ではなく AI 特有の読みにくさと言ってよい。
