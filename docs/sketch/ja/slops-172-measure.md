@@ -21,6 +21,8 @@ uv pip install -r requirements.txt   # ginza / ja-ginza / markdown-it-py を固�
 - `out/members.jsonl`: メンバーごとの全指標
 - `out/report.md`: 著者別集計 + claude-vs-devin の Cohen's d ランキング (issue コメントの表のもと)
 
+`members.jsonl` を入力にして「記事の目的 (slops-use-case-templates の分類)」で層別化する二次分析が `genre.py`。`.venv/bin/python genre.py` で `out/genre.md` に genre×author の構成と、ジャンル内での devin-vs-claude 比較を出力する。GiNZA を再実行しないので速い。
+
 ## クリーンアップ
 
 実験環境を消すとき:
