@@ -47,6 +47,9 @@ HIRAGANA = set("あいうえおかがきぎくぐけげこごさざしじすず�
 FORMAL_NOUNS = {"こと", "もの", "ところ", "ため", "わけ", "際", "場合", "うえ", "うち", "ほう", "とおり", "なか"}
 # surfaces that pass the verb-existence test but are not used as deverbal nouns
 RENYO_STOP = {"なし", "はず", "わけ", "ほう", "とも", "つの", "あり"}
+
+# verbs that do not select an agentive subject (existential / stative / light)
+LIGHT_VERBS = {"ある", "いる", "おる", "なる", "する", "できる", "である", "くださる", "まま", "見える", "みえる", "聞こえる"}
 KANJI_RE = re.compile(r"[一-龯々]")
 KATAKANA_RE = re.compile(r"[ァ-ヶー]")
 LATIN_RE = re.compile(r"[A-Za-z]")
@@ -346,6 +349,14 @@ def measure_member(path: Path, nlp, md: MarkdownIt, checker: RenyoChecker) -> di
                     counters["nsubj"] += 1
                     if t.lemma_ not in ANIMATE_NOUNS and t.pos_ in ("NOUN", "PRON"):
                         counters["inanim_nsubj"] += 1
+                        if t.head.pos_ == "VERB" and t.head.lemma_ not in LIGHT_VERBS:
+                            counters["inanim_action"] += 1
+                if t.dep_ == "acl":
+                    counters["acl_noun"] += 1
+                    nsub = len(list(t.subtree))
+                    counters["acl_len_total"] += nsub
+                    if nsub >= 5:
+                        counters["acl_long"] += 1
                 if t.dep_ in ("advcl", "acl", "ccomp", "xcomp"):
                     counters["dep_clause"] += 1
                 if t.pos_ == "CCONJ" or t.tag_.startswith("接続詞"):
@@ -365,6 +376,19 @@ def measure_member(path: Path, nlp, md: MarkdownIt, checker: RenyoChecker) -> di
                 counters["sents_with_nsubj"] += 1
             topics.append(topic)
             endings[ending_category(sent)] += 1
+
+            # noun stacking: consecutive NOUN tokens (の/compound links don't break
+            # the run only for compound; a bare run of NOUN tokens = stacked compound)
+            run = 0
+            for t in stoks:
+                if t.pos_ == "NOUN" and (run == 0 or t.dep_ in ("compound", "nmod")):
+                    run += 1
+                else:
+                    if run >= 3:
+                        counters["noun_run3"] += 1
+                    run = 0
+            if run >= 3:
+                counters["noun_run3"] += 1
         if kind == "paragraph":
             para_sent_counts.append(len(list(doc.sents)))
             para_chars.append(len(text))
@@ -400,6 +424,8 @@ def measure_member(path: Path, nlp, md: MarkdownIt, checker: RenyoChecker) -> di
         "dep_depth_max": max(depths, default=0),
         "arc_len_mean": mean(arc_lens),
         "nsubj_sent_rate": counters["sents_with_nsubj"] / max(1, len(sent_lens_tok)),
+        "inanim_action_share": counters["inanim_action"] / counters["nsubj"] if counters["nsubj"] else 0.0,
+        "acl_len_mean": counters["acl_len_total"] / counters["acl_noun"] if counters["acl_noun"] else 0.0,
         "topic_switch_rate": switches / len(tpair) if tpair else None,
         "comma_boundary_rate": counters["comma_boundary"] / counters["comma"] if counters["comma"] else None,
         "sahen_share_of_noun": counters["sahen_noun"] / counters["noun"] if counters["noun"] else 0.0,
@@ -442,6 +468,10 @@ DENSITY_KEYS = [
     ("long_arc", "長距離係り(>8tok)"),
     ("nsubj", "主語(nsubj)"),
     ("inanim_nsubj", "無生物主語(推定)"),
+    ("inanim_action", "無生物主語+動作動詞"),
+    ("acl_noun", "連体修飾節(acl)"),
+    ("acl_long", "長い連体修飾(>=5tok)"),
+    ("noun_run3", "名詞3連積み上げ"),
     ("conj", "接続詞"),
     ("formal_noun", "形式名詞"),
     ("paren", "括弧(開)"),
@@ -464,6 +494,8 @@ MEAN_KEYS = [
     ("katakana_rate", "カタカナ率"),
     ("latin_rate", "英字率"),
     ("nsubj_sent_rate", "主語出現率/文"),
+    ("inanim_action_share", "無生物+動作動詞/主語"),
+    ("acl_len_mean", "連体修飾節の長さ"),
     ("topic_switch_rate", "主題交代率"),
     ("comma_boundary_rate", "読点位置一致率"),
     ("sahen_share_of_noun", "サ変/名詞比"),

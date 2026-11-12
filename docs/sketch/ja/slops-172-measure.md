@@ -50,7 +50,18 @@ uv pip install -r requirements.txt   # ginza / ja-ginza / markdown-it-py を固�
 
 → GiNZA の UD 係受け + Sudachi の辞書情報で近似する方針に落ち着いた。
 
-## 連用形名詞の推定
+## 推定系の特徴量
+
+### 無生物主語+動作動詞 (Clark, Martin & Mahowald 論文の特徴の写し)
+
+`nsubj`/`csubj` で、主語の lemma が小さな有生リスト (私・人・ユーザー等) に無い → 無生物主語。その head が `VERB` で軽動詞 (ある/いる/なる/する/できる/である 等) でなければ「動作動詞」とみなす。passive や慣用的な無生物主語も混ざる雑さはあるが、全著者に同一の歪みなので比較には使う。
+
+### 名詞積み上げ・連体修飾
+
+- 名詞積み上げ: 連続する `NOUN` token で各々が `compound`/`nmod` で繋がる run が 3 以上 (日本語の漢語連結の近似)
+- 連体修飾: `acl` dep の数と、その subtree の token 数 (>=5 を長い修飾として別カウント)
+
+### 連用形名詞の推定
 
 「確かめ」型のヒューリスティック:
 
