@@ -73,3 +73,10 @@ python3 ~/ghq/github.com/nanaism/yomiyasu/scripts/yomiyasu_lint.py --doc-type ar
   is not a count to zero out.
 - Report remaining hits the pass left alone, with the reason each was
   kept.
+
+## Re-running on the same article
+
+When refining an article again, commit the current state before
+rewriting, then commit the refined text afterwards. The before/after
+diff of a pass must be reviewable on its own: unrelated edits or an
+earlier pass's output must not mix into the same commit.
