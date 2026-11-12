@@ -2,6 +2,7 @@
 title: 全記事を lint に通して執筆者の違いを測ったが、欲しかった数値は取れなかった
 description: yomiyasu lint を slops 全 59 メンバーに適用して執筆者別に集計した記録。候補の量では執筆者が分かれず、残った差は機械的な書式規則に集中していた。測りたかった Claude Code の読みにくさは、文レベルの規則では届かない層にあると分かった。
 prev: ../2026-11-11-moonbit-sum-types.md
+next: ../2026-11-12-slops-feature-metrics.md
 ---
 
 # 全記事を lint に通して執筆者の違いを測ったが、欲しかった数値は取れなかった
