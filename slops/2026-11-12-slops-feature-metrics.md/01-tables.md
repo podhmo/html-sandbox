@@ -1,7 +1,7 @@
 ## 表の抜粋
 
 > [!NOTE]
-> 執筆: Devin（SWE-2 Max）。`tools/slops-metrics/out/report.md` と `out/genre.md` からの抜粋。全量はファイル側。
+> 執筆: Devin（SWE-2 Max）。`tools/slops-metrics/out/report.md` と `out/genre.md` からの抜粋。全量はファイル側にある。
 
 ### 分離度ランキング (claude 平均 vs devin 平均の Cohen's d)
 
