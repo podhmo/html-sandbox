@@ -21,6 +21,15 @@ uv pip install -r requirements.txt   # ginza / ja-ginza / markdown-it-py を固�
 - `out/members.jsonl`: メンバーごとの全指標
 - `out/report.md`: 著者別集計 + claude-vs-devin の Cohen's d ランキング (issue コメントの表のもと)
 
+## クリーンアップ
+
+実験環境を消すとき:
+
+- `tools/slops-metrics/.venv` — `rm -rf .venv` で削除。再現は `uv venv --python 3.12 .venv && uv pip install -r requirements.txt` でいつでもできる
+- `tools/slops-metrics/out/` — 再生成できるが、issue コメントの表のもとになっているので残してある
+- JUMAN 試行の残骸: `apt-get download` + `dpkg -x` で `/tmp/juman-local` に展開し、`.jumanrc` を `/tmp/juman-local/.jumanrc` と `~/.jumanrc` に置いた。計測には使っていないので両方削除済み (juman は HOME かカレントの `.jumanrc` を読む。`~/.jumanrc` を残すと存在しない /tmp の辞書を指す設定が残って他の利用を壊すので注意)
+- uv が入れた Python 3.12 自体を消すなら `uv python uninstall 3.12` (他の用途で使っていなければ)
+
 ## 利用時の落とし穴
 
 ### パッケージ構成
