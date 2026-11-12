@@ -14,7 +14,7 @@
 - [issue #169](https://github.com/podhmo/html-sandbox/issues/169) — 前回の yomiyasu lint 集計。集計形式 (密度正規化・執筆者別) を引き継いだ。
 - [issue #167](https://github.com/podhmo/html-sandbox/issues/167) — 論文特徴の出典になった調査メモ。
 - [issue #171](https://github.com/podhmo/html-sandbox/issues/171) — この計測の特徴量を規則候補にする自作 lint の構想 (未実装)。
-- [what-the-lint-missed](../2026-11-12-what-the-lint-missed.md/) — 前の記事。#169 の集計記録で、「lint に届かない層」の分解はこの記事の測りたい対象だった。
+- [what-the-lint-missed](../2026-11-12-what-the-lint-missed.md/) — 前の記事。[issue #169](https://github.com/podhmo/html-sandbox/issues/169) の集計記録で、「lint に届かない層」の分解はこの記事の測りたい対象だった。
 - [slops-use-case-templates](../2026-11-05-slops-use-case-templates.md/) — ジャンル統制に使った目的分類の出典 (`01-use-cases.md` の表)。
 - `tools/slops-metrics/` — `measure.py` (特徴量の抽出と執筆者集計), `genre.py` (ジャンル別の層別化), `out/` (結果)。
 - `docs/sketch/ja/slops-172-measure.md` — 環境構築・クリーンアップ・落とし穴の記録。

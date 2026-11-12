@@ -22,7 +22,7 @@ prev: ../2026-11-12-what-the-lint-missed.md
 
 計測スクリプトは `tools/slops-metrics/measure.py`。markdown-it-py (`commonmark` + table) で Markdown の構造を取り、prose 部分(段落・リスト項目・引用)だけを GiNZA 5.3.0 に通した。GiNZA からは形態素(Sudachi/UniDic)・UD 係受け・文節・節の情報が取れる。見出しと表セルは文指標からは外して面積計算にだけ含め、コード・SVG フェンスは構造面積として数えるだけにした。
 
-対象は全 65 メンバー(devin 39, claude 20, codex 3, opencode 1, 不明 2)。帰属はメンバーの「執筆」表記で、なければバンドル README から継承し、「おそらく」付きは不明とした。出現数は prose 文字数あたりの密度(件/千字)に正規化し、執筆者間の差はメンバー平均の Cohen's d で見る。ここは #169 と同じ形式に揃えた。
+対象は全 65 メンバー(devin 39, claude 20, codex 3, opencode 1, 不明 2)。帰属はメンバーの「執筆」表記で、なければバンドル README から継承し、「おそらく」付きは不明とした。出現数は prose 文字数あたりの密度(件/千字)に正規化し、執筆者間の差はメンバー平均の Cohen's d で見る。ここは [issue #169](https://github.com/podhmo/html-sandbox/issues/169) と同じ形式に揃えた。
 
 集めた特徴量は約 60 個で、3 層ある。
 
@@ -250,7 +250,7 @@ prev: ../2026-11-12-what-the-lint-missed.md
 
 ## データと参考
 
-集計表の全文は issue #172 のコメントと `tools/slops-metrics/out/` にある。
+集計表の全文は [issue #172](https://github.com/podhmo/html-sandbox/issues/172) のコメントと `tools/slops-metrics/out/` にある。
 
 - [計測結果と分離度ランキング](https://github.com/podhmo/html-sandbox/issues/172#issuecomment-6814724865) / [第一弾の読み](https://github.com/podhmo/html-sandbox/issues/172#issuecomment-6814729098)
 - [論文特徴との対応](https://github.com/podhmo/html-sandbox/issues/172#issuecomment-6814971661)
