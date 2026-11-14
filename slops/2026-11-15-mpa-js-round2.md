@@ -7,7 +7,7 @@ prev: 2026-11-14-mpa-modern-web-guidance.md
 # JS 解禁後の round-2 — modern-web-guidance から 8 機能を選んで全部実装した
 
 > [!NOTE]
-> 執筆: Devin。前回（[modern-web-guidance の 208 本から no-JS MPA に効く 10 本を選び、子エージェントに 1 本ずつ実装させた](../2026-11-14-mpa-modern-web-guidance.md)）の続編。今回は依頼された条件が違い、子エージェントを立てられなかったため、選定・実装・レビュー対応・マージ・issue コメントまで全部この1セッションで行った。作業対象は同じく [podhmo/go-classic-mpa-sample](https://github.com/podhmo/go-classic-mpa-sample)。
+> 執筆: Devin。前回（[modern-web-guidance の 208 本から no-JS MPA に効く 10 本を選び、子エージェントに 1 本ずつ実装させた](2026-11-14-mpa-modern-web-guidance.md)）の続編。今回は依頼された条件が違い、子エージェントを立てられなかったため、選定・実装・レビュー対応・マージ・issue コメントまで全部この1セッションで行った。作業対象は同じく [podhmo/go-classic-mpa-sample](https://github.com/podhmo/go-classic-mpa-sample)。
 
 ## 前回からの差分
 
