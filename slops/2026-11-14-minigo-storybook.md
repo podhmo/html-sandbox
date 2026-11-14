@@ -73,15 +73,23 @@ goldmark 周りは `e.Bind` で必要シンボルを列挙した（8 シンボ�
 
 図は `tools/svg-gen` の PALETTE（colorful オプション）で生成した `tools/svg-gen/examples/fig-storybook-viewports.ts` の出力。左が story ナビ、右が同じ story を 320/360/768px で描いた preview 枠を左辺揃えで重ねたもの。実線の太い 360px 枠と破線の 320/768px 枠は、色が効かなくても幅差と破線で読み分けられる。
 
+### ハンドラ同型の story（StoryHttp prefix、後日追加）
+
+「story が Response を返せるようにすれば status code や header も取れる。いっその事 http.Handler と同型にする」という依頼者の提案で 2 つ目の story 形式を追加した（PR #23 に同梱）。前節で発見した CSP ギャップの直接の解消でもある。
+
+`StoryHttp` で始まる story は `func(http.ResponseWriter, *http.Request)` 型を必須とし（AST で構造判定）、`Render` は `httptest.NewRecorder` と `httptest.NewRequest` をホスト側で作って `s.Call(ctx, pkg, name, rec, req)` で渡す。host の Go オブジェクトが `vm.SnapshotOf` 経由でそのまま script から書き込めるので、recorder に status と headers が残り、`/story/<Name>` がそれらを replay する。あわせて `Store` interface の script 側 fake（`storyStore`）を書き、実 mux `web.New(storyStore{})` を通す story にした。`web`・`store` は interpreted なので script 内 struct が interface をそのまま満たす。
+
+実測: `StoryHttpIssueList`（実 mux → `GET /issues`）は 200 + CSP・`X-Content-Type-Options` 等つき、`StoryHttpNotFound` は 404 を実際に返す。マークアップの確認は print 型、ヘッダ・status・ルーティング込みの検証は `StoryHttp` 型、と使い分ける構成になった。
+
 ## 答え
 
 - stack #21（[PR #18](https://github.com/podhmo/go-classic-mpa-sample/pull/18) → [#19](https://github.com/podhmo/go-classic-mpa-sample/pull/19) → [#20](https://github.com/podhmo/go-classic-mpa-sample/pull/20) → [#22](https://github.com/podhmo/go-classic-mpa-sample/pull/22) → [#23](https://github.com/podhmo/go-classic-mpa-sample/pull/23)）として提出済み。#23 は「minigo の未使用機能を使う」追加要求への対応で、`Engine.NewSession()` を使うリファクタ。
-- `make setup-minigo` → `make storybook` で :6006 に立つ。全 10 story が sqlite 非実行で描画できる。
+- `make setup-minigo` → `make storybook` で :6006 に立つ。print 型 10 + StoryHttp 型 2 の計 12 story が sqlite 非実行で描画できる。
 - 再起動不要性は実測済み：テンプレート・モックデータ・story 追加・CSS はリロードのみ。storybook 本体（cmd/storybook の Go コード）は再ビルドが必要。
 - モバイル対応は環境として成立：`?w=` で幅を固定して試行錯誤できる。アプリ側の追修正は不要と判断した。
 - minigo フィードバックは [issue #1068](https://github.com/podhmo/minigo/issues/1068) に集約（Bind の package 名、bound struct の不透明性、ParseFS/fs.FS の橋渡し、bind 全列挙、キャッシュ、missing field がエラーにならない divergence の 6 件 + 追記コメント）。
 - 設計メモは `docs/sketch/ja/storybook-with-minigo.md`（PR #20 に含まれる）。
-- 残っている未回答の部分: CSP 等ハンドラが付けるレスポンスヘッダ込みの検証（future work として記録済み）。
+- 残っている未回答の部分: storybook 本体の JS による props 操作など本物の storybook 相当機能（CSP 等ヘッダ込み検証は `StoryHttp` 型で解消済み）。
 
 ## 「lazy なインタプリタ」は本質か（依頼者との対話）
 
