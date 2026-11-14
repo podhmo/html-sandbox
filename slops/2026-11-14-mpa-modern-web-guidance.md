@@ -192,6 +192,25 @@ TODO.md の 10 タスク + bugs.md #23 の緩和がすべて main に squash マ
 
 残っているもの: bugs.md の wontfix 6 件（styled 405、ASCII のみの検索、fmtTime の分単位表示など、いずれも実害が薄いため記録のみ）と、#23 の残存リスク（スキップ中コメントの本文テキストはブラウズモードに出ない。完全解消には content-visibility の撤去が必要で、~120ms の perf 回帰とのトレードオフで見送った）。検索 UX 系のガイド（`q=` の結果表示改善など）もカタログにあったが、明確な不足を確認できず採用しなかった。
 
+## もし JS 禁止がなかったら入れたかったもの
+
+執筆後にカタログ 208 本を見直した。第 1 フィルタで「実行 JS が必須」としてまとめて落とした群の中に、このアプリにとって実害・未練のあるものがいくつかある。仮に制約がなければ、この順で入れたい。
+
+- `same-document-transitions` — 一覧の issue 行から詳細ページへ、共有要素のモーフィング（行のタイトルがそのまま詳細の見出しに伸びる GitHub 的な遷移）。cross-document のクロスフェードは入ったが「要素が続いている」感は `document.startViewTransition` がないと作れない。MPA でも視覚的な繋がりを出せる最大の一手。
+- `directional-navigation-transitions` — ページネーションの「次へ/前へ」でスライド方向を変える。PR #8 で設計まで進んだが方向の判別に JS が要り見送った。no-JS で諦めた中では一番惜しい。
+- `accessible-error-announcement` — `aria-invalid` を `:user-invalid` とリアルタイム同期させる。PR #10 で「サーバー再描画時のみ同期」に留めた未練。422 表示後に入力を直しても aria-invalid が外れないのはスクリーンリーダー実害。
+- `ime-safe-enter-submit` — コメント textarea の Ctrl/Cmd+Enter 送信。IME 変換中の Enter 誤爆を `isComposing`/`keyCode 229` で防ぐ。日本語の利用者が主なので素直に欲しい。
+- `hovercard` — コメント本文中の `#3` リンクに issue 概要のホバーカードを出す。参照先を開かずに文脈を保てる、情報量向上としては最大級。
+- `highlight-text-ranges` — `q=` 検索のヒット箇所を Custom Highlight API（`::highlight()`）でマーク。DOM を書き換えずテキスト範囲だけ着色できる。
+- `copy-button` — issue URL や `#comment-N` パーマリンクのコピーボタン。Invoker Commands + Async Clipboard。小さいが毎日使う系。
+- `form-fields-automatically-fit-contents` — コメント textarea の自動伸縮。本命は CSS の `field-sizing: content` で、JS が要るのは非対応ブラウザ向けのフォールバック側。
+- `dynamic-sort` — issue 一覧の並び替えをフルリロードなしで。サーバーソートリンクにすれば MPA のままでも機能自体は作れるが、JS なら既存ノードの入れ替えを view transition でアニメーションしつつ aria-live で一度だけ告知できる。
+- `dark-mode-toggle` — system/light/dark の三状態トグル。現状は OS 設定のみ。実は cookie + フォーム POST でも実装可能だが、ガイドの本命は localStorage で FOUC なく切り替えるもの。
+- `summarizer` — 長いスレッドの要約ボタン（on-device Summarizer API）。content-visibility で描画を絞るほど長いスレッドを、そもそも読まずに済ませる方向。玩具枠だが試してみたかった。
+- `swipe-to-reveal`、`interest-triggered-action-previews` — モバイルで issue 行をスワイプして close/delete を出す、削除ボタンへの hover/focus で対象行を事前ハイライトする。どちらも小さいながら実用。
+
+逆に「JS があっても要らない」と再確認したもの: passkeys 系（認証がない）、autofill 系（住所・決済フォームがない）、carousel・media 系（画像投稿がない）、service worker・INP 系（オフライン要件も重い処理もない）、Web Components 系（テンプレート部品化は html/template で足りている）。
+
 ## 余談
 
 - CSP は bugs.md #13' で「ラベル色の inline `style=` と相性が悪い」と一度見送られていた。`style-src-attr 'unsafe-inline'` という「style 属性だけ通して `<style>` 要素は塞ぐ」ディレクティブで最小の穴にできたため、過去の wontfix を取り下げて採用に転じた。nonce/hash は style 属性値には効かないので、これが取りうる最も狭い穴だった。
