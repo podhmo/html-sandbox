@@ -75,7 +75,7 @@ goldmark 周りは `e.Bind` で必要シンボルを列挙した（8 シンボ�
 
 ## 答え
 
-- stack #21（[PR #18](https://github.com/podhmo/go-classic-mpa-sample/pull/18) → [#19](https://github.com/podhmo/go-classic-mpa-sample/pull/19) → [#20](https://github.com/podhmo/go-classic-mpa-sample/pull/20) → [#22](https://github.com/podhmo/go-classic-mpa-sample/pull/22)）として提出済み。全 PR の Devin Review は最終的に findings 0。
+- stack #21（[PR #18](https://github.com/podhmo/go-classic-mpa-sample/pull/18) → [#19](https://github.com/podhmo/go-classic-mpa-sample/pull/19) → [#20](https://github.com/podhmo/go-classic-mpa-sample/pull/20) → [#22](https://github.com/podhmo/go-classic-mpa-sample/pull/22) → [#23](https://github.com/podhmo/go-classic-mpa-sample/pull/23)）として提出済み。#23 は「minigo の未使用機能を使う」追加要求への対応で、`Engine.NewSession()` を使うリファクタ。
 - `make setup-minigo` → `make storybook` で :6006 に立つ。全 10 story が sqlite 非実行で描画できる。
 - 再起動不要性は実測済み：テンプレート・モックデータ・story 追加・CSS はリロードのみ。storybook 本体（cmd/storybook の Go コード）は再ビルドが必要。
 - モバイル対応は環境として成立：`?w=` で幅を固定して試行錯誤できる。アプリ側の追修正は不要と判断した。
@@ -94,15 +94,15 @@ goldmark 周りは `e.Bind` で必要シンボルを列挙した（8 シンボ�
 
 一方で再ビルド方式が勝る点もある：本物の型が通るので、テンプレートのフィールド typo がエラーになる（minigo では現状、空描画で気づけない。issue #1068 の項目 6）。「モックの柔軟性 vs 型の正確性」のトレードオフとして、インタプリタは前者を取る道具、というのが今のところの評価。
 
-### 使い切れていなかった minigo の機能
+### 使い切れていなかった minigo の機能（後日適用済みのものを含む）
 
-今回の実装が通らなかったが、後で API を見直すと用意されていたもの。
+API を見直すと用意されていたもの。指摘後に一部は実際に適用した（下記）。
 
-- `WithInitMode(LazyInit)` — メンバ問い合わせで init を走らせず、型と関数シグネチャだけを実体化するモード。「lazy インタプリタ」そのものが既に存在していた。今回はデフォルトの `GoCompatibleInit` で進めた。
-- `Engine.NewSession()` — 設定・bind・special form を引き継ぎつつ package cache が空の子エンジンを返す。今回は毎リクエスト `NewEngine` + 全 bind の再登録をしていたが、`NewSession` が「bind を共有して実行状態だけ隔離する」ための正規の API だった。bind 登録コストも省ける。
-- `WithPackageModes` の `ModeSource` / `ModeDeny` — bound な package を source 解釈に戻したり import を拒否したりする per-path 制御。sqlite の扱いに ModeDeny は別解だった（ただし blank import の解決自体は必要なので今回の空 map bind の方が素直）。
-- Engine の package cache — engine はロード済み package をキャッシュする。長寿命 engine + `NewSession` の組合せが、おそらく「storybook の都度再解釈」と「bind の再利用」を両立する設計（issue #1068 の項目 5 の方向性）。
-- `inspect` パッケージ・`BoundSymbols`・`WithHostPolicy`・`ScriptProfiler` — story 発掘の静的解析、bind 済みシンボルの列挙確認、ホスト側アクセス制御、計測。今回は未使用。
+- `Engine.NewSession()` — 設定・bind・special form を引き継ぎつつ package cache が空の子エンジンを返す。初期版は毎リクエスト `NewEngine` + 全 bind の再登録だったが、`NewSession` が「bind を共有して実行状態だけ隔離する」ための正規の API だった。これはその後 [PR #23](https://github.com/podhmo/go-classic-mpa-sample/pull/23) として適用した：長寿命の base engine（bind・BuildConfig・PackageModes を一度だけ設定、`Book.base` に遅延構築）から `Render` 毎に `NewSession()` を fork し、出力先だけ `WithOutput(&buf)(session)` で差し替える形。適用後も全 story の描画・fixture 編集の即反映（session 毎に source が再インタプリトされる）を確認した。レイテンシは 100〜200ms/req と同程度で、効果は速さより「正規 API で意図が明確」「bind 再登録が消えて大きなアプリでも伸びにくい」側にある。
+- `WithInitMode(LazyInit)` — メンバ問い合わせで init を走らせず、型と関数シグネチャだけを実体化するモード。「lazy インタプリタ」そのものが既に存在していた。story 関数は実際に実行して fixture の var 値が必要なので、今回の用途では `GoCompatibleInit` が正解（未適用は意図的）。
+- `WithPackageModes` の `ModeSource` / `ModeDeny` — bound な package を source 解釈に戻したり import を拒否したりする per-path 制御。`ModeSource` は `-src` フラグ経由で使用済み。sqlite の扱いに ModeDeny は別解だった（ただし blank import の解決自体は必要なので空 map bind の方が素直）。
+- Engine の package cache — engine はロード済み package をキャッシュする。長寿命 engine + `NewSession` の組合せで「storybook の都度再解釈」と「bound パッケージの再利用」を両立する設計になった（issue #1068 の項目 5 の方向性）。
+- `inspect` パッケージ・`BoundSymbols`・`WithHostPolicy`・`ScriptProfiler` — story 発掘の静的解析、bind 済みシンボルの列挙確認、ホスト側アクセス制御、計測。現状は未使用。
 
 ## もっと良くするには（依頼による展望の節）
 
@@ -115,7 +115,7 @@ goldmark 周りは `e.Bind` で必要シンボルを列挙した（8 シンボ�
 
 ### minigo 側（issue #1068 の指摘がすべて解消された後の話）
 
-- 毎リクエスト新規エンジンは小さなアプリでは十分速かったが、アプリが大きくなると解決済みパッケージのキャッシュ・増分評価が効いてくる。issue の項目 5 の具体的な形として、エンジン間で package resolution だけ共有できる API が欲しい。
+- 毎リクエスト新規エンジン → 長寿命 engine + `NewSession` の構成に変えたことで「bind 共有・実行状態隔離」は実現できた（PR #23）。残るのは source package の再パース・再コンパイルのコストで、アプリが大きくなると増分評価（変更ファイルだけ再解釈）が効いてくる。issue の項目 5 の次の形として、ファイル単位の無効化が欲しい。
 - story 発掘〜描画の共通部を `examples` から切り出した共有 storybook ヘルパにすると、利用者は `Book` 相当を再実装しなくて済む（今回も per-consumer で再実装した）。
 - script 側の fs.FS/構造体とホスト側の橋渡しが解消されると、`parsePages` のようなアプリ側リファクタ自体が不要になり、導入障壁が一段下がる。
 - missing field で空描画される件が strict にエラーになれば、storybook 的用途（テンプレートの試行錯誤）での typo 検知が格段に強くなる。
