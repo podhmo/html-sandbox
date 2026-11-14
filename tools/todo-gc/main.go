@@ -70,11 +70,15 @@ func run(root string, write bool) error {
 		}
 		return nil
 	}
-	if err := os.WriteFile(todoPath, []byte(res.TODO), 0o644); err != nil {
+	// The archive goes first: if writing TODO.md then fails, the moved items
+	// are duplicated in both files rather than lost from both.
+	if err := writeFile(archivePath, []byte(res.Archive), 0o644); err != nil {
 		return err
 	}
-	return os.WriteFile(archivePath, []byte(res.Archive), 0o644)
+	return writeFile(todoPath, []byte(res.TODO), 0o644)
 }
+
+var writeFile = os.WriteFile
 
 // Result is the outcome of one GC pass.
 type Result struct {
@@ -131,11 +135,39 @@ func parse(src string) *document {
 	lines := strings.Split(strings.TrimSuffix(src, "\n"), "\n")
 	doc := &document{}
 	var stack []*node
+	// Blank lines are held until the next line shows whether they sit
+	// inside an item (an indented marker or continuation follows) or
+	// between top-level blocks.
+	var blanks []string
+	passthrough := func(ls ...string) {
+		if k := len(doc.items); k > 0 && doc.items[k-1].item == nil {
+			doc.items[k-1].lines = append(doc.items[k-1].lines, ls...)
+		} else {
+			doc.items = append(doc.items, segment{lines: ls})
+		}
+	}
+	flushBlanks := func(inside bool) {
+		if len(blanks) == 0 {
+			return
+		}
+		if inside {
+			top := stack[len(stack)-1]
+			top.raw = append(top.raw, blanks...)
+		} else {
+			passthrough(blanks...)
+		}
+		blanks = nil
+	}
 	for _, line := range lines {
+		if strings.TrimSpace(line) == "" {
+			blanks = append(blanks, line)
+			continue
+		}
 		indent := len(line) - len(strings.TrimLeft(line, " "))
 		// An indented marker with nothing open starts a top-level item too:
 		// older archive entries were copied with their original indentation.
 		if markerRE.MatchString(line) {
+			flushBlanks(len(stack) > 0 && stack[0].indent < indent)
 			n := &node{indent: indent, raw: []string{line}}
 			for len(stack) > 0 && stack[len(stack)-1].indent >= indent {
 				stack = stack[:len(stack)-1]
@@ -149,21 +181,20 @@ func parse(src string) *document {
 			stack = append(stack, n)
 			continue
 		}
-		if strings.TrimSpace(line) != "" && indent > 0 && len(stack) > 0 {
+		if indent > 0 && len(stack) > 0 {
 			for len(stack) > 1 && stack[len(stack)-1].indent+2 > indent {
 				stack = stack[:len(stack)-1]
 			}
+			flushBlanks(true)
 			top := stack[len(stack)-1]
 			top.raw = append(top.raw, line)
 			continue
 		}
+		flushBlanks(false)
 		stack = nil
-		if k := len(doc.items); k > 0 && doc.items[k-1].item == nil {
-			doc.items[k-1].lines = append(doc.items[k-1].lines, line)
-		} else {
-			doc.items = append(doc.items, segment{lines: []string{line}})
-		}
+		passthrough(line)
 	}
+	flushBlanks(false)
 	return doc
 }
 
@@ -201,6 +232,9 @@ var checkboxRE = regexp.MustCompile(`^\[([ x-])\] `)
 func (n *node) split() (state, string) {
 	text := markerRE.FindStringSubmatch(n.raw[0])[2]
 	for _, l := range n.raw[1:] {
+		if strings.TrimSpace(l) == "" {
+			continue
+		}
 		text = joinWrapped(text, strings.TrimSpace(l))
 	}
 	st := note
@@ -292,7 +326,8 @@ func sweep(items []segment, moved *[]string, warnings *[]string) []segment {
 	return kept
 }
 
-// sweepNode reports whether n itself was archived.
+// sweepNode reports whether n itself was archived. A note is never
+// archived on its own, but completed items under it are.
 func sweepNode(n *node, chain []string, moved *[]string, warnings *[]string) bool {
 	st, text := n.split()
 	if st == done {
@@ -306,10 +341,6 @@ func sweepNode(n *node, chain []string, moved *[]string, warnings *[]string) boo
 	sub := append(append([]string(nil), chain...), title(text))
 	var kept []*node
 	for _, c := range n.children {
-		if cst, _ := c.split(); cst == note {
-			kept = append(kept, c)
-			continue
-		}
 		if !sweepNode(c, sub, moved, warnings) {
 			kept = append(kept, c)
 		}

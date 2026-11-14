@@ -1,6 +1,9 @@
 package main
 
 import (
+	"errors"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -101,6 +104,49 @@ func TestGC(t *testing.T) {
 				"- [x] S > indented > deeper",
 			),
 		},
+		{
+			name:        "blank line before an open child keeps the done parent in place",
+			todo:        lines("- [x] **P**: p", "", "  - [ ] open"),
+			archive:     header,
+			wantTODO:    lines("- [x] **P**: p", "", "  - [ ] open"),
+			wantArchive: header,
+			wantWarn:    1,
+		},
+		{
+			name: "blank line before a done child keeps its chain",
+			todo: lines(
+				"- [-] **P**: p",
+				"",
+				"  - [x] **C**: c",
+				"",
+				"  - [ ] **D**: d",
+				"- [ ] **E**: e",
+			),
+			archive: header,
+			wantTODO: lines(
+				"- [-] **P**: p",
+				"",
+				"  - [ ] **D**: d",
+				"- [ ] **E**: e",
+			),
+			wantArchive: header + lines("", "- [x] P > **C**: c"),
+		},
+		{
+			name: "done items under a note are swept",
+			todo: lines(
+				"- [-] **P**: p",
+				"  - 完了の条件: all of",
+				"    - [x] **C**: c",
+				"    - [ ] **D**: d",
+			),
+			archive: header,
+			wantTODO: lines(
+				"- [-] **P**: p",
+				"  - 完了の条件: all of",
+				"    - [ ] **D**: d",
+			),
+			wantArchive: header + lines("", "- [x] P > 完了の条件 > **C**: c"),
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
@@ -132,5 +178,37 @@ func TestTitle(t *testing.T) {
 		if got := title(in); got != want {
 			t.Errorf("title(%q) = %q, want %q", in, got, want)
 		}
+	}
+}
+
+func TestRunKeepsTODOWhenArchiveWriteFails(t *testing.T) {
+	dir := t.TempDir()
+	todoPath := filepath.Join(dir, "TODO.md")
+	archivePath := filepath.Join(dir, "TODO-archive.md")
+	todo := lines("- [x] **A**: a", "- [ ] **B**: b")
+	if err := os.WriteFile(todoPath, []byte(todo), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(archivePath, []byte(header), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	orig := writeFile
+	t.Cleanup(func() { writeFile = orig })
+	errDisk := errors.New("disk full")
+	writeFile = func(name string, data []byte, perm os.FileMode) error {
+		if name == archivePath {
+			return errDisk
+		}
+		return orig(name, data, perm)
+	}
+	if err := run(dir, true); !errors.Is(err, errDisk) {
+		t.Fatalf("run = %v, want %v", err, errDisk)
+	}
+	got, err := os.ReadFile(todoPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(got) != todo {
+		t.Errorf("TODO.md was rewritten although the archive write failed:\n%s", got)
 	}
 }
