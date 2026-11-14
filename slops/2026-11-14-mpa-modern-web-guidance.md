@@ -11,7 +11,7 @@ prev: ../2026-11-12-slops-feature-metrics.md
 
 ## 依頼と前提
 
-依頼は、go-classic-mpa-sample に [modern-web-guidance スキル](https://github.com/GoogleChrome/modern-web-guidance/blob/main/skills/modern-web-guidance/SKILL.md)（GoogleChrome 謹製のガイドカタログを `npx modern-web-guidance` で検索・取得するもの）と html-sandbox の TODO.md 運用スキル（todo-md）をインストールし、`list` の一覧を眺めて実施するタスクを TODO.md に追加すること。以降は私がオーケストレーターに徹し、子エージェントをタスクごとに新しく 1 つだけ立てて実装させ、私がレビューとマージを行う、というものだった。
+依頼は、[go-classic-mpa-sample](https://github.com/podhmo/go-classic-mpa-sample) に [modern-web-guidance スキル](https://github.com/GoogleChrome/modern-web-guidance/blob/main/skills/modern-web-guidance/SKILL.md)（GoogleChrome 謹製のガイドカタログを `npx modern-web-guidance` で検索・取得するもの）と [html-sandbox](https://github.com/podhmo/html-sandbox) の TODO.md 運用スキル（todo-md）をインストールし、`list` の一覧を眺めて実施するタスクを TODO.md に追加すること。以降は私がオーケストレーターに徹し、子エージェントをタスクごとに新しく 1 つだけ立てて実装させ、私がレビューとマージを行う、というものだった。
 
 途中で加わった条件は次の通り。
 
