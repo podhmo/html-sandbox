@@ -83,6 +83,27 @@ goldmark 周りは `e.Bind` で必要シンボルを列挙した（8 シンボ�
 - 設計メモは `docs/sketch/ja/storybook-with-minigo.md`（PR #20 に含まれる）。
 - 残っている未回答の部分: CSP 等ハンドラが付けるレスポンスヘッダ込みの検証（future work として記録済み）。
 
+## 「lazy なインタプリタ」は本質か（依頼者との対話）
+
+依頼者の整理は「lazy なインタプリタがあれば古典的 SSR でも storybook 的体験ができるのでは。起動が遅くて良いなら lazy じゃなくても良いし、書き換える度にビルドして良いならインタプリタじゃなくても良い」だった。やってみた結果への私（Devin）の見解を残す。
+
+本質は lazy 性ではなく「編集したファイルがソースとして毎レンダー再実行されること」だ、という点は同意する。実際今回の設計は lazy ではなく、むしろ毎リクエスト新規エンジンで丸ごと再インタプリトする「一番非 lazy」な選択で、それでも 100〜150ms/req で storybook 体験は成立した。ビルドし直して再起動する方式（ウォッチャー + `go build`）でも同じ UX には到達できる。ではインタプリタを選ぶ差分は何かというと、今回実際に効いたのは次の 2 点だった。
+
+- import レベルでモックできる。`modernc.org/sqlite` を空 map に bind して blank import の解決だけを満たし、init も driver 登録も走らせない。`internal/store` ごとインタプリトして fixture を script-side struct で作る。再ビルド方式でこれをやるには build tag や interface の切り口をアプリ側に仕込む必要がある。インタプリタは「import の意味」を呼び出し側が再定義できるのが一番の価値だった。
+- bound（ホスト実装）と interpreted の境界を実行毎に動かせる。重い依存（goldmark・html/template）は bound で速く、アプリコードは interpreted でホット編集。これは `WithPackageModes` という既存の選択肢として minigo が用意している。
+
+一方で再ビルド方式が勝る点もある：本物の型が通るので、テンプレートのフィールド typo がエラーになる（minigo では現状、空描画で気づけない。issue #1068 の項目 6）。「モックの柔軟性 vs 型の正確性」のトレードオフとして、インタプリタは前者を取る道具、というのが今のところの評価。
+
+### 使い切れていなかった minigo の機能
+
+今回の実装が通らなかったが、後で API を見直すと用意されていたもの。
+
+- `WithInitMode(LazyInit)` — メンバ問い合わせで init を走らせず、型と関数シグネチャだけを実体化するモード。「lazy インタプリタ」そのものが既に存在していた。今回はデフォルトの `GoCompatibleInit` で進めた。
+- `Engine.NewSession()` — 設定・bind・special form を引き継ぎつつ package cache が空の子エンジンを返す。今回は毎リクエスト `NewEngine` + 全 bind の再登録をしていたが、`NewSession` が「bind を共有して実行状態だけ隔離する」ための正規の API だった。bind 登録コストも省ける。
+- `WithPackageModes` の `ModeSource` / `ModeDeny` — bound な package を source 解釈に戻したり import を拒否したりする per-path 制御。sqlite の扱いに ModeDeny は別解だった（ただし blank import の解決自体は必要なので今回の空 map bind の方が素直）。
+- Engine の package cache — engine はロード済み package をキャッシュする。長寿命 engine + `NewSession` の組合せが、おそらく「storybook の都度再解釈」と「bind の再利用」を両立する設計（issue #1068 の項目 5 の方向性）。
+- `inspect` パッケージ・`BoundSymbols`・`WithHostPolicy`・`ScriptProfiler` — story 発掘の静的解析、bind 済みシンボルの列挙確認、ホスト側アクセス制御、計測。今回は未使用。
+
 ## もっと良くするには（依頼による展望の節）
 
 ### go-classic-mpa-sample 側
