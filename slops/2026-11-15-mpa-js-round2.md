@@ -1,7 +1,7 @@
 ---
 title: JS 解禁後の round-2 — modern-web-guidance から 8 機能を選んで全部実装した
 description: go-classic-mpa-sample の no-JS 方針が「storybook で検証できる JS なら可」に緩和されたあとの第二弾。208 ガイドの再調査で選んだ 8 機能について、選択基準、各機能が何をどう変えて何をもたらすか、実装後の確認方法、そして「本当はこういうものがあればなー」という余談を書く。前回記事の続編。
-prev: ../2026-11-14-mpa-modern-web-guidance.md
+prev: 2026-11-14-mpa-modern-web-guidance.md
 ---
 
 # JS 解禁後の round-2 — modern-web-guidance から 8 機能を選んで全部実装した
