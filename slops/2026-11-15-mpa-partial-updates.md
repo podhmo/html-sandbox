@@ -136,7 +136,7 @@ go-classic-mpa-sample は「レガシーなコードの Web アプリの開発�
 </svg>
 ```
 
-つまり「手軽な確認」は維持どころか拡張されていて、コマンドは `make storybook` のまま、確認できる挙動だけが増えた。古い print story と `go test` は今回も第一線で使った — 部分更新の HTML fragment 自体が print story で差し替え差分を観測できたのは設計がサーバ側 fragment に寄ったおかげだ。
+つまり「手軽な確認」は維持どころか拡張されていて、コマンドは `make storybook` のまま、確認できる挙動だけが増えた。編集中の反復速度も落ちていない — `make storybook-watch` 相当の `-watch` フラグが既にあって、ソースやテンプレートを触ると開いているページ（app mount のページも含む）が SSE で自動リロードされる。古い print story と `go test` は今回も第一線で使った — 部分更新の HTML fragment 自体が print story で差し替え差分を観測できたのは設計がサーバ側 fragment に寄ったおかげだ。
 
 ## modern-web-guidance から何を取り込んだか
 
@@ -159,7 +159,7 @@ go-classic-mpa-sample は「レガシーなコードの Web アプリの開発�
 - `Element.append` 相当の「fragment を差し込むだけ」API。fragment をどう parse するか（`<template>` / `parseHTMLUnsafe` / 手動）はユーザーに委ねる設計、という線
 - `form.reset()` より小さい「submission-attempted を消すだけ」プリミティブ。却下ドラフトを残したまま `:user-invalid` 状態だけリセットできれば、今回の2段階修正が不要だった
 - `html-setters` 系のライブラリが「依存管理と揮発性」を解決したら、手書き fetch が消える可能性がある。案Fとしてウォッチ対象
-- ブラウザの live-reload が欲しい。storybook app mount のおかげで `make storybook` で見えるが、ファイルを保存したらリロードされると快適だ（今は reload ボタンを押している）
+- 欲しいと思って調べたら既にあったものもある — storybook の `-watch`（`make storybook-watch`）。SSE で開いているページを自動リロードし、app mount 経由のページにもスクリプトが注入される。「あると嬉しい」ではなく「あるのを知らなかった」だけだった。こういうのが他にも眠っていそう
 
 minigo 側にもいくつか要望が出た — 今回実装で詰まった3件を issue として起票済み（`httptest.NewRequest` が `*bytes.Reader` body を解決できない、host `*http.Request` が解釈実行でフィールド設定不可、multipart の `ParseMultipartForm` が空を返す）。再現コードと workaround も書いたので、将来の修正に繋がるはずだ。
 
