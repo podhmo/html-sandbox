@@ -146,7 +146,7 @@ round-2 の依頼は、この緩和を踏まえてガイド一覧をもう一度
 
 JS を許可したからには「書いた JS が動くか」をブラウザで確かめる必要がある。確認の柱は次の2本。
 
-- storybook（`make storybook` → :6006）で見た目と JS の挙動を確認する。minigo 駆動の自作 storybook で、アプリ本体や DB なしに story を開ける。story の実体は `/story/<Name>` URL。テンプレートは embed.FS に焼き込まれているので、ブランチを切り替えたら storybook の再起動が必要。
+- storybook（`make storybook` → :6006）で見た目と JS の挙動を確認する。minigo 駆動の自作 storybook で、アプリ本体や DB なしに story を開ける。story の実体は `/story/<Name>` URL。minigo storybook はリクエストごとにセッションを fork してパッケージを読み直すので、ソース・テンプレート（`//go:embed` の中身）・静的ファイルのどれを編集しても、ブラウザのリロードだけで反映される（実際にテンプレートを編集して確認した）。再起動が要るのは bindApp のような Setup 時の host bind を変えたときだけ。
 - playwright-cli（`pnpm dlx @playwright/cli`）で実ブラウザを動かす。fill/type/press で本物のキー入力を流し、eval で DOM 状態を観測する。
 
 その過程で踏んだ検証面の落とし穴を3つ挙げておく。
@@ -163,7 +163,7 @@ JS を許可したからには「書いた JS が動くか」をブラウザで�
 - `:user-invalid` のインタラクションフラグをテストから立てられる手段（CDP のエミュレーションやフラグなど）が欲しい。現状「実入力を流す」しかなく、キー入力が必要なせいで検証が遅くて脆い。
 - cross-document view transition の `vt.types` が pagereveal で mutable なのは便利だが、方向情報そのものはブラウザ側で持っている。`navigation.activation.from` の URL 比較を毎回書くのは面倒なので、`activation.navigationType` みたいな「前のページとの関係」を返す一級のプロパティがあると素直に書ける。
 - Devin Review は push のたびに再レビューが走るが、conflict 解消の merge commit でも普通に走る。merge commit 差分だけはスキップして実質差分を見てほしい、と思う場面が何度かあった。
-- storybook のテンプレートが embed.FS 焼き込みなので、ブランチ切替のたびに再起動が要る。テンプレートのホットリロードがあると試行錯誤が速い（minigo 側の話になるが）。
+- storybook は編集の再読み込み自体は効くのに、ブラウザのリロードは手動なので、保存→確認の一拍が残る。live-reload（変更検知でページを自動リロード）があると試行錯誤がさらに速い（minigo 側の話になるが）。
 
 ## まとめ
 
