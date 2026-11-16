@@ -128,6 +128,25 @@ beforeunload のダイアログは headed モードで録画して目視でも�
 
 もうひとつ。テスト中に `pnpm dlx @playwright/cli -s=NAME` が pnpm に `-s` を食われて名前付きセッションが効かない問題を見つけた。SKILL.md の修正案はあるので別 PR として出したい（要相談）。
 
+## その後 — 散在した JS を dom-hooks でまとめた
+
+この記事を読んだ依頼主から「散在した js にきつくなってきた。vdom 的な binding が欲しい？」という話が来たので、ついでに手を入れた（PR [#80](https://github.com/podhmo/go-classic-mpa-sample/pull/80)）。数えてみると `internal/web/static/` は 10 ファイル・約 930 行で、半分はすでに ESM。見立ては「ファイル数ではなく、DOM ライフサイクル管理の散在が痛い」だった。leave-guard・comment-submit-disabled・form-errors がそれぞれ独自の MutationObserver と初回スキャンを持ち、fragment 差し替えへの追従方式がファイルごとにバラバラ — Devin Review が拾った 2件のバグはまさにこの構造が原因だった。
+
+vdom 系は不採用にした。DOM の所有権はサーバにある（partial-submit.js が X-Partial の fragment を素直に差し込む）ので、クライアントで reconcile すると所有権が二重になる。代わりに zero-build の小さい registry を 1 ファイルだけ足した。
+
+```js
+// dom-hooks.js: 共有 MutationObserver + attach/detach 契約
+bind("form", {init: snapshot, teardown: unmark});
+bind("form.comment-form", {init: syncCommentSubmit});
+```
+
+- `dom-hooks.js`: observer は 1 本だけ。`bind(selector, {init, teardown})` が既存要素に即時 init、addedNodes で init、removedNodes で teardown を呼ぶ。追跡は WeakSet で、差し替えられた要素は自然に捨てられる
+- 3 振る舞いを bind 契約に移行。leave-guard は `teardown: unmark` を持つので、422 swap で dirtyCount が残る系のバグは構造上起きなくなった
+- partial-submit.js は無変更。submit/toggle/click は document 委譲済みで注入フォームにも効くので、要素 attach の作業を持たない
+- detail ページの `<script>` タグ 6 本を `page-detail.js` 1 本に、form ページの 3 本を `page-form.js` 1 本に集約。各振る舞いファイルは名前のまま残るので ui-rules.md の参照は有効（`/static/` ルートは忘れず登録）
+
+検証は前と同じ 3 層（`go test` / `vet` / `gofmt`、実サーバ + 実ブラウザで console 0・swap 投入フォームへの attach・dirty → beforeunload、Devin Review）で、レビューは無指摘のままマージされた。新しい振る舞いを足すときのコストが「route + template + observer の 3 重管理」から bind 1 点になったのが収穫。
+
 ## おわりに
 
-監査 → TODO → 実装 → 実機検証 → レビュー修正 → マージまで 1 周回った。「でっち上げたチェックリスト」だったが、ドリフトの発生源を個別に名前をつけて潰していく方式はこの規模の MPA にはちょうどいい解像度だった。次は「正」の項目が新しい機能追加で崩れないかを監視する運用になるはず。
+監査 → TODO → 実装 → 実機検証 → レビュー修正 → マージまで 1 周回った。「でっち上げたチェックリスト」だったが、ドリフトの発生源を個別に名前をつけて潰していく方式はこの規模の MPA にはちょうどいい解像度だった。次は「正」の項目が新しい機能追加で崩れないかを監視する運用になるはず。直後のリファクタリングで JS 側のドリフト元も 1 箇所に収まったので、監視の単位は揃った。
