@@ -30,7 +30,7 @@ prev: 2026-11-16-mpa-ui-rules-audit.md
 
 ## GitHub の subset になっていた
 
-もともとこのプロジェクトは「古典的 SSR の MPA を育てるデモ」だった。net/http + html/template + SQLite、ビルドも SPA もなし。それが issue、comment、label、discussion（Q&A）、hide/edit history、markdown export、JSON API、gh 風 CLI、SSE による部分更新まで育ち、今回 pull request が載った。
+もともとこのプロジェクトは「古典的 SSR の MPA を育てるデモ」だった。net/http + html/template + SQLite、ビルドも SPA もなし。それが issue、comment、label、discussion、hide/edit history、markdown export、JSON API、gh 風 CLI、SSE による部分更新まで育ち、今回 pull request が載った。
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -10 740 364" width="740" height="364" role="img" aria-label="GitHub 本体に対する実装済み機能の subset 関係図">
@@ -86,8 +86,8 @@ repo が見つからない・無効化した場合は /pulls 配下ごと未マ�
 
 2 点目は AI への情報提供を優先していること。これは最初期からの方針で、今回の PR 機能にもそのまま波及した。
 
-- `zatu pr` という gh 風 CLI で全操作（list/view/diff/create/edit/close/reopen/merge/delete/comment）ができる
-- `zatu pr view N --markdown` で PR 全文を markdown 1 発でエクスポートできる（export.PullRequestMarkdown）
+- `zatu pr` という gh 風 CLI で、list/view/diff/create/edit/close/reopen/merge/delete/comment の全操作ができる
+- export.PullRequestMarkdown を通じて、`zatu pr view N --markdown` で PR 全文を markdown 1 発でエクスポートできる
 - `/api/v1/pulls*` の JSON API があり、remote モードでは zatu もこれを経由する
 - issue や comment と同じく store 層が SQLite で、スキーマ自体が読める
 
@@ -95,7 +95,7 @@ GitHub の Web UI は人間が画面を見て操作する前提だが、こち�
 
 ## PR の実体
 
-pull_requests は DB の 1 行（id, base_ref, head_ref, title, body, state, merge_base_sha, head_sha, merged 系）で、git 的な実体は実リポジトリ側にある。open の間は commits・files・conflict 判定を毎回 git に問い合わせて計算する。close か merge された時点で merge_base_sha と head_sha を記録し、以後の表示は記録済みの値で差分を取る。
+pull_requests は DB の 1 行で、id, base_ref, head_ref, title, body, state, merge_base_sha, head_sha, merged 系を持つ。git 的な実体は実リポジトリ側にある。open の間は commits・files・conflict 判定を毎回 git に問い合わせて計算する。close か merge された時点で merge_base_sha と head_sha を記録し、以後の表示は記録済みの値で差分を取る。
 
 「open はライブ、closed は凍結」という単純な線引きで、diff が close 後に変化しないことを保証している。
 
@@ -105,7 +105,7 @@ pull_requests は DB の 1 行（id, base_ref, head_ref, title, body, state, mer
 
 ### commits は two-dot、files は three-dot
 
-`git log base..head`（two-dot）は「head 側にだけあるコミット」を列挙する。一方 `git diff base...head`（three-dot）は「merge-base から head への差分」を出す。GitHub の commits タブと files タブはそれぞれこの意味論を持つ。
+two-dot の `git log base..head` は「head 側にだけあるコミット」を列挙する。一方 three-dot の `git diff base...head` は「merge-base から head への差分」を出す。GitHub の commits タブと files タブはそれぞれこの意味論を持つ。
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-5.75 -9 372 208.6" width="372" height="209" role="img" aria-label="two-dot base..head と three-dot merge-base..head の対象範囲の違い">
@@ -136,7 +136,7 @@ pull_requests は DB の 1 行（id, base_ref, head_ref, title, body, state, mer
 
 base がブランチ作成後に進んでいると、two-dot の diff には base 側の新コミットによる逆方向の変更が混ざる。files タブで「この PR が何を変えるか」を出すには merge-base が要る。open の間は `git merge-base` を毎回呼び、closed では記録済みの merge_base_sha を使う。
 
-この range 計算は filesRange という helper に共通化した。理由は実害があったからで、files 表示と「anchored コメントの path が diff に含まれるか」の検証が別々の range を計算していると、「画面に出るのにコメントできない」「コメントできるのに画面に出ない」という不整合になる。実際、レビューで api/cli 側に同じ検証穴が指摘され、web 側にも同型の穴が残っていることが分かって両方潰した。
+この range 計算は filesRange という helper に共通化した。共通化に至ったのは実害があったからで、files 表示と「anchored コメントの path が diff に含まれるか」の検証が別々の range を計算していると、「画面に出るのにコメントできない」「コメントできるのに画面に出ない」という不整合になる。実際、レビューで api/cli 側に同じ検証穴が指摘され、web 側にも同型の穴が残っていることが分かって両方潰した。
 
 ### close/merge 時に head を pin する
 
@@ -178,7 +178,7 @@ merge の実装は対象 ref が checked-out かどうかで分岐する。
 
 method は merge commit / squash / rebase の 3 種。squash の commit message は GitHub 風に `(#N)` を末尾に付けている。マージ済み PR への再マージは 409 で弾く。
 
-ここで厄介だったのが git のバージョン差で、`merge-tree --write-tree`（対話なしに tree を書き出せる形）は git 2.38 からしかない。2.38 未満では conflict 判定自体が取れず、plumbing merge も使えない。その場合は conflict チェックを unknown として返し、merge は checked-out 経路のみ許可、という退化にした。「古い環境では機能が制限される」ことをエラーではなく機能差として扱う方が、ローカルデモとしては優しい。
+ここで厄介だったのが git のバージョン差だ。対話なしに tree を書き出せる `merge-tree --write-tree` は git 2.38 からしかない。2.38 未満では conflict 判定自体が取れず、plumbing merge も使えない。その場合は conflict チェックを unknown として返し、merge は checked-out 経路のみ許可、という退化にした。「古い環境では機能が制限される」ことをエラーではなく機能差として扱う方が、ローカルデモとしては優しい。
 
 ### anchored コメントの検証
 
@@ -188,7 +188,7 @@ web 側では行番号クリックで `<details>` のコメントフォームが
 
 ### conflict 時は merge フォームを出さない
 
-conflict 検出は `git merge-tree`（または checked-out 時は試行 merge）で行い、conflict 状態（Status==2）では merge フォーム自体を出さない。UI 上でコンフリクト解消までやるのは範囲外と判断した。解消したければローカルで解決して push すれば、次回表示時に再計算される。open は常にライブ計算なので、こういう逃げ道が素直に機能する。
+conflict 検出は `git merge-tree` で行い、checked-out の場合は試行 merge を使う。Status==2 の conflict 状態では merge フォーム自体を出さない。UI 上でコンフリクト解消までやるのは範囲外と判断した。解消したければローカルで解決して push すれば、次回表示時に再計算される。open は常にライブ計算なので、こういう逃げ道が素直に機能する。
 
 ### ついでに見つかった小さいバグ
 
@@ -205,10 +205,10 @@ conflict 検出は `git merge-tree`（または checked-out 時は試行 merge�
 
 効いたのはレビュー指摘の横展開だった。anchored コメントの path 検証漏れは api/cli で指摘されたが、同じ責務を持つ web 側も同じ穴を持っていた。レイヤを跨いで同型の穴が残るのは実装を分割したときの典型で、指摘が来たら他レイヤも見る、という動きが今回は特に重要だった。
 
-もう 1 つは GitHub の PR stack（#105）との付き合い。#103 と #104 が stack になると base ブランチの付け替えと merge の順序を GitHub 側が管理するので、こちらから base を直したり個別に merge したりしてはいけない。#102 だけ先に squash merge して残りを stack に任せた。
+もう 1 つは GitHub の PR stack #105 との付き合い。#103 と #104 が stack になると base ブランチの付け替えと merge の順序を GitHub 側が管理するので、こちらから base を直したり個別に merge したりしてはいけない。#102 だけ先に squash merge して残りを stack に任せた。
 
 ## おわりに
 
-issue tracker のデモとして始めたものが、pull request まで実装されて GitHub の subset になった。肝心だったのは git の意味論を隠蔽しすぎないことで、two-dot/three-dot、pin ref、merge 2 経路、バージョン差への退化、あたりは「git に聞けば分かる範囲」をそのまま使った結果の設計になっている。ローカルで動き、AI がデータを全部取り出せる、という条件の中ではそれが一番素直だった。
+issue tracker のデモとして始めたものが、pull request まで実装されて GitHub の subset になった。肝心だったのは git の意味論を隠蔽しすぎないことで、two-dot/three-dot、pin ref、merge 2 経路、バージョン差への退化はどれも「git に聞けば分かる範囲」をそのまま使った結果の設計になっている。ローカルで動き、AI がデータを全部取り出せる、という条件の中ではそれが一番素直だった。
 
 次は review verdict か CI か、あるいはここで打ち止めか。subset のどこまでを埋めるかは、また sketch が書かれたときに決まるだろう。
