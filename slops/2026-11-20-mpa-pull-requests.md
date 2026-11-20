@@ -19,7 +19,7 @@ prev: 2026-11-16-mpa-ui-rules-audit.md
 | --- | --- |
 | [#102](https://github.com/podhmo/go-classic-mpa-sample/pull/102) | internal/gitrepo（repo 解決 + git ラッパ + merge 2 経路）と store の pull_requests/pr_comments |
 | [#103](https://github.com/podhmo/go-classic-mpa-sample/pull/103) | web 層：/pulls 一覧・詳細・files・merge + SSE |
-| [#104](https://github.com/podhmo/go-classic-mpa-sample/pull/104) | /api/v1/pulls* + zatu pr CLI + export.PullRequestMarkdown |
+| [#104](https://github.com/podhmo/go-classic-mpa-sample/pull/104) | `/api/v1/pulls*` + zatu pr CLI + export.PullRequestMarkdown |
 | [#106](https://github.com/podhmo/go-classic-mpa-sample/pull/106) | 実ブラウザ検証で見つけた不具合 2 件 + demo スクリプト + docs 分割 |
 
 この記事はその実装記録で、テーマは 3 つ。
@@ -88,7 +88,7 @@ repo が見つからない・無効化した場合は /pulls 配下ごと未マ�
 
 - `zatu pr` という gh 風 CLI で全操作（list/view/diff/create/edit/close/reopen/merge/delete/comment）ができる
 - `zatu pr view N --markdown` で PR 全文を markdown 1 発でエクスポートできる（export.PullRequestMarkdown）
-- /api/v1/pulls* の JSON API があり、remote モードでは zatu もこれを経由する
+- `/api/v1/pulls*` の JSON API があり、remote モードでは zatu もこれを経由する
 - issue や comment と同じく store 層が SQLite で、スキーマ自体が読める
 
 GitHub の Web UI は人間が画面を見て操作する前提だが、こちらは AI が「データを全部ください」と言ったときに markdown か JSON でそのまま渡せることを優先している。review comment も API/CLI から path + line + side で投げられるので、AI が書いたコメントがそのまま anchored コメントになる。
