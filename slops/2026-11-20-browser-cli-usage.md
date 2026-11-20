@@ -88,6 +88,18 @@ chrome-devtools には MCP 版もあるが、CLI 版と MCP 版は同じツー�
 
 今回は「chrome-devtools で insight を眺めて Cache 問題を特定 → playwright-cli の CDP 経由で CSS rule coverage を取る」という分担が自然にハマった。chrome-devtools は「なぜ」を教えてくれるが、自前で条件を作って計測・差分を回すのは playwright-cli の方が向いている。
 
+## viewport・モバイル幅の確認
+
+幅を変えて見た目を確認する手段は、実は3箇所にある。
+
+- storybook の `?w=<px>`。プレビュー iframe の幅を固定するトグルが最初から付いていて、メディアクエリは iframe の内側の viewport を見るので、狭幅レイアウトの目視確認はこれが最速。ブラウザ自動化すら要らない
+- playwright-cli。`resize <w> <h>` でウィンドウを変えられる。`run-code` に降りると `setViewportSize` に加えて Playwright の `devices` 記述子（UA・deviceScaleFactor・タッチまで含むデバイスエミュレーション）も使えるので、狭幅を含む自動チェックはこちら
+- chrome-devtools CLI。`resize_page` で viewport、`emulate` で CPU・ネットワークのスロットリングが効く。単に幅を変えたいだけなら選ぶ理由は薄いが、perf trace と組み合わせて「モバイル相当の遅い環境ではどう見えるか」を調べるときに生きる
+
+実際に今回やったのは: E2E 検証で実アプリを 360px 幅で見た（playwright-cli 側）。ただし視覚差分 baseline は 1280x800 の1幅だけで、狭幅は差分検知の対象外だった。狭幅まで継続的に守りたいなら、storybook の `?w=` を差分スクリプトのループに混ぜるのが一番安い（story URL に `w=360` を付けて撮るだけでよい）。
+
+どれを使っても headless Chromium 上の近似であって、実機そのものの確認ではない点は次の節の「届かないもの」に通じる。
+
 ## 両方でも確認できないもの
 
 推測込みで挙げると、届かないものはだいたい「この headless Chromium・この瞬間の外側」にある。
