@@ -1,6 +1,6 @@
 ---
 title: 自分で書き直したコードに無い関数を、自分の振り返りレポートに書いていた — gist-cli リファクタリングと refine-slops の事故
-description: podhmo/gom の examples/gist-cli をリファクタリングし、その知見をレポートにまとめ、refine-slops で推敲した。推敲の途中で、レポートに書かれた parse_files がコードに一度も存在しなかったと分かった。コード・レポート・推敲・訂正をすべて同じ Devin が行ったのに起きた事故で、なぜ起きうるか、どう防ぐかを書く。
+description: podhmo/gom の examples/gist-cli をリファクタリングし、その知見をレポートにまとめ、refine-slops で推敲した。推敲のあと、ユーザーの指摘を受けて履歴を確かめると、レポートに書かれた parse_files がコードに一度も存在しなかったと分かった。コード・レポート・推敲・訂正をすべて同じ Devin が行ったのに起きた事故で、なぜ起きうるか、どう防ぐかを書く。
 prev: ../2026-11-20-browser-cli-usage.md
 ---
 
