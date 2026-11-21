@@ -1,0 +1,12 @@
+ slops/2026-10-27-writing-slops.md/03-svg-pitfalls.md                        |   2 +-
+ slops/2026-11-05-skill-for-new-articles.md/README.md                        |   2 +-
+ slops/2026-11-07-exploration-notes-from-issue-133.md/01-codex-comparison.md |  67 -----------------------
+ slops/2026-11-07-exploration-notes-from-issue-133.md/02-codex-vs-gemini.md  |  66 -----------------------
+ slops/2026-11-07-exploration-notes-from-issue-133.md/README.md              | 104 -----------------------------------
+ slops/2026-11-07-investigation-notes-skill.md/01-compare-with-pr139.md      |  70 ------------------------
+ slops/2026-11-07-investigation-notes-skill.md/02-compare-with-pr140.md      |  62 ---------------------
+ slops/2026-11-07-investigation-notes-skill.md/03-overall.md                 |  52 ------------------
+ slops/2026-11-07-investigation-notes-skill.md/README.md                     |  98 ---------------------------------
+ slops/2026-11-07-merge-investigation-note-skill.md                          | 342 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++------------
+ slops/2026-11-07-write-slops-investigation-notes.md                         | 124 ------------------------------------------
+ 11 files changed, 310 insertions(+), 679 deletions(-)
