@@ -181,6 +181,27 @@ stacked PR のマージは本質的に直列である。子PRは親がマージ�
 
 事故からの教訓も1つある。push 前に `go test ./internal/archcheck` を実測する、を徹底するようになった。未確認で push して main を壊した2回は、どちらもこの一手を省いたのが直接の原因だった。
 
+## /tmp に置いた使い捨てツール
+
+自動化の実体は、すべて `/tmp` に置いた捨てスクリプトだった。土台の `/tmp/tasks.json` は次のように作った。
+
+- `gh pr list --json number,baseRefName,headRefName` で open PR を全件取得(`/tmp/prs.json`)
+- `headRefName → PR番号` の対応表を作り、各 PR の `baseRefName` がどの PR の head かを解決して親子関係を復元。`base=main` がルート(6件見つかり、本命は [#1111](https://github.com/podhmo/minigo/pull/1111))、同じ親を持つ子が2本ある点がフォーク([#1365](https://github.com/podhmo/minigo/pull/1365) → [#1366](https://github.com/podhmo/minigo/pull/1366) と [#1367](https://github.com/podhmo/minigo/pull/1367))
+- `git ls-remote` で全 devin/* ブランチの tip SHA を採取(`/tmp/orig_heads.txt`、252件)
+- チェーンをトポロジカル順に並べ、`{num, head, head_orig, parent_num, parent_orig_head}` の行を書き出したものが `tasks.json`(232件。生成時点では #1157 まで処理済みだったので、残り全部が入っている)
+
+`head_orig` と `parent_orig_head`(走査時点の tip の記録)が後の自動化の要になった。親が squash merge・ブランチ書き換えで消えても、`rev-list tip ^parent_orig_tip` で「その PR 自身のコミット」を機械的に確定できる。
+
+その上に載せたツールは次の5つである。
+
+- `mergeall.py` — 本線ドライバ。`tasks.json` 順に `PUT merge-async squash` を投げ、返ってきた uuid を `merge-status` でポーリング。timeout でも merged まで待つか再 enqueue する。`merge_done.json` に進捗を記録して中断・再開可能にした
+- `watchmerge.sh` — 監督ループ。`mergeall.py` が死んだら再起動し、ログに merge conflict が出たら `fixconflict.py` をその PR へ走らせる。修復後も同じ PR が衝突したままなら「人間に返す」と記録して先へ進む
+- `restack.py` / `fixconflict.py` / `fixone.sh` — 衝突修復の3世代。`rebase --onto` で own コミットを親の新 tip へ載せる方式から、cherry-pick で1個ずつ積む方式へ。いずれも budgets.go は `--theirs`、TODO.md は `--union` + 重複行除去で自動解決し、それ以外のファイルが衝突したら止まる設計は共通だった
+- `drive.py` — 終盤の単発ドライバ。1 PR ぶん enqueue → ポーリングだけを回す
+- `fix_budgets()`(restack 系スクリプト内の関数) — `go test ./internal/archcheck` の失敗文面を正規表現でパースし、`budgets.go` の該当行の数値を実測値へ書き換えるループ。これが budgets ずれ 81 件を機械化できた理由である
+
+要するに「状態ファイル(tasks.json / state.json / done.json)+ 失敗ログを読んで立て直す監督スクリプト + 衝突種別ごとの機械解決」という、長時間稼働前提の雑な自動化だった。雑であるが故に全履歴 replay のような誤爆も起きたわけだが、修復ルールをファイル種別で切り分けられたのは効いた。
+
 ## GitHub stacked PRs で分かった仕様
 
 今回はじめて規格書ではなく挙動として分かったことがいくつかある。
