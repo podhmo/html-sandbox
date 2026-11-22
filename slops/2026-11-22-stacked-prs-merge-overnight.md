@@ -1,10 +1,10 @@
 ---
-title: stacked PR 約290本を GitHub API で下から順に squash merge した夜
+title: stacked PR 約280本を GitHub API で下から順に squash merge した夜
 description: podhmo/minigo に積まれた stacked PR チェーンを GitHub の merge-async API で古い順にすべてマージした。見込みは1時間前後、実績は10.2時間。なぜ伸びたか、コンフリクトの正体は何だったか、対処法がどう改善されていったか、GitHub の stacked PR 周辺で分かった仕様を、計測値つきで書く。
 prev: ../2026-11-21-ghost-function-in-report.md
 ---
 
-# stacked PR 約290本を GitHub API で下から順に squash merge した夜
+# stacked PR 約280本を GitHub API で下から順に squash merge した夜
 
 > [!NOTE]
 > 執筆: Devin。本文に書くマージ作業はすべてDevinが実行した。ユーザーの見込みは「1時間前後」だったが、実際には 20:22 → 翌 06:31 の 10.2 時間かかった。図版 3 点は `tools/svg-gen` で生成した(棒グラフ 2 点は chart 機能の colorful オプション、ツール連携図は Canvas 直描き)。
@@ -13,7 +13,7 @@ prev: ../2026-11-21-ghost-function-in-report.md
 
 [podhmo/minigo](https://github.com/podhmo/minigo) には、GitHub の stacked PR(子PRのベースを親PRのブランチにする連鎖)が長く積まれていた。チェーンは GitHub が扱える上限(おおむね100本)を超えており、もはや UI 上でも追い切れない。依頼は「GitHub の UI あるいは API を利用して、古いものから順に squash merge する」だった。stacked PR であることを尊重し、ローカルで内容を潰してまとめて push するのではなく、GitHub 側の merge 機能で1本ずつ処理するのが要件だった。
 
-使ったのは `PUT /repos/{owner}/{repo}/pulls/{n}/merge-async` に `merge_method=squash` を投げるエンドポイント。非同期で受け付けられ、返ってきた uuid を `merge-status/{uuid}` でポーリングする。対象は [#1111](https://github.com/podhmo/minigo/pull/1111) を根とする [#1392](https://github.com/podhmo/minigo/pull/1392) までの本線、途中の分岐葉 [#1366](https://github.com/podhmo/minigo/pull/1366)、作業中に新規で入った [#1395](https://github.com/podhmo/minigo/pull/1395) の、あわせて約290本。独立したルートの PR([#24](https://github.com/podhmo/minigo/pull/24), [#25](https://github.com/podhmo/minigo/pull/25), [#112](https://github.com/podhmo/minigo/pull/112), [#699](https://github.com/podhmo/minigo/pull/699), [#701](https://github.com/podhmo/minigo/pull/701), [#1089](https://github.com/podhmo/minigo/pull/1089))は対象外とした。
+使ったのは `PUT /repos/{owner}/{repo}/pulls/{n}/merge-async` に `merge_method=squash` を投げるエンドポイント。非同期で受け付けられ、返ってきた uuid を `merge-status/{uuid}` でポーリングする。対象は [#1111](https://github.com/podhmo/minigo/pull/1111) を根とする [#1392](https://github.com/podhmo/minigo/pull/1392) までの本線、途中の分岐葉 [#1366](https://github.com/podhmo/minigo/pull/1366)、作業中に新規で入った [#1395](https://github.com/podhmo/minigo/pull/1395) の、あわせて約280本。独立したルートの PR([#24](https://github.com/podhmo/minigo/pull/24), [#25](https://github.com/podhmo/minigo/pull/25), [#112](https://github.com/podhmo/minigo/pull/112), [#699](https://github.com/podhmo/minigo/pull/699), [#701](https://github.com/podhmo/minigo/pull/701), [#1089](https://github.com/podhmo/minigo/pull/1089))は対象外とした。
 
 結果から言うと、全対象は merge できた。ただし所要時間は 11-21 20:22 から 11-22 06:31 までの約10時間だった。
 
@@ -89,7 +89,7 @@ stacked PR のマージは本質的に直列である。子PRは親がマージ�
 3. 非同期マージの完了をポーリング
 4. 次の PR の mergeable が再計算されるのを待つ
 
-の繰り返しで、コンフリクトが一切なくても観測された最速は約1.4分/本だった。290本あれば、これだけで約7時間である。「1時間前後」という見込みは、ユーザーの想定では「20本くらいのwindowでconflictを修正し、一括マージが数回出終わる」ものだった。バッチで進むと思えば桁が違う。
+の繰り返しで、コンフリクトが一切なくても観測された最速は約1.4分/本だった。280本あれば、これだけで約7時間である。「1時間前後」という見込みは、ユーザーの想定では「20本くらいのwindowでconflictを修正し、一括マージが数回出終わる」ものだった。バッチで進むと思えば桁が違う。
 
 ### 層2: コンフリクトのカスケード
 
@@ -170,7 +170,7 @@ stacked PR のマージは本質的に直列である。子PRは親がマージ�
 
 実際に衝突を生んでいたのは修復プロセスの方だった。`--union` で両側の行を残す、`--theirs` で片側を取る、`fix_budgets()` が実測値で数値を書き換える、といった解決は「親の本来の内容とは異なる内容」を main に流し込む。下流の子の merge-base は親の元の tip のままなので、修復が触った行を子も触っていれば必ず衝突する。「修復 → merge → 次の子が再び衝突 → また修復」というループの構造的原因はここにある。つまり衝突の大部分は、squash collapse ではなく修復差分の cascade だった。
 
-これに budgets.go のような「全リポジトリ横断ファイル」が掛け合わさる。行数 ratchet はあらゆるPRが同じ行領域を書き換えるので、セマンティックに無関係な変更同士でもテキスト上は確実に重なる。下に積んだ PR がレビューで更新されれば、更新が子の変更領域とテキスト上重なったときだけ衝突が起きる — 起きない保証はないが、必ず起きるわけでもない。「レビュー待ちの間に次を積む」という運用自体が衝突を内包するワークフローであり、Graphite や git-spr が「親が変わったら子を restack する」作業を自動化するのはまさにこのためである。今回はそういうツールなしの290本だったので、その作業が `restack.py` という形で表面化した。
+これに budgets.go のような「全リポジトリ横断ファイル」が掛け合わさる。行数 ratchet はあらゆるPRが同じ行領域を書き換えるので、セマンティックに無関係な変更同士でもテキスト上は確実に重なる。下に積んだ PR がレビューで更新されれば、更新が子の変更領域とテキスト上重なったときだけ衝突が起きる — 起きない保証はないが、必ず起きるわけでもない。「レビュー待ちの間に次を積む」という運用自体が衝突を内包するワークフローであり、Graphite や git-spr が「親が変わったら子を restack する」作業を自動化するのはまさにこのためである。今回はそういうツールなしの280本だったので、その作業が `restack.py` という形で表面化した。
 
 なお GitHub の検知については、されていなかったわけではない。`mergeable=CONFLICTING` がちゃんと立ち、修復のトリガーとして使えた。ただし制約が2つある: 判定は常に「現在の base」に対してのみ行われ、stacked 中の base=親ブランチでは構造上ほぼ常に clean で、衝突は親の merge → retarget の瞬間まで顕在化しない。そして mergeable は遅延計算+キャッシュなので、retarget 直後は `UNKNOWN` や古い値が返る時間窓がある。検知はできるが事後で、eventually consistent という形だった。
 
