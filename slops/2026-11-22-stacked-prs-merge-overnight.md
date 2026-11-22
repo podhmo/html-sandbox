@@ -183,7 +183,64 @@ stacked PR のマージは本質的に直列である。子PRは親がマージ�
 
 ## /tmp に置いた使い捨てツール
 
-自動化の実体は、すべて `/tmp` に置いた捨てスクリプトだった。土台の `/tmp/tasks.json` は次のように作った。
+自動化の実体は、すべて `/tmp` に置いた捨てスクリプトだった。全体像を先に図で示す。
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="18 18 1033.1999999999998 381.4" width="1033" height="381" role="img" aria-label="throwaway /tmp tooling: scan, queue, merge loop, supervisor, repair">
+<rect x="30" y="30" width="109.00000000000001" height="36" rx="8" fill="none" stroke="#3B82C4" stroke-width="1.5"/>
+<text x="84.5" y="48" font-size="14" text-anchor="middle" dominant-baseline="central" fill="currentColor">gh pr list</text>
+<rect x="30" y="90" width="93.60000000000002" height="36" rx="8" fill="none" stroke="#3B82C4" stroke-width="1.5"/>
+<text x="76.80000000000001" y="108" font-size="14" text-anchor="middle" dominant-baseline="central" fill="currentColor">prs.json</text>
+<path d="M83.58351371490441 68.85658062886937 L77.7164862850956 87.14341937113063" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M76.60956129140872 77.3364209996435 L77.7164862850956 87.14341937113063 L84.322328989356 79.81093396940157" fill="none" stroke="currentColor" stroke-width="1.5"/>
+<rect x="30" y="150" width="132.10000000000002" height="36" rx="8" fill="none" stroke="#3B82C4" stroke-width="1.5"/>
+<text x="96.05000000000001" y="168" font-size="14" text-anchor="middle" dominant-baseline="central" fill="currentColor">git ls-remote</text>
+<rect x="30" y="210" width="139.8" height="40" rx="8" fill="none" stroke="#3B82C4" stroke-width="1.5"/>
+<text x="99.9" y="220.9" font-size="14" text-anchor="middle" dominant-baseline="central" fill="currentColor">orig_heads.txt</text>
+<text x="99.9" y="239.1" font-size="14" text-anchor="middle" dominant-baseline="central" fill="currentColor">252 tips</text>
+<path d="M96.5251748772956 188.96212910521928 L99.42482512270442 207.03787089478072" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M94.00042619877163 198.79296966347198 L99.42482512270442 207.03787089478072 L101.99817478286366 197.50999749477387" fill="none" stroke="currentColor" stroke-width="1.5"/>
+<rect x="230" y="140" width="209.09999999999997" height="52" rx="8" fill="none" stroke="#E69F00" stroke-width="1.5"/>
+<text x="334.54999999999995" y="156.9" font-size="14" text-anchor="middle" dominant-baseline="central" fill="currentColor">tasks.json</text>
+<text x="334.54999999999995" y="175.1" font-size="14" text-anchor="middle" dominant-baseline="central" fill="currentColor">{num,head,parent_num,…}</text>
+<path d="M126.60000000000002 108 L205 108 L205 166 L227 166" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M218 170.05 L227 166 L218 161.95" fill="none" stroke="currentColor" stroke-width="1.5"/>
+<path d="M172.79977748636705 229.963461906378 L334 228 L334.5041720147209 194.99964994553787" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M338.4162154853599 204.06046756227815 L334.5041720147209 194.99964994553787 L330.31716063240765 203.93673200202474" fill="none" stroke="currentColor" stroke-width="1.5"/>
+<text x="30" y="270" font-size="12" fill="currentColor" opacity="0.75">走査: base→head の解決 + tip凍結 → トポロジカル順のキュー</text>
+<rect x="460" y="120" width="124.40000000000002" height="52" rx="8" fill="none" stroke="#00A876" stroke-width="1.5"/>
+<text x="522.2" y="136.9" font-size="14" text-anchor="middle" dominant-baseline="central" fill="currentColor">mergeall.py</text>
+<text x="522.2" y="155.1" font-size="14" text-anchor="middle" dominant-baseline="central" fill="currentColor">enqueue→poll</text>
+<path d="M441.26747506566403 163.92586118118274 L457.83252493433594 148.07413881881726" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M454.1301871427471 157.2226466139155 L457.83252493433594 148.07413881881726 L448.5300123319405 151.3704639366226" fill="none" stroke="currentColor" stroke-width="1.5"/>
+<rect x="460" y="195" width="147.50000000000003" height="36" rx="8" fill="none" stroke="#E69F00" stroke-width="1.5"/>
+<text x="533.75" y="213" font-size="14" text-anchor="middle" dominant-baseline="central" fill="currentColor">merge_done.json</text>
+<path d="M523.5463012763248 174.68094626454285 L532.4036987236752 192.31905373545715" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M524.7455174375681 186.09372166486705 L532.4036987236752 192.31905373545715 L531.9840723518338 182.45870821879012" fill="none" stroke="currentColor" stroke-width="1.5"/>
+<rect x="460" y="245" width="124.40000000000002" height="36" rx="8" fill="none" stroke="#E69F00" stroke-width="1.5"/>
+<text x="522.2" y="263" font-size="14" text-anchor="middle" dominant-baseline="central" fill="currentColor">mergeall.log</text>
+<path d="M531.8408511356133 233.31411983562023 L524.1091488643867 242.68588016437977" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M526.7125336794594 233.16616969059703 L524.1091488643867 242.68588016437977 L532.9606572356341 238.3208716244411" fill="none" stroke="currentColor" stroke-width="1.5"/>
+<rect x="640" y="50" width="116.70000000000002" height="90" rx="8" fill="none" stroke="#D55E00" stroke-width="1.5"/>
+<text x="698.35" y="76.8" font-size="14" text-anchor="middle" dominant-baseline="central" fill="currentColor">GitHub</text>
+<text x="698.35" y="95" font-size="14" text-anchor="middle" dominant-baseline="central" fill="currentColor">merge-async</text>
+<text x="698.35" y="113.2" font-size="14" text-anchor="middle" dominant-baseline="central" fill="currentColor">squash</text>
+<path d="M584.9208904213467 142.12977091518482 L636.0992862340373 95.185558928724" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M632.2045368622122 104.25382377546661 L636.0992862340373 95.185558928724 L626.7292230439342 98.28465812259894" fill="none" stroke="currentColor" stroke-width="1.5"/>
+<path d="M639.4791095786533 98.87022908481516 L588.3007137659627 145.81444107127598" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M592.1954631377878 136.74617622453337 L588.3007137659627 145.81444107127598 L597.6707769560658 142.71534187740104" fill="none" stroke="currentColor" stroke-width="1.5"/>
+<rect x="640" y="195" width="116" height="40" rx="8" fill="none" stroke="#00A876" stroke-width="1.5"/>
+<text x="698" y="205.9" font-size="14" text-anchor="middle" dominant-baseline="central" fill="currentColor">drive.py</text>
+<text x="698" y="224.1" font-size="14" text-anchor="middle" dominant-baseline="central" fill="currentColor">終盤の単発版</text>
+<path d="M698.0190905225512 192.00006074195682 L698.3309094774488 142.99993925804318" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 4"/><path d="M702.3235559081536 152.02552923761684 L698.3309094774488 142.99993925804318 L694.223719911437 151.97398482672864" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 4"/>
+<rect x="230" y="285" width="137.7" height="44" rx="8" fill="none" stroke="#CC79A7" stroke-width="1.5"/>
+<text x="298.85" y="297.9" font-size="14" text-anchor="middle" dominant-baseline="central" fill="currentColor">watchmerge.sh</text>
+<text x="298.85" y="316.1" font-size="14" text-anchor="middle" dominant-baseline="central" fill="currentColor">再起動+衝突検出</text>
+<path d="M457 263 L420 263 L420 307 L370.7 307" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M379.7 302.95 L370.7 307 L379.7 311.05" fill="none" stroke="currentColor" stroke-width="1.5"/>
+<text x="230" y="258" font-size="12" fill="currentColor" opacity="0.75">log: merge conflict</text>
+<rect x="430" y="295" width="232.19999999999993" height="56" rx="8" fill="none" stroke="#56B4E9" stroke-width="1.5"/>
+<text x="546.0999999999999" y="313.9" font-size="14" text-anchor="middle" dominant-baseline="central" fill="currentColor">fixconflict.py / fixone.sh</text>
+<text x="546.0999999999999" y="332.1" font-size="14" text-anchor="middle" dominant-baseline="central" fill="currentColor">(restack.py, fix_budgets)</text>
+<path d="M370.6057036547169 307.7462481296223 L427.0942963452831 322.2537518703777" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M417.36975040614226 323.93770741537855 L427.0942963452831 322.2537518703777 L419.3846203561225 316.0923075476429" fill="none" stroke="currentColor" stroke-width="1.5"/>
+<path d="M665.1999999999999 323 L850 323 L850 95 L759.7 95" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M768.7 90.95 L759.7 95 L768.7 99.05" fill="none" stroke="currentColor" stroke-width="1.5"/>
+<text x="858" y="215" font-size="12" fill="currentColor" opacity="0.75">force-push → mergeableに戻す</text>
+<text x="30" y="370" font-size="12" fill="currentColor" opacity="0.75">青=走査  橙=状態/キュー  緑=ドライバ  紫=監督  空色=修復  朱=GitHub</text>
+<text x="430" y="385" font-size="12" fill="currentColor" opacity="0.75">修復ルール: budgets→--theirs, TODO→--union+dedupe / それ以外は停止して人間へ</text>
+</svg>
+```
+
+土台の `/tmp/tasks.json` は次のように作った。
 
 - `gh pr list --json number,baseRefName,headRefName` で open PR を全件取得(`/tmp/prs.json`)
 - `headRefName → PR番号` の対応表を作り、各 PR の `baseRefName` がどの PR の head かを解決して親子関係を復元。`base=main` がルート(6件見つかり、本命は [#1111](https://github.com/podhmo/minigo/pull/1111))、同じ親を持つ子が2本ある点がフォーク([#1365](https://github.com/podhmo/minigo/pull/1365) → [#1366](https://github.com/podhmo/minigo/pull/1366) と [#1367](https://github.com/podhmo/minigo/pull/1367))
