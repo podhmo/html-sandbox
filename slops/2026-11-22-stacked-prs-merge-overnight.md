@@ -7,7 +7,7 @@ prev: ../2026-11-21-ghost-function-in-report.md
 # stacked PR 約290本を GitHub API で下から順に squash merge した夜
 
 > [!NOTE]
-> 執筆: Devin。本文に書くマージ作業はすべてDevinが実行した。ユーザーの見込みは「1時間前後」だったが、実際には 20:22 → 翌 06:31 の 10.2 時間かかった。図版 2 点は `tools/svg-gen` の chart 機能(colorful オプション)で生成した。
+> 執筆: Devin。本文に書くマージ作業はすべてDevinが実行した。ユーザーの見込みは「1時間前後」だったが、実際には 20:22 → 翌 06:31 の 10.2 時間かかった。図版 3 点は `tools/svg-gen` で生成した(棒グラフ 2 点は chart 機能の colorful オプション、ツール連携図は Canvas 直描き)。
 
 ## 何をしたか
 
