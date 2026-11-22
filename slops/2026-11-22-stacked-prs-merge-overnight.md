@@ -174,6 +174,14 @@ stacked PR のマージは本質的に直列である。子PRは親がマージ�
 
 なお GitHub の検知については、されていなかったわけではない。`mergeable=CONFLICTING` がちゃんと立ち、修復のトリガーとして使えた。ただし制約が2つある: 判定は常に「現在の base」に対してのみ行われ、stacked 中の base=親ブランチでは構造上ほぼ常に clean で、衝突は親の merge → retarget の瞬間まで顕在化しない。そして mergeable は遅延計算+キャッシュなので、retarget 直後は `UNKNOWN` や古い値が返る時間窓がある。検知はできるが事後で、eventually consistent という形だった。
 
+### budgets.go の設計自体も問題では
+
+ここまで書くと、budgets.go の仕組みそのものに問題があるという見方が自然に出てくる。`TestFileBudgetsMatchRepo` は `budget == 実測行数` の完全一致を要求する。つまりこのファイルの正しい内容は「リポジトリ全体の状態の関数」であり、どこかのPRがファイルの行数を変えるたびに、飛行中の他PRの budgets.go は全域で stale になる。ファイルサイズを変えるほぼ全PRがこのファイルを編集するので、これは実質的に全PRを直列化するグローバルロックである。
+
+結果は2つの形で現れた。1つは今回の81件の衝突という「PRごとの修復コミット」ルート。もう1つは、CIが古いbaseの時点でgreenだったPRがそのままマージされると、stale な budgets.go が main に着地して `TestFileBudgetsMatchRepo` が赤くなる「静かな破壊」ルート — 実際に2回発生し、修復コミット(`0cdc5780`, `39f72934`)で対処した。ratchet の意図(ファイルの静かな肥大化を止める)は正当だが、完全一致のミラーファイルという表現が並行開発と相性が悪い。同じ構造のファイルは他にもあり、`similarity-baseline.json` や `TODO.md` の `[x]` マークも「リポジトリ全体の状態の関数である checked-in ファイル」として同じ種類の hotspot になる。
+
+この問題は minigo 側の issue として記録した: [#1396](https://github.com/podhmo/minigo/issues/1396)。差分スコープ化・base 相対 ratchet・パッケージ分割・merge 時の自動再生成、といった緩和の方向もそこにまとめてある。TODO.md の対応エントリもこの issue へのリンクになっている。
+
 ## [#1378](https://github.com/podhmo/minigo/pull/1378) のタスクが増えなかった理由
 
 [#1378](https://github.com/podhmo/minigo/pull/1378) は [gosimilarity](https://github.com/Songmu/gosimilarity)(構造類似検出)の出力を checked-in baseline と比較する `make simcheck` を入れた PR だった。マージ後に simcheck を走らせると 18 ペアが「baseline に無い新規」として出たが、これは想像より少ない。調べると、チェックインされた baseline(35 ペア)には、flag されたファイル群(`inspect/host_shape.go`, `vm/selectsite_test.go`, `vm/globalsite_test.go`, `internal/typedef/dispatch.go`)の言及がゼロだった。
