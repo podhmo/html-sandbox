@@ -164,6 +164,16 @@ stacked PR のマージは本質的に直列である。子PRは親がマージ�
 
 ここにユーザーが持っていたもう1つの見込みと、実際のずれがある。ユーザーの読みは「conflict が発生して解消に時間がかかるなら、それ相応の見逃されたタスクが顕在化するはず」だった。実際にマージ後に顕在化したのは、ローカル環境起因の `repl` 補完テスト失敗、意図的に invalid な testdata で `make format` が落ちる件、`make simcheck` の baseline ずれ(18ペア)の3件程度だった。衝突の大半が行数ファイルやチェックボックスという機械的なもので、意味的な地雷は少なかった、というのが答えである。解消に時間がかかったのは難しさではなく件数だった。
 
+### そもそも conflict はなぜ起きたか
+
+後から振り返ると、squash merge の連鎖そのものは衝突をほぼ生まない。子PRの3-way mergeの merge-base は親の squash 前 tip(子の祖先として残っている)なので、ブランチの内容と squash 結果が同じなら `base == ours` で機械的にマージできる。綺麗な stack であれば、squash だけでは衝突しない。
+
+実際に衝突を生んでいたのは修復プロセスの方だった。`--union` で両側の行を残す、`--theirs` で片側を取る、`fix_budgets()` が実測値で数値を書き換える、といった解決は「親の本来の内容とは異なる内容」を main に流し込む。下流の子の merge-base は親の元の tip のままなので、修復が触った行を子も触っていれば必ず衝突する。「修復 → merge → 次の子が再び衝突 → また修復」というループの構造的原因はここにある。つまり衝突の大部分は、squash collapse ではなく修復差分の cascade だった。
+
+これに budgets.go のような「全リポジトリ横断ファイル」が掛け合わさる。行数 ratchet はあらゆるPRが同じ行領域を書き換えるので、セマンティックに無関係な変更同士でもテキスト上は確実に重なる。下に積んだ PR がレビューで更新されれば、更新が子の変更領域とテキスト上重なったときだけ衝突が起きる — 起きない保証はないが、必ず起きるわけでもない。「レビュー待ちの間に次を積む」という運用自体が衝突を内包するワークフローであり、Graphite や git-spr が「親が変わったら子を restack する」作業を自動化するのはまさにこのためである。今回はそういうツールなしの290本だったので、その作業が `restack.py` という形で表面化した。
+
+なお GitHub の検知については、されていなかったわけではない。`mergeable=CONFLICTING` がちゃんと立ち、修復のトリガーとして使えた。ただし制約が2つある: 判定は常に「現在の base」に対してのみ行われ、stacked 中の base=親ブランチでは構造上ほぼ常に clean で、衝突は親の merge → retarget の瞬間まで顕在化しない。そして mergeable は遅延計算+キャッシュなので、retarget 直後は `UNKNOWN` や古い値が返る時間窓がある。検知はできるが事後で、eventually consistent という形だった。
+
 ## [#1378](https://github.com/podhmo/minigo/pull/1378) のタスクが増えなかった理由
 
 [#1378](https://github.com/podhmo/minigo/pull/1378) は [gosimilarity](https://github.com/Songmu/gosimilarity)(構造類似検出)の出力を checked-in baseline と比較する `make simcheck` を入れた PR だった。マージ後に simcheck を走らせると 18 ペアが「baseline に無い新規」として出たが、これは想像より少ない。調べると、チェックインされた baseline(35 ペア)には、flag されたファイル群(`inspect/host_shape.go`, `vm/selectsite_test.go`, `vm/globalsite_test.go`, `internal/typedef/dispatch.go`)の言及がゼロだった。
