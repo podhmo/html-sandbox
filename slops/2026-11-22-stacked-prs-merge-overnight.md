@@ -17,6 +17,12 @@ prev: ../2026-11-21-ghost-function-in-report.md
 
 結果から言うと、全対象は merge できた。ただし所要時間は 11-21 20:22 から 11-22 06:31 までの約10時間だった。
 
+## この約280本はどこから来たか
+
+山の正体は、おおむねリアーキテクチャ計画の実行ログである。[podhmo/minigo](https://github.com/podhmo/minigo) の `docs/next/ja/` には、計画書([docs/sketch/ja/plan-rearchitecture.md](https://github.com/podhmo/minigo/blob/main/docs/sketch/ja/plan-rearchitecture.md))を実行可能な単位に分解した [TODO.md](https://github.com/podhmo/minigo/blob/main/docs/next/ja/TODO.md) があり、「チェック項目の末端を1PRの目安にする」という運用ルールが書かれている。M0〜M4 / P0〜P3 のマイルストーンごとに末端タスクが並び、各PRがその1つずつを潰していった形だ。内部では `internal/archcheck` や TypeID intern 表、`internal/semantics` の宣言質問 API などがこの計画の産物である。
+
+ただし計画の項目だけでは終わっていない。`docs/next` の TODO をやり切ったあとも Devin は作業を続け、リポジトリ直下の TODO.md に積まれた既存タスクの消化に移っていた。そのためチェーンは計画分を超えて伸び続け、最終的に上限越えの約280本に育っていた。stacked PR のまま「レビュー待ちの間に次のタスクを積む」運用と、「細かく分けた1PR単位」の運用が掛け合わさった結果である。
+
 ## かかった時間
 
 1時間あたりのマージ完了数を、main の squash コミット時刻で集計したのが次の図である。
