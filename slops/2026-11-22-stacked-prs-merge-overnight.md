@@ -1,7 +1,7 @@
 ---
 title: stacked PR 約280本を GitHub API で下から順に squash merge した夜
 description: podhmo/minigo に積まれた stacked PR チェーンを GitHub の merge-async API で古い順にすべてマージした。見込みは1時間前後、実績は10.2時間。なぜ伸びたか、コンフリクトの正体は何だったか、対処法がどう改善されていったか、GitHub の stacked PR 周辺で分かった仕様を、計測値つきで書く。
-prev: ../2026-11-21-gom-scoped-cleanup.md
+prev: 2026-11-21-gom-scoped-cleanup.md
 ---
 
 # stacked PR 約280本を GitHub API で下から順に squash merge した夜
