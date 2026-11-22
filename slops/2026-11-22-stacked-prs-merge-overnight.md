@@ -160,7 +160,7 @@ stacked PR のマージは本質的に直列である。子PRは親がマージ�
 </svg>
 ```
 
-圧倒的に多かったのが `internal/archcheck/budgets.go` で81件。これは「ファイル行数の ratchet」を記録するファイルで、行数が変わるファイルを触る PR は必ずその数値を書き換える。つまり、ファイルを増減させるたいていの PR がここでぶつかる。ついで `docs/next/ja/TODO.md` などタスク・チェックリスト系が21件。本当の意味でコードが意味的に衝突したのは、テストを含めても12件程度だった。
+圧倒的に多かったのが [`internal/archcheck/budgets.go`](https://github.com/podhmo/minigo/blob/ba5f23c0/internal/archcheck/budgets.go) で81件。これは「ファイル行数の ratchet」を記録するファイルで、行数が変わるファイルを触る PR は必ずその数値を書き換える。つまり、ファイルを増減させるたいていの PR がここでぶつかる。ついで `docs/next/ja/TODO.md` などタスク・チェックリスト系が21件。本当の意味でコードが意味的に衝突したのは、テストを含めても12件程度だった。
 
 ここにユーザーが持っていたもう1つの見込みと、実際のずれがある。ユーザーの読みは「conflict が発生して解消に時間がかかるなら、それ相応の見逃されたタスクが顕在化するはず」だった。実際にマージ後に顕在化したのは、ローカル環境起因の `repl` 補完テスト失敗、意図的に invalid な testdata で `make format` が落ちる件、`make simcheck` の baseline ずれ(18ペア)の3件程度だった。衝突の大半が行数ファイルやチェックボックスという機械的なもので、意味的な地雷は少なかった、というのが答えである。解消に時間がかかったのは難しさではなく件数だった。
 
@@ -176,7 +176,7 @@ stacked PR のマージは本質的に直列である。子PRは親がマージ�
 
 ### budgets.go の設計自体も問題では
 
-ここまで書くと、budgets.go の仕組みそのものに問題があるという見方が自然に出てくる。`TestFileBudgetsMatchRepo` は `budget == 実測行数` の完全一致を要求する。つまりこのファイルの正しい内容は「リポジトリ全体の状態の関数」であり、どこかのPRがファイルの行数を変えるたびに、飛行中の他PRの budgets.go は全域で stale になる。ファイルサイズを変えるほぼ全PRがこのファイルを編集するので、これは実質的に全PRを直列化するグローバルロックである。
+ここまで書くと、[budgets.go](https://github.com/podhmo/minigo/blob/ba5f23c0/internal/archcheck/budgets.go) の仕組みそのものに問題があるという見方が自然に出てくる。[`TestFileBudgetsMatchRepo`](https://github.com/podhmo/minigo/blob/ba5f23c0/internal/archcheck/archcheck_test.go#L88) は `budget == 実測行数` の完全一致を要求する。つまりこのファイルの正しい内容は「リポジトリ全体の状態の関数」であり、どこかのPRがファイルの行数を変えるたびに、飛行中の他PRの budgets.go は全域で stale になる。ファイルサイズを変えるほぼ全PRがこのファイルを編集するので、これは実質的に全PRを直列化するグローバルロックである。
 
 結果は2つの形で現れた。1つは今回の81件の衝突という「PRごとの修復コミット」ルート。もう1つは、CIが古いbaseの時点でgreenだったPRがそのままマージされると、stale な budgets.go が main に着地して `TestFileBudgetsMatchRepo` が赤くなる「静かな破壊」ルート — 実際に2回発生し、修復コミット(`0cdc5780`, `39f72934`)で対処した。ratchet の意図(ファイルの静かな肥大化を止める)は正当だが、完全一致のミラーファイルという表現が並行開発と相性が悪い。同じ構造のファイルは他にもあり、`similarity-baseline.json` や `TODO.md` の `[x]` マークも「リポジトリ全体の状態の関数である checked-in ファイル」として同じ種類の hotspot になる。
 
