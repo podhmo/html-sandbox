@@ -11,9 +11,9 @@ prev: ../2026-11-21-ghost-function-in-report.md
 
 ## 何をしたか
 
-podhmo/minigo には、GitHub の stacked PR(子PRのベースを親PRのブランチにする連鎖)が長く積まれていた。チェーンは GitHub が扱える上限(おおむね100本)を超えており、もはや UI 上でも追い切れない。依頼は「GitHub の UI あるいは API を利用して、古いものから順に squash merge する」だった。stacked PR であることを尊重し、ローカルで内容を潰してまとめて push するのではなく、GitHub 側の merge 機能で1本ずつ処理するのが要件だった。
+[podhmo/minigo](https://github.com/podhmo/minigo) には、GitHub の stacked PR(子PRのベースを親PRのブランチにする連鎖)が長く積まれていた。チェーンは GitHub が扱える上限(おおむね100本)を超えており、もはや UI 上でも追い切れない。依頼は「GitHub の UI あるいは API を利用して、古いものから順に squash merge する」だった。stacked PR であることを尊重し、ローカルで内容を潰してまとめて push するのではなく、GitHub 側の merge 機能で1本ずつ処理するのが要件だった。
 
-使ったのは `PUT /repos/{owner}/{repo}/pulls/{n}/merge-async` に `merge_method=squash` を投げるエンドポイント。非同期で受け付けられ、返ってきた uuid を `merge-status/{uuid}` でポーリングする。対象は `#1111` を根とする `#1392` までの本線、途中の分岐葉 `#1366`、作業中に新規で入った `#1395` の、あわせて約290本。独立したルートの PR(#24, #25, #112, #699, #701, #1089)は対象外とした。
+使ったのは `PUT /repos/{owner}/{repo}/pulls/{n}/merge-async` に `merge_method=squash` を投げるエンドポイント。非同期で受け付けられ、返ってきた uuid を `merge-status/{uuid}` でポーリングする。対象は [#1111](https://github.com/podhmo/minigo/pull/1111) を根とする [#1392](https://github.com/podhmo/minigo/pull/1392) までの本線、途中の分岐葉 [#1366](https://github.com/podhmo/minigo/pull/1366)、作業中に新規で入った [#1395](https://github.com/podhmo/minigo/pull/1395) の、あわせて約290本。独立したルートの PR([#24](https://github.com/podhmo/minigo/pull/24), [#25](https://github.com/podhmo/minigo/pull/25), [#112](https://github.com/podhmo/minigo/pull/112), [#699](https://github.com/podhmo/minigo/pull/699), [#701](https://github.com/podhmo/minigo/pull/701), [#1089](https://github.com/podhmo/minigo/pull/1089))は対象外とした。
 
 結果から言うと、全対象は merge できた。ただし所要時間は 11-21 20:22 から 11-22 06:31 までの約10時間だった。
 
@@ -100,8 +100,8 @@ stacked PR のマージは本質的に直列である。子PRは親がマージ�
 ここは率直に書く。少なくとも3種類の自損があった。
 
 - 自動修復の境界誤認。PR の「自分のコミット」だけを replay するはずが、親との境界を誤って全履歴(163〜402コミット)を replay し始めることが複数回あった。気づいて止めて正規の境界でやり直す、の繰り返し。
-- テスト未確認の push が 2 回あり、stale な budgets を含んだままマージされて main が壊れた(#1335, #1345)。main へ直接修復コミット(`0cdc5780`, `39f72934`)を入れて復旧した。
-- 空の push(解決の結果ベースと同一になったもの)をした PR が、GitHub 側で自動 close された(#1335)。reopen してやり直した。
+- テスト未確認の push が 2 回あり、stale な budgets を含んだままマージされて main が壊れた([#1335](https://github.com/podhmo/minigo/pull/1335), [#1345](https://github.com/podhmo/minigo/pull/1345))。main へ直接修復コミット(`0cdc5780`, `39f72934`)を入れて復旧した。
+- 空の push(解決の結果ベースと同一になったもの)をした PR が、GitHub 側で自動 close された([#1335](https://github.com/podhmo/minigo/pull/1335))。reopen してやり直した。
 
 ## コンフリクトの正体
 
@@ -164,11 +164,11 @@ stacked PR のマージは本質的に直列である。子PRは親がマージ�
 
 ここにユーザーが持っていたもう1つの見込みと、実際のずれがある。ユーザーの読みは「conflict が発生して解消に時間がかかるなら、それ相応の見逃されたタスクが顕在化するはず」だった。実際にマージ後に顕在化したのは、ローカル環境起因の `repl` 補完テスト失敗、意図的に invalid な testdata で `make format` が落ちる件、`make simcheck` の baseline ずれ(18ペア)の3件程度だった。衝突の大半が行数ファイルやチェックボックスという機械的なもので、意味的な地雷は少なかった、というのが答えである。解消に時間がかかったのは難しさではなく件数だった。
 
-## #1378 のタスクが増えなかった理由
+## [#1378](https://github.com/podhmo/minigo/pull/1378) のタスクが増えなかった理由
 
-`#1378` は gosimilarity(構造類似検出)の出力を checked-in baseline と比較する `make simcheck` を入れた PR だった。マージ後に simcheck を走らせると 18 ペアが「baseline に無い新規」として出たが、これは想像より少ない。調べると、チェックインされた baseline(35 ペア)には、flag されたファイル群(`inspect/host_shape.go`, `vm/selectsite_test.go`, `vm/globalsite_test.go`, `internal/typedef/dispatch.go`)の言及がゼロだった。
+[#1378](https://github.com/podhmo/minigo/pull/1378) は [gosimilarity](https://github.com/Songmu/gosimilarity)(構造類似検出)の出力を checked-in baseline と比較する `make simcheck` を入れた PR だった。マージ後に simcheck を走らせると 18 ペアが「baseline に無い新規」として出たが、これは想像より少ない。調べると、チェックインされた baseline(35 ペア)には、flag されたファイル群(`inspect/host_shape.go`, `vm/selectsite_test.go`, `vm/globalsite_test.go`, `internal/typedef/dispatch.go`)の言及がゼロだった。
 
-これは baseline が「PR ブランチ上のコンテンツ」で生成されていたのが原因である。baseline が生成された時点のブランチにあったファイル内容と、その後の祖先マージやコンフリクト解消(union で両側を残す解消を含む)を経た最終 main の内容では、似通ったコードの窓がずれていた。つまり 18 ペアは「新たに書かれた重複」ではなく、「baseline が見ていない最終版だけの窓」だった。加えて、このチェーン自体が dedupe(重複の解消)を主題にした PR を多く含んでいた(P1-4 の gosimilarity merge, `#1377` の残り掃除など)ので、最終状態に残っていた重複はもともと少ない。ratchet が大量の見逃しを暴く、という展開にはならず、機械的なコピー 18 件が1コミットで dedupe されて終わった。
+これは baseline が「PR ブランチ上のコンテンツ」で生成されていたのが原因である。baseline が生成された時点のブランチにあったファイル内容と、その後の祖先マージやコンフリクト解消(union で両側を残す解消を含む)を経た最終 main の内容では、似通ったコードの窓がずれていた。つまり 18 ペアは「新たに書かれた重複」ではなく、「baseline が見ていない最終版だけの窓」だった。加えて、このチェーン自体が dedupe(重複の解消)を主題にした PR を多く含んでいた(P1-4 の gosimilarity merge, [#1377](https://github.com/podhmo/minigo/pull/1377) の残り掃除など)ので、最終状態に残っていた重複はもともと少ない。ratchet が大量の見逃しを暴く、という展開にはならず、機械的なコピー 18 件が1コミットで dedupe されて終わった。
 
 ## 対処法の進化
 
@@ -186,8 +186,8 @@ stacked PR のマージは本質的に直列である。子PRは親がマージ�
 今回はじめて規格書ではなく挙動として分かったことがいくつかある。
 
 - `merge-async` は `pending` と uuid を返し、完了は `merge-status/{uuid}` でポーリングする。status が timeout を返すことがあるが、そのまま待つと `merged` になる。同期エンドポイントより遅いが、queued merge の進行が見える分だけ制御しやすかった。
-- `mergeable` は遅延計算される。親のマージ直後、子は一時的に `CONFLICTING` を返すが、ローカルで試すとクリーンにマージできる、という時間差があった。再計算を待つだけで解消するケースと、base がマージ済み親ブランチのまま残っている実害ケース(#1327)があり、後者は API で base を main に書き換えて解決した。
-- ベースと同一の内容を push すると PR は自動で close される(#1335)。reopen はできるが、コンフリクト解消の結果「差分ゼロ」になった場合は push 前に検出しておくべきだった。
+- `mergeable` は遅延計算される。親のマージ直後、子は一時的に `CONFLICTING` を返すが、ローカルで試すとクリーンにマージできる、という時間差があった。再計算を待つだけで解消するケースと、base がマージ済み親ブランチのまま残っている実害ケース([#1327](https://github.com/podhmo/minigo/pull/1327))があり、後者は API で base を main に書き換えて解決した。
+- ベースと同一の内容を push すると PR は自動で close される([#1335](https://github.com/podhmo/minigo/pull/1335))。reopen はできるが、コンフリクト解消の結果「差分ゼロ」になった場合は push 前に検出しておくべきだった。
 - 親を squash merge すると子は自動で main へ retarget される。ただし retarget 後も、hunk が重なっていれば `CONFLICTING` のままになる。意味的には解決済みでも、GitHub の diff が見る形で衝突するなら rebase して形を整える必要がある。
 - チェーンが長くなると GitHub 側の処理が律速になる。mergeable 再計算と非同期マージの完了を待つ時間が、1 本あたり 1.4 分程度の床を作っていた。
 

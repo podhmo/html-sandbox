@@ -33,6 +33,13 @@ when a reusable instruction for another LLM is needed.
 - Front matter, if used, is simple `key: value`, not general YAML.
   Only `title`, `description`, `prev`, and `next` are allowed. Give a
   single-file article or bundle face a title there or in a `#` heading.
+- Turn repository, issue, and pull-request references into Markdown
+  links the reader can follow — a bare `owner/repo` or `#123` in prose
+  does not autolink. Use `[podhmo/minigo](https://github.com/podhmo/minigo)`,
+  `[#1378](https://github.com/podhmo/minigo/pull/1378)`, and
+  `[#65](https://github.com/podhmo/html-sandbox/issues/65)` shapes.
+  Repeat the link when the same reference comes up again later in the
+  article rather than only on first mention.
 
 ## Try SVG illustrations in slops articles
 
