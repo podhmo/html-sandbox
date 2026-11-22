@@ -15,7 +15,7 @@ preferred_target = "wasm-gc"
 description = "The blog of html-sandbox, served from Wasm on Cloudflare Workers."
 
 import {
-  "moonbitlang/async@0.22.5",
+  "moonbitlang/async@0.22.10",
 }
 
 // Opt-in warnings that point at rewrites (see the modernize report in
