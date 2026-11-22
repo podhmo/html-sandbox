@@ -311,11 +311,11 @@ fn main () -> Unit = match copy_file "main.gom" "copy.out" {
 
 ## 余談: main に入ったのは別の実装だった
 
-この記事を書いた後で、SC-2 と SC-3 は [#93](https://github.com/podhmo/gom/pull/93) と [#94](https://github.com/podhmo/gom/pull/94) ではなく、別に作られた [#112](https://github.com/podhmo/gom/pull/112) と [#113](https://github.com/podhmo/gom/pull/113) で main に入った。#93 と #94 は閉じた。
+この記事を書いた後で、SC-2 と SC-3 は [#93](https://github.com/podhmo/gom/pull/93) と [#94](https://github.com/podhmo/gom/pull/94) ではなく、別に作られた [#112](https://github.com/podhmo/gom/pull/112) と [#113](https://github.com/podhmo/gom/pull/113) で main に入った。[#93](https://github.com/podhmo/gom/pull/93) と [#94](https://github.com/podhmo/gom/pull/94) は閉じた。
 
-記事の E0418 と `@noescape(f)` は、#93 の実装での名前である。main では次のように違う。
+記事の E0418 と `@noescape(f)` は、[#93](https://github.com/podhmo/gom/pull/93) の実装での名前である。main では次のように違う。
 
-| 項目 | この記事（#93） | main（#112） |
+| 項目 | この記事（[#93](https://github.com/podhmo/gom/pull/93)） | main（[#112](https://github.com/podhmo/gom/pull/112)） |
 | --- | --- | --- |
 | 脱出のエラーコード | E0418 | E0419（E0418 は別のエラーに使われている） |
 | `.gomi` の境界の注釈 | 属性 `@noescape(f)` | ディレクティブコメント `//gom:noescape <名前> <引数番号>...`（`.gomi` には属性を書けない） |
