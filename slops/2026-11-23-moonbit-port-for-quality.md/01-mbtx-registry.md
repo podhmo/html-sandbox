@@ -35,32 +35,6 @@
 </svg>
 ```
 
-```svg
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 30 682 145.8" width="682" height="146" role="img" aria-label="how moon run resolves .mbtx imports: parse front matter, resolve via the registry index, sync the cache, materialize .mooncakes, then compile">
-<rect x="10" y="40" width="110" height="44" rx="8" fill="none" stroke="#3B82C4" stroke-width="1.5"/>
-<text x="65" y="62" font-size="11" text-anchor="middle" dominant-baseline="central" fill="currentColor">1. front matter</text>
-<text x="65" y="100" font-size="9" text-anchor="middle" fill="currentColor" opacity="0.6">moon.pkg syntax</text>
-<rect x="148" y="40" width="110" height="44" rx="8" fill="none" stroke="#E69F00" stroke-width="1.5"/>
-<text x="203" y="62" font-size="11" text-anchor="middle" dominant-baseline="central" fill="currentColor">2. resolve</text>
-<text x="203" y="100" font-size="9" text-anchor="middle" fill="currentColor" opacity="0.6">registry index</text>
-<path d="M124 62 L144 62" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.7"/><path d="M135 66.05 L144 62 L135 57.95" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.7"/>
-<rect x="286" y="40" width="110" height="44" rx="8" fill="none" stroke="#00A876" stroke-width="1.5"/>
-<text x="341" y="62" font-size="11" text-anchor="middle" dominant-baseline="central" fill="currentColor">3. sync</text>
-<text x="341" y="100" font-size="9" text-anchor="middle" fill="currentColor" opacity="0.6">registry cache</text>
-<path d="M262 62 L282 62" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.7"/><path d="M273 66.05 L282 62 L273 57.95" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.7"/>
-<rect x="424" y="40" width="110" height="44" rx="8" fill="none" stroke="#D55E00" stroke-width="1.5"/>
-<text x="479" y="62" font-size="11" text-anchor="middle" dominant-baseline="central" fill="currentColor">4. materialize</text>
-<text x="479" y="100" font-size="9" text-anchor="middle" fill="currentColor" opacity="0.6">.mooncakes/</text>
-<path d="M400 62 L420 62" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.7"/><path d="M411 66.05 L420 62 L411 57.95" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.7"/>
-<rect x="562" y="40" width="110" height="44" rx="8" fill="none" stroke="#CC79A7" stroke-width="1.5"/>
-<text x="617" y="62" font-size="11" text-anchor="middle" dominant-baseline="central" fill="currentColor">5. compile</text>
-<text x="617" y="100" font-size="9" text-anchor="middle" fill="currentColor" opacity="0.6">moonc</text>
-<path d="M538 62 L558 62" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.7"/><path d="M549 66.05 L558 62 L549 57.95" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.7"/>
-<text x="340" y="150" font-size="9" text-anchor="middle" fill="currentColor" opacity="0.6">stages 1-4: moon CLI (moonbuild + mooncake)</text>
-<text x="340" y="164" font-size="9" text-anchor="middle" fill="currentColor" opacity="0.6">stage 5: the compiler sees only resolved package paths</text>
-</svg>
-```
-
 ## front matter の文法
 
 ### 区切りと前処理
