@@ -1,0 +1,82 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-good-slops-map.mbtx -- where parts of existing slops sit on
+// two axes: x = whether the requester could already see it (PR,
+// diff, chat) or only the AI could (what it saw, chose, left
+// unsaid); y = whether the part carries content or only voice.
+// Positions are qualitative. The arrow is the TTS article: its
+// "properties" rearranged visible facts, while the reflection the
+// requester asked for (why not ask for a driver update) was never
+// written.
+
+fn main {
+  let c = @s.Canvas::new(margin=12.0)
+
+  let l = 90.0
+  let r = 620.0
+  let t = 50.0
+  let b = 300.0
+  c.text(10.0, 14.0, "記事の一部を、見えていたか・中身か語り口かで置く（定性的）", size=13.0)
+
+  // axes
+  c.line((l, b), (r, b), opacity=Some(0.6))
+  c.line((l, t), (l, b), opacity=Some(0.6))
+  c.text(l, b + 18.0, "依頼した人に見えていたもの（PR、diff、会話）", size=11.0, opacity=Some(0.8))
+  c.text(
+    r,
+    b + 36.0,
+    "AI だけが知っていたもの（見たもの、選んだもの、言わなかったもの）",
+    anchor=@s.End,
+    size=11.0,
+    opacity=Some(0.8),
+  )
+  c.text(l - 8.0, t + 6.0, "語り口", anchor=@s.End, size=11.0, opacity=Some(0.8))
+  c.text(l - 8.0, b - 6.0, "中身", anchor=@s.End, size=11.0, opacity=Some(0.8))
+
+  // the region the inference points at
+  ignore(
+    c.box(380.0, 150.0, @s.Fixed(230.0), 140.0, rx=6.0, dash="5 4", width=1.5, opacity=Some(0.7)),
+  )
+  c.text(600.0, 166.0, "良い記事の側（推測）", anchor=@s.End, size=11.0, opacity=Some(0.8))
+
+  // (x, y, label, palette index, anchor end?)
+  let pts = [
+    (170.0, 250.0, "answers-under-constraints の「性質 1〜5」", 0, true),
+    (250.0, 90.0, "reading-slops-again の「ぞくっとする」など", 3, true),
+    (400.0, 205.0, "pi-sarashina の「どこでハマったか」", 1, true),
+    (520.0, 240.0, "gom の推測とその根拠", 2, false),
+  ]
+  for p in pts {
+    let (x, y, label, k, start) = p
+    ignore(c.circle(x, y, 6.0, color=c.color(k), width=2.5))
+    c.text(
+      if start { x - 6.0 } else { x + 6.0 },
+      y - 14.0,
+      label,
+      anchor=(if start { @s.Start } else { @s.End }),
+      size=11.0,
+    )
+  }
+
+  // the reflection that was asked for but not written
+  let miss : @s.Point = (430.0, 276.0)
+  ignore(c.circle(miss.0, miss.1, 6.0, dash="2 2", width=1.5))
+  c.text(miss.0 + 12.0, miss.1 + 4.0, "書かれなかった反省", size=11.0, opacity=Some(0.85))
+  c.arrow((176.0, 252.0), (422.0, 275.0), dash="4 3", opacity=Some(0.6))
+
+  for p in pts {
+    let (x, y, _, _, _) = p
+    if !(x > l && x < r && y > t && y < b) {
+      abort("points inside the plot")
+    }
+  }
+  if !(miss.0 > 380.0 && miss.1 > 150.0) {
+    abort("the missing reflection lies in the good region")
+  }
+
+  println(
+    c.render(label="qualitative map: x from what the requester could already see to what only the AI knew, y from content to voice; the TTS article's properties sit on the visible side, the unwritten reflection on the AI-only content side"),
+  )
+}

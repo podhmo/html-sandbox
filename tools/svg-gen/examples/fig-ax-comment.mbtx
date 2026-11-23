@@ -1,0 +1,83 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-ax-comment.mbtx -- What the accessibility tree kept, before
+// and after PR #16. A skipped comment under
+// `content-visibility: auto`: when the rule hit the <li>, the
+// listitem stayed but childless — head (permalink) and body were
+// both notRendered. Scoping the rule to .comment-body keeps the
+// listitem and its header link in the AX tree; only the body is
+// skipped. Node colors: kept in the AX tree (green) vs dropped
+// (vermillion, dashed).
+
+fn main {
+  let c = @s.Canvas::new()
+
+  let kept = 2 // green
+  let gone = 3 // vermillion
+
+  let node = fn(x : Double, y : Double, label : String, k : Bool) -> @s.Shape {
+    c.box(
+      x,
+      y,
+      @s.Auto,
+      30.0,
+      label=label,
+      color=c.color(if k { kept } else { gone }),
+      dash=(if k { "" } else { "5 4" }),
+      size=12.0,
+      pad_x=10.0,
+    )
+  }
+
+  let edge = fn(a : @s.Shape, b : @s.Shape, k : Bool) {
+    c.line(
+      c.anchor(a, @s.S),
+      c.anchor(b, @s.N),
+      color=c.color(if k { kept } else { gone }),
+      dash=(if k { "" } else { "5 4" }),
+      opacity=Some(if k { 0.9 } else { 0.7 }),
+    )
+  }
+
+  // ---- before: rule on the <li> ----
+  c.text(20.0, 20.0, "before: CV on <li>", size=13.0)
+
+  let li1 = node(60.0, 50.0, "li.comment → listitem", true)
+  let head1 = node(30.0, 110.0, ".comment-head", false)
+  let body1 = node(190.0, 110.0, ".comment-body", false)
+  edge(li1, head1, false)
+  edge(li1, body1, false)
+  c.text(
+    30.0,
+    160.0,
+    "children=0 — head & body notRendered",
+    size=11.0,
+    opacity=Some(0.7),
+  )
+
+  // ---- after: rule on .comment-body ----
+  c.text(420.0, 20.0, "after: CV on .comment-body", size=13.0)
+
+  let li2 = node(460.0, 50.0, "li.comment → listitem", true)
+  let head2 = node(430.0, 110.0, ".comment-head", true)
+  let body2 = node(620.0, 110.0, ".comment-body", false)
+  edge(li2, head2, true)
+  edge(li2, body2, false)
+  c.text(
+    430.0,
+    160.0,
+    "children=2 — 番号・パーマリンクは残る",
+    size=11.0,
+    opacity=Some(0.7),
+  )
+
+  // Legend.
+  ignore(node(250.0, 200.0, "AX に残る", true))
+  ignore(node(400.0, 200.0, "notRendered", false))
+
+  println(
+    c.render(label="content-visibility を <li> から .comment-body に移すと AX ツリーに listitem とパーマリンクが残る図"),
+  )
+}
