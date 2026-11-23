@@ -1,0 +1,79 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-silence-loop.mbtx -- how silence turns one output into a
+// convention. The loop's closed shape is the point: with no
+// negative channel, each pass feeds the next. The dangling box is
+// the escape: writing the precedent down turns it into an
+// explicit, negotiable requirement.
+
+fn main {
+  let h = 52.0
+  let gx = 150.0
+  let gy = 74.0
+  let c = @s.Canvas::new()
+
+  let a = c.box(0.0, 0.0, @s.Auto, h, label="振る舞いが\n出力に入る")
+  let b = c.box(c.right_of(a, gx), a.y, @s.Auto, h, label="止められない\n（沈黙）")
+  let cc = c.box(b.x, b.y + h + gy, @s.Auto, h, label="文脈に前例\nとして残る")
+  let d = c.box(a.x, cc.y, @s.Auto, h, label="次回の exemplar\nに化ける")
+
+  c.arrow(c.anchor(a, @s.E), c.anchor(b, @s.W))
+  c.arrow(c.anchor(b, @s.S), c.anchor(cc, @s.N))
+  c.arrow(c.anchor(cc, @s.W), c.anchor(d, @s.E))
+  c.arrow(c.anchor(d, @s.N), c.anchor(a, @s.S))
+
+  // The loop's centre names what accumulates each time around.
+  c.text(
+    a.x + a.w + gx / 2.0,
+    a.y + h + gy / 2.0 - 12.0,
+    "沈黙の意味は",
+    anchor=@s.Middle,
+    central=true,
+    size=12.0,
+    opacity=Some(0.65),
+  )
+  c.text(
+    a.x + a.w + gx / 2.0,
+    a.y + h + gy / 2.0 + 12.0,
+    "ループで決まる",
+    anchor=@s.Middle,
+    central=true,
+    size=12.0,
+    opacity=Some(0.65),
+  )
+
+  // Escape hatch: codification converts precedent into an explicit
+  // rule.
+  let e = c.box(
+    cc.x + 30.0,
+    cc.y + h + gy,
+    @s.Auto,
+    h,
+    label="skill に書き込まれる\n＝明示要求に昇格",
+  )
+  c.arrow(
+    c.anchor(cc, @s.S),
+    (e.x + e.w / 2.0, e.y),
+    dash="5 4",
+    via=[
+      (cc.x + cc.w / 2.0, e.y + e.h / 2.0),
+      (e.x + e.w / 2.0, e.y + e.h / 2.0),
+    ],
+  )
+
+  if !(a.y == b.y && cc.y == d.y) {
+    abort("loop rows must be aligned")
+  }
+  if !(b.x == cc.x && a.x == d.x) {
+    abort("loop columns must be aligned")
+  }
+  if !(e.y > cc.y + cc.h && e.x > d.x + d.w) {
+    abort("the codification box must hang off the loop, not overlap it")
+  }
+
+  println(
+    c.render(label="silence loop: each unflagged output becomes the next exemplar; writing it down escapes the loop"),
+  )
+}
