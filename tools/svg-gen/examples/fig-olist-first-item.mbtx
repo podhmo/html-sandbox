@@ -1,0 +1,74 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-olist-first-item.mbtx -- In a list run that mixes "- " and
+// "N. " items, the FIRST item's marker picks the wrapper tag: a
+// run led by "N. " becomes <ol> (with start= when the number is
+// not 1), a run led by "- " becomes <ul>; later markers only tag
+// their own <li>.
+
+fn main {
+  let c = @s.Canvas::new()
+  let ol = c.color(0)
+  let ul = c.color(1)
+  let lh = 22.0
+
+  let runs = [
+    (70.0, ["3. c", "4. d"], "<ol start=\"3\">", ol),
+    (150.0, ["1. x", "- y", "- z"], "<ol>", ol),
+    (250.0, ["- x", "1. y", "- z"], "<ul>", ul),
+  ]
+
+  // Legend: marker dot colour = marker kind, decided tag stroke =
+  // first item.
+  c.raw("<circle cx=\"16\" cy=\"24\" r=\"4.5\" fill=\"\{ol}\"/>", covered=[(16.0, 24.0)])
+  c.text(28.0, 28.0, "\"N. \" (num > 0)", size=12.0)
+  c.raw("<circle cx=\"170\" cy=\"24\" r=\"4.5\" fill=\"\{ul}\"/>", covered=[(170.0, 24.0)])
+  c.text(182.0, 28.0, "\"- \" / \"* \" (num = 0)", size=12.0)
+
+  for run in runs {
+    let (ry, lines, tag_s, col) = run
+    for i, src in lines {
+      let y = ry + i.to_double() * lh
+      let first_ch = if src.length() > 0 { src[0] } else { ' ' }
+      let is_ordered = first_ch >= '0' && first_ch <= '9'
+      c.raw(
+        "<circle cx=\"16\" cy=\"\{y - 4.0}\" r=\"4.5\" fill=\"\{if is_ordered { ol } else { ul }}\"/>",
+        covered=[(16.0, y - 4.0)],
+      )
+      c.text(30.0, y, src, size=14.0)
+      let num = if is_ordered {
+        // parse leading digits
+        let mut n = 0
+        for ch in src {
+          if ch >= '0' && ch <= '9' {
+            n = n * 10 + (ch.to_int() - '0'.to_int())
+          } else {
+            break
+          }
+        }
+        n
+      } else {
+        0
+      }
+      c.text(110.0, y, "num=\{num}", size=12.0, opacity=Some(0.7))
+      if i == 0 && is_ordered != (col == ol) {
+        abort("first item decides the tag")
+      }
+    }
+    let tag = c.box(260.0, ry - 16.0, @s.Auto, 34.0, label=tag_s, color=col, width=2.0)
+    c.arrow(
+      (152.0, ry - 4.0),
+      c.anchor(tag, @s.W),
+      color=col,
+      width=2.0,
+      gap_start=Some(4.0),
+      gap_end=Some(6.0),
+    )
+  }
+
+  println(
+    c.render(label="a list run's first item marker picks <ol> or <ul>; later markers only tag their own li"),
+  )
+}

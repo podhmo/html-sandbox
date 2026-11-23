@@ -1,0 +1,19 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-points.mbtx -- P0: the article's whole input is ten unlabeled
+// points. Every later figure reuses this set (geom.mbt sites).
+
+fn main {
+  let c = @s.Canvas::new()
+  for p in @s.sites {
+    c.raw(
+      "<circle cx=\"\{p.0}\" cy=\"\{p.1}\" r=\"3.5\" fill=\"currentColor\"/>",
+      covered=[p],
+    )
+  }
+  println(
+    c.render(label="the shared input: ten points, no structure yet"),
+  )
+}

@@ -1,0 +1,113 @@
+---
+import {
+  "podhmo/svg-gen" @s,
+  "moonbitlang/core/math" @math,
+}
+---
+
+// fig-flip.mbtx -- D3: the repair is one edge flip. Left: the wrong
+// diagonal (vermillion) whose circumcircle swallows the opposite
+// vertex. Right: flipped to the Delaunay diagonal (blue), circles
+// empty.
+
+fn main {
+  let s = @s.sites
+  let tris = @s.delaunay(s)
+  let c = @s.Canvas::new()
+  let dx = 265.0
+
+  let mut quad : (Int, Int, Int, Int)? = None
+  for entry in @s.edge_adjacency(tris) {
+    let (ea, eb, t) = entry
+    if t.length() == 2 {
+      let t1 = tris[t[0]]
+      let t2 = tris[t[1]]
+      let mut b = -1
+      let mut d = -1
+      for v in [t1.0, t1.1, t1.2] {
+        if v != ea && v != eb {
+          b = v
+        }
+      }
+      for v in [t2.0, t2.1, t2.2] {
+        if v != ea && v != eb {
+          d = v
+        }
+      }
+      quad = Some((ea, b, eb, d))
+      break
+    }
+  }
+  guard quad is Some(q) else {
+    abort("no interior edge")
+  }
+  let a = s[q.0]
+  let b = s[q.1]
+  let cc = s[q.2]
+  let d = s[q.3]
+
+  let dot = fn(p : @s.Point, fill : String) {
+    c.raw(
+      "<circle cx=\"\{p.0}\" cy=\"\{p.1}\" r=\"3.5\" fill=\"\{fill}\"/>",
+      covered=[p],
+    )
+  }
+  let quad_outline = fn(pp : Array[@s.Point]) {
+    for e in [(pp[0], pp[1]), (pp[1], pp[2]), (pp[2], pp[3]), (pp[3], pp[0])] {
+      c.line(e.0, e.1, width=1.2)
+    }
+  }
+
+  // Left: wrong diagonal bd — circle through abd contains c.
+  let bad = @s.circum(a, b, d)
+  if !(@math.hypot(cc.0 - bad.o.0, cc.1 - bad.o.1) < bad.r) {
+    abort("vertex c must lie inside the bad circumcircle")
+  }
+  quad_outline([a, b, cc, d])
+  c.line(b, d, width=2.5, color=c.color(3))
+  ignore(
+    c.circle(bad.o.0, bad.o.1, bad.r, color=c.color(3), dash="5 3", opacity=Some(0.8)),
+  )
+  for p in [a, b, cc, d] {
+    dot(p, "currentColor")
+  }
+  c.text(112.0, 215.0, "illegal: site inside", anchor=@s.Middle, size=11.0, opacity=Some(0.7))
+
+  // arrow between panels
+  c.arrow((240.0, 105.0), (258.0, 105.0), width=1.5)
+
+  // Right: flipped diagonal ac — both circumcircles empty.
+  let sq = @s.shift([a, b, cc, d], dx, 0.0)
+  let sa = sq[0]
+  let sb = sq[1]
+  let scc = sq[2]
+  let sd = sq[3]
+  for case in [([sa, sb, scc], sd), ([sa, scc, sd], sb)] {
+    let (t, other) = case
+    let cc2 = @s.circum(t[0], t[1], t[2])
+    if !(@math.hypot(other.0 - cc2.o.0, other.1 - cc2.o.1) > cc2.r - 1.0e-9) {
+      abort("flipped diagonal: circumcircles empty")
+    }
+  }
+  quad_outline([sa, sb, scc, sd])
+  c.line(sa, scc, width=2.5, color=c.color(0))
+  let c1 = @s.circum(sa, sb, scc)
+  ignore(c.circle(c1.o.0, c1.o.1, c1.r, opacity=Some(0.6)))
+  let c2 = @s.circum(sa, scc, sd)
+  ignore(c.circle(c2.o.0, c2.o.1, c2.r, opacity=Some(0.6)))
+  for p in [sa, sb, scc, sd] {
+    dot(p, "currentColor")
+  }
+  c.text(
+    112.0 + dx,
+    215.0,
+    "legal: circles empty",
+    anchor=@s.Middle,
+    size=11.0,
+    opacity=Some(0.7),
+  )
+
+  println(
+    c.render(label="edge flip: an illegal diagonal (site inside the circumcircle) is swapped for the Delaunay one"),
+  )
+}

@@ -1,0 +1,106 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-slops-use-cases.mbtx -- every slops article (as of 2026-11-05)
+// placed by date (x) and by the use case it was written for (row).
+// Row position carries the category; hue repeats it for colorful
+// mode. The point is when each kind of article appears: feature
+// reports fill October, while claim-examining and meta articles
+// only show up in the last days.
+
+fn main {
+  let c = @s.Canvas::new(margin=12.0)
+
+  let cats = [
+    "変更の報告",
+    "詰まった経緯",
+    "実験・比較",
+    "実現性の調査",
+    "他人の成果物を読む",
+    "任せた作業の記録",
+    "主張の検討",
+    "書き方そのもの",
+    "記法の見本",
+  ]
+
+  // [day of month (Oct=10-31, Nov=1-5 as 32-36), category]
+  let dd = fn(m : Int, d : Int) { if m == 10 { d } else { 31 + d } }
+  let articles = [
+    (dd(10, 16), 0), (dd(10, 17), 0), (dd(10, 18), 0), (dd(10, 19), 0), (dd(10, 20), 0),
+    (dd(10, 22), 0), (dd(10, 24), 0), (dd(10, 25), 0), (dd(10, 25), 0), (dd(10, 28), 0),
+    (dd(10, 29), 0), (dd(10, 31), 0),
+    (dd(10, 21), 1), (dd(10, 28), 1),
+    (dd(10, 26), 2), (dd(10, 27), 2), (dd(10, 27), 2), (dd(10, 31), 2), (dd(11, 1), 2),
+    (dd(11, 3), 2), (dd(11, 3), 2),
+    (dd(11, 3), 3),
+    (dd(11, 3), 4),
+    (dd(10, 30), 5),
+    (dd(11, 3), 6), (dd(11, 5), 6),
+    (dd(10, 27), 7), (dd(11, 5), 7), (dd(11, 5), 7),
+    (dd(10, 14), 8), (dd(10, 15), 8), (dd(10, 22), 8),
+  ]
+  if articles.length() != 32 {
+    abort("31 existing articles plus this one")
+  }
+
+  let x0 = 150.0
+  // right margin so the 11/5 cluster of three fits
+  let day_w = 20.0
+  let row = 24.0
+  let y0 = 40.0
+  let first = dd(10, 14)
+  let xf = fn(d : Int) { x0 + (d - first).to_double() * day_w + day_w / 2.0 }
+
+  c.text(10.0, 14.0, "slops の記事を、書かれた目的ごとに日付順で並べる", size=13.0)
+
+  for k, name in cats {
+    let y = y0 + k.to_double() * row
+    c.text(x0 - 10.0, y, name, anchor=@s.End, central=true, size=11.0)
+    c.line((x0, y), (xf(dd(11, 5)) + day_w / 2.0, y), opacity=Some(0.15))
+  }
+
+  let counts : Map[String, Int] = Map([])
+  for a in articles {
+    let (d, k) = a
+    let key = "\{d}:\{k}"
+    counts.set(key, counts.get(key).unwrap_or(0) + 1)
+  }
+
+  let seen : Map[String, Int] = Map([])
+  for a in articles {
+    let (d, k) = a
+    let key = "\{d}:\{k}"
+    let n = seen.get(key).unwrap_or(0)
+    seen.set(key, n + 1)
+    // same-day articles in one row sit side by side
+    let dx = (n.to_double() - (counts.get(key).unwrap_or(1) - 1).to_double() / 2.0) * 11.0
+    ignore(
+      c.circle(
+        xf(d) + dx,
+        y0 + k.to_double() * row,
+        5.0,
+        color=c.color(k % 6),
+        width=2.0,
+        dash=(if k >= 6 { "2 2" } else { "" }),
+      ),
+    )
+  }
+
+  // date axis
+  let y_axis = y0 + cats.length().to_double() * row
+  c.line((x0, y_axis), (xf(dd(11, 5)) + day_w / 2.0, y_axis), opacity=Some(0.6))
+  for t in [("10/14", dd(10, 14)), ("10/21", dd(10, 21)), ("10/28", dd(10, 28)), ("11/1", dd(11, 1)), ("11/5", dd(11, 5))] {
+    let (label, d) = t
+    c.line((xf(d), y_axis), (xf(d), y_axis + 4.0), opacity=Some(0.6))
+    c.text(xf(d), y_axis + 16.0, label, anchor=@s.Middle, size=11.0, opacity=Some(0.75))
+  }
+  // mark issue #133's target
+  let tx = xf(dd(11, 5))
+  c.line((tx - 9.0, y0 + 6.0 * row - 13.0), (tx - 4.0, y0 + 6.0 * row - 7.0), opacity=Some(0.6))
+  c.text(tx - 11.0, y0 + 6.0 * row - 15.0, "#133 が指した記事", anchor=@s.End, size=10.0, opacity=Some(0.75))
+
+  println(
+    c.render(label="slops articles by date and use case: twelve feature reports spread through October; claim-examining and meta articles appear only from Nov 3"),
+  )
+}

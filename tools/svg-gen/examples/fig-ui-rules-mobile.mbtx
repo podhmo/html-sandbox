@@ -1,0 +1,95 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-ui-rules-mobile.mbtx -- the 360px collision the audit
+// found: the back-to-top chip sat in the same corner as the
+// submit button. The fix moves it to the inline-start edge
+// under max-width:40em.
+
+fn main {
+  let c = @s.Canvas::new()
+  let w = 150.0
+  let h = 240.0
+
+  let phone = fn(x : Double, y : Double, caption : String) -> @s.Shape {
+    let p = c.box(x, y, @s.Fixed(w), h, rx=14.0, opacity=Some(0.8))
+    c.text(
+      x + w / 2.0,
+      y + h + 22.0,
+      caption,
+      anchor=@s.Middle,
+      central=true,
+      size=11.0,
+      opacity=Some(0.6),
+    )
+    p
+  }
+
+  // before: the chip covers the submit corner
+  let x1 = 20.0
+  let y1 = 10.0
+  ignore(phone(x1, y1, "before: overlap"))
+  ignore(
+    c.box(
+      x1 + w - 78.0,
+      y1 + h - 46.0,
+      @s.Fixed(66.0),
+      28.0,
+      label="Submit",
+      size=11.0,
+      pad_x=8.0,
+      rx=6.0,
+      color=c.color(0),
+    ),
+  )
+  ignore(
+    c.box(
+      x1 + w - 60.0,
+      y1 + h - 31.0,
+      @s.Fixed(52.0),
+      26.0,
+      label="↑Top",
+      size=11.0,
+      pad_x=6.0,
+      rx=13.0,
+      color=c.color(3),
+      dash="4 3",
+    ),
+  )
+
+  // after: chip moves left, submit keeps the right corner
+  let x2 = 240.0
+  let y2 = 10.0
+  ignore(phone(x2, y2, "after: split corners"))
+  ignore(
+    c.box(
+      x2 + w - 78.0,
+      y2 + h - 46.0,
+      @s.Fixed(66.0),
+      28.0,
+      label="Submit",
+      size=11.0,
+      pad_x=8.0,
+      rx=6.0,
+      color=c.color(0),
+    ),
+  )
+  ignore(
+    c.box(
+      x2 + 10.0,
+      y2 + h - 46.0,
+      @s.Fixed(52.0),
+      26.0,
+      label="↑Top",
+      size=11.0,
+      pad_x=6.0,
+      rx=13.0,
+      color=c.color(1),
+    ),
+  )
+
+  println(
+    c.render(label="360px 幅で back-to-top チップが送信ボタンに重なっていた問題と、左右の隅に分けた修正後を対比した図"),
+  )
+}

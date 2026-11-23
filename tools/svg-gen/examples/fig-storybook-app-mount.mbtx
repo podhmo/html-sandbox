@@ -1,0 +1,50 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// Storybook app mount: the storybook's HTTP mux keeps its own
+// routes (index/story/static); every other path falls through a
+// catch-all into the StoryHttpApp story, which rebuilds the
+// request script-side and serves it through the real app mux on
+// a fake store. The browser then exercises fetch -> fragment ->
+// DOM swap without a database.
+
+fn main {
+  let c = @s.Canvas::new()
+
+  c.text(14.0, 18.0, "one :6006 server, two kinds of traffic", size=12.0, opacity=Some(0.7))
+
+  let browser = c.box(20.0, 96.0, @s.Auto, 56.0, label="browser\nreal requests", color=c.color(0), size=12.0)
+  let mux = c.box(300.0, 40.0, @s.Auto, 56.0, label="storybook mux\nGET /story/* /static/* …", color=c.color(1), size=12.0)
+  let story = c.box(620.0, 40.0, @s.Auto, 56.0, label="print / StoryHttp* stories\nmarkup & responses", size=12.0, dash="5 4")
+  c.arrow(c.anchor(browser, @s.E), c.anchor(mux, @s.W), width=1.5)
+  c.arrow(c.anchor(mux, @s.E), c.anchor(story, @s.W), width=1.5)
+  c.text(555.0, 66.0, "storybook paths", size=10.0, opacity=Some(0.75), anchor=@s.Middle)
+
+  let app = c.box(300.0, 152.0, @s.Auto, 56.0, label="StoryHttpApp story\nNew(storyStore).ServeHTTP", color=c.color(3), size=12.0)
+  c.arrow(c.anchor(mux, @s.S), c.anchor(app, @s.N), width=1.5)
+  c.text(480.0, 126.0, "catch-all mux.Handle(\"/\")", size=10.0, opacity=Some(0.75))
+  let page = c.box(620.0, 152.0, @s.Auto, 56.0, label="real app pages\n/issues/2, POST …/comments", color=c.color(3), size=12.0)
+  c.arrow(c.anchor(app, @s.E), c.anchor(page, @s.W), width=1.5, heads=@s.Both, split=14.0)
+  c.text(505.0, 218.0, "fragment / 303 / 422", size=10.0, opacity=Some(0.75))
+
+  c.arrow(c.anchor(browser, @s.S), (20.0, 240.0), heads=@s.NoHead)
+  c.text(
+    20.0,
+    260.0,
+    "fetch(POST, X-Partial) from the page lands on the same fake app — DOM swap is observable",
+    size=11.0,
+    opacity=Some(0.65),
+  )
+  c.text(
+    20.0,
+    296.0,
+    "schematic — storyStore is an in-memory fake (ids fixed at 99)",
+    size=10.0,
+    opacity=Some(0.55),
+  )
+
+  println(
+    c.render(label="storybook の mux が storybook パスを story に、それ以外のパスを catch-all 経由で StoryHttpApp（実アプリ mux + fake store）に流し、ブラウザの fetch→fragment→DOM swap を DB なしで検証できる構成図"),
+  )
+}

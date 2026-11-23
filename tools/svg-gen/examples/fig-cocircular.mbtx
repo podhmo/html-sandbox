@@ -1,0 +1,67 @@
+---
+import {
+  "podhmo/svg-gen" @s,
+  "moonbitlang/core/math" @math,
+}
+---
+
+// fig-cocircular.mbtx -- X2: four cocircular sites give two equally
+// valid Delaunay triangulations. All four triangle circumcircles
+// coincide with the big circle, so neither diagonal breaks the
+// empty-circle rule. The Voronoi vertex has degree 4 — the
+// degenerate case.
+
+fn main {
+  let o : @s.Point = (115.0, 105.0)
+  let r = 78.0
+  let c = @s.Canvas::new()
+  let dx = 260.0
+
+  let on_circle = fn(deg : Double) -> @s.Point {
+    (
+      o.0 + r * @math.cos(deg * @math.PI / 180.0),
+      o.1 + r * @math.sin(deg * @math.PI / 180.0),
+    )
+  }
+  let p = [10.0, 100.0, 195.0, 285.0].map(on_circle)
+
+  // All four circumcircles coincide with the big circle (sites on it,
+  // none strictly inside).
+  for t in [(0, 1, 2), (0, 2, 3), (1, 2, 3), (0, 1, 3)] {
+    let cc = @s.circum(p[t.0], p[t.1], p[t.2])
+    if !(@math.hypot(cc.o.0 - o.0, cc.o.1 - o.1) < 1.0e-6 && (cc.r - r).abs() < 1.0e-6) {
+      abort("four sites must be cocircular")
+    }
+  }
+
+  let draw_panel = fn(pp : Array[@s.Point], diag : (Int, Int), off : Double) {
+    ignore(c.circle(o.0 + off, o.1, r, opacity=Some(0.45)))
+    for e in [(0, 1), (1, 2), (2, 3), (3, 0)] {
+      c.line(pp[e.0], pp[e.1], width=1.2)
+    }
+    c.line(pp[diag.0], pp[diag.1], width=2.5, color=c.color(0))
+    for q in pp {
+      c.raw(
+        "<circle cx=\"\{q.0}\" cy=\"\{q.1}\" r=\"3.5\" fill=\"currentColor\"/>",
+        covered=[q],
+      )
+    }
+  }
+
+  draw_panel(p, (0, 2), 0.0)
+  draw_panel(@s.shift(p, dx, 0.0), (1, 3), dx)
+  // the single degree-4 Voronoi vertex, same spot in both panels
+  for off in [0.0, dx] {
+    let oc : @s.Point = (o.0 + off, o.1)
+    c.raw(
+      "<circle cx=\"\{oc.0}\" cy=\"\{oc.1}\" r=\"3.5\" fill=\"\{c.color(3)}\"/>",
+      covered=[oc],
+    )
+  }
+  c.text(115.0, 215.0, "diagonal A", anchor=@s.Middle, size=11.0, opacity=Some(0.7))
+  c.text(115.0 + dx, 215.0, "diagonal B", anchor=@s.Middle, size=11.0, opacity=Some(0.7))
+
+  println(
+    c.render(label="four cocircular sites: both diagonals give legal Delaunay triangulations"),
+  )
+}

@@ -1,0 +1,47 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-loop.mbtx -- generate -> render -> check -> fix loop, the same
+// figure as the earlier /tmp prototype, now with anchors instead of
+// literals.
+
+fn main {
+  let h = 44.0
+  let gap = 40.0
+  let c = @s.Canvas::new()
+
+  // Widths come from the labels, so no label can outgrow its box.
+  let input = c.box(0.0, 80.0, @s.Auto, h, label="Input")
+  let conv = c.box(c.right_of(input, gap), input.y, @s.Auto, h, label="Convert")
+  let out = c.box(c.right_of(conv, gap), input.y, @s.Auto, h, label="Output")
+  let check = c.box(conv.x, input.y - 1.5 * gap - h, @s.Auto, h, label="Check + fix")
+
+  c.arrow(c.anchor(input, @s.E), c.anchor(conv, @s.W))
+  c.arrow(c.anchor(conv, @s.E), c.anchor(out, @s.W))
+  c.arrow(
+    c.anchor(out, @s.N),
+    c.anchor(check, @s.E),
+    via=[(c.anchor(out, @s.N).0, c.anchor(check, @s.E).1)],
+  )
+  c.arrow(
+    c.anchor(check, @s.W),
+    c.anchor(input, @s.N),
+    via=[
+      (input.x - gap / 2.0, c.anchor(check, @s.W).1),
+      (input.x - gap / 2.0, c.anchor(input, @s.N).1),
+    ],
+    dash="5 4",
+  )
+
+  // Spatial claims the drawing depends on, stated where they can fail
+  // loudly.
+  if !(input.y == conv.y && conv.y == out.y) {
+    abort("row must be aligned")
+  }
+  if !(check.y + check.h < input.y) {
+    abort("check box must sit above the input row")
+  }
+
+  println(c.render(label="generate, render, then check and fix loop"))
+}

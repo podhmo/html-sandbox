@@ -1,0 +1,52 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-speculation-delivery.mbtx -- Two ways to deliver
+// speculation rules, and what CSP `script-src 'none'` does to
+// each. Top: an inline <script type="speculationrules"> is still
+// a script element, so CSP blocks it. Bottom: the
+// Speculation-Rules response header points at an external JSON
+// ruleset — no <script> element exists, so the two coexist.
+
+fn main {
+  let c = @s.Canvas::new()
+
+  let chip = fn(x : Double, y : Double, w : @s.Sizing, label : String, col : Int?) -> @s.Shape {
+    let color = match col {
+      Some(i) => c.color(i)
+      None => "currentColor"
+    }
+    c.box(x, y, w, 34.0, label=label, color=color, size=12.0, pad_x=10.0)
+  }
+
+  // ---- top row: inline script, blocked ----
+  c.text(10.0, 20.0, "inline <script>", size=13.0)
+
+  ignore(c.box(20.0, 40.0, @s.Fixed(200.0), 80.0, rx=10.0))
+  c.text(30.0, 58.0, "document", size=11.0, opacity=Some(0.7))
+  let inline = chip(35.0, 70.0, @s.Auto, "<script type=speculationrules>", Some(3))
+
+  let wall = c.box(280.0, 40.0, @s.Fixed(14.0), 80.0, color=c.color(3), width=2.5)
+  c.text(254.0, 140.0, "CSP", size=12.0)
+  c.text(254.0, 156.0, "script-src 'none'", size=11.0, opacity=Some(0.8))
+
+  let blocked = chip(360.0, 63.0, @s.Auto, "✕ blocked (Chromium 156)", Some(3))
+  c.arrow(c.anchor(inline, @s.E), c.anchor(wall, @s.W), color=c.color(3))
+  c.line(c.anchor(wall, @s.E), c.anchor(blocked, @s.W), dash="5 4", color=c.color(3), opacity=Some(0.7))
+
+  // ---- bottom row: header + external ruleset, allowed ----
+  c.text(10.0, 220.0, "Speculation-Rules header", size=13.0)
+
+  ignore(c.box(20.0, 240.0, @s.Fixed(240.0), 80.0, rx=10.0))
+  c.text(30.0, 258.0, "HTTP response", size=11.0, opacity=Some(0.7))
+  let hdr = chip(35.0, 270.0, @s.Auto, "Speculation-Rules: \"/static/….json\"", Some(0))
+
+  let ruleset = chip(360.0, 263.0, @s.Auto, "application/speculationrules+json", Some(0))
+  c.arrow(c.anchor(hdr, @s.E), c.anchor(ruleset, @s.W), color=c.color(0))
+  c.text(360.0, 330.0, "no <script> element → CSP と共存", size=11.0, opacity=Some(0.7))
+
+  println(
+    c.render(label="inline speculationrules は CSP にブロックされるが Speculation-Rules ヘッダ配信なら共存できる図"),
+  )
+}

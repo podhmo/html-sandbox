@@ -1,0 +1,139 @@
+---
+import {
+  "podhmo/svg-gen" @s,
+  "moonbitlang/core/math" @math,
+  "moonbitlang/core/double" @double,
+}
+---
+
+// fig-min-angle.mbtx -- D4: Delaunay maximizes the minimum angle. Two
+// triangulations of the SAME quad: flipping the diagonal creates a
+// smaller minimum angle. The smallest angle is marked with an arc and
+// its measured degree.
+
+fn main {
+  let s = @s.sites
+  let tris = @s.delaunay(s)
+  let c = @s.Canvas::new()
+  let dx = 260.0
+
+  let mut quad : (Int, Int, Int, Int)? = None
+  for entry in @s.edge_adjacency(tris) {
+    let (ea, eb, t) = entry
+    if t.length() == 2 {
+      let t1 = tris[t[0]]
+      let t2 = tris[t[1]]
+      let mut b = -1
+      let mut d = -1
+      for v in [t1.0, t1.1, t1.2] {
+        if v != ea && v != eb {
+          b = v
+        }
+      }
+      for v in [t2.0, t2.1, t2.2] {
+        if v != ea && v != eb {
+          d = v
+        }
+      }
+      quad = Some((ea, b, eb, d))
+      break
+    }
+  }
+  guard quad is Some(q) else {
+    abort("no interior edge")
+  }
+
+  let angle_at = fn(v : @s.Point, p : @s.Point, qq : @s.Point) -> Double {
+    let u = @math.atan2(p.1 - v.1, p.0 - v.0)
+    let w = @math.atan2(qq.1 - v.1, qq.0 - v.0)
+    let mut a = (u - w).abs()
+    if a > @math.PI {
+      a = 2.0 * @math.PI - a
+    }
+    a
+  }
+
+  // min angle over a triangle list (vertex indices into pts)
+  let min_angle = fn(pts : Array[@s.Point], tr : Array[(Int, Int, Int)]) -> (Double, (Int, Int, Int)) {
+    let mut best = @double.infinity
+    let mut mark = (0, 0, 0)
+    for t in tr {
+      for e in [(0, 1, 2), (1, 2, 0), (2, 0, 1)] {
+        let tv = if e.0 == 0 { t.0 } else if e.0 == 1 { t.1 } else { t.2 }
+        let tp = if e.1 == 0 { t.0 } else if e.1 == 1 { t.1 } else { t.2 }
+        let tq = if e.2 == 0 { t.0 } else if e.2 == 1 { t.1 } else { t.2 }
+        let a = angle_at(pts[tv], pts[tp], pts[tq])
+        if a < best {
+          best = a
+          mark = (tv, tp, tq)
+        }
+      }
+    }
+    (best, mark)
+  }
+
+  let draw_tri_set = fn(pts : Array[@s.Point], tr : Array[(Int, Int, Int)], cap : String, cap_x : Double) -> Double {
+    for t in tr {
+      for e in [(0, 1), (1, 2), (2, 0)] {
+        let ea = if e.0 == 0 { t.0 } else if e.0 == 1 { t.1 } else { t.2 }
+        let eb = if e.1 == 0 { t.0 } else if e.1 == 1 { t.1 } else { t.2 }
+        c.line(pts[ea], pts[eb], width=1.2)
+      }
+    }
+    let (a, mark) = min_angle(pts, tr)
+    let v = pts[mark.0]
+    let p = pts[mark.1]
+    let qq = pts[mark.2]
+    let u = @math.atan2(p.1 - v.1, p.0 - v.0)
+    let w = @math.atan2(qq.1 - v.1, qq.0 - v.0)
+    let mut t0 = u.min(w)
+    let mut t1 = u.max(w)
+    if t1 - t0 > @math.PI {
+      let tmp = t0
+      t0 = t1
+      t1 = tmp + 2.0 * @math.PI
+    }
+    let rad = 22.0
+    let arc = Array::makei(17, fn(i) {
+      let t = t0 + (t1 - t0) * i.to_double() / 16.0
+      (v.0 + rad * @math.cos(t), v.1 + rad * @math.sin(t))
+    })
+    c.path(@s.path_of(arc), arc, width=2.5, color=c.color(3))
+    let mid = (t0 + t1) / 2.0
+    c.text(
+      v.0 + (rad + 14.0) * @math.cos(mid),
+      v.1 + (rad + 14.0) * @math.sin(mid),
+      "\{(a * 180.0 / @math.PI).round().to_int64()}°",
+      anchor=@s.Middle,
+      central=true,
+      size=12.0,
+    )
+    for p in pts {
+      c.raw(
+        "<circle cx=\"\{p.0}\" cy=\"\{p.1}\" r=\"3.5\" fill=\"currentColor\"/>",
+        covered=[p],
+      )
+    }
+    c.text(cap_x, 215.0, cap, anchor=@s.Middle, size=11.0, opacity=Some(0.7))
+    a
+  }
+
+  // Left: Delaunay (diagonal ac). Right: the same quad, diagonal bd.
+  let (ga, _gm) = min_angle(s, [(q.0, q.1, q.2), (q.0, q.2, q.3)])
+  let (ba, _bm) = min_angle(s, [(q.0, q.1, q.3), (q.1, q.2, q.3)])
+  if !(ga > ba + 1.0e-9) {
+    abort("flip shrinks the min angle (\{ga} vs \{ba})")
+  }
+
+  ignore(
+    draw_tri_set(s, [(q.0, q.1, q.2), (q.0, q.2, q.3)], "Delaunay", 112.0),
+  )
+  let p2 = @s.shift(s, dx, 0.0)
+  ignore(
+    draw_tri_set(p2, [(q.0, q.1, q.3), (q.1, q.2, q.3)], "other diagonal", 112.0 + dx),
+  )
+
+  println(
+    c.render(label="Delaunay maximizes the minimum angle; the other diagonal leaves a smaller one"),
+  )
+}

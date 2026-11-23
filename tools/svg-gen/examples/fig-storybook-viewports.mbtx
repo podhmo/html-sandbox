@@ -1,0 +1,59 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-storybook-viewports.mbtx -- one story previewed at three
+// viewport widths: same left edge, widths drawn to scale, hues
+// distinguish the frames and a dash/width fallback keeps them
+// readable without color.
+
+fn main {
+  let px = 0.3 // css px -> svg units
+  let h = 180.0
+
+  let c = @s.Canvas::new()
+
+  let nav = c.box(0.0, 0.0, @s.Auto, h, label="story\nnav")
+  let x0 = c.right_of(nav, 48.0)
+
+  // widths drawn to scale: the 768 frame is visibly wider than
+  // the two phone widths, which differ only slightly.
+  let widths = [320.0, 360.0, 768.0]
+  let dashes = ["5 3", "", "2 3"]
+  let ws = [1.5, 2.5, 1.5]
+  let frames = widths.mapi(fn(i, wpx) {
+    c.box(x0, 0.0, @s.Fixed(wpx * px), h, color=c.color(i), dash=dashes[i], width=ws[i])
+  })
+
+  // each label sits above its own frame's right edge, staggered so
+  // the two close widths do not collide.
+  for i, wpx in widths {
+    let f = frames[i]
+    c.text(
+      f.x + f.w - 4.0,
+      -10.0 - i.to_double() * 14.0,
+      "\{wpx.to_int64()}px",
+      anchor=@s.End,
+      size=12.0,
+    )
+  }
+
+  c.text(
+    x0 + (768.0 * px) / 2.0,
+    h + 24.0,
+    "same story, three ?w= widths",
+    anchor=@s.Middle,
+    size=13.0,
+  )
+
+  if !(frames[0].w < frames[1].w && frames[1].w < frames[2].w) {
+    abort("frame widths ordered")
+  }
+  for f in frames {
+    if f.x != x0 {
+      abort("same left edge")
+    }
+  }
+
+  println(c.render(label="one story previewed at 320, 360 and 768 css px"))
+}

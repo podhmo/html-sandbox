@@ -1,0 +1,99 @@
+---
+import {
+  "podhmo/svg-gen" @s,
+  "moonbitlang/core/math" @math,
+}
+---
+
+// fig-empty-circle.mbtx -- D2: the empty circumcircle property, obeyed
+// (left) and violated (right). Same convex quad, different diagonal:
+// one circle stays empty, the other swallows the fourth site
+// (vermillion). The quad comes from real Delaunay data.
+
+fn main {
+  let s = @s.sites
+  let tris = @s.delaunay(s)
+  let c = @s.Canvas::new()
+  let dx = 260.0
+
+  // an interior Delaunay edge (a,c) with triangles abc and acd →
+  // quad a-b-c-d.
+  let mut quad : (Int, Int, Int, Int)? = None
+  for entry in @s.edge_adjacency(tris) {
+    let (ea, eb, t) = entry
+    if t.length() == 2 {
+      let t1 = tris[t[0]]
+      let t2 = tris[t[1]]
+      let mut b = -1
+      let mut d = -1
+      for v in [t1.0, t1.1, t1.2] {
+        if v != ea && v != eb {
+          b = v
+        }
+      }
+      for v in [t2.0, t2.1, t2.2] {
+        if v != ea && v != eb {
+          d = v
+        }
+      }
+      quad = Some((ea, b, eb, d))
+      break
+    }
+  }
+  guard quad is Some(quadv) else {
+    abort("no interior edge")
+  }
+  let (ia, ib, ic, id) = quadv
+  let a = s[ia]
+  let b = s[ib]
+  let cc = s[ic]
+  let d = s[id]
+
+  let dot = fn(p : @s.Point, fill : String) {
+    c.raw(
+      "<circle cx=\"\{p.0}\" cy=\"\{p.1}\" r=\"3.5\" fill=\"\{fill}\"/>",
+      covered=[p],
+    )
+  }
+
+  // Left: Delaunay triangles abc + acd; circumcircle of abc is empty.
+  let good = @s.circum(a, b, cc)
+  if !(@math.hypot(d.0 - good.o.0, d.1 - good.o.1) > good.r - 1.0e-9) {
+    abort("circumcircle of abc must be empty")
+  }
+  let quad_edges = [(a, b), (b, cc), (cc, d), (d, a)]
+  for e in quad_edges {
+    c.line(e.0, e.1, width=1.2)
+  }
+  c.line(a, cc, width=1.2, color=c.color(0))
+  ignore(c.circle(good.o.0, good.o.1, good.r, opacity=Some(0.6)))
+  for p in [a, b, cc, d] {
+    dot(p, "currentColor")
+  }
+  c.text(120.0, 215.0, "empty circle", anchor=@s.Middle, size=12.0, opacity=Some(0.7))
+
+  // Right: the other diagonal bd. Its triangle abd has bcd's vertex c
+  // inside the circumcircle — violation.
+  let sa = @s.shift([a], dx, 0.0)[0]
+  let sb = @s.shift([b], dx, 0.0)[0]
+  let scc = @s.shift([cc], dx, 0.0)[0]
+  let sd = @s.shift([d], dx, 0.0)[0]
+  let bad = @s.circum(sa, sb, sd)
+  if !(@math.hypot(scc.0 - bad.o.0, scc.1 - bad.o.1) < bad.r) {
+    abort("vertex c must lie inside the bad circumcircle")
+  }
+  for e in [(sa, sb), (sb, scc), (scc, sd), (sd, sa)] {
+    c.line(e.0, e.1, width=1.2)
+  }
+  c.line(sb, sd, width=2.0, color=c.color(3))
+  ignore(c.circle(bad.o.0, bad.o.1, bad.r, color=c.color(3), dash="5 3"))
+  for p in [sa, sb, sd] {
+    dot(p, "currentColor")
+  }
+  dot(scc, c.color(3))
+  c.text(120.0 + dx, 215.0, "a site inside: not Delaunay", anchor=@s.Middle, size=12.0, opacity=Some(0.7))
+
+  println(
+    c.render(label="empty circumcircle: every Delaunay triangle's circumcircle contains no other site (left); the other diagonal puts a site inside (right)"),
+  )
+}

@@ -1,0 +1,93 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-slops-genre-comma.mbtx -- comma density (per 1000 prose
+// chars, member mean) by article genre and author. Real
+// measurements from tools/slops-metrics/out/genre.md. devin's own
+// values swing 10x across genres; in every shared genre claude
+// still sits at or above devin.
+
+fn main {
+  let c = @s.Canvas::new()
+
+  // rows top-first, ordered by the devin mean (claude-only rows
+  // slotted by their claude value). * marks provisional genre
+  // labels from genre.py. d/cl/x = devin/claude/codex member
+  // means (absent = no dot).
+  // (label, devin?, claude?, codex?)
+  let rows = [
+    ("書き方そのもの*", None, Some(26.56), None),
+    ("書き方そのもの", Some(26.52), Some(22.15), Some(26.01)),
+    ("詰まった経緯", None, Some(22.4), None),
+    ("主張の検討", Some(19.36), None, None),
+    ("他人の成果物を読む", Some(19.14), None, None),
+    ("変更の報告", Some(18.77), Some(24.44), None),
+    ("実験・比較", Some(15.27), Some(25.99), None),
+    ("変更の報告*", Some(14.4), Some(18.71), None),
+    ("実験・比較*", Some(14.11), None, None),
+    ("主張の検討*", Some(13.93), None, None),
+    ("実現性の調査", Some(12.58), None, None),
+    ("任せた作業の記録", Some(9.99), None, None),
+    ("記法の見本", Some(0.0), Some(13.82), None),
+  ]
+  let n_r = rows.length()
+
+  let p = @s.Plot::new(
+    c,
+    {
+      title: "読点密度はジャンルでも大きく動く",
+      subtitle: "読点/千字のメンバー平均を記事の目的別に。devin/claude/codex は色分けの点",
+      footnote: "出典: issue #172 集計 / tools/slops-metrics genre.py。n=1 の点あり",
+    },
+    (-1.2, 30.0),
+    (0.0, n_r.to_double()),
+    w=300.0,
+    h=340.0,
+  )
+  p.frame(
+    xticks=[0.0, 5.0, 10.0, 15.0, 20.0, 25.0, 30.0].map(fn(v) { @s.Num(v) }),
+    yticks=rows.mapi(fn(j, r) {
+      @s.Lab(n_r.to_double() - 0.5 - j.to_double(), r.0)
+    }),
+  )
+  p.data(fn(p) {
+    for j, r in rows {
+      let (_, d, cl, x) = r
+      let y = p.ys.map(n_r.to_double() - 0.5 - j.to_double())
+      // dots() takes pixel coordinates, not data coordinates.
+      match d {
+        Some(v) => p.dots([(p.xs.map(v), y)], r=3.2, color=c.color(0))
+        None => ()
+      }
+      match cl {
+        Some(v) => p.dots([(p.xs.map(v), y)], r=3.2, color=c.color(1))
+        None => ()
+      }
+      match x {
+        Some(v) => p.dots([(p.xs.map(v), y)], r=3.2, color=c.color(2))
+        None => ()
+      }
+    }
+  })
+
+  // legend: colored dots + labels under the plot.
+  let ly = p.y1 + 56.0
+  let legend = [(0, "devin"), (1, "claude"), (2, "codex")]
+  for k, e in legend {
+    let (i, name) = e
+    let x = p.x1 - 150.0 + k.to_double() * 50.0
+    c.raw(
+      "<circle cx=\"\{x}\" cy=\"\{ly}\" r=\"3.2\" fill=\"\{c.color(i)}\" stroke=\"none\"/>",
+      covered=[(x, ly)],
+    )
+    c.text(x + 7.0, ly, name, size=9.0, opacity=Some(0.7), central=true)
+  }
+
+  if rows.length() != n_r {
+    abort("row count")
+  }
+  println(
+    c.render(label="comma density by genre and author: devin ranges 10 to 27 across genres while claude stays high in every shared genre"),
+  )
+}

@@ -1,0 +1,70 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-lora-vram.mbtx -- measured peak VRAM of the local FLUX.2
+// klein LoRA training runs, against the 8GB card they ran on.
+// Measured with torch.cuda.max_memory_allocated() at the end of
+// training on an RTX 5060 Laptop (8GB, WSL2), 2026-11-03.
+
+fn main {
+  let c = @s.Canvas::new()
+
+  let gib = 8.0 // nominal VRAM of the card
+  let px_per_gib = 26.0
+
+  let runs = [
+    @s.Hbar::{ label: "512px, 400 steps", value: 3.0 },
+    @s.Hbar::{ label: "1024px, 10 steps", value: 4.99 },
+  ]
+
+  // hbars scales the largest value to maxW, so set maxW from the
+  // ratio to keep 1 GiB == PX_PER_GIB px and leave room for the
+  // 8 GiB marker.
+  let mut biggest = 0.0
+  for r in runs {
+    biggest = biggest.max(r.value)
+  }
+  let max_w = px_per_gib * biggest
+  c.hbars(
+    runs,
+    x=0.0,
+    y=0.0,
+    bar_h=20.0,
+    row_gap=14.0,
+    max_w=max_w,
+    size=12.0,
+    value_fmt=fn(v) { "\{@s.fixed(v, 2)} GiB" },
+  )
+
+  // The capacity line is placed at 8 GiB using the same ratio.
+  let mut label_w = 0.0
+  for r in runs {
+    label_w = label_w.max(@s.text_width(r.label, 12.0))
+  }
+  label_w = label_w + 16.0
+  let cap_x = label_w + gib * px_per_gib
+  let bottom = runs.length().to_double() * (20.0 + 14.0) - 14.0
+  c.line((cap_x, -26.0), (cap_x, bottom + 10.0), dash="4 3", width=1.5)
+  c.text(cap_x, -34.0, "8 GiB (このGPUのVRAM)", anchor=@s.Middle, size=11.0, opacity=Some(0.7))
+
+  c.text(
+    0.0,
+    bottom + 34.0,
+    "ピークは transformer をNF4、text encoderをCPUに置いた構成の実測値。",
+    size=11.0,
+    opacity=Some(0.65),
+  )
+
+  for r in runs {
+    if !(r.value < gib) {
+      abort("every measured run must fit under the card's VRAM")
+    }
+  }
+  if !(runs[0].value < runs[1].value) {
+    abort("1024px is the more expensive run")
+  }
+  println(
+    c.render(label="peak VRAM of the local LoRA training: 512px 400 steps 3.00 GiB, 1024px 10 steps 4.99 GiB, on an 8 GiB card"),
+  )
+}

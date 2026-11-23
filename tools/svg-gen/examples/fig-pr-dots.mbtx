@@ -1,0 +1,88 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-pr-dots.mbtx -- why the commits list and the files view use
+// different ranges: two-dot base..head vs three-dot
+// merge-base..head.
+
+fn main {
+  let c = @s.Canvas::new()
+  let base_i = 0
+  let head_i = 1
+  let mb_i = 2
+  let r = 9.0
+  let d = 64.0
+  let y_base = 60.0
+  let y_head = 150.0
+  let x0 = 40.0
+  let cen = fn(s : @s.Shape) -> @s.Point {
+    (s.x + s.w / 2.0, s.y + s.h / 2.0)
+  }
+
+  // base branch (top): merge-base, then commits that arrived after
+  // the fork
+  let mb = c.circle(x0, y_base, r, color=c.color(mb_i), width=2.5)
+  c.text(x0, y_base - r - 12.0, "merge-base", anchor=@s.Middle, size=13.0)
+  let b1 = c.circle(x0 + d, y_base, r, color=c.color(base_i))
+  let _b2 = c.circle(x0 + 2.0 * d, y_base, r, color=c.color(base_i))
+  let b3 = c.circle(x0 + 3.0 * d, y_base, r, color=c.color(base_i))
+  c.line(cen(mb), cen(b3), color=c.color(base_i))
+  c.text(b3.x + b3.w + 8.0, y_base + 4.0, "base (moved on)", size=13.0)
+
+  // head branch (bottom): diverged at merge-base
+  let h1 = c.circle(x0 + d, y_head, r, color=c.color(head_i))
+  let h2 = c.circle(x0 + 2.0 * d, y_head, r, color=c.color(head_i))
+  let h3 = c.circle(x0 + 3.0 * d, y_head, r, color=c.color(head_i))
+  c.line(cen(mb), cen(h1), color=c.color(head_i))
+  c.line(cen(h1), cen(h3), color=c.color(head_i))
+  c.text(h3.x + h3.w + 8.0, y_head + 4.0, "head", size=13.0)
+
+  // two-dot range: every commit on head since it diverged (commits
+  // list)
+  c.text(
+    x0 + 2.0 * d,
+    y_head + 34.0,
+    "commits list: base..head (head-side only)",
+    anchor=@s.Middle,
+    size=13.0,
+    underline=2.0,
+  )
+  for h in [h1, h2, h3] {
+    c.highlight(h, mode=@s.Ring)
+  }
+
+  // three-dot range: merge-base..head comparison (files view)
+  c.text(
+    x0 + d,
+    y_base - 46.0,
+    "files view: merge-base → head",
+    size=13.0,
+    underline=2.0,
+  )
+  c.arrow(
+    (x0 + d, y_base - 36.0),
+    (x0, y_base - r - 4.0),
+    dash="4 3",
+    color=c.color(mb_i),
+    head=7.0,
+  )
+  c.arrow(
+    (x0 + 2.0 * d + 8.0, y_base - 36.0),
+    (x0 + 3.0 * d, y_head - r - 4.0),
+    dash="4 3",
+    color=c.color(mb_i),
+    head=7.0,
+  )
+
+  if !(b1.x == b3.x - 2.0 * d) {
+    abort("base row spaced evenly")
+  }
+  if !(mb.x < h1.x) {
+    abort("merge-base sits before head commits")
+  }
+
+  println(
+    c.render(label="two-dot base..head と three-dot merge-base..head の対象範象範囲の違い"),
+  )
+}

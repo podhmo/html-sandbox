@@ -1,0 +1,112 @@
+---
+import {
+  "podhmo/svg-gen" @s,
+  "moonbitlang/core/math" @math,
+}
+---
+
+// fig-bw-step.mbtx -- A1: one Bowyer-Watson insertion. Left: current
+// triangulation, the point to insert (vermillion), and the triangles
+// whose circumcircle contains it — the cavity (vermillion wash).
+// Right: cavity boundary re-triangulated to the new point (blue fan).
+
+fn main {
+  let s = @s.sites
+  let c = @s.Canvas::new()
+  let dx = 260.0
+
+  // Triangulate everything except the central site 3 ((70,115)),
+  // whose removal leaves the largest cavity — 4 triangles by the
+  // debug check.
+  let init : Array[@s.Point] = []
+  for i, p in s {
+    if i != 3 {
+      init.push(p)
+    }
+  }
+  let tris = @s.delaunay(init)
+  let p = s[3]
+
+  // bad triangles = circumcircle contains p; cavity = boundary edges
+  // of bad set.
+  let bad = tris.filter(fn(t) {
+    let cc = @s.circum(init[t.0], init[t.1], init[t.2])
+    @math.hypot(p.0 - cc.o.0, p.1 - cc.o.1) < cc.r
+  })
+  if bad.length() < 2 {
+    abort("new point falls in a multi-triangle cavity")
+  }
+  let count : Map[String, (Int, Int)] = Map([])
+  for t in bad {
+    for e in [(0, 1), (1, 2), (2, 0)] {
+      let ea = if e.0 == 0 { t.0 } else if e.0 == 1 { t.1 } else { t.2 }
+      let eb = if e.1 == 0 { t.0 } else if e.1 == 1 { t.1 } else { t.2 }
+      let kk = if ea < eb { "\{ea},\{eb}" } else { "\{eb},\{ea}" }
+      if count.contains(kk) {
+        count.remove(kk)
+      } else {
+        count.set(kk, (ea, eb))
+      }
+    }
+  }
+  let cavity = count.values().to_array()
+
+  let dot = fn(x : @s.Point, fill : String) {
+    c.raw(
+      "<circle cx=\"\{x.0}\" cy=\"\{x.1}\" r=\"3.5\" fill=\"\{fill}\"/>",
+      covered=[x],
+    )
+  }
+
+  // Left: existing triangulation + cavity highlighted.
+  for t in tris {
+    for e in [(0, 1), (1, 2), (2, 0)] {
+      let ea = if e.0 == 0 { t.0 } else if e.0 == 1 { t.1 } else { t.2 }
+      let eb = if e.1 == 0 { t.0 } else if e.1 == 1 { t.1 } else { t.2 }
+      c.line(
+        init[ea],
+        init[eb],
+        width=1.0,
+        opacity=Some(if bad.contains(t) { 0.35 } else { 0.8 }),
+      )
+    }
+  }
+  for t in bad {
+    let pts = [init[t.0], init[t.1], init[t.2]]
+    c.raw(@s.poly_el(pts, c.color(3), 0.15), covered=pts)
+  }
+  for e in cavity {
+    c.line(init[e.0], init[e.1], width=2.5, color=c.color(0))
+  }
+  for q in init {
+    dot(q, "currentColor")
+  }
+  dot(p, c.color(3))
+  c.text(115.0, 218.0, "point falls in cavity", anchor=@s.Middle, size=11.0, opacity=Some(0.7))
+
+  // Right: cavity boundary stitched to the new point.
+  let big_i = @s.shift(init, dx, 0.0)
+  let big_p = @s.shift([p], dx, 0.0)[0]
+  let kept = tris.filter(fn(t) { !bad.contains(t) })
+  for t in kept {
+    for e in [(0, 1), (1, 2), (2, 0)] {
+      let ea = if e.0 == 0 { t.0 } else if e.0 == 1 { t.1 } else { t.2 }
+      let eb = if e.1 == 0 { t.0 } else if e.1 == 1 { t.1 } else { t.2 }
+      c.line(big_i[ea], big_i[eb], width=1.0, opacity=Some(0.8))
+    }
+  }
+  for e in cavity {
+    c.line(big_i[e.0], big_i[e.1], width=2.5, color=c.color(0))
+    c.line(big_i[e.0], big_p, width=1.5, color=c.color(0))
+    c.line(big_i[e.1], big_p, width=1.5, color=c.color(0))
+  }
+  for q in big_i {
+    dot(q, "currentColor")
+  }
+  dot(big_p, c.color(3))
+  c.text(115.0 + dx, 218.0, "retriangulated", anchor=@s.Middle, size=11.0, opacity=Some(0.7))
+
+  println(
+    c.render(label="Bowyer-Watson step: remove triangles whose circumcircle contains the new point, then stitch the cavity to it"),
+  )
+}

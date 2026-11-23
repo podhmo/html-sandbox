@@ -1,0 +1,121 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-skill-share.mbtx -- where write-slops spends its lines. Each
+// row is a section of .agents/skills/write-slops/SKILL.md in file
+// order; the bar length is its non-blank line count (measured
+// 2026-11-05), hue/dash is what the section constrains. The last
+// row is empty on purpose: no line names the narrator, the
+// standpoint, or the voice.
+
+fn main {
+  let c = @s.Canvas::new(margin=12.0)
+
+  // (section, non-blank lines, category index)
+  let rows = [
+    ("冒頭（内容の扱い）", 8, 0),
+    ("Markdown for this site", 18, 1),
+    ("Try SVG illustrations", 15, 2),
+    ("Generate figures with svg-gen", 27, 2),
+    ("SVG is an image only with…", 25, 2),
+    ("One file or one flat bundle", 22, 3),
+    ("Check the intended output", 13, 4),
+  ]
+  let cats = [
+    ("内容の誠実さ", ""),
+    ("記法", "6 3"),
+    ("図", ""),
+    ("置き方", "2 3"),
+    ("確認と報告", "8 3 2 3"),
+  ]
+
+  let x = 210.0
+  let unit = 9.0
+  let bar_h = 18.0
+  let gap = 8.0
+  let y0 = 40.0
+
+  c.text(10.0, 14.0, "write-slops の SKILL.md、節ごとの行数（空行を除く）", size=13.0)
+
+  for i, r in rows {
+    let (name, n, k) = r
+    let y = y0 + i.to_double() * (bar_h + gap)
+    c.text(x - 8.0, y + bar_h / 2.0, name, anchor=@s.End, central=true, size=11.0)
+    ignore(
+      c.box(
+        x,
+        y,
+        @s.Fixed(n.to_double() * unit),
+        bar_h,
+        rx=2.0,
+        color=c.color(k),
+        dash=cats[k].1,
+        width=2.0,
+      ),
+    )
+    c.text(
+      x + n.to_double() * unit + 6.0,
+      y + bar_h / 2.0,
+      "\{n} 行",
+      central=true,
+      size=11.0,
+      opacity=Some(0.75),
+    )
+  }
+
+  // the empty row: nothing in the skill speaks about who writes or
+  // how
+  let y_empty = y0 + rows.length().to_double() * (bar_h + gap) + 6.0
+  c.text(
+    x - 8.0,
+    y_empty + bar_h / 2.0,
+    "語り手・立場・文体",
+    anchor=@s.End,
+    central=true,
+    size=11.0,
+  )
+  c.line((x, y_empty), (x, y_empty + bar_h), width=2.0, opacity=Some(0.6))
+  c.text(x + 8.0, y_empty + bar_h / 2.0, "0 行", central=true, size=11.0, opacity=Some(0.75))
+
+  // the three figure sections together
+  let fig0 = y0 + 2.0 * (bar_h + gap)
+  let fig1 = y0 + 4.0 * (bar_h + gap) + bar_h
+  let bx = x + 27.0 * unit + 50.0
+  c.line((bx - 6.0, fig0), (bx, fig0), opacity=Some(0.6), via=[(bx, fig0), (bx, fig1)])
+  c.line((bx, fig1), (bx - 6.0, fig1), opacity=Some(0.6))
+  c.text(bx + 6.0, (fig0 + fig1) / 2.0 - 7.0, "図の 3 節で 67 行", central=true, size=11.0)
+  c.text(
+    bx + 6.0,
+    (fig0 + fig1) / 2.0 + 9.0,
+    "（全 128 行の半分強）",
+    central=true,
+    size=11.0,
+    opacity=Some(0.7),
+  )
+
+  // legend: hue and dash both carry the category
+  let ly = y_empty + bar_h + 26.0
+  let mut lx = 10.0
+  for k, cat in cats {
+    let (name, dash) = cat
+    c.line((lx, ly), (lx + 26.0, ly), color=c.color(k), dash=dash, width=2.0)
+    c.text(lx + 32.0, ly, name, central=true, size=11.0)
+    lx = lx + 32.0 + name.length().to_double() * 11.0 + 22.0
+  }
+
+  let total = rows.fold(init=0, fn(s, r) { s + r.1 })
+  if total != 128 {
+    abort("section lines add up to the measured total")
+  }
+  let fig_total = rows
+    .filter(fn(r) { r.2 == 2 })
+    .fold(init=0, fn(s, r) { s + r.1 })
+  if fig_total != 67 {
+    abort("figure sections")
+  }
+
+  println(
+    c.render(label="bar per SKILL.md section by line count: figure sections take 67 of 128 lines, content honesty 8, and no line covers narrator, standpoint or voice"),
+  )
+}

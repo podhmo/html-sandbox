@@ -1,0 +1,60 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-repl-completion-stack.mbtx -- Stack #1409's nine layers,
+// drawn in merge order: each PR diffs only against the one
+// beneath it, and the whole series lands bottom-up.
+
+fn main {
+  let c = @s.Canvas::new()
+  let w = 345.0
+  let lh = 30.0
+
+  let layers = [
+    ("#1407", "EvalBase tier (eval the selector base)"),
+    ("#1408", "map string-key candidates"),
+    ("#1410", "untyped `var x = f()` inference"),
+    ("#1411", "Ambiguous flag on promoted members"),
+    ("#1412", "Detail spelled by the real home"),
+    ("#1413", "no members inside an index slot"),
+    ("#1414", "Detail for fn* builtins (~160)"),
+    ("#1416", "`!` marker in listings"),
+    ("#1417", "eval memoization"),
+  ]
+
+  let x = 70.0
+  let top = 10.0
+  // top of the stack is the last PR; main sits below the bottom
+  // layer.
+  for i, l in layers {
+    let (pr, label) = l
+    let y = top + (layers.length() - 1 - i).to_double() * lh
+    ignore(c.box(x, y, @s.Fixed(w), lh, rx=4.0, color=c.color(i % 6)))
+    c.text(x + 10.0, y + lh / 2.0, pr, size=12.0, central=true)
+    c.text(x + 62.0, y + lh / 2.0, label, size=12.0, central=true)
+  }
+  let stack_bottom = top + layers.length().to_double() * lh
+  let main_b = c.box(x, stack_bottom + 8.0, @s.Fixed(w), 24.0, rx=4.0, dash="4 3", opacity=Some(0.7))
+  c.text(x + 10.0, stack_bottom + 8.0 + 12.0, "main", size=12.0, central=true, opacity=Some(0.7))
+
+  // merge-direction arrow on the left, pointing up = bottom merges
+  // first
+  c.arrow((40.0, stack_bottom), (40.0, top + 2.0), color=c.color(0), width=2.0)
+  c.text(
+    40.0,
+    stack_bottom + 8.0 + 36.0,
+    "lands bottom-up",
+    anchor=@s.Middle,
+    size=12.0,
+    opacity=Some(0.8),
+  )
+
+  if !(main_b.y > stack_bottom) {
+    abort("main sits below the lowest layer")
+  }
+
+  println(
+    c.render(label="nine stacked pull requests layered on main, merging bottom-up"),
+  )
+}

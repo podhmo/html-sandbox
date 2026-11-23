@@ -1,0 +1,52 @@
+---
+import {
+  "podhmo/svg-gen" @s,
+  "moonbitlang/core/math" @math,
+}
+---
+
+// fig-bisector.mbtx -- P1: the locus of points equidistant from two
+// sites is one straight line (the perpendicular bisector). Dashed
+// connectors from two sample points on the line to both sites carry
+// "equal distance"; same length by construction.
+
+fn main {
+  let a : @s.Point = (70.0, 60.0)
+  let b : @s.Point = (170.0, 115.0)
+  let c = @s.Canvas::new()
+  let col_a = c.color(0)
+  let col_b = c.color(1)
+  let rect = (10.0, 10.0, 230.0, 170.0)
+
+  let bi = @s.bisector(a, b)
+  let (p, q) = @s.line_rect(bi.mid, bi.dir, rect)
+  c.line(p, q, width=2.0)
+  c.raw("<circle cx=\"\{a.0}\" cy=\"\{a.1}\" r=\"4\" fill=\"\{col_a}\"/>", covered=[a])
+  c.raw("<circle cx=\"\{b.0}\" cy=\"\{b.1}\" r=\"4\" fill=\"\{col_b}\"/>", covered=[b])
+
+  // Two sample points on the locus, connectors to both sites — same
+  // length.
+  let len = @math.hypot(bi.dir.0, bi.dir.1)
+  for t in [-45.0, 55.0] {
+    let w : @s.Point = (
+      bi.mid.0 + bi.dir.0 / len * t,
+      bi.mid.1 + bi.dir.1 / len * t,
+    )
+    let diff = (
+        @math.hypot(w.0 - a.0, w.1 - a.1) - @math.hypot(w.0 - b.0, w.1 - b.1)
+      ).abs()
+    if diff >= 1.0e-9 {
+      abort("locus point must be equidistant to both sites")
+    }
+    c.line(w, a, dash="3 3", opacity=Some(0.6), color=col_a)
+    c.line(w, b, dash="3 3", opacity=Some(0.6), color=col_b)
+    c.raw(
+      "<circle cx=\"\{w.0}\" cy=\"\{w.1}\" r=\"2.5\" fill=\"currentColor\"/>",
+      covered=[w],
+    )
+  }
+
+  println(
+    c.render(label="perpendicular bisector: locus of points equidistant from two sites"),
+  )
+}

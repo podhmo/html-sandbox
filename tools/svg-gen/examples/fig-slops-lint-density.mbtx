@@ -1,0 +1,78 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-slops-lint-density.mbtx -- yomiyasu lint candidate density,
+// rule x author. Real measurements from the issue #169
+// aggregation over all 59 slops members (not virtual data): dark
+// cells show where the authors actually differ.
+
+fn main {
+  let c = @s.Canvas::new()
+
+  let authors = ["Devin", "Claude", "Codex", "opencode", "不明"]
+  // candidates per 1000 chars, rows in display order (top first).
+  let rows = [
+    ("pause_comma", [0.51, 1.83, 2.47, 1.53, 1.44]),
+    ("trailing_colon", [0.34, 0.0, 0.0, 0.0, 0.0]),
+    ("dash_decoration", [0.39, 0.05, 0.0, 0.0, 0.0]),
+    ("slop_vocabulary", [0.15, 0.05, 0.0, 0.0, 0.0]),
+    ("metaphor_label", [0.11, 0.0, 0.0, 0.0, 0.0]),
+    ("calque", [0.11, 0.18, 0.0, 1.02, 0.0]),
+    ("negative_parallelism", [0.58, 0.48, 0.27, 1.53, 0.84]),
+    ("excess_list", [0.34, 0.18, 0.55, 0.26, 0.0]),
+  ]
+  let n_r = rows.length()
+  let n_c = authors.length()
+
+  let p = @s.Plot::new(
+    c,
+    {
+      title: "執筆者差は機械的な規則に集まる",
+      subtitle: "yomiyasu lint の候補密度 (候補/千字)、slops 全 59 メンバー",
+      footnote: "出典: issue #169 の集計コメント / 生成: fig-slops-lint-density.mbtx",
+    },
+    (0.0, n_c.to_double()),
+    (0.0, n_r.to_double()),
+    w=300.0,
+    h=200.0,
+  )
+  p.frame(
+    xticks=authors.mapi(fn(i, a) {
+      @s.Lab(i.to_double() + 0.5, a)
+    }),
+    yticks=rows.mapi(fn(j, r) {
+      @s.Lab(n_r.to_double() - 0.5 - j.to_double(), r.0)
+    }),
+  )
+  let mut mm = (0.0, 0.0)
+  p.data(fn(p) { mm = p.heatmap(rows.map(fn(r) { r.1 })) })
+  p.heat_legend(mm, p.x1 - 80.0, p.y1 + 56.0, fmt=fn(v) { @s.fixed(v, 1) }, label="候補/千字")
+
+  // value labels inside every cell: the gap between a dark cell
+  // and a near-zero neighbour is the whole point, so keep the
+  // numbers readable.
+  let cw = (p.x1 - p.x0) / n_c.to_double()
+  let ch = (p.y1 - p.y0) / n_r.to_double()
+  for j, r in rows {
+    for i, v in r.1 {
+      c.text(
+        p.x0 + (i.to_double() + 0.5) * cw,
+        p.y0 + (j.to_double() + 0.55) * ch,
+        if v == 0.0 { "0" } else { @s.fixed(v, 2) },
+        anchor=@s.Middle,
+        central=true,
+        size=8.0,
+        opacity=Some(0.8),
+      )
+    }
+  }
+
+  if !(rows.length() == 8 && rows.iter().all(fn(r) { r.1.length() == authors.length() })) {
+    abort("row shape")
+  }
+
+  println(
+    c.render(label="yomiyasu lint candidate density by author: pause_comma separates the authors, meaning-level rules stay flat"),
+  )
+}

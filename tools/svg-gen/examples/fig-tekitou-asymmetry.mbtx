@@ -1,0 +1,92 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// Who holds the answer? Three scenes from the tekitou article: the
+// school test (knowledge shared on both sides), the request
+// (requester cannot judge, receiver holds the criterion), and the
+// receiver's realization (the requester cannot evaluate the
+// delivered work). The "正解" token sits with whoever holds the
+// criterion; the drift tracks that asymmetry.
+
+fn main {
+  let c = @s.Canvas::new()
+  let token_col = c.color(2) // green — the "正解" mark
+  let loose = c.color(3) // vermillion — the "テキトー" end
+  let r = 20.0
+
+  let token = fn(cx : Double, cy : Double) {
+    c.raw(
+      "<rect x=\"\{cx - 6.5}\" y=\"\{cy - 6.5}\" width=\"13\" height=\"13\" transform=\"rotate(45 \{cx} \{cy})\" fill=\"\{token_col}\"/>",
+      covered=[(cx - 10.0, cy - 10.0), (cx + 10.0, cy + 10.0)],
+    )
+  }
+
+  let person = fn(cx : Double, cy : Double, role : String, dash : String) {
+    ignore(c.circle(cx, cy, r, dash=dash, size=11.0))
+    c.text(cx, cy + r + 15.0, role, anchor=@s.Middle, size=11.0, opacity=Some(0.85))
+  }
+
+  // ---- panel 1: test — knowledge shared ----
+  let p1 = 110.0
+  c.text(p1, 18.0, "テスト（同門）", anchor=@s.Middle, size=13.0)
+  person(p1, 56.0, "先生", "")
+  person(p1, 146.0, "生徒", "")
+  // enclosing box = the shared frame of knowledge, drawn around both
+  // roles
+  ignore(
+    c.box(p1 - 52.0, 30.0, @s.Fixed(104.0), 172.0, rx=12.0, dash="4 3", opacity=Some(0.55)),
+  )
+  token(p1 + 36.0, 101.0)
+  c.text(p1 + 36.0, 126.0, "正解", anchor=@s.Middle, size=10.0, opacity=Some(0.8))
+  c.text(p1, 216.0, "同じ正解を共有", anchor=@s.Middle, size=10.0, opacity=Some(0.7))
+
+  // ---- panel 2: request — requester does not know ----
+  let p2 = 360.0
+  c.text(p2, 18.0, "依頼（お任せ）", anchor=@s.Middle, size=13.0)
+  person(p2, 56.0, "依頼者", "")
+  person(p2, 146.0, "受注者", "")
+  token(p2 + 44.0, 146.0)
+  c.arrow(
+    c.anchor(@s.Shape::{ x: p2 - r, y: 56.0, w: 2.0 * r, h: 2.0 * r }, @s.S),
+    c.anchor(@s.Shape::{ x: p2 - r, y: 146.0, w: 2.0 * r, h: 2.0 * r }, @s.N),
+    width=1.5,
+  )
+  c.text(p2 + 50.0, 96.0, "よしなに", size=11.0, opacity=Some(0.8))
+  c.text(p2 + 50.0, 110.0, "（丸ごと委任）", size=10.0, opacity=Some(0.6))
+
+  // ---- panel 3: realization — requester cannot evaluate ----
+  let p3 = 610.0
+  c.text(p3, 18.0, "受注側の気づき", anchor=@s.Middle, size=13.0)
+  person(p3, 56.0, "発注者", "4 3")
+  person(p3, 146.0, "受注者", "")
+  token(p3 + 44.0, 146.0)
+  c.arrow(
+    c.anchor(@s.Shape::{ x: p3 - r, y: 146.0, w: 2.0 * r, h: 2.0 * r }, @s.N),
+    c.anchor(@s.Shape::{ x: p3 - r, y: 56.0, w: 2.0 * r, h: 2.0 * r }, @s.S),
+    dash="4 3",
+    width=1.5,
+    color=loose,
+  )
+  c.text(p3 + 52.0, 96.0, "手を抜いても", size=11.0, opacity=Some(0.85))
+  c.text(p3 + 52.0, 110.0, "見抜けない", size=11.0, opacity=Some(0.85))
+  c.text(p3, 216.0, "破線 = 評価できない側", anchor=@s.Middle, size=10.0, opacity=Some(0.6))
+
+  // ---- the drift below the panels ----
+  c.line(
+    (110.0, 246.0),
+    (610.0, 246.0),
+    dash="2 3",
+    opacity=Some(0.4),
+    gap_end=Some(0.0),
+    gap_start=Some(0.0),
+  )
+  c.text(110.0, 266.0, "正解が両者にある", size=11.0, opacity=Some(0.8))
+  c.text(610.0, 266.0, "正解は受け手だけにある", anchor=@s.End, size=11.0, opacity=Some(0.8))
+  c.arrow((360.0, 250.0), (560.0, 250.0), width=1.5)
+  c.text(360.0, 266.0, "対称 → 非対称", size=11.0, opacity=Some(0.8))
+
+  println(
+    c.render(label="三つの場面で正解の持ち主が移る。テストでは両者が共有、依頼では受注者だけが持ち、受注者は発注者が評価できないと気づく"),
+  )
+}

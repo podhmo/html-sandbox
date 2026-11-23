@@ -1,0 +1,51 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-highlight.mbtx -- compare low-key ways to say "look here", from
+// weakest to strongest claim. The posts figures used a flat grey
+// band; these stay currentColor so they work on both themes.
+
+fn main {
+  let c = @s.Canvas::new()
+  let row_h = 64.0
+
+  // (caption, mark): mark = None for box-option variants, whose style
+  // is folded into the emphasized box's args instead.
+  let variants : Array[(String, (@s.Shape) -> Unit, Double, Double)] = [
+    ("wash 0.06", fn(s) { c.highlight(s, opacity=0.06) }, 1.0, 0.0),
+    ("wash 0.12", fn(s) { c.highlight(s, opacity=0.12) }, 1.0, 0.0),
+    ("dashed ring", fn(s) { c.highlight(s, mode=@s.Ring) }, 1.0, 0.0),
+    ("thick stroke", fn(_s) { () }, 2.5, 0.0),
+    ("underlined label", fn(_s) { () }, 1.0, 1.0),
+  ]
+
+  for i, v in variants {
+    let (caption, mark, width, underline) = v
+    let y = i.to_double() * row_h
+    c.text(
+      150.0,
+      y + 20.0,
+      caption,
+      anchor=@s.End,
+      central=true,
+      size=11.0,
+      opacity=Some(0.6),
+    )
+    let a = c.box(170.0, y, @s.Auto, 40.0, label="plain", size=12.0)
+    let b = c.box(
+      c.right_of(a, 60.0),
+      y,
+      @s.Auto,
+      40.0,
+      label="emphasized",
+      size=12.0,
+      width=width,
+      underline=underline,
+    )
+    c.arrow(c.anchor(a, @s.E), c.anchor(b, @s.W))
+    mark(b)
+  }
+
+  println(c.render(label="five low-key ways to emphasize a box"))
+}

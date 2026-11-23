@@ -1,0 +1,78 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-chart-tts-retry.mbtx -- the retry's two kinds of change on
+// one RTF axis. The Qwen rows move because the driver changed
+// (1.80 -> 1.54 with the same venv); the Piper rows move because
+// the first measurement was taken under load (0.133 -> 0.072 in
+// the same venv). Same metric, same direction, different cause:
+// hue marks the cause, so the two groups are not read as one
+// improvement story.
+
+fn main {
+  let c = @s.Canvas::new()
+
+  // measured values, one run each (Qwen: the warmed-up second run)
+  let rows = [
+    (4.0, 1.8, "1.80", 3),
+    (3.0, 1.54, "1.54", 3),
+    (2.0, 1.57, "1.57", 3),
+    (1.0, 0.133, "0.133", 4),
+    (0.0, 0.072, "0.072", 4),
+  ]
+
+  let p = @s.Plot::new(
+    c,
+    {
+      title: "同じ RTF の差でも、原因は 2 種類ある",
+      subtitle: "実測 1 回ずつ（Qwen はウォームアップ後の 2 回目）、RTF は小さいほど速い",
+      footnote: "出典: docs/sketch/ja/tts-wsl2.md（追試の記録、PR #129）の実測値 / 生成: tools/svg-gen/examples/fig-chart-tts-retry.mbtx",
+    },
+    (0.05, 2.0),
+    (-0.6, 4.6),
+    x=210.0,
+    y=0.0,
+    w=400.0,
+    h=180.0,
+    xlog=true,
+    xtitle="RTF（音声 1 秒あたりの合成秒数、対数軸）",
+    grid=true,
+  )
+
+  p.frame(
+    xticks=[0.05, 0.1, 0.2, 0.5, 1.0, 2.0].map(fn(v) { @s.Num(v) }),
+    yticks=[
+      @s.Lab(4.0, "Qwen1.7B 573.22 / cu128"),
+      @s.Lab(3.0, "Qwen1.7B 617.42 / cu128 venv"),
+      @s.Lab(2.0, "Qwen1.7B 617.42 / cu132 既定"),
+      @s.Lab(1.0, "Piper 初回（573.22）"),
+      @s.Lab(0.0, "Piper 同じ venv で再測"),
+    ],
+  )
+
+  p.data(fn(p) {
+    p.vline(1.0, label="実時間の境界")
+    for row in rows {
+      let (ry, rtf, label, cause) = row
+      p.dots([(p.xs.map(rtf), p.ys.map(ry))], r=5.0, opacity=1.0, color=c.color(cause))
+      // the value stays as text, so hue is not the only channel
+      c.text(p.xs.map(rtf) + 10.0, p.ys.map(ry), label, size=11.0, central=true)
+    }
+  })
+
+  // which hue means which cause, without a legend box
+  c.text(p.x1 + 16.0, p.ys.map(3.5), "ドライバ由来", size=11.0, opacity=Some(0.8))
+  c.text(p.x1 + 16.0, p.ys.map(0.5), "負荷によるノイズ", size=11.0, opacity=Some(0.8))
+
+  if !(rows[0].1 - rows[1].1 > 0.2) {
+    abort("the driver change moves the Qwen row visibly")
+  }
+  if !(rows[3].1 - rows[4].1 > 0.05) {
+    abort("the Piper re-measurement moves visibly too")
+  }
+
+  println(
+    c.render(label="dot plot of RTF for three Qwen configurations and two Piper measurements: the Qwen change tracks the driver, the Piper change is measurement noise"),
+  )
+}

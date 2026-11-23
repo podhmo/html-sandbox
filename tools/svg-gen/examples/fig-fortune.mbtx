@@ -1,0 +1,108 @@
+---
+import {
+  "podhmo/svg-gen" @s,
+  "moonbitlang/core/math" @math,
+  "moonbitlang/core/double" @double,
+}
+---
+
+// fig-fortune.mbtx -- A2: Fortune's sweep. Each swept site owns a
+// parabola of points equidistant to it and the sweep line; only sites
+// near the sweep ever reach the beach line, so those get hues and
+// the rest stay faint. The beach line (thick solid) is the top of
+// the parabola pile; breakpoints where two parabolas tie trace
+// Voronoi edges.
+
+fn main {
+  // sites above the sweep line (screen y grows downward, sweep below).
+  let s = @s.sites
+  let ly = 200.0 // sweep line y: 4 breakpoints on this set
+  let c = @s.Canvas::new()
+  let x0 = 0.0
+  let x1 = 230.0
+
+  // parabola for focus (fx,fy), directrix ly:
+  //   y = (x-fx)^2/(2(fy-ly)) + (fy+ly)/2
+  let fns = s.map(fn(f) {
+    let (fx, fy) = f
+    fn(x : Double) { (x - fx) * (x - fx) / (2.0 * (fy - ly)) + (fy + ly) / 2.0 }
+  })
+
+  // beach line = pointwise max (nearest to the sweep line = largest y).
+  let n = 600
+  let beach : Array[@s.Point] = []
+  let beach_set : Array[Int] = []
+  let mut prev_top = -1
+  let breaks : Array[@s.Point] = []
+  for i = 0; i <= n; i = i + 1 {
+    let x = x0 + (x1 - x0) * i.to_double() / n.to_double()
+    let mut top = @double.neg_infinity
+    let mut arg = 0
+    for k, f in fns {
+      let y = f(x)
+      if y > top {
+        top = y
+        arg = k
+      }
+    }
+    if prev_top != -1 && arg != prev_top {
+      breaks.push((x, top))
+    }
+    prev_top = arg
+    if top > -10.0 && top < ly + 5.0 {
+      beach.push((x, top))
+      if !beach_set.contains(arg) {
+        beach_set.push(arg)
+      }
+    }
+  }
+  if breaks.length() < 4 {
+    abort("several parabolas share the beach line")
+  }
+  let hue_of = fn(i : Int) -> Int {
+    for j, v in beach_set {
+      if v == i {
+        break j
+      }
+    } nobreak {
+      -1
+    }
+  }
+
+  for i, _st in s {
+    let pts = @s.sample(fns[i], x0, x1, n=160)
+      .filter(fn(p) { p.1 > -10.0 && p.1 < ly + 5.0 })
+    if hue_of(i) >= 0 {
+      c.path(@s.path_of(pts), pts, dash="5 3", opacity=Some(0.8), color=c.color(hue_of(i)))
+    } else {
+      c.path(@s.path_of(pts), pts, dash="4 3", opacity=Some(0.25))
+    }
+  }
+  for i, st in s {
+    let h = hue_of(i)
+    if h >= 0 {
+      c.raw(
+        "<circle cx=\"\{st.0}\" cy=\"\{st.1}\" r=\"4\" fill=\"\{c.color(h)}\"/>",
+        covered=[st],
+      )
+    } else {
+      c.raw(
+        "<circle cx=\"\{st.0}\" cy=\"\{st.1}\" r=\"3.5\" fill=\"currentColor\"/>",
+        covered=[st],
+      )
+    }
+  }
+  c.path(@s.path_of(beach), beach, width=3.0)
+  c.line((x0, ly), (x1, ly), width=2.0, color=c.color(5))
+  for bp in breaks {
+    c.raw(
+      "<circle cx=\"\{@s.fixed(bp.0, 1)}\" cy=\"\{@s.fixed(bp.1, 1)}\" r=\"3\" fill=\"\{c.color(3)}\"/>",
+      covered=[bp],
+    )
+  }
+  c.text(x1 - 6.0, ly - 8.0, "sweep", anchor=@s.End, size=11.0, opacity=Some(0.7))
+
+  println(
+    c.render(label="Fortune's sweep: site parabolas (dashed), their top envelope is the beach line (thick), breakpoints trace Voronoi edges"),
+  )
+}

@@ -1,0 +1,108 @@
+---
+import {
+  "podhmo/svg-gen" @s,
+  "moonbitlang/core/math" @math,
+  "moonbitlang/core/double" @double,
+}
+---
+
+// fig-chart-scatter.mbtx -- payload size vs latency, log x axis.
+// The "relationship" branch of the chart-selection flow: a scatter
+// of raw request pairs. Data is virtual — 220 requests from a
+// seeded PRNG, with a handful of timeout-ish outliers.
+
+fn main {
+  let c = @s.Canvas::new()
+  let rand = @s.rng(20261031U)
+  let g = @s.gauss(rand)
+
+  // virtual pairs: payload (KiB) spans 3 decades on a log axis;
+  // latency grows ~linearly in log10(payload) plus noise and
+  // outliers.
+  let pairs : Array[@s.Point] = []
+  for i = 0; i < 220; i = i + 1 {
+    let lx = 3.0 * rand() // log10(KiB): 0..3 -> 1KiB..1MiB
+    let payload = @math.pow(10.0, lx)
+    let outlier = if rand() < 0.04 { 160.0 + 60.0 * rand() } else { 0.0 }
+    let latency = 35.0 + 42.0 * lx + 22.0 * g() + outlier
+    pairs.push((payload, latency.max(8.0)))
+  }
+
+  // least squares on log10(payload) -> the "+N ms per decade"
+  // headline.
+  let xs = pairs.map(fn(pr) { @math.log10(pr.0) })
+  let ys = pairs.map(fn(pr) { pr.1 })
+  let n = xs.length().to_double()
+  let mx = xs.fold(init=0.0, fn(acc, v) { acc + v }) / n
+  let my = ys.fold(init=0.0, fn(acc, v) { acc + v }) / n
+  let num = xs.fold(init=0.0, fn(acc, i) { acc }) // placeholder
+  ignore(num)
+  let mut num2 = 0.0
+  let mut den = 0.0
+  for i, v in xs {
+    num2 = num2 + (v - mx) * (ys[i] - my)
+    den = den + (v - mx) * (v - mx)
+  }
+  let slope = num2 / den
+  let per_decade = slope.round().to_int64()
+
+  let p = @s.Plot::new(
+    c,
+    {
+      title: "ペイロード 1 桁ごとにレイテンシ +約 \{per_decade} ms（仮想データ）",
+      subtitle: "n = 220 リクエスト、2026-10-14 の 1 時間、生値、仮想データ",
+      footnote: "出典: 仮想データ (seed 20261031) / n = 220 / 集計: なし（生値）/ 生成: tools/svg-gen/examples/fig-chart-scatter.mbtx",
+    },
+    (1.0, 1000.0),
+    (0.0, 400.0),
+    w=420.0,
+    h=190.0,
+    xlog=true,
+    xtitle="ペイロード (KiB, log)",
+    ytitle="レイテンシ (ms)",
+    grid=true,
+  )
+  p.frame()
+  // regression guide, drawn dashed so it reads as "a fitted model",
+  // not as another measured series.
+  let lx = fn(v : Double) { my + slope * (v - mx) }
+  p.data(fn(p) {
+    p.dots(
+      pairs.map(fn(pr) { (p.xs.map(pr.0), p.ys.map(pr.1)) }),
+      r=1.8,
+      opacity=0.45,
+    )
+    p.series(
+      [
+        (p.xs.map(1.0), p.ys.map(lx(0.0))),
+        (p.xs.map(1000.0), p.ys.map(lx(3.0))),
+      ],
+      dash="2 3",
+      opacity=Some(0.8),
+      color=c.color(0),
+    )
+  })
+  c.text(
+    p.xs.map(300.0),
+    p.ys.map(lx(@math.log10(300.0))) - 8.0,
+    "単回帰（説明用）",
+    anchor=@s.Middle,
+    size=10.0,
+    opacity=Some(0.7),
+  )
+
+  let mut ymax = @double.neg_infinity
+  for v in ys {
+    ymax = ymax.max(v)
+  }
+  if !(ymax <= 400.0) {
+    abort("outliers stay inside the y domain")
+  }
+  if !(per_decade > 20 && per_decade < 60) {
+    abort("slope lands in the designed range")
+  }
+
+  println(
+    c.render(label="scatter of payload size vs latency: about +\{per_decade} ms per decade of payload (virtual data)"),
+  )
+}

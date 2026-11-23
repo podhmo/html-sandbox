@@ -1,0 +1,65 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-chart-heat.mbtx -- traffic heatmap, day x hour. The "time
+// series / periodicity" branch: a heatmap shows daily and weekly
+// patterns that 168 points of spaghetti lines would not.
+
+fn main {
+  let c = @s.Canvas::new()
+  let traffic = @s.traffic()
+
+  // find the peak cell for the conclusion title
+  let mut peak_d = 0
+  let mut peak_h = 0
+  let mut peak_v = 0.0
+  for d, row in traffic {
+    for h, v in row {
+      if v > peak_v {
+        peak_d = d
+        peak_h = h
+        peak_v = v
+      }
+    }
+  }
+
+  let p = @s.Plot::new(
+    c,
+    {
+      title: "\{@s.traffic_days[peak_d]} \{peak_h} 時台のスパイクと週末の谷（仮想データ）",
+      subtitle: "req/s の 1 時間平均、2026-10-W42 の 1 週間、仮想データ",
+      footnote: "出典: 仮想データ (tools/svg-gen/examples/data.mbt, seed 20261102) / 集計: 1 時間平均 / 生成: tools/svg-gen/examples/fig-chart-heat.mbtx",
+    },
+    (0.0, 24.0),
+    (0.0, 7.0),
+    w=440.0,
+    h=150.0,
+    xtitle="時刻 (JST)",
+  )
+  p.frame(
+    xticks=[0.0, 6.0, 12.0, 18.0, 24.0].map(fn(h) {
+      @s.Lab(h, "\{h.to_int64()}時")
+    }),
+    yticks=@s.traffic_days.mapi(fn(i, d) {
+      @s.Lab(traffic.length().to_double() - 0.5 - i.to_double(), d)
+    }),
+  )
+  let mut mm = (0.0, 0.0)
+  p.data(fn(p) { mm = p.heatmap(traffic) })
+  p.heat_legend(
+    mm,
+    p.x1 - 80.0,
+    p.y0 - 24.0,
+    fmt=fn(v) { "\{v.round().to_int64()}" },
+    label="req/s",
+  )
+
+  if peak_d != 1 {
+    abort("the incident peak is on Tuesday")
+  }
+
+  println(
+    c.render(label="traffic heatmap: peak on \{@s.traffic_days[peak_d]} around \{peak_h}:00, weekends quiet (virtual data)"),
+  )
+}

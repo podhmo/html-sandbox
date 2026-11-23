@@ -1,0 +1,112 @@
+---
+import {
+  "podhmo/svg-gen" @s,
+  "moonbitlang/core/math" @math,
+  "moonbitlang/core/double" @double,
+}
+---
+
+// fig-voronoi-dual.mbtx -- spike for the Delaunay/Voronoi article (see
+// docs/sketch/ja/delaunay-voronoi.md): draw a *computed* Delaunay
+// triangulation (solid blue) and its dual Voronoi diagram (dashed
+// orange) for the shared point set in geom.mbt. Asserts the claims
+// the figure illustrates: every circumcircle is empty, T = 2n-2-h.
+
+fn main {
+  let s = @s.sites
+  let tris = @s.delaunay(s)
+  let centers = tris.map(fn(t) { @s.circum(s[t.0], s[t.1], s[t.2]).o })
+
+  // Assert the properties the figure claims (README: "assert spatial
+  // claims the figure depends on").
+  let h = @s.hull(s).length()
+  if tris.length() != 2 * s.length() - 2 - h {
+    abort("triangle count = 2n-2-h")
+  }
+  for t in tris {
+    let cc = @s.circum(s[t.0], s[t.1], s[t.2])
+    for p in s {
+      if !(@math.hypot(p.0 - cc.o.0, p.1 - cc.o.1) > cc.r - 1.0e-9) {
+        abort("empty circumcircle")
+      }
+    }
+  }
+
+  let c = @s.Canvas::new()
+  let col_dt = c.color(0) // Delaunay: solid blue
+  let col_vor = c.color(1) // Voronoi: dashed orange
+  let bsize = 230.0 // clip box for Voronoi rays (figure bounds)
+  for entry in @s.edge_adjacency(tris) {
+    let (ea, eb, t) = entry
+    if t.length() == 2 {
+      c.line(centers[t[0]], centers[t[1]], dash="4 3", opacity=Some(0.8), color=col_vor)
+    } else {
+      // ray from the single center along the edge's perpendicular
+      // bisector, away from the triangle's third vertex.
+      let tri = tris[t[0]]
+      let third = for v in [tri.0, tri.1, tri.2] {
+        if v != ea && v != eb {
+          break v
+        }
+      } nobreak {
+        abort("edge not in triangle")
+      }
+      let mid : @s.Point = (
+        (s[ea].0 + s[eb].0) / 2.0,
+        (s[ea].1 + s[eb].1) / 2.0,
+      )
+      let d : @s.Point = (-(s[eb].1 - s[ea].1), s[eb].0 - s[ea].0)
+      let l = @math.hypot(d.0, d.1)
+      let sg = ((s[third].0 - mid.0) * d.0 + (s[third].1 - mid.1) * d.1).signum()
+      let sgn = if sg == 0.0 { 1.0 } else { sg }
+      let dir : @s.Point = (-sgn * d.0 / l, -sgn * d.1 / l)
+      let o = centers[t[0]]
+      let far : @s.Point = (o.0 + dir.0 * bsize, o.1 + dir.1 * bsize)
+      let cand = [
+        if far.0 > 0.0 { bsize / far.0 } else { @double.infinity },
+        if far.0 < 0.0 { -20.0 / far.0 } else { @double.infinity },
+        if far.1 > 0.0 { bsize / far.1 } else { @double.infinity },
+        if far.1 < 0.0 { -20.0 / far.1 } else { @double.infinity },
+      ]
+      let mut tt = @double.infinity
+      for v in cand {
+        tt = tt.min(v)
+      }
+      let tscale = tt.min(1.0)
+      c.line(
+        o,
+        (o.0 + dir.0 * bsize * tscale, o.1 + dir.1 * bsize * tscale),
+        dash="4 3",
+        opacity=Some(0.8),
+        color=col_vor,
+      )
+    }
+  }
+  for t in tris {
+    for e in [(0, 1), (1, 2), (2, 0)] {
+      let ea = if e.0 == 0 { t.0 } else if e.0 == 1 { t.1 } else { t.2 }
+      let eb = if e.1 == 0 { t.0 } else if e.1 == 1 { t.1 } else { t.2 }
+      c.line(s[ea], s[eb], width=1.2, color=col_dt)
+    }
+  }
+
+  // Highlight one triangle: its empty circumcircle is the figure's
+  // claim, its center is a Voronoi vertex (dashed edges meet there).
+  let feat = 4
+  let cc2 = @s.circum(s[tris[feat].0], s[tris[feat].1], s[tris[feat].2])
+  ignore(c.circle(cc2.o.0, cc2.o.1, cc2.r, opacity=Some(0.45)))
+  c.raw(
+    "<circle cx=\"\{cc2.o.0}\" cy=\"\{cc2.o.1}\" r=\"2.5\" fill=\"currentColor\"/>",
+    covered=[cc2.o],
+  )
+  for p in s {
+    c.raw(
+      "<circle cx=\"\{p.0}\" cy=\"\{p.1}\" r=\"3\" fill=\"currentColor\"/>",
+      covered=[p],
+    )
+  }
+
+  println(
+    c.render(label="Delaunay triangulation (solid) and its dual Voronoi diagram (dashed); one empty circumcircle shown"),
+  )
+}

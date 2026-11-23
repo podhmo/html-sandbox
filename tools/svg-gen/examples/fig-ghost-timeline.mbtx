@@ -1,0 +1,185 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-ghost-timeline.mbtx -- the gist-cli session on one time
+// axis. Code commits and report commits sit on separate lanes;
+// the thick bar on the report lane is the span during which the
+// report named `parse_files`. The code lane has no such bar: the
+// function never existed in a commit.
+
+fn main {
+  let c = @s.Canvas::new()
+  let code = c.color(0)
+  let doc = c.color(1)
+  let ghost = c.color(3)
+
+  let x0 = 110.0
+  let px = 22.0 // px per minute, t = minutes since 01:42:00 JST
+  let pint = fn(s : StringView) -> Int {
+    let mut n = 0
+    for ch in s {
+      if ch >= '0' && ch <= '9' {
+        n = n * 10 + (ch.to_int() - '0'.to_int())
+      }
+    }
+    n
+  }
+  let x = fn(hms : String) -> Double {
+    let parts = hms.split(":").to_array()
+    let h = pint(parts[0])
+    let m = pint(parts[1])
+    let s = pint(parts[2])
+    x0 +
+    (
+        (h * 60 + m - (60 + 42)).to_double() +
+        s.to_double() / 60.0 +
+        (if h < 1 { 1440.0 } else { 0.0 })
+      ) *
+    px
+  }
+
+  let code_y = 70.0
+  let doc_y = 150.0
+  let axis_y = 200.0
+
+  c.text(0.0, 0.0, "書き直したコードと、振り返りレポートの時間軸", size=15.0)
+  c.text(
+    0.0,
+    20.0,
+    "podhmo/gom PR #89 のコミット時刻 (JST)。点は 1 コミット",
+    size=11.0,
+    opacity=Some(0.65),
+  )
+
+  c.text(x0 - 12.0, code_y, "コード", anchor=@s.End, central=true, size=12.0)
+  c.text(x0 - 12.0, doc_y, "レポート", anchor=@s.End, central=true, size=12.0)
+  let end_x = x("02:11:30")
+  c.line((x0, code_y), (end_x, code_y), opacity=Some(0.3))
+  c.line((x0, doc_y), (end_x, doc_y), opacity=Some(0.3))
+
+  // The span the report carried the ghost name: 44428e7 .. 57391df.
+  let g0 = x("01:45:53")
+  let g1 = x("02:10:26")
+  c.raw(
+    "<rect x=\"\{g0}\" y=\"\{doc_y - 7.0}\" width=\"\{g1 - g0}\" height=\"14\" rx=\"3\" fill=\"\{ghost}\" opacity=\"0.35\"/>",
+    covered=[(g0, doc_y - 7.0), (g1, doc_y + 7.0)],
+  )
+  c.text(
+    (g0 + g1) / 2.0,
+    doc_y + 24.0,
+    "本文に parse_files と [\"--gist\"] の腕がある",
+    anchor=@s.Middle,
+    size=11.0,
+  )
+  c.text(
+    (g0 + g1) / 2.0,
+    code_y - 16.0,
+    "コードには一度も現れない (git log -S)",
+    anchor=@s.Middle,
+    size=11.0,
+    opacity=Some(0.75),
+  )
+
+  let dot = fn(t : String, y : Double, color : String, k : Int) {
+    let cx = x(t)
+    let cy = y + k.to_double() * 9.0
+    c.raw(
+      "<circle cx=\"\{cx}\" cy=\"\{cy}\" r=\"4.5\" fill=\"\{color}\"/>",
+      covered=[(cx - 5.0, cy - 5.0), (cx + 5.0, cy + 5.0)],
+    )
+  }
+
+  // Code commits; same-second pairs are stacked downward.
+  let code_commits = [
+    "01:42:26", "01:42:47", "01:43:28", "01:43:37", "01:43:49", "01:44:01",
+    "01:44:08", "01:44:29", "01:50:01",
+  ]
+  for t in code_commits {
+    dot(t, code_y, code, 0)
+  }
+  dot("01:43:49", code_y, code, 1)
+  dot("01:44:08", code_y, code, 1)
+  // Report commits: written, refined, corrected.
+  for t in ["01:45:53", "02:06:07", "02:10:26"] {
+    dot(t, doc_y, doc, 0)
+  }
+
+  let note = fn(t : String, y : Double, lines : Array[String], up : Bool) {
+    let cx = x(t)
+    let ty = if up { y - 34.0 } else { y + 46.0 }
+    c.line(
+      (cx, if up { y - 8.0 } else { y + 8.0 }),
+      (cx, if up { ty + 6.0 } else { ty - 12.0 }),
+      opacity=Some(0.45),
+      width=1.0,
+    )
+    for i, s in lines {
+      c.text(cx, ty + i.to_double() * 14.0, s, anchor=@s.Middle, size=10.0, opacity=Some(0.85))
+    }
+  }
+  note("01:43:00", code_y, ["全体→局所の 10 コミット"], true)
+  note("01:50:01", code_y, ["レビュー指摘の修正"], true)
+  note("01:45:53", doc_y, ["レポートを書く"], false)
+  note("02:06:07", doc_y, ["refine-slops", "「もう存在しません」"], false)
+  note("02:10:26", doc_y, ["指摘を受けて", "履歴を確認し訂正"], false)
+
+  // Context summary: only known to fall between the last edit and
+  // 606e73e.
+  let s0 = x("01:47:00")
+  let s1 = x("01:50:00")
+  c.raw(
+    "<rect x=\"\{s0}\" y=\"\{code_y + 18.0}\" width=\"\{s1 - s0}\" height=\"\{doc_y - code_y - 36.0}\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" stroke-dasharray=\"3 3\" opacity=\"0.5\"/>",
+    covered=[(s0, code_y + 18.0), (s1, doc_y - 18.0)],
+  )
+  c.text(
+    (s0 + s1) / 2.0,
+    (code_y + doc_y) / 2.0,
+    "要約",
+    anchor=@s.Middle,
+    central=true,
+    size=10.0,
+    opacity=Some(0.8),
+  )
+
+  // Time axis.
+  c.line((x0, axis_y + 50.0), (end_x, axis_y + 50.0), opacity=Some(0.45), width=1.0)
+  for t in ["01:45:00", "01:50:00", "01:55:00", "02:00:00", "02:05:00", "02:10:00"] {
+    let tx = x(t)
+    c.line((tx, axis_y + 50.0), (tx, axis_y + 54.0), opacity=Some(0.5), width=1.0)
+    let label = t.split(":").to_array()
+    c.text(
+      tx,
+      axis_y + 68.0,
+      "\{label[0]}:\{label[1]}",
+      anchor=@s.Middle,
+      size=10.0,
+      opacity=Some(0.7),
+    )
+  }
+  c.text(
+    0.0,
+    axis_y + 92.0,
+    "点線の枠は文脈の要約が起きた区間。正確な時刻は残っておらず、前後のコミットからの推定",
+    size=10.0,
+    opacity=Some(0.6),
+  )
+  c.text(
+    0.0,
+    axis_y + 108.0,
+    "出典: git log origin/main..HEAD (podhmo/gom) / 生成: fig-ghost-timeline.mbtx",
+    size=10.0,
+    opacity=Some(0.55),
+  )
+
+  if !(x("02:10:26") < end_x) {
+    abort("the last commit fits on the lanes")
+  }
+  if !(g0 > x("01:44:29")) {
+    abort("the report was written after the last structural code commit")
+  }
+
+  println(
+    c.render(label="コードとレポートのコミットの時間軸。レポートには 01:45 から 02:10 まで parse_files が書かれていたが、コードには一度も現れない"),
+  )
+}
