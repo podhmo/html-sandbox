@@ -1,0 +1,48 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-mpa-vt-two-pages.mbtx -- Classification for directional
+// transitions must run on BOTH sides of the navigation. On the
+// outgoing page, pageswap's event.activation has from/entry
+// URLs; on the new page, pagereveal must re-derive them from
+// navigation.activation — types added during pageswap do not
+// propagate to the new page's vt.types.
+
+fn main {
+  let c = @s.Canvas::new()
+
+  // ---- old page ----
+  ignore(c.box(10.0, 30.0, @s.Fixed(300.0), 120.0, rx=10.0))
+  c.text(20.0, 46.0, "old page (/issues)", size=12.0, opacity=Some(0.75))
+  let swap = c.box(30.0, 60.0, @s.Fixed(260.0), 60.0, color=c.color(0))
+  c.text(40.0, 80.0, "pageswap listener", size=12.0)
+  c.text(40.0, 98.0, "event.activation.from / entry.url", size=10.0, opacity=Some(0.8))
+  c.text(40.0, 112.0, "vt.types.add(\"forward\")", size=10.0, opacity=Some(0.8))
+
+  // ---- new page ----
+  ignore(c.box(390.0, 30.0, @s.Fixed(330.0), 120.0, rx=10.0))
+  c.text(400.0, 46.0, "new page (/issues/3)", size=12.0, opacity=Some(0.75))
+  let reveal = c.box(410.0, 60.0, @s.Fixed(290.0), 60.0, color=c.color(1))
+  c.text(420.0, 80.0, "pagereveal listener", size=12.0)
+  c.text(420.0, 98.0, "navigation.activation.from / entry.url", size=10.0, opacity=Some(0.8))
+  c.text(420.0, 112.0, "vt.types.add(\"forward\")  again", size=10.0, opacity=Some(0.8))
+
+  // the transition carries the snapshot across; the types do not
+  c.arrow(c.anchor(swap, @s.E), c.anchor(reveal, @s.W), heads=@s.Both, color=c.color(2))
+  c.text(320.0, 58.0, "same ViewTransition", size=10.0, anchor=@s.Middle)
+  c.text(320.0, 72.0, "object", size=10.0, anchor=@s.Middle)
+  c.text(320.0, 104.0, "types は引き継がれない", size=10.0, anchor=@s.Middle)
+  c.text(320.0, 118.0, "(Chrome 156 実測)", size=9.0, anchor=@s.Middle, opacity=Some(0.7))
+
+  // result line
+  let css = c.box(230.0, 190.0, @s.Fixed(280.0), 40.0, rx=8.0, color=c.color(4))
+  c.text(370.0, 206.0, "CSS matches:", size=11.0, anchor=@s.Middle)
+  c.text(370.0, 222.0, ":active-view-transition-type(forward)", size=11.0, anchor=@s.Middle)
+  c.arrow(c.anchor(swap, @s.S), c.anchor(css, @s.W), dash="4 3", opacity=Some(0.8))
+  c.arrow(c.anchor(reveal, @s.S), c.anchor(css, @s.E), dash="4 3", opacity=Some(0.8))
+
+  println(
+    c.render(label="旧ページの pageswap と新ページの pagereveal の両方で type を付けないと :active-view-transition-type が効かない図"),
+  )
+}

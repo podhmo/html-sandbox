@@ -1,0 +1,65 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-mpa-vt-optin-race.mbtx -- Why @view-transition at the end of
+// a big external stylesheet silently disabled every
+// cross-document transition. Chrome checks the opt-in at
+// pagereveal without waiting for the rest of app.css; an opt-in
+// that arrives late is simply never seen. Two lanes: before
+// (opt-in inside external app.css, arrives late -> skipped) and
+// after (opt-in in an inline <style> in <head>, present early ->
+// runs).
+
+fn main {
+  let c = @s.Canvas::new()
+
+  let lanes = [
+    (40.0, "before: opt-in は app.css の末尾", true),
+    (190.0, "after: opt-in は <head> の inline <style>", false),
+  ]
+
+  for lane in lanes {
+    let (y, label, late) = lane
+    c.text(10.0, y - 12.0, label, size=12.0)
+
+    // HTML document shell
+    ignore(c.box(10.0, y, @s.Fixed(470.0), 90.0, rx=10.0))
+    c.text(20.0, y + 14.0, "new page", size=11.0, opacity=Some(0.7))
+
+    if late {
+      // external stylesheet streaming — opt-in sits at its tail
+      ignore(c.box(30.0, y + 24.0, @s.Fixed(320.0), 40.0, dash="5 4"))
+      c.text(38.0, y + 40.0, "app.css loading", size=11.0, opacity=Some(0.8))
+      c.text(38.0, y + 55.0, "@view-transition = last bytes", size=10.0, opacity=Some(0.6))
+      let optin = c.box(355.0, y + 24.0, @s.Fixed(90.0), 40.0, color=c.color(3))
+      c.text(360.0, y + 40.0, "opt-in", size=11.0)
+      c.text(360.0, y + 55.0, "arrives late", size=10.0, opacity=Some(0.7))
+
+      // pagereveal fires before the tail arrives
+      let reveal = c.circle(180.0, y + 78.0, 5.0, color=c.color(3), width=2.0)
+      c.text(180.0, y + 78.0 + 16.0, "pagereveal", size=10.0, anchor=@s.Middle)
+      c.arrow(c.anchor(optin, @s.W), c.anchor(reveal, @s.N), color=c.color(3), dash="4 3")
+      c.text(495.0, y + 40.0, "miss", size=12.0)
+      c.text(495.0, y + 56.0, "→ fadeなし", size=10.0, opacity=Some(0.7))
+    } else {
+      // inline style in <head> — opt-in present from the first
+      // bytes
+      ignore(c.box(30.0, y + 24.0, @s.Fixed(120.0), 40.0, color=c.color(0)))
+      c.text(38.0, y + 40.0, "inline <style>", size=11.0)
+      c.text(38.0, y + 55.0, "opt-in", size=10.0, opacity=Some(0.7))
+      ignore(c.box(170.0, y + 24.0, @s.Fixed(275.0), 40.0, dash="5 4"))
+      c.text(178.0, y + 40.0, "app.css loading", size=11.0, opacity=Some(0.8))
+      c.text(178.0, y + 55.0, "capture styles / keyframes", size=10.0, opacity=Some(0.6))
+
+      ignore(c.circle(180.0, y + 78.0, 5.0, color=c.color(0), width=2.0))
+      c.text(180.0, y + 78.0 + 16.0, "pagereveal", size=10.0, anchor=@s.Middle)
+      c.text(495.0, y + 40.0, "hit", size=12.0)
+      c.text(495.0, y + 56.0, "→ VT 発火", size=10.0, opacity=Some(0.7))
+    }
+  }
+
+  println(
+    c.render(label="external CSS 末尾の opt-in は pagereveal 検査に間に合わず遷移が無効、inline <style> なら間に合う比較図"),
+  )
+}
