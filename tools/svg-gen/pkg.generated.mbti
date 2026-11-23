@@ -6,21 +6,55 @@ import {
 }
 
 // Values
+pub fn bench() -> Array[BoxGroup]
+
 pub fn bins(Array[Double], Double) -> Array[Bin]
+
+pub fn bisector((Double, Double), (Double, Double)) -> Bisector
+
+pub fn circum((Double, Double), (Double, Double), (Double, Double)) -> Circum
+
+pub fn delaunay(Array[(Double, Double)]) -> Array[(Int32, Int32, Int32)]
 
 pub fn ecdf_points(Plot, Array[Double], max? : Double) -> Array[(Double, Double)]
 
+pub fn edge_adjacency(Array[(Int32, Int32, Int32)]) -> Array[(Int32, Int32, Array[Int32])]
+
+pub let few_sites : Array[(Double, Double)]
+
 pub fn gauss(() -> Double) -> () -> Double
 
+pub fn hull(Array[(Double, Double)]) -> Array[Int32]
+
+pub fn line_rect((Double, Double), (Double, Double), (Double, Double, Double, Double)) -> ((Double, Double), (Double, Double))
+
 pub let palette : Array[String]
+
+pub fn path_of(Array[(Double, Double)]) -> String
+
+pub fn poly_el(Array[(Double, Double)], String, Double, extra? : String) -> String
 
 pub fn quantile(Array[Double], Double) -> Double
 
 pub fn rng(UInt32) -> () -> Double
 
+pub fn sample((Double) -> Double, Double, Double, n? : Int32) -> Array[(Double, Double)]
+
+pub fn shift(Array[(Double, Double)], Double, Double) -> Array[(Double, Double)]
+
+pub let sites : Array[(Double, Double)]
+
 pub fn text_width(String, Double) -> Double
 
 pub fn ticks(Double, Double, count? : Int32) -> Array[Double]
+
+pub fn traffic() -> Array[Array[Double]]
+
+pub let traffic_days : Array[String]
+
+pub fn voronoi_cell((Double, Double), Array[(Double, Double)], Array[(Double, Double)]) -> Array[(Double, Double)]
+
+pub fn voronoi_segments(Array[(Double, Double)], Array[(Int32, Int32, Int32)], (Double, Double, Double, Double)) -> Array[((Double, Double), (Double, Double))]
 
 // Errors
 
@@ -30,6 +64,12 @@ pub(all) struct Bin {
   x0 : Double
   x1 : Double
   mut n : Int32
+}
+
+#derive(@debug.Debug)
+pub(all) struct Bisector {
+  mid : (Double, Double)
+  dir : (Double, Double)
 }
 
 #derive(@debug.Debug)
@@ -72,6 +112,12 @@ pub(all) struct ChartMeta {
   title : String
   subtitle : String
   footnote : String
+}
+
+#derive(@debug.Debug)
+pub(all) struct Circum {
+  o : (Double, Double)
+  r : Double
 }
 
 pub(all) struct Hbar {
@@ -172,5 +218,7 @@ pub enum Tick {
 
 // Type aliases
 pub type Point = (Double, Double)
+
+pub type Tri = (Int32, Int32, Int32)
 
 // Traits
