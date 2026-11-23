@@ -21,7 +21,10 @@ svg: vendor $(FIGS)
 
 build/fig-%.svg: examples/fig-%.mbtx vendor
 	@mkdir -p build
-	$(MOON) run $< > $@
+	# write beside the target and rename: a failed generator then
+	# leaves the previous SVG in place instead of truncating it.
+	$(MOON) run $< > $@.tmp
+	mv $@.tmp $@
 
 ## check: lint every SVG in build/ (viewBox, ids, banned constructs)
 check: svg
