@@ -7,7 +7,7 @@ import { "podhmo/svg-gen" @s }
 // band; these stay currentColor so they work on both themes.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let row_h = 64.0
 
   // (caption, mark): mark = None for box-option variants, whose style

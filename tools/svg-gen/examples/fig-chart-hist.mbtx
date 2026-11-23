@@ -11,7 +11,7 @@ import {
 // width is declared in the subtitle, as the guideline requires.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let bench = @s.bench()
 
   let mut cached : @s.BoxGroup? = None
@@ -24,7 +24,7 @@ fn main {
     abort("cached group exists")
   }
   let bin_w = 10.0
-  let bs = @s.bins(cch.values, bin_w)
+  let bs = @s.bins(cch.values, w=bin_w)
   // two modes: a dip below 45% of the peak somewhere between the modes
   let mut peak = 0
   for b in bs {
@@ -46,7 +46,7 @@ fn main {
     }
   }
 
-  let p = @s.Plot::new(
+  let p = @s.Plot(
     c,
     {
       title: "\"cached\" の試行時間は二峰（箱ひげと同じデータ、仮想）",

@@ -10,7 +10,7 @@ import { "podhmo/svg-gen" @s }
 // toward 程々.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let token_col = c.color(2)
   let loose = c.color(3)
 

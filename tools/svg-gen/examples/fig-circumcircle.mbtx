@@ -12,7 +12,7 @@ import {
 fn main {
   let pts = [@s.sites[0], @s.sites[2], @s.sites[8]]
   let rect = (0.0, 0.0, 230.0, 230.0)
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let cc = @s.circum(pts[0], pts[1], pts[2])
 
   for e in [(0, 1), (1, 2)] {

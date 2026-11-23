@@ -14,7 +14,7 @@ import {
 fn main {
   let o : @s.Point = (115.0, 105.0)
   let r = 78.0
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let dx = 260.0
 
   let on_circle = fn(deg : Double) -> @s.Point {
@@ -49,7 +49,7 @@ fn main {
   }
 
   draw_panel(p, (0, 2), 0.0)
-  draw_panel(@s.shift(p, dx, 0.0), (1, 3), dx)
+  draw_panel(@s.shift(p, dx=dx, dy=0.0), (1, 3), dx)
   // the single degree-4 Voronoi vertex, same spot in both panels
   for off in [0.0, dx] {
     let oc : @s.Point = (o.0 + off, o.1)

@@ -13,7 +13,7 @@ import {
 fn main {
   let a : @s.Point = (70.0, 60.0)
   let b : @s.Point = (170.0, 115.0)
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let col_a = c.color(0)
   let col_b = c.color(1)
   let rect = (10.0, 10.0, 230.0, 170.0)

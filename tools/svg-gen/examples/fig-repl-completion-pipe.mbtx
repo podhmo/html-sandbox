@@ -10,7 +10,7 @@ import { "podhmo/svg-gen" @s }
 // narrow (mobile) screens.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let h = 56.0
   let gap = 26.0
   let colx = 170.0

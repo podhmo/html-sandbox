@@ -9,7 +9,7 @@ import { "podhmo/svg-gen" @s }
 // converging on the announcer + describedby link.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
 
   c.text(
     14.0,

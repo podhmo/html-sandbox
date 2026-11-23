@@ -9,14 +9,14 @@ import { "podhmo/svg-gen" @s }
 // made visible here by the jittered points.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let jitter = @s.rng(20261103U)
   let bench = @s.bench()
 
   let medians = bench.map(fn(b) {
     let sv = b.values.copy()
     sv.sort()
-    @s.quantile(sv, 0.5)
+    @s.quantile(sv, q=0.5)
   })
   let mut best_i = 0
   for i, m in medians {
@@ -26,7 +26,7 @@ fn main {
   }
   let best = bench[best_i].label
 
-  let p = @s.Plot::new(
+  let p = @s.Plot(
     c,
     {
       title: "\"cached\" は箱では一様だが、実は二峰（仮想データ）",

@@ -10,7 +10,7 @@ import { "podhmo/svg-gen" @s }
 // back into a mergeable one.
 
 fn main {
-  let c = @s.Canvas::new(margin=12.0)
+  let c = @s.Canvas(margin=12.0)
 
   // -- scan phase (left column) -----------------------------------
   let ghlist = c.box(30.0, 30.0, @s.Auto, 36.0, label="gh pr list", color=c.color(0))

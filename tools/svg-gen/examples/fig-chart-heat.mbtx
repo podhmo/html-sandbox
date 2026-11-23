@@ -7,7 +7,7 @@ import { "podhmo/svg-gen" @s }
 // patterns that 168 points of spaghetti lines would not.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let traffic = @s.traffic()
 
   // find the peak cell for the conclusion title
@@ -24,7 +24,7 @@ fn main {
     }
   }
 
-  let p = @s.Plot::new(
+  let p = @s.Plot(
     c,
     {
       title: "\{@s.traffic_days[peak_d]} \{peak_h} 時台のスパイクと週末の谷（仮想データ）",

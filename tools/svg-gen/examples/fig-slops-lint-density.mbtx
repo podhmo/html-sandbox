@@ -8,7 +8,7 @@ import { "podhmo/svg-gen" @s }
 // cells show where the authors actually differ.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
 
   let authors = ["Devin", "Claude", "Codex", "opencode", "不明"]
   // candidates per 1000 chars, rows in display order (top first).
@@ -25,7 +25,7 @@ fn main {
   let n_r = rows.length()
   let n_c = authors.length()
 
-  let p = @s.Plot::new(
+  let p = @s.Plot(
     c,
     {
       title: "執筆者差は機械的な規則に集まる",
@@ -47,7 +47,7 @@ fn main {
   )
   let mut mm = (0.0, 0.0)
   p.data(fn(p) { mm = p.heatmap(rows.map(fn(r) { r.1 })) })
-  p.heat_legend(mm, p.x1 - 80.0, p.y1 + 56.0, fmt=fn(v) { @s.fixed(v, 1) }, label="候補/千字")
+  p.heat_legend(mm, p.x1 - 80.0, p.y1 + 56.0, fmt=fn(v) { @s.fixed(v, d=1) }, label="候補/千字")
 
   // value labels inside every cell: the gap between a dark cell
   // and a near-zero neighbour is the whole point, so keep the
@@ -59,7 +59,7 @@ fn main {
       c.text(
         p.x0 + (i.to_double() + 0.5) * cw,
         p.y0 + (j.to_double() + 0.55) * ch,
-        if v == 0.0 { "0" } else { @s.fixed(v, 2) },
+        if v == 0.0 { "0" } else { @s.fixed(v, d=2) },
         anchor=@s.Middle,
         central=true,
         size=8.0,

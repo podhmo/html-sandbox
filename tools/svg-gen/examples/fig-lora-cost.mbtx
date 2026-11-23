@@ -9,7 +9,7 @@ import { "podhmo/svg-gen" @s }
 // than as a bar.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
 
   let usd = [
     @s.Hbar::{ label: "Replicate FLUX.1 dev", value: 1.46 },

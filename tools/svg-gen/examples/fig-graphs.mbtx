@@ -14,7 +14,7 @@ import {
 fn main {
   let s = @s.sites
   let tris = @s.delaunay(s)
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let dx = 260.0
   let dy = 230.0
 

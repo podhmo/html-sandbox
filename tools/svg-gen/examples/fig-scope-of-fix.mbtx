@@ -10,7 +10,7 @@ import { "podhmo/svg-gen" @s }
 // one is the cause it skipped.
 
 fn main {
-  let c = @s.Canvas::new(margin=14.0)
+  let c = @s.Canvas(margin=14.0)
 
   // the log line the agent saw
   let log = c.box(

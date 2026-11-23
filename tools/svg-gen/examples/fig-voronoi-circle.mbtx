@@ -13,10 +13,10 @@ fn main {
   let s = @s.sites
   let tris = @s.delaunay(s)
   let clip = (0.0, 0.0, 230.0, 230.0)
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let col_vor = c.color(1)
 
-  for seg in @s.voronoi_segments(s, tris, clip) {
+  for seg in @s.voronoi_segments(s, tris=tris, rect=clip) {
     c.line(seg.0, seg.1, dash=Some("4 3"), opacity=Some(0.6), color=col_vor)
   }
 

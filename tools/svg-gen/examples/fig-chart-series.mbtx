@@ -8,7 +8,7 @@ import { "podhmo/svg-gen" @s }
 // two weeks of daily-aggregated p50/p90 from a seeded PRNG.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let g = @s.gauss(@s.rng(20261030U))
 
   // virtual daily aggregates: a latency drop after the 10/08 deploy,
@@ -34,7 +34,7 @@ fn main {
     ).round()
   let drop_i = drop.to_int64()
 
-  let p = @s.Plot::new(
+  let p = @s.Plot(
     c,
     {
       title: "10/08 デプロイ後に p90 が約 \{drop_i}% 低下（仮想データ）",

@@ -8,7 +8,7 @@ import { "podhmo/svg-gen" @s }
 // the meaning: the strictness of the criterion fades left to right.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
 
   let y = 90.0
   let x0 = 60.0

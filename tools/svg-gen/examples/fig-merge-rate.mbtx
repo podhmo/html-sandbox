@@ -7,7 +7,7 @@ import { "podhmo/svg-gen" @s }
 // Real data: squash-commit committer timestamps from main.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
 
   // merges per hour, 20:00 -> 06:00 JST (x = hours since 20:00).
   let counts = [44, 27, 36, 42, 44, 30, 10, 13, 12, 13, 7]
@@ -16,7 +16,7 @@ fn main {
   })
   let clock = fn(i : Int) { "\{(20 + i) % 24}:00" }
 
-  let p = @s.Plot::new(
+  let p = @s.Plot(
     c,
     {
       title: "1時間あたりのマージ完了数 — 02時すぎから鈍化した",

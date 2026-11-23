@@ -9,7 +9,7 @@ import { "podhmo/svg-gen" @s }
 // and items outside both are post-hoc candidates.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   ignore(c.box(10.0, 10.0, @s.Fixed(400.0), 160.0))
   c.text(22.0, 32.0, "条件・限界・再現に関係する案（GPT 版）", size=12.0)
   ignore(c.box(30.0, 48.0, @s.Fixed(360.0), 62.0, dash=Some("5 4")))

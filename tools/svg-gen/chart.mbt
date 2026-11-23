@@ -30,7 +30,7 @@ pub fn gauss(rand : () -> Double) -> () -> Double {
 }
 
 ///|
-pub fn quantile(sorted : Array[Double], q : Double) -> Double {
+pub fn quantile(sorted : Array[Double], q~ : Double) -> Double {
   let i = (sorted.length() - 1).to_double() * q
   let lo = @math.floor(i).to_int()
   let hi = @math.ceil(i).to_int()
@@ -85,7 +85,7 @@ pub(all) struct Scale {
 }
 
 ///|
-pub fn Scale::new(
+pub fn Scale::Scale(
   lo : Double,
   hi : Double,
   a : Double,
@@ -145,7 +145,7 @@ pub(all) struct ChartMeta {
 
 ///|
 /// toFixed(d) for element attributes: x.toFixed(1), o.toFixed(2), ...
-pub fn fixed(v : Double, d : Int32) -> String {
+pub fn fixed(v : Double, d~ : Int32) -> String {
   let p = @math.pow(10.0, d.to_double())
   let scaled = (v * p).round()
   let neg = scaled < 0.0
@@ -214,7 +214,7 @@ pub struct Plot {
 }
 
 ///|
-pub fn Plot::new(
+pub fn Plot::Plot(
   c : Canvas,
   meta : ChartMeta,
   xdom : Point,
@@ -240,8 +240,8 @@ pub fn Plot::new(
     y0,
     x1,
     y1,
-    xs: Scale::new(xdom.0, xdom.1, x0, x1, kind=xscale),
-    ys: Scale::new(ydom.0, ydom.1, y1, y0, kind=yscale),
+    xs: Scale::Scale(xdom.0, xdom.1, x0, x1, kind=xscale),
+    ys: Scale::Scale(ydom.0, ydom.1, y1, y0, kind=yscale),
     meta,
     xfmt,
     yfmt,
@@ -286,7 +286,7 @@ fn Plot::inside(self : Plot, pts : Array[Point]) -> Array[Point] {
 
 ///|
 fn fixed1(v : Double) -> String {
-  fixed(v, 1)
+  fixed(v, d=1)
 }
 
 ///|
@@ -567,9 +567,9 @@ pub fn Plot::boxplot(
   for i, g in groups {
     let s = g.values.copy()
     s.sort()
-    let q1 = quantile(s, 0.25)
-    let q2 = quantile(s, 0.5)
-    let q3 = quantile(s, 0.75)
+    let q1 = quantile(s, q=0.25)
+    let q2 = quantile(s, q=0.5)
+    let q3 = quantile(s, q=0.75)
     let iqr = q3 - q1
     let lo = @cmp.maximum(s[0], q1 - 1.5 * iqr)
     let hi = @cmp.minimum(s[s.length() - 1], q3 + 1.5 * iqr)
@@ -675,7 +675,7 @@ pub fn Plot::heatmap(
     for i, v in row {
       let o = 0.06 + 0.9 * ((v - min) / span)
       self.put(
-        "<rect x=\"\{fixed1(self.x0 + i.to_double() * cw)}\" y=\"\{fixed1(self.y0 + j.to_double() * ch)}\" width=\"\{fixed1(cw - 0.6)}\" height=\"\{fixed1(ch - 0.6)}\" fill=\"\{color}\" fill-opacity=\"\{fixed(o, 2)}\" stroke=\"none\"/>",
+        "<rect x=\"\{fixed1(self.x0 + i.to_double() * cw)}\" y=\"\{fixed1(self.y0 + j.to_double() * ch)}\" width=\"\{fixed1(cw - 0.6)}\" height=\"\{fixed1(ch - 0.6)}\" fill=\"\{color}\" fill-opacity=\"\{fixed(o, d=2)}\" stroke=\"none\"/>",
         [],
       )
     }
@@ -703,7 +703,7 @@ pub fn Plot::heat_legend(
   for i = 0; i < steps; i = i + 1 {
     let o = 0.06 + 0.9 * (i.to_double() / (steps - 1).to_double())
     self.c.raw(
-      "<rect x=\"\{fixed1(x + i.to_double() * sw)}\" y=\"\{num(y)}\" width=\"\{fixed1(sw - 1.0)}\" height=\"8\" fill=\"currentColor\" fill-opacity=\"\{fixed(o, 2)}\" stroke=\"none\"/>",
+      "<rect x=\"\{fixed1(x + i.to_double() * sw)}\" y=\"\{num(y)}\" width=\"\{fixed1(sw - 1.0)}\" height=\"8\" fill=\"currentColor\" fill-opacity=\"\{fixed(o, d=2)}\" stroke=\"none\"/>",
     )
   }
   self.c.text(x, y + 16.0, fmt(min), size=9.0, opacity=Some(0.6))
@@ -731,7 +731,7 @@ pub fn Plot::heat_legend(
 /// Count samples into width-w bins aligned to w*k boundaries.
 
 ///|
-pub fn bins(values : Array[Double], w : Double) -> Array[Bin] {
+pub fn bins(values : Array[Double], w~ : Double) -> Array[Bin] {
   let mut mn = @double.infinity
   let mut mx = @double.neg_infinity
   for v in values {
@@ -762,9 +762,9 @@ pub fn bins(values : Array[Double], w : Double) -> Array[Bin] {
 /// the same, only fewer of its vertices are drawn.
 
 ///|
-pub fn ecdf_points(
-  p : Plot,
-  samples : Array[Double],
+pub fn Plot::ecdf_points(
+  self : Plot,
+  samples~ : Array[Double],
   max~ : Double = @double.infinity,
 ) -> Array[Point] {
   let s = samples.copy()
@@ -773,9 +773,12 @@ pub fn ecdf_points(
   let pts : Array[Point] = []
   for i = 0; i < s.length(); i = i + stride {
     pts.push(
-      (p.xs.map(s[i]), p.ys.map((i + 1).to_double() / s.length().to_double())),
+      (
+        self.xs.map(s[i]),
+        self.ys.map((i + 1).to_double() / s.length().to_double()),
+      ),
     )
   }
-  pts.push((p.xs.map(s[s.length() - 1]), p.ys.map(1.0)))
+  pts.push((self.xs.map(s[s.length() - 1]), self.ys.map(1.0)))
   pts
 }

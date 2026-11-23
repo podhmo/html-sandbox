@@ -9,7 +9,7 @@ import { "podhmo/svg-gen" @s }
 fn main {
   let h = 44.0
   let gap = 40.0
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
 
   // Widths come from the labels, so no label can outgrow its box.
   let input = c.box(0.0, 80.0, @s.Auto, h, label="Input")

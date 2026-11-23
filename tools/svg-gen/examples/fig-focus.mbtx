@@ -6,7 +6,7 @@ import { "podhmo/svg-gen" @s }
 // neighbours dimmed, drawn without a layout engine.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let dim = 0.35
 
   let focus = c.box(140.0, 60.0, @s.Fixed(130.0), 46.0, label="focus pkg")

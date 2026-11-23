@@ -12,7 +12,7 @@ fn main {
   let h = 52.0
   let gx = 150.0
   let gy = 74.0
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
 
   let a = c.box(0.0, 0.0, @s.Auto, h, label="振る舞いが\n出力に入る")
   let b = c.box(c.right_of(a, gx), a.y, @s.Auto, h, label="止められない\n（沈黙）")

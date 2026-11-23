@@ -7,7 +7,7 @@ import { "podhmo/svg-gen" @s }
 // not.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let imp = [0, 1, 2, 3, 4, 5]
 
   let outer = c.box(0.0, 0.0, @s.Fixed(720.0), 344.0, rx=12.0, dash=Some("6 4"))

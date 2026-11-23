@@ -10,7 +10,7 @@ import { "podhmo/svg-gen" @s }
 // criterion; the drift tracks that asymmetry.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let token_col = c.color(2) // green — the "正解" mark
   let loose = c.color(3) // vermillion — the "テキトー" end
   let r = 20.0

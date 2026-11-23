@@ -11,7 +11,7 @@ fn main {
   let h = 52.0
   let gx = 130.0
   let gy = 104.0
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
 
   // Ephemeral workers. Colour = the mark that dies with the session.
   let s1 = c.box(0.0, 0.0, @s.Auto, h, label="実装セッション 1\n（揮発）", color=c.color(0))

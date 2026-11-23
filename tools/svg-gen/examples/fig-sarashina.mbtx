@@ -9,7 +9,7 @@ import { "podhmo/svg-gen" @s }
 // bidirectional, since a response always comes back.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let dash = Some("4 3")
 
   // Row 1: the people and the code

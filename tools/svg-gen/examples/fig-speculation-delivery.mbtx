@@ -10,7 +10,7 @@ import { "podhmo/svg-gen" @s }
 // ruleset — no <script> element exists, so the two coexist.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
 
   let chip = fn(x : Double, y : Double, w : @s.Sizing, label : String, col : Int?) -> @s.Shape {
     let color = match col {

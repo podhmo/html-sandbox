@@ -8,7 +8,7 @@ import { "podhmo/svg-gen" @s }
 // round-trip cost.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
 
   c.text(14.0, 20.0, "same action: submit a comment on /issues/2", size=12.0, opacity=Some(0.7))
 

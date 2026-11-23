@@ -9,7 +9,7 @@ import { "podhmo/svg-gen" @s }
 fn main {
   let s = @s.sites
   let clip = (10.0, 10.0, 225.0, 220.0)
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
 
   // Featured site: a central one (index 3 = (70,115) has 6 neighbors).
   let si = 3
@@ -25,7 +25,7 @@ fn main {
     }
   }
 
-  let cell = @s.voronoi_cell(site, s, [
+  let cell = @s.voronoi_cell(site, sites=s, rect=[
     (clip.0, clip.1),
     (clip.2, clip.1),
     (clip.2, clip.3),
@@ -55,7 +55,7 @@ fn main {
   }
 
   c.raw(
-    @s.poly_el(cell, c.color(2), 0.18, extra=" stroke=\"\{c.color(2)}\" stroke-width=\"2\""),
+    @s.poly_el(cell, fill=c.color(2), opacity=0.18, extra=" stroke=\"\{c.color(2)}\" stroke-width=\"2\""),
     covered=cell,
   )
   c.raw(

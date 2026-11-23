@@ -7,7 +7,7 @@ import { "podhmo/svg-gen" @s }
 // line-budget file, not code.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
 
   // conflicted-path counts from the fix loop log, grouped:
   //  - internal/archcheck/budgets.go: the file-line-count ratchet
@@ -21,7 +21,7 @@ fn main {
     @s.Bin::{ x0: i.to_double() + 0.12, x1: i.to_double() + 0.88, n }
   })
 
-  let p = @s.Plot::new(
+  let p = @s.Plot(
     c,
     {
       title: "コンフリクトしたファイルの内訳 — ほぼ記録用ファイル",

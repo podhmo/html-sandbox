@@ -32,7 +32,7 @@ fn main {
     }
   }
 
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let col_dt = c.color(0) // Delaunay: solid blue
   let col_vor = c.color(1) // Voronoi: dashed orange
   let bsize = 230.0 // clip box for Voronoi rays (figure bounds)

@@ -8,7 +8,7 @@ import { "podhmo/svg-gen" @s }
 // under max-width:40em.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let w = 150.0
   let h = 240.0
 

@@ -8,7 +8,7 @@ import { "podhmo/svg-gen" @s }
 // is open.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let x0 = 170.0
   // Program points, left to right.
   let pts = [

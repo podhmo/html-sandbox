@@ -12,7 +12,7 @@ import { "podhmo/svg-gen" @s }
 // (vermillion, dashed).
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
 
   let kept = 2 // green
   let gone = 3 // vermillion

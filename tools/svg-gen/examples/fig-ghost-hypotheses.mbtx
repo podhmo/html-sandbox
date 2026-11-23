@@ -9,7 +9,7 @@ import { "podhmo/svg-gen" @s }
 // frame = the unverified guess.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let code = c.color(0)
   let ghost = c.color(3)
 

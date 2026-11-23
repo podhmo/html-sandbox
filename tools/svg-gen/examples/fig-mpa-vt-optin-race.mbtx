@@ -12,7 +12,7 @@ import { "podhmo/svg-gen" @s }
 // runs).
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
 
   let lanes = [
     (40.0, "before: opt-in は app.css の末尾", true),

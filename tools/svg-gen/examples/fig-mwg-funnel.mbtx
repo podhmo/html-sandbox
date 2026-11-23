@@ -9,7 +9,7 @@ import { "podhmo/svg-gen" @s }
 // schematic — only 208 and 10 are real numbers.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
 
   let src = c.box(
     0.0,
@@ -51,7 +51,7 @@ fn main {
   let drop = fn(g : @s.Shape, labels : Array[String]) {
     let mut w = 0.0
     for s in labels {
-      w = w.max(@s.text_width(s, 11.0))
+      w = w.max(@s.text_width(s, size=11.0))
     }
     w = w + 16.0
     let label = labels.join("\n")

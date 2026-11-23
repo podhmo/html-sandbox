@@ -204,8 +204,8 @@ pub fn hull(pts : Array[Point]) -> Array[Int32] {
 /// bisector, keeping the side nearer to s).
 pub fn voronoi_cell(
   s : Point,
-  sites : Array[Point],
-  rect : Array[Point],
+  sites~ : Array[Point],
+  rect~ : Array[Point],
 ) -> Array[Point] {
   let poly = rect.copy()
   for t in sites {
@@ -248,7 +248,7 @@ fn isect(a : Point, b : Point, sa : Double, sb : Double) -> Point {
 
 ///|
 /// Shift a point set so several panels can share one canvas.
-pub fn shift(pts : Array[Point], dx : Double, dy : Double) -> Array[Point] {
+pub fn shift(pts : Array[Point], dx~ : Double, dy~ : Double) -> Array[Point] {
   pts.map(fn(p) { (p.0 + dx, p.1 + dy) })
 }
 
@@ -312,8 +312,8 @@ pub fn line_rect(
 /// a ray from the single center along the bisector, clipped to rect.
 pub fn voronoi_segments(
   pts : Array[Point],
-  tris : Array[Tri],
-  rect : (Double, Double, Double, Double),
+  tris~ : Array[Tri],
+  rect~ : (Double, Double, Double, Double),
 ) -> Array[(Point, Point)] {
   let centers = tris.map(fn(t) { circum(pts[t.0], pts[t.1], pts[t.2]).o })
   let out : Array[(Point, Point)] = []
@@ -363,8 +363,8 @@ pub fn voronoi_segments(
 /// Sample a function to a polyline for c.path().
 pub fn sample(
   f : (Double) -> Double,
-  x0 : Double,
-  x1 : Double,
+  x0~ : Double,
+  x1~ : Double,
   n~ : Int32 = 64,
 ) -> Array[Point] {
   let pts : Array[Point] = []
@@ -378,17 +378,17 @@ pub fn sample(
 ///|
 /// Sampled polyline -> SVG path data.
 pub fn path_of(pts : Array[Point]) -> String {
-  "M" + pts.map(fn(p) { "\{fixed(p.0, 1)} \{fixed(p.1, 1)}" }).join(" L")
+  "M" + pts.map(fn(p) { "\{fixed(p.0, d=1)} \{fixed(p.1, d=1)}" }).join(" L")
 }
 
 ///|
 /// Filled polygon element (escape hatch for cell/triangle fills).
 pub fn poly_el(
   pts : Array[Point],
-  fill : String,
-  op : Double,
+  fill~ : String,
+  opacity~ : Double,
   extra~ : String = "",
 ) -> String {
-  let s = pts.map(fn(p) { fixed(p.0, 1) + "," + fixed(p.1, 1) }).join(" ")
-  "<polygon points=\"\{s}\" fill=\"\{fill}\" fill-opacity=\"\{op}\"\{extra}/>"
+  let s = pts.map(fn(p) { fixed(p.0, d=1) + "," + fixed(p.1, d=1) }).join(" ")
+  "<polygon points=\"\{s}\" fill=\"\{fill}\" fill-opacity=\"\{opacity}\"\{extra}/>"
 }

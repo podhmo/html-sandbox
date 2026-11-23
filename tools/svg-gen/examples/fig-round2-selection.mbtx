@@ -8,7 +8,7 @@ import { "podhmo/svg-gen" @s }
 // target UI + measured gap -> 8 tasks shipped.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
 
   let src = c.box(10.0, 40.0, @s.Fixed(200.0), 60.0, size=13.0)
   c.text(110.0, 63.0, "208 guides", anchor=@s.Middle, central=true, size=14.0)

@@ -11,7 +11,7 @@ import { "podhmo/svg-gen" @s }
 // improvement story.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
 
   // measured values, one run each (Qwen: the warmed-up second run)
   let rows = [
@@ -22,7 +22,7 @@ fn main {
     (0.0, 0.072, "0.072", 4),
   ]
 
-  let p = @s.Plot::new(
+  let p = @s.Plot(
     c,
     {
       title: "同じ RTF の差でも、原因は 2 種類ある",

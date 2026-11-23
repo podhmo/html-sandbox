@@ -8,7 +8,7 @@ import { "podhmo/svg-gen" @s }
 // accepted, uses that carry `s` past its edge are E0418.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   c.text(0.0, 0.0, "Scope のハンドル s が行ってよい場所", size=15.0)
   c.text(
     0.0,

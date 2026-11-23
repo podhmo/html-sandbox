@@ -8,7 +8,7 @@ import { "podhmo/svg-gen" @s }
 // deletion.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let pin = 1
   let live = 0
   let r = 9.0

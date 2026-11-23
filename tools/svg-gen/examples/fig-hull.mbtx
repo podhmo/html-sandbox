@@ -8,7 +8,7 @@ import { "podhmo/svg-gen" @s }
 fn main {
   let s = @s.sites
   let hv = @s.hull(s)
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
 
   for i = 0; i < hv.length(); i = i + 1 {
     c.line(s[hv[i]], s[hv[(i + 1) % hv.length()]], width=2.0, color=c.color(2))

@@ -10,7 +10,7 @@ fn main {
   let s = @s.sites
   let tris = @s.delaunay(s)
   let clip = (0.0, 0.0, 230.0, 230.0)
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let col_vor = c.color(1)
 
   // Unbounded cells: boundary Delaunay edges (one adjacent triangle)
@@ -23,18 +23,18 @@ fn main {
     }
   }
 
-  for seg in @s.voronoi_segments(s, tris, clip) {
+  for seg in @s.voronoi_segments(s, tris=tris, rect=clip) {
     c.line(seg.0, seg.1, dash=Some("4 3"), width=1.5, color=col_vor)
   }
 
   // one featured cell washed
-  let feat = @s.voronoi_cell(s[3], s, [
+  let feat = @s.voronoi_cell(s[3], sites=s, rect=[
     (clip.0, clip.1),
     (clip.2, clip.1),
     (clip.2, clip.3),
     (clip.0, clip.3),
   ])
-  c.raw(@s.poly_el(feat, c.color(1), 0.12), covered=feat)
+  c.raw(@s.poly_el(feat, fill=c.color(1), opacity=0.12), covered=feat)
 
   for p in s {
     c.raw(

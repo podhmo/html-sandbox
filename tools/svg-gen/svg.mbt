@@ -104,7 +104,7 @@ let ascii_w : Double = 0.55
 let cjk_w : Double = 1.0
 
 ///|
-pub fn text_width(s : String, size : Double) -> Double {
+pub fn text_width(s : String, size~ : Double) -> Double {
   let mut w = 0.0
   for ch in s {
     w += (if ch.to_int() > 0x2e80 { cjk_w } else { ascii_w }) * size
@@ -175,7 +175,7 @@ pub struct Canvas {
 }
 
 ///|
-pub fn Canvas::new(margin~ : Double = 10) -> Canvas {
+pub fn Canvas::Canvas(margin~ : Double = 10) -> Canvas {
   { margin, backdrop: [], parts: [], bounds: None, }
 }
 
@@ -306,7 +306,7 @@ pub fn Canvas::box(
       }
       let mut m = 0.0
       for s in label.split("\n") {
-        let tw = text_width(s.to_owned(), size)
+        let tw = text_width(s.to_owned(), size~)
         if tw > m {
           m = tw
         }
@@ -385,7 +385,7 @@ pub fn Canvas::text(
   self.parts.push(
     "<text x=\"\{num(x)}\" y=\"\{num(y)}\" font-size=\"\{num(size)}\"\{a}\{bl} fill=\"currentColor\"\{o}>\{esc(s)}</text>",
   )
-  let w = text_width(s, size)
+  let w = text_width(s, size~)
   let lx = match anchor {
     Middle => x - w / 2.0
     End => x - w
@@ -586,7 +586,7 @@ pub fn Canvas::hbars(
     None => {
       let mut m = 0.0
       for it in items {
-        let tw = text_width(it.label, size)
+        let tw = text_width(it.label, size~)
         if tw > m {
           m = tw
         }

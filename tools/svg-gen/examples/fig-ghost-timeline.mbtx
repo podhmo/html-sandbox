@@ -9,7 +9,7 @@ import { "podhmo/svg-gen" @s }
 // function never existed in a commit.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let code = c.color(0)
   let doc = c.color(1)
   let ghost = c.color(3)

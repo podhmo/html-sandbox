@@ -10,7 +10,7 @@ import { "podhmo/svg-gen" @s }
 // Item.children points back at the list type, not at an item.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let kind = c.color(0) // where the kind lives
   let sent = c.color(1) // sentinel value
   let w = 148.0

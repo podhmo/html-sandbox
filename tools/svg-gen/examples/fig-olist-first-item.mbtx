@@ -9,7 +9,7 @@ import { "podhmo/svg-gen" @s }
 // their own <li>.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let ol = c.color(0)
   let ul = c.color(1)
   let lh = 22.0

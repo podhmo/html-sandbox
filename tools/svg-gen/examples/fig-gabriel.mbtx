@@ -16,7 +16,7 @@ fn main {
   let p : @s.Point = (55.0, 130.0)
   let q : @s.Point = (190.0, 130.0)
   let r : @s.Point = (125.0, 80.0)
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
 
   let mid : @s.Point = ((p.0 + q.0) / 2.0, (p.1 + q.1) / 2.0)
   let dr = @math.hypot(p.0 - q.0, p.1 - q.1) / 2.0
