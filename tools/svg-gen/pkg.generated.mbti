@@ -93,9 +93,9 @@ pub fn Canvas::above(Self, Shape, Double, Double) -> Double
 pub fn Canvas::anchor(Self, Shape, Side) -> (Double, Double)
 pub fn Canvas::arrow(Self, (Double, Double), (Double, Double), via? : Array[(Double, Double)], head? : Double, ends? : Ends, gap? : Double, gap_start? : Double?, gap_end? : Double?, dash? : String, opacity? : Double?, width? : Double, color? : String) -> Unit
 pub fn Canvas::below(Self, Shape, Double) -> Double
-pub fn Canvas::box(Self, Double, Double, Sizing, Double, label? : String, rx? : Double, pad_x? : Double, size? : Double, dash? : String, opacity? : Double?, width? : Double, color? : String, underline? : Double) -> Shape
+pub fn Canvas::box(Self, Double, Double, Sizing, Double, label? : String, rx? : Double, pad_x? : Double, size? : Double, dash? : String, opacity? : Double?, width? : Double, color? : String, underline? : Underline) -> Shape
 pub fn Canvas::center(Self, Shape) -> (Double, Double)
-pub fn Canvas::circle(Self, Double, Double, Double, label? : String, size? : Double, dash? : String, opacity? : Double?, width? : Double, color? : String, underline? : Double) -> Shape
+pub fn Canvas::circle(Self, Double, Double, Double, label? : String, size? : Double, dash? : String, opacity? : Double?, width? : Double, color? : String, underline? : Underline) -> Shape
 pub fn Canvas::color(Self, Int32) -> String
 pub fn Canvas::hbars(Self, Array[Hbar], x? : Double, y? : Double, bar_h? : Double, row_gap? : Double, max_w? : Double, label_w? : Double?, size? : Double, value_fmt? : (Double) -> String, fill_opacity? : Double, highlight? : Int32?) -> Unit
 pub fn Canvas::highlight(Self, Shape, pad? : Double, opacity? : Double, mode? : HighlightMode, rx? : Double?) -> Unit
@@ -107,7 +107,7 @@ pub fn Canvas::path(Self, String, Array[(Double, Double)], dash? : String, opaci
 pub fn Canvas::raw(Self, String, covered? : Array[(Double, Double)]) -> Unit
 pub fn Canvas::render(Self, width? : Double?, height? : Double?, label? : String) -> String
 pub fn Canvas::right_of(Self, Shape, Double) -> Double
-pub fn Canvas::text(Self, Double, Double, String, anchor? : TextAnchor, central? : Bool, size? : Double, opacity? : Double?, underline? : Double) -> Unit
+pub fn Canvas::text(Self, Double, Double, String, anchor? : TextAnchor, central? : Bool, size? : Double, opacity? : Double?, underline? : Underline) -> Unit
 
 #derive(@debug.Debug)
 pub(all) struct ChartMeta {
@@ -222,6 +222,13 @@ pub(all) enum TextAnchor {
 pub(all) enum Tick {
   Num(Double)
   Lab(Double, String)
+}
+
+#derive(Eq)
+pub(all) enum Underline {
+  No
+  Yes
+  Custom(Double)
 }
 
 // Type aliases

@@ -52,6 +52,18 @@ pub(all) enum Heads {
 }
 
 ///|
+/// Underline style for text, porting the TS `boolean | number` option:
+/// `No` draws nothing, `Yes` draws the default 2px rule, `Custom(w)`
+/// draws a rule of width `w`. As a sum type the off/on/custom cases are
+/// exhaustive in `match`, rather than a magic `0` inside a Double.
+#derive(Eq)
+pub(all) enum Underline {
+  No
+  Yes
+  Custom(Double)
+}
+
+///|
 /// What sits at the ends of an `arrow` call: a single polyline with
 /// its `Heads` decoration, or a parallel request/response pair at the
 /// given offset. In the TS kit `heads` and `split` were independent
@@ -227,7 +239,7 @@ fn Canvas::label_lines(
   label : String,
   size : Double,
   opacity~ : Double?,
-  underline~ : Double,
+  underline~ : Underline,
 ) -> Unit {
   let lines = label.split("\n").map(fn(v) { v.to_owned() }).collect()
   let lh = size * 1.3
@@ -265,7 +277,7 @@ pub fn Canvas::box(
   opacity~ : Double? = None,
   width~ : Double = 1.5,
   color~ : String = "currentColor",
-  underline~ : Double = 0,
+  underline~ : Underline = No,
 ) -> Shape {
   let ww = match w {
     Auto => {
@@ -314,7 +326,7 @@ pub fn Canvas::circle(
   opacity~ : Double? = None,
   width~ : Double = 1.5,
   color~ : String = "currentColor",
-  underline~ : Double = 0,
+  underline~ : Underline = No,
 ) -> Shape {
   self.parts.push(
     "<circle cx=\"\{num(cx)}\" cy=\"\{num(cy)}\" r=\"\{num(r)}\"" +
@@ -338,7 +350,7 @@ pub fn Canvas::text(
   central~ : Bool = false,
   size~ : Double = 14,
   opacity~ : Double? = None,
-  underline~ : Double = 0,
+  underline~ : Underline = No,
 ) -> Unit {
   let a = match anchor {
     Start => ""
@@ -361,11 +373,16 @@ pub fn Canvas::text(
   }
   let ty = if central { y - size / 2.0 } else { y - size }
   let by = ty + size * 1.2
-  if underline > 0 {
+  let uw = match underline {
+    No => 0.0
+    Yes => 2.0
+    Custom(w) => w
+  }
+  if uw > 0.0 {
     self.parts.push(
-      "<path d=\"M\{num(lx)} \{num(by + 2.0)} L\{num(lx + w)} \{num(by + 2.0)}\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"\{num(underline)}\"\{o}/>",
+      "<path d=\"M\{num(lx)} \{num(by + 2.0)} L\{num(lx + w)} \{num(by + 2.0)}\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"\{num(uw)}\"\{o}/>",
     )
-    self.cover([(lx, by + 2.0 + underline / 2.0)])
+    self.cover([(lx, by + 2.0 + uw / 2.0)])
   }
   self.cover([(lx, ty), (lx + w, by)])
 }

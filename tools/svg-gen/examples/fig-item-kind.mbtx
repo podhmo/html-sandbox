@@ -48,7 +48,7 @@ fn main {
   }
 
   // ---- before ----
-  c.text(24.0, 30.0, "before", size=14.0, underline=1.0)
+  c.text(24.0, 30.0, "before", size=14.0, underline=@s.Custom(1.0))
   let item = record(24.0, 52.0, "Item", [
     ("text : String", ""),
     ("num : Int32", sent),
@@ -89,7 +89,7 @@ fn main {
 
   // ---- after ----
   let ax = 300.0
-  c.text(ax, 30.0, "after", size=14.0, underline=1.0)
+  c.text(ax, 30.0, "after", size=14.0, underline=@s.Custom(1.0))
   let item_list = record(ax, 52.0, "ItemList", [
     ("kind : ListKind", kind),
     ("items : Array[Item]", ""),

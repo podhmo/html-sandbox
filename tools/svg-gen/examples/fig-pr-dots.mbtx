@@ -46,7 +46,7 @@ fn main {
     "commits list: base..head (head-side only)",
     anchor=@s.Middle,
     size=13.0,
-    underline=2.0,
+    underline=@s.Yes,
   )
   for h in [h1, h2, h3] {
     c.highlight(h, mode=@s.Ring)
@@ -58,7 +58,7 @@ fn main {
     y_base - 46.0,
     "files view: merge-base → head",
     size=13.0,
-    underline=2.0,
+    underline=@s.Yes,
   )
   c.arrow(
     (x0 + d, y_base - 36.0),
