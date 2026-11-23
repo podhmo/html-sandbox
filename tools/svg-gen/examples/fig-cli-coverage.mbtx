@@ -1,0 +1,116 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-cli-coverage.mbtx -- coverage map of the two browser CLIs.
+// Inside the dashed frame: what playwright-cli (blue, left) and
+// the chrome-devtools CLI (orange, right) each reach, with the
+// overlap. Outside the frame: things neither CLI can verify for
+// you.
+
+fn main {
+  let c = @s.Canvas::new(margin=14.0)
+  let pw_col = c.color(0) // blue = playwright-cli
+  let cd_col = c.color(1) // orange = chrome-devtools CLI
+  let out_col = c.color(3) // vermillion = outside the CLIs' reach
+
+  let ellipse = fn(cx : Double, cy : Double, rx : Double, ry : Double, color : String) -> @s.Shape {
+    c.raw(
+      "<ellipse cx=\"\{cx}\" cy=\"\{cy}\" rx=\"\{rx}\" ry=\"\{ry}\" fill=\"none\" stroke=\"\{color}\" stroke-width=\"2\"/>",
+      covered=[
+        (cx - rx, cy),
+        (cx + rx, cy),
+        (cx, cy - ry),
+        (cx, cy + ry),
+      ],
+    )
+    @s.Shape::{ x: cx - rx, y: cy - ry, w: 2.0 * rx, h: 2.0 * ry }
+  }
+
+  // The frame: everything a browser-automation CLI can verify at
+  // all.
+  let frame = @s.Shape::{ x: 0.0, y: 0.0, w: 600.0, h: 290.0 }
+  c.raw(
+    "<rect x=\"\{frame.x}\" y=\"\{frame.y}\" width=\"\{frame.w}\" height=\"\{frame.h}\" rx=\"14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-dasharray=\"7 5\"/>",
+    covered=[(frame.x, frame.y), (frame.x + frame.w, frame.y + frame.h)],
+  )
+  c.text(
+    frame.x + 14.0,
+    frame.y + 22.0,
+    "CLI が届く範囲 (headless Chromium)",
+    size=13.0,
+    opacity=Some(0.75),
+  )
+
+  // Two overlapping ellipses; the shared lens is ~110px wide at
+  // center.
+  let e_y = 175.0
+  let pw = ellipse(210.0, e_y, 145.0, 95.0, pw_col)
+  let cd = ellipse(390.0, e_y, 145.0, 95.0, cd_col)
+  if !(pw.x > frame.x && cd.x + cd.w < frame.x + frame.w) {
+    abort("ellipses fit inside the frame")
+  }
+
+  // Tool names above each ellipse, underlined in their zone's
+  // color.
+  c.text(210.0, 56.0, "playwright-cli", anchor=@s.Middle, size=15.0, underline=2.0)
+  c.text(390.0, 56.0, "chrome-devtools CLI", anchor=@s.Middle, size=15.0, underline=2.0)
+  c.raw(
+    "<line x1=\"\{210.0 - 62.0}\" y1=\"64\" x2=\"\{210.0 + 62.0}\" y2=\"64\" stroke=\"\{pw_col}\" stroke-width=\"2\"/>",
+    covered=[(210.0 - 62.0, 64.0), (210.0 + 62.0, 64.0)],
+  )
+  c.raw(
+    "<line x1=\"\{390.0 - 88.0}\" y1=\"64\" x2=\"\{390.0 + 88.0}\" y2=\"64\" stroke=\"\{cd_col}\" stroke-width=\"2\"/>",
+    covered=[(390.0 - 88.0, 64.0), (390.0 + 88.0, 64.0)],
+  )
+
+  // Left-only area: automation + screenshots + arbitrary CDP.
+  c.text(135.0, 158.0, "定型操作・E2E", anchor=@s.Middle, size=12.5)
+  c.text(135.0, 180.0, "screenshot 差分", anchor=@s.Middle, size=12.5)
+  c.text(135.0, 202.0, "任意 CDP", anchor=@s.Middle, size=12.5)
+
+  // Overlap lens: what both do. Short labels, small size, near
+  // center.
+  c.text(300.0, 172.0, "trace 取得", anchor=@s.Middle, size=11.0)
+  c.text(300.0, 190.0, "net/console", anchor=@s.Middle, size=11.0)
+
+  // Right-only area: curated DevTools diagnosis.
+  c.text(468.0, 152.0, "perf insight", anchor=@s.Middle, size=12.5)
+  c.text(468.0, 174.0, "自動分析", anchor=@s.Middle, size=12.5)
+  c.text(468.0, 196.0, "CSS cascade 追跡", anchor=@s.Middle, size=12.5)
+  c.text(468.0, 218.0, "lighthouse", anchor=@s.Middle, size=12.5)
+
+  // Outside the frame: what neither CLI verifies. One color marks
+  // "out".
+  let out_x = frame.x + frame.w + 28.0
+  c.text(out_x, 24.0, "届かないもの", size=13.0, opacity=Some(0.75))
+  let outside = [
+    (70.0, "実デバイス・OS差", "フォント/GPU/タッチ"),
+    (118.0, "他エンジン", "Safari / Firefox"),
+    (166.0, "意味の判断", "差分 ≠ 壊れた"),
+    (214.0, "継続的な実測", "RUM / 長時間挙動"),
+  ]
+  for o in outside {
+    let (y, t1, t2) = o
+    c.raw(
+      "<circle cx=\"\{out_x + 5.0}\" cy=\"\{y - 4.0}\" r=\"4\" fill=\"\{out_col}\"/>",
+      covered=[(out_x + 5.0, y - 4.0)],
+    )
+    c.text(out_x + 18.0, y, t1, size=13.0)
+    c.text(out_x + 18.0, y + 17.0, t2, size=11.0, opacity=Some(0.65))
+  }
+
+  // A dashed boundary arrow: crossing the frame means leaving the
+  // CLIs.
+  c.arrow(
+    (frame.x + frame.w - 6.0, 262.0),
+    (out_x - 6.0, 262.0),
+    heads=@s.End,
+    dash="5 4",
+    color=out_col,
+  )
+
+  println(
+    c.render(label="2つのCLIの届く範囲。重なる中央は両方で可能、枠の外側右は両方でも確認できない領域"),
+  )
+}
