@@ -1,0 +1,46 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-bench.mbtx -- a horizontal bar chart from real numbers: the
+// SVG sizes each renderer/layout produced for the same package
+// graph in issue #85's comparison. Long labels fit because the
+// label column is measured from the labels.
+
+fn main {
+  let c = @s.Canvas::new()
+
+  // KiB of SVG output for moonbit/'s 17-package, 21-edge graph
+  // (issue #85).
+  let kib = [
+    @s.Hbar::{ label: "beautiful-mermaid elk", value: 19.8 },
+    @s.Hbar::{ label: "d2 tala", value: 20.8 },
+    @s.Hbar::{ label: "d2 dagre", value: 21.9 },
+    @s.Hbar::{ label: "d2 elk", value: 22.3 },
+    @s.Hbar::{ label: "mermaid elk", value: 46.9 },
+    @s.Hbar::{ label: "mermaid dagre", value: 47.9 },
+  ]
+
+  c.hbars(
+    kib,
+    x=0.0,
+    y=0.0,
+    value_fmt=fn(v) { "\{v} KiB" },
+    highlight=Some(0),
+  )
+  c.text(
+    160.0,
+    -16.0,
+    "SVG size for the same graph (smaller is better)",
+    size=11.0,
+    opacity=Some(0.6),
+  )
+
+  for i, k in kib {
+    if i > 0 && !(kib[i - 1].value <= k.value) {
+      abort("bars are sorted ascending")
+    }
+  }
+
+  println(c.render(label="SVG file size by renderer and layout"))
+}

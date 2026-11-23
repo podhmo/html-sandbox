@@ -53,6 +53,9 @@ pub fn ticks(lo : Double, hi : Double, count~ : Int = 5) -> Array[Double] {
 ///|
 fn round12(v : Double) -> Double {
   // +v.toPrecision(12)
+  if v == 0.0 {
+    return 0.0
+  }
   let p = @math.pow(10.0, 12.0 - @math.floor(@math.log10(v.abs())))
   (v * p).round() / p
 }
@@ -124,7 +127,7 @@ pub(all) struct ChartMeta {
 }
 
 ///| toFixed(d) for element attributes: x.toFixed(1), o.toFixed(2), ...
-fn fixed(v : Double, d : Int) -> String {
+pub fn fixed(v : Double, d : Int) -> String {
   let p = @math.pow(10.0, d.to_double())
   let scaled = (v * p).round()
   let neg = scaled < 0.0

@@ -1,0 +1,61 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-chart-box.mbtx -- box-and-whisker for four benchmark variants,
+// raw points jittered on top. The "cached" group is secretly bimodal
+// (data.mbt): the box reports one compact distribution, which is
+// the guideline's own warning — a box plot hides multimodality —
+// made visible here by the jittered points.
+
+fn main {
+  let c = @s.Canvas::new()
+  let jitter = @s.rng(20261103U)
+  let bench = @s.bench()
+
+  let medians = bench.map(fn(b) {
+    let sv = b.values.copy()
+    sv.sort()
+    @s.quantile(sv, 0.5)
+  })
+  let mut best_i = 0
+  for i, m in medians {
+    if m < medians[best_i] {
+      best_i = i
+    }
+  }
+  let best = bench[best_i].label
+
+  let p = @s.Plot::new(
+    c,
+    {
+      title: "\"cached\" は箱では一様だが、実は二峰（仮想データ）",
+      subtitle: "ベンチマーク試行 n = 160 / impl、中央値最小は \"\{best}\"、仮想データ",
+      footnote: "出典: 仮想データ (tools/svg-gen/examples/data.mbt, seed 20261102) / n = 160×4 / ひげ: 1.5×IQR / 生成: tools/svg-gen/examples/fig-chart-box.mbtx",
+    },
+    (0.0, bench.length().to_double()),
+    (40.0, 260.0),
+    w=420.0,
+    h=190.0,
+    ytitle="試行時間 (ms)",
+    grid=true,
+  )
+  p.frame(
+    xticks=bench.mapi(fn(i, b) {
+      @s.Lab(i.to_double() + 0.5, b.label)
+    }),
+  )
+  // faint jittered points (thinned): the box alone hides shape, so
+  // the points carry the multimodality the boxes cannot show.
+  p.data(fn(p) {
+    p.boxplot(bench, overlay=0.25, rand=Some(jitter), color=c.color(0))
+  })
+
+  if bench.length() != 4 {
+    abort("four benchmark groups drawn")
+  }
+
+  println(
+    c.render(label="box plot of four benchmark variants; the cached group is secretly bimodal (virtual data)"),
+  )
+}

@@ -1,0 +1,88 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-chart-series.mbtx -- daily latency percentiles around a deploy.
+// The "time series" branch of the chart-selection flow: lines for
+// the trend, a vertical event line for the deploy. Data is virtual —
+// two weeks of daily-aggregated p50/p90 from a seeded PRNG.
+
+fn main {
+  let c = @s.Canvas::new()
+  let g = @s.gauss(@s.rng(20261030U))
+
+  // virtual daily aggregates: a latency drop after the 10/08 deploy,
+  // with day-of-week wobble and noise.
+  let days = Array::makei(14, fn(i) { (i + 1).to_double() }) // Oct 1..14
+  let base = fn(d : Double) { if d < 8.0 { 150.0 } else { 105.0 } }
+  let weekly = fn(d : Double) {
+    let di = d.to_int64() % 7
+    if di == 6 || di == 0 {
+      12.0
+    } else {
+      0.0
+    }
+  } // weekend bump
+  let p50 = days.map(fn(d) { base(d) + weekly(d) + 5.0 * g() })
+  let p90 = days.mapi(fn(i, d) { p50[i] * 1.7 + weekly(d) + 12.0 * g() })
+
+  let mean = fn(a : Array[Double]) {
+    a.fold(init=0.0, fn(acc, v) { acc + v }) / a.length().to_double()
+  }
+  let drop = (
+      (1.0 - mean(p90[8:].to_array()) / mean(p90[0:8].to_array())) * 100.0
+    ).round()
+  let drop_i = drop.to_int64()
+
+  let p = @s.Plot::new(
+    c,
+    {
+      title: "10/08 デプロイ後に p90 が約 \{drop_i}% 低下（仮想データ）",
+      subtitle: "JST、1 時間平均の日次集計、2026-10-01〜10-14、仮想データ",
+      footnote: "出典: 仮想データ (seed 20261030) / 集計: 日次 / イベント: 10/08 v2.3 デプロイ / 生成: tools/svg-gen/examples/fig-chart-series.mbtx",
+    },
+    (1.0, 14.0),
+    (0.0, 320.0),
+    w=420.0,
+    h=170.0,
+    xtitle="日付 (JST)",
+    ytitle="レイテンシ (ms)",
+    xfmt=fn(v) { "10/\{v.to_int64()}" },
+    grid=true,
+  )
+  p.frame()
+  p.data(fn(p) {
+    p.vline(8.0, label="10/08 v2.3 デプロイ")
+    // colorful option: hue does the series distinction, width/dash
+    // stays as a grayscale fallback so the figure still reads when
+    // colors are unavailable (print, copy).
+    p.series(
+      days.mapi(fn(i, d) { (p.xs.map(d), p.ys.map(p90[i])) }),
+      dash="5 3",
+      color=c.color(3),
+    )
+    p.series(
+      days.mapi(fn(i, d) { (p.xs.map(d), p.ys.map(p50[i])) }),
+      width=2.5,
+      color=c.color(0),
+    )
+  })
+  // direct labels at the right ends (the two series end far apart).
+  c.text(p.x1 + 6.0, p.ys.map(p50[13]), "p50", central=true, size=10.0)
+  c.text(
+    p.x1 + 6.0,
+    p.ys.map(p90[13]),
+    "p90",
+    central=true,
+    size=10.0,
+    opacity=Some(0.65),
+  )
+
+  if !(drop > 10.0) {
+    abort("p90 clearly drops after the deploy")
+  }
+
+  println(
+    c.render(label="daily p50/p90 latency: p90 drops about \{drop_i}% after the 10/08 deploy (virtual data)"),
+  )
+}

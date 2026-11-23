@@ -1,0 +1,78 @@
+---
+import {
+  "podhmo/svg-gen" @s,
+  "moonbitlang/core/math" @math,
+}
+---
+
+// fig-chart-hist.mbtx -- histogram of the same "cached" group the
+// box plot flattened. Same virtual dataset (data.mbt), different
+// figure: the two modes the box hid are obvious here. The bin
+// width is declared in the subtitle, as the guideline requires.
+
+fn main {
+  let c = @s.Canvas::new()
+  let bench = @s.bench()
+
+  let mut cached : @s.BoxGroup? = None
+  for b in bench {
+    if b.label == "cached" {
+      cached = Some(b)
+    }
+  }
+  guard cached is Some(cch) else {
+    abort("cached group exists")
+  }
+  let bin_w = 10.0
+  let bs = @s.bins(cch.values, bin_w)
+  // two modes: a dip below 45% of the peak somewhere between the modes
+  let mut peak = 0
+  for b in bs {
+    if b.n > peak {
+      peak = b.n
+    }
+  }
+  let mut mid = 0
+  for i, b in bs {
+    if b.x0 >= 110.0 {
+      mid = i
+      break
+    }
+  }
+  let mut dip = peak
+  for i = 4; i <= mid; i = i + 1 {
+    if bs[i].n < dip {
+      dip = bs[i].n
+    }
+  }
+
+  let p = @s.Plot::new(
+    c,
+    {
+      title: "\"cached\" の試行時間は二峰（箱ひげと同じデータ、仮想）",
+      subtitle: "ベンチマーク試行 n = \{cch.values.length()}、ビン幅 \{bin_w.to_int64()} ms、仮想データ",
+      footnote: "出典: 仮想データ (tools/svg-gen/examples/data.mbt, seed 20261102) / n = 160 / ビン幅 10 ms / 生成: tools/svg-gen/examples/fig-chart-hist.mbtx",
+    },
+    (60.0, 200.0),
+    // ~10% headroom above the tallest bin, rounded up to a tick step
+    (0.0, @math.ceil(peak.to_double() * 1.1 / 10.0) * 10.0),
+    w=420.0,
+    h=170.0,
+    xtitle="試行時間 (ms)",
+    ytitle="件数",
+    grid=true,
+  )
+  p.frame()
+  p.data(fn(p) { p.histogram(bs, color=c.color(0)) })
+
+  if !(dip.to_double() < peak.to_double() * 0.5) {
+    abort("a visible dip separates the two modes")
+  }
+  if !(peak <= 45) {
+    abort("tallest bin stays inside the y domain")
+  }
+
+  println(
+    c.render(label="histogram of cached trials showing two modes (same virtual data as the box plot)"),
+  )
+}
