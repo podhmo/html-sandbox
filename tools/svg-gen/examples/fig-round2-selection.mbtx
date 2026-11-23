@@ -58,21 +58,21 @@ fn main {
   }
 
   // dropped-by-filter notes
-  ignore(c.box(280.0, 150.0, @s.Fixed(200.0), 58.0, dash="5 4", opacity=Some(0.85), size=11.0))
+  ignore(c.box(280.0, 150.0, @s.Fixed(200.0), 58.0, dash=Some("5 4"), opacity=Some(0.85), size=11.0))
   c.text(292.0, 168.0, "検証不能な JS（スクロール", size=11.0, opacity=Some(0.85))
   c.text(292.0, 184.0, "連動アニメ等）は引き続き除外", size=11.0, opacity=Some(0.85))
-  c.arrow(c.anchor(f1, @s.S), (380.0, 148.0), dash="5 4", width=1.2, opacity=Some(0.7))
+  c.arrow(c.anchor(f1, @s.S), (380.0, 148.0), dash=Some("5 4"), width=1.2, opacity=Some(0.7))
 
-  ignore(c.box(535.0, 150.0, @s.Fixed(185.0), 58.0, dash="5 4", opacity=Some(0.85), size=11.0))
+  ignore(c.box(535.0, 150.0, @s.Fixed(185.0), 58.0, dash=Some("5 4"), opacity=Some(0.85), size=11.0))
   c.text(547.0, 168.0, "新設フォームがないので", size=11.0, opacity=Some(0.85))
   c.text(547.0, 184.0, "autofill・日時系は対象外", size=11.0, opacity=Some(0.85))
-  c.arrow(c.anchor(f2, @s.S), (625.0, 148.0), dash="5 4", width=1.2, opacity=Some(0.7))
+  c.arrow(c.anchor(f2, @s.S), (625.0, 148.0), dash=Some("5 4"), width=1.2, opacity=Some(0.7))
 
   // the unlocked items
-  ignore(c.box(742.0, 150.0, @s.Fixed(196.0), 58.0, dash="2 3", opacity=Some(0.85), size=11.0))
+  ignore(c.box(742.0, 150.0, @s.Fixed(196.0), 58.0, dash=Some("2 3"), opacity=Some(0.85), size=11.0))
   c.text(752.0, 168.0, "no-JS 時代に見送った2件を回収", size=11.0, opacity=Some(0.85))
   c.text(752.0, 184.0, "方向アニメ + aria-invalid 同期", size=11.0, opacity=Some(0.85))
-  c.arrow(c.anchor(out, @s.S), (835.0, 148.0), dash="5 4", width=1.2, opacity=Some(0.7))
+  c.arrow(c.anchor(out, @s.S), (835.0, 148.0), dash=Some("5 4"), width=1.2, opacity=Some(0.7))
 
   c.text(
     10.0,

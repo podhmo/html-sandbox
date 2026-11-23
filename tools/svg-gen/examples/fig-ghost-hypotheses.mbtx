@@ -52,7 +52,7 @@ fn main {
     bar(tw, x0 + w, ry, ghost)
     for e in [(tw, "書く"), (tr, "refine")] {
       let (tx, s) = e
-      c.line((tx, y + 34.0), (tx, y + 92.0), opacity=Some(0.4), width=1.0, dash="2 3")
+      c.line((tx, y + 34.0), (tx, y + 92.0), opacity=Some(0.4), width=1.0, dash=Some("2 3"))
       c.text(tx, y + 108.0, s, anchor=@s.Middle, size=9.0, opacity=Some(0.7))
     }
   }

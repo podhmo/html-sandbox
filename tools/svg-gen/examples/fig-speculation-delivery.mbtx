@@ -33,7 +33,7 @@ fn main {
 
   let blocked = chip(360.0, 63.0, @s.Auto, "✕ blocked (Chromium 156)", Some(3))
   c.arrow(c.anchor(inline, @s.E), c.anchor(wall, @s.W), color=c.color(3))
-  c.line(c.anchor(wall, @s.E), c.anchor(blocked, @s.W), dash="5 4", color=c.color(3), opacity=Some(0.7))
+  c.line(c.anchor(wall, @s.E), c.anchor(blocked, @s.W), dash=Some("5 4"), color=c.color(3), opacity=Some(0.7))
 
   // ---- bottom row: header + external ruleset, allowed ----
   c.text(10.0, 220.0, "Speculation-Rules header", size=13.0)

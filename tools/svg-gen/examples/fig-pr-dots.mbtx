@@ -63,14 +63,14 @@ fn main {
   c.arrow(
     (x0 + d, y_base - 36.0),
     (x0, y_base - r - 4.0),
-    dash="4 3",
+    dash=Some("4 3"),
     color=c.color(mb_i),
     head=7.0,
   )
   c.arrow(
     (x0 + 2.0 * d + 8.0, y_base - 36.0),
     (x0 + 3.0 * d, y_head - r - 4.0),
-    dash="4 3",
+    dash=Some("4 3"),
     color=c.color(mb_i),
     head=7.0,
   )

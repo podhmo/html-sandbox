@@ -225,13 +225,16 @@ fn Canvas::cover(self : Canvas, pts : Array[Point]) -> Unit {
 
 ///|
 fn stroke_attrs(
-  dash~ : String,
+  dash~ : String?,
   opacity~ : Double?,
   width~ : Double,
   color~ : String,
 ) -> String {
   let w = " stroke-width=\"\{num(width)}\""
-  let d = if dash == "" { "" } else { " stroke-dasharray=\"\{dash}\"" }
+  let d = match dash {
+    None => ""
+    Some(p) => " stroke-dasharray=\"\{p}\""
+  }
   let o = match opacity {
     Some(v) => " opacity=\"\{v}\""
     None => ""
@@ -290,7 +293,7 @@ pub fn Canvas::box(
   rx~ : Double = 8,
   pad_x~ : Double = 16,
   size~ : Double = 14,
-  dash~ : String = "",
+  dash~ : String? = None,
   opacity~ : Double? = None,
   width~ : Double = 1.5,
   color~ : String = "currentColor",
@@ -339,7 +342,7 @@ pub fn Canvas::circle(
   r : Double,
   label~ : String = "",
   size~ : Double = 14,
-  dash~ : String = "",
+  dash~ : String? = None,
   opacity~ : Double? = None,
   width~ : Double = 1.5,
   color~ : String = "currentColor",
@@ -457,7 +460,7 @@ pub fn Canvas::arrow(
   gap~ : Double = 3,
   gap_start~ : Double? = None,
   gap_end~ : Double? = None,
-  dash~ : String = "",
+  dash~ : String? = None,
   opacity~ : Double? = None,
   width~ : Double = 1.5,
   color~ : String = "currentColor",
@@ -667,7 +670,7 @@ pub fn Canvas::line(
   gap~ : Double = 0,
   gap_start~ : Double? = None,
   gap_end~ : Double? = None,
-  dash~ : String = "",
+  dash~ : String? = None,
   opacity~ : Double? = None,
   width~ : Double = 1.5,
   color~ : String = "currentColor",
@@ -704,7 +707,7 @@ pub fn Canvas::path(
   self : Canvas,
   d : String,
   covered : Array[Point],
-  dash~ : String = "",
+  dash~ : String? = None,
   opacity~ : Double? = None,
   width~ : Double = 1.5,
   color~ : String = "currentColor",

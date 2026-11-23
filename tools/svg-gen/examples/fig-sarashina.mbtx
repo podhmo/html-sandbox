@@ -10,7 +10,7 @@ import { "podhmo/svg-gen" @s }
 
 fn main {
   let c = @s.Canvas::new()
-  let dash = "4 3"
+  let dash = Some("4 3")
 
   // Row 1: the people and the code
   let human = c.box(20.0, 20.0, @s.Auto, 40.0, label="人", size=13.0)

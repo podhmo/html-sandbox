@@ -16,7 +16,7 @@ fn main {
 
   let browser = c.box(20.0, 96.0, @s.Auto, 56.0, label="browser\nreal requests", color=c.color(0), size=12.0)
   let mux = c.box(300.0, 40.0, @s.Auto, 56.0, label="storybook mux\nGET /story/* /static/* …", color=c.color(1), size=12.0)
-  let story = c.box(620.0, 40.0, @s.Auto, 56.0, label="print / StoryHttp* stories\nmarkup & responses", size=12.0, dash="5 4")
+  let story = c.box(620.0, 40.0, @s.Auto, 56.0, label="print / StoryHttp* stories\nmarkup & responses", size=12.0, dash=Some("5 4"))
   c.arrow(c.anchor(browser, @s.E), c.anchor(mux, @s.W), width=1.5)
   c.arrow(c.anchor(mux, @s.E), c.anchor(story, @s.W), width=1.5)
   c.text(555.0, 66.0, "storybook paths", size=10.0, opacity=Some(0.75), anchor=@s.Middle)

@@ -18,7 +18,7 @@ fn main {
   for e in [(0, 1), (1, 2)] {
     let bi = @s.bisector(pts[e.0], pts[e.1])
     let (p, q) = @s.line_rect(bi.mid, bi.dir, rect)
-    c.line(p, q, dash="4 3", opacity=Some(0.6))
+    c.line(p, q, dash=Some("4 3"), opacity=Some(0.6))
   }
 
   // The center sits on both bisectors, so it is equidistant to all
@@ -38,7 +38,7 @@ fn main {
       "<circle cx=\"\{p.0}\" cy=\"\{p.1}\" r=\"4\" fill=\"\{c.color(i)}\"/>",
       covered=[p],
     )
-    c.line(p, cc.o, dash="3 3", opacity=Some(0.5), color=c.color(i))
+    c.line(p, cc.o, dash=Some("3 3"), opacity=Some(0.5), color=c.color(i))
   }
   c.raw(
     "<circle cx=\"\{cc.o.0}\" cy=\"\{cc.o.1}\" r=\"3\" fill=\"currentColor\"/>",

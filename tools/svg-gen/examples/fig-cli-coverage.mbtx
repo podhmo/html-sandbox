@@ -106,7 +106,7 @@ fn main {
     (frame.x + frame.w - 6.0, 262.0),
     (out_x - 6.0, 262.0),
     ends=@s.Single(@s.End),
-    dash="5 4",
+    dash=Some("5 4"),
     color=out_col,
   )
 

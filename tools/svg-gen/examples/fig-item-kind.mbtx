@@ -56,17 +56,17 @@ fn main {
   ])
   // children recurses to the same record (dashed).
   let ch = item.1[2]
-  c.line(c.anchor(ch, @s.W), (12.0, ch.y + ch.h / 2.0), dash="4 3")
+  c.line(c.anchor(ch, @s.W), (12.0, ch.y + ch.h / 2.0), dash=Some("4 3"))
   c.line(
     (12.0, ch.y + ch.h / 2.0),
     (12.0, item.0.y + item.0.h / 2.0),
-    dash="4 3",
+    dash=Some("4 3"),
   )
   c.arrow(
     (12.0, item.0.y + item.0.h / 2.0),
     c.anchor(item.0, @s.W),
     gap=0.0,
-    dash="4 3",
+    dash=Some("4 3"),
   )
   let list_before = c.box(
     24.0 + pad,
@@ -112,17 +112,17 @@ fn main {
   )
   // children points back at the list type, not at an item (dashed).
   let ch2 = item_after.1[1]
-  c.line(c.anchor(ch2, @s.W), (ax - 34.0, ch2.y + ch2.h / 2.0), dash="4 3")
+  c.line(c.anchor(ch2, @s.W), (ax - 34.0, ch2.y + ch2.h / 2.0), dash=Some("4 3"))
   c.line(
     (ax - 34.0, ch2.y + ch2.h / 2.0),
     (ax - 34.0, item_list.0.y + item_list.0.h / 2.0),
-    dash="4 3",
+    dash=Some("4 3"),
   )
   c.arrow(
     (ax - 34.0, item_list.0.y + item_list.0.h / 2.0),
     c.anchor(item_list.0, @s.W),
     gap=0.0,
-    dash="4 3",
+    dash=Some("4 3"),
   )
   // List wraps the ItemList.
   let list_after = c.box(

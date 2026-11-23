@@ -24,7 +24,7 @@ fn main {
   }
 
   for seg in @s.voronoi_segments(s, tris, clip) {
-    c.line(seg.0, seg.1, dash="4 3", width=1.5, color=col_vor)
+    c.line(seg.0, seg.1, dash=Some("4 3"), width=1.5, color=col_vor)
   }
 
   // one featured cell washed

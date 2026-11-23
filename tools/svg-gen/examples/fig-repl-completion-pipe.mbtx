@@ -27,7 +27,7 @@ fn main {
     36.0,
     label="no candidates",
     size=12.0,
-    dash="5 3",
+    dash=Some("5 3"),
     opacity=Some(0.85),
   )
 
@@ -42,14 +42,14 @@ fn main {
   c.arrow(c.anchor(input, @s.S), c.anchor(ctx, @s.N))
   c.arrow(c.anchor(ctx, @s.S), c.anchor(base, @s.N))
   c.arrow(c.anchor(base, @s.S), c.anchor(statik, @s.N), color=c.color(2))
-  c.arrow(c.anchor(base, @s.S), c.anchor(evaled, @s.N), color=c.color(3), dash="5 3")
+  c.arrow(c.anchor(base, @s.S), c.anchor(evaled, @s.N), color=c.color(3), dash=Some("5 3"))
   c.arrow(c.anchor(statik, @s.S), c.anchor(members, @s.N), color=c.color(2))
-  c.arrow(c.anchor(evaled, @s.S), c.anchor(members, @s.N), color=c.color(3), dash="5 3")
+  c.arrow(c.anchor(evaled, @s.S), c.anchor(members, @s.N), color=c.color(3), dash=Some("5 3"))
   c.arrow(c.anchor(members, @s.S), c.anchor(splice, @s.N))
 
   // dashed gate: context may veto the whole walk (index slot,
   // string tail)
-  c.arrow(c.anchor(ctx, @s.W), c.anchor(suppress, @s.E), dash="5 3", color=c.color(1))
+  c.arrow(c.anchor(ctx, @s.W), c.anchor(suppress, @s.E), dash=Some("5 3"), color=c.color(1))
 
   if !(statik.y + statik.h < members.y) {
     abort("tiers must not overlap members")

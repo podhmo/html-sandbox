@@ -291,13 +291,16 @@ fn fixed1(v : Double) -> String {
 
 ///|
 fn sattrs(
-  dash~ : String,
+  dash~ : String?,
   opacity~ : Double?,
   width~ : Double,
   color~ : String,
 ) -> String {
   let w = " stroke-width=\"\{num(width)}\""
-  let d = if dash == "" { "" } else { " stroke-dasharray=\"\{dash}\"" }
+  let d = match dash {
+    None => ""
+    Some(p) => " stroke-dasharray=\"\{p}\""
+  }
   let o = match opacity {
     Some(v) => " opacity=\"\{v}\""
     None => ""
@@ -411,7 +414,7 @@ pub fn Plot::series(
   self : Plot,
   pts : Array[Point],
   label~ : String = "",
-  dash~ : String = "",
+  dash~ : String? = None,
   opacity~ : Double? = None,
   width~ : Double = 1.5,
   color~ : String = "currentColor",
@@ -443,7 +446,7 @@ pub fn Plot::step(
   self : Plot,
   pts : Array[Point],
   label~ : String = "",
-  dash~ : String = "",
+  dash~ : String? = None,
   opacity~ : Double? = None,
   width~ : Double = 1.5,
   color~ : String = "currentColor",
@@ -499,7 +502,7 @@ pub fn Plot::vline(
   self : Plot,
   xv : Double,
   label~ : String = "",
-  dash~ : String = "4 3",
+  dash~ : String? = Some("4 3"),
   opacity~ : Double = 0.6,
 ) -> Unit {
   let px = self.xs.map(xv)
@@ -520,7 +523,7 @@ pub fn Plot::hline(
   self : Plot,
   yv : Double,
   label~ : String = "",
-  dash~ : String = "4 3",
+  dash~ : String? = Some("4 3"),
   opacity~ : Double = 0.6,
 ) -> Unit {
   let py = self.ys.map(yv)
@@ -589,15 +592,15 @@ pub fn Plot::boxplot(
     let lo_y = self.ys.map(lo)
     let hi_y = self.ys.map(hi)
     self.put(
-      "<line x1=\"\{num(cx)}\" y1=\"\{num(lo_y)}\" x2=\"\{num(cx)}\" y2=\"\{num(hi_y)}\"\{sattrs(dash="", opacity=Some(0.8), width=1.0, color~)}/>",
+      "<line x1=\"\{num(cx)}\" y1=\"\{num(lo_y)}\" x2=\"\{num(cx)}\" y2=\"\{num(hi_y)}\"\{sattrs(dash=None, opacity=Some(0.8), width=1.0, color~)}/>",
       [],
     )
     self.put(
-      "<line x1=\"\{num(cx - bw * 0.2)}\" y1=\"\{num(lo_y)}\" x2=\"\{num(cx + bw * 0.2)}\" y2=\"\{num(lo_y)}\"\{sattrs(dash="", opacity=None, width=1.0, color~)}/>",
+      "<line x1=\"\{num(cx - bw * 0.2)}\" y1=\"\{num(lo_y)}\" x2=\"\{num(cx + bw * 0.2)}\" y2=\"\{num(lo_y)}\"\{sattrs(dash=None, opacity=None, width=1.0, color~)}/>",
       [],
     )
     self.put(
-      "<line x1=\"\{num(cx - bw * 0.2)}\" y1=\"\{num(hi_y)}\" x2=\"\{num(cx + bw * 0.2)}\" y2=\"\{num(hi_y)}\"\{sattrs(dash="", opacity=None, width=1.0, color~)}/>",
+      "<line x1=\"\{num(cx - bw * 0.2)}\" y1=\"\{num(hi_y)}\" x2=\"\{num(cx + bw * 0.2)}\" y2=\"\{num(hi_y)}\"\{sattrs(dash=None, opacity=None, width=1.0, color~)}/>",
       [],
     )
     // outliers beyond the fences
@@ -615,7 +618,7 @@ pub fn Plot::boxplot(
       [],
     )
     self.put(
-      "<line x1=\"\{num(cx - bw / 2.0)}\" y1=\"\{num(self.ys.map(q2))}\" x2=\"\{num(cx + bw / 2.0)}\" y2=\"\{num(self.ys.map(q2))}\"\{sattrs(dash="", opacity=None, width=2.5, color~)}/>",
+      "<line x1=\"\{num(cx - bw / 2.0)}\" y1=\"\{num(self.ys.map(q2))}\" x2=\"\{num(cx + bw / 2.0)}\" y2=\"\{num(self.ys.map(q2))}\"\{sattrs(dash=None, opacity=None, width=2.5, color~)}/>",
       [],
     )
   }

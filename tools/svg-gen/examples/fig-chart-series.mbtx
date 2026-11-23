@@ -58,7 +58,7 @@ fn main {
     // colors are unavailable (print, copy).
     p.series(
       days.mapi(fn(i, d) { (p.xs.map(d), p.ys.map(p90[i])) }),
-      dash="5 3",
+      dash=Some("5 3"),
       color=c.color(3),
     )
     p.series(

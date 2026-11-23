@@ -41,7 +41,7 @@ fn main {
   let axis_y = 60.0
   for p in pts {
     let (px, label) = p
-    c.line((px, axis_y), (px, axis_y + 250.0), dash="2 4", opacity=Some(0.35))
+    c.line((px, axis_y), (px, axis_y + 250.0), dash=Some("2 4"), opacity=Some(0.35))
     let lines = label.split("\n").to_array()
     c.text(px, axis_y - 14.0, lines[0].to_owned(), anchor=@s.Middle, size=11.0)
     c.text(px, axis_y + 0.0, lines[1].to_owned(), anchor=@s.Middle, size=11.0)

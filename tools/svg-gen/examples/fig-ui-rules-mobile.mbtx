@@ -54,7 +54,7 @@ fn main {
       pad_x=6.0,
       rx=13.0,
       color=c.color(3),
-      dash="4 3",
+      dash=Some("4 3"),
     ),
   )
 

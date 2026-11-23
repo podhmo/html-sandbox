@@ -71,7 +71,7 @@ fn main {
   c.line(
     (x + strip_w - 4.0, y3 + 4.0),
     (x + strip_w - 4.0, y3 + strip_h - 4.0),
-    dash="3 3",
+    dash=Some("3 3"),
     opacity=Some(0.5),
   )
 

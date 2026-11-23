@@ -82,7 +82,7 @@ fn main {
         5.0,
         color=c.color(k % 6),
         width=2.0,
-        dash=(if k >= 6 { "2 2" } else { "" }),
+        dash=(if k >= 6 { Some("2 2") } else { None }),
       ),
     )
   }

@@ -18,7 +18,7 @@ fn main {
   c.arrow(c.anchor(b1, @s.E), c.anchor(s1, @s.W), width=1.5, ends=@s.Pair(14.0))
   c.text(170.0, 68.0, "POST body=…", size=10.0, opacity=Some(0.75))
   c.text(168.0, 102.0, "303 → GET (full page)", size=10.0, opacity=Some(0.75))
-  let r1 = c.box(620.0, 52.0, @s.Auto, 56.0, label="screen\nwhole page repaints", color=c.color(0), size=12.0, dash="5 4")
+  let r1 = c.box(620.0, 52.0, @s.Auto, 56.0, label="screen\nwhole page repaints", color=c.color(0), size=12.0, dash=Some("5 4"))
   c.arrow(c.anchor(s1, @s.E), c.anchor(r1, @s.W), width=1.5)
   c.text(20.0, 140.0, "classic SSR: every POST repaints the page (PRG)", size=11.0, opacity=Some(0.65))
 

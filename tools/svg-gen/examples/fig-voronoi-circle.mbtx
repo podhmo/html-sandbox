@@ -17,7 +17,7 @@ fn main {
   let col_vor = c.color(1)
 
   for seg in @s.voronoi_segments(s, tris, clip) {
-    c.line(seg.0, seg.1, dash="4 3", opacity=Some(0.6), color=col_vor)
+    c.line(seg.0, seg.1, dash=Some("4 3"), opacity=Some(0.6), color=col_vor)
   }
 
   // featured Voronoi vertex: circumcenter of a central triangle.
@@ -38,7 +38,7 @@ fn main {
       "<circle cx=\"\{s[i].0}\" cy=\"\{s[i].1}\" r=\"4\" fill=\"\{c.color(0)}\"/>",
       covered=[s[i]],
     )
-    c.line(s[i], cc.o, dash="3 3", opacity=Some(0.5))
+    c.line(s[i], cc.o, dash=Some("3 3"), opacity=Some(0.5))
   }
   for i, p in s {
     if i != feat.0 && i != feat.1 && i != feat.2 {

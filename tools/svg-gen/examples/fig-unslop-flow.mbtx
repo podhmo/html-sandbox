@@ -24,7 +24,7 @@ fn main {
 
   // the no-slop exit: down and out before the passes
   let exit = c.box(190.0, 180.0, @s.Auto, 40.0, label="no slop\n→ polishのみ", color=c.color(4))
-  c.arrow(c.anchor(verdict, @s.S), c.anchor(exit, @s.N), dash="4 4")
+  c.arrow(c.anchor(verdict, @s.S), c.anchor(exit, @s.N), dash=Some("4 4"))
   c.text(240.0, 155.0, "DADSレポート5種はここ", anchor=@s.Start, size=12.0)
 
   // what still lives past the exit: direction-level gap

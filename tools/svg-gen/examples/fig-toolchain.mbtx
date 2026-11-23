@@ -47,7 +47,7 @@ fn main {
   c.arrow(c.anchor(mergeall, @s.E), c.anchor(gh, @s.W), ends=@s.Pair(5.0))
 
   let drive = c.box(640.0, 195.0, @s.Auto, 40.0, label="drive.py\n終盤の単発版", color=c.color(2))
-  c.arrow(c.anchor(drive, @s.N), c.anchor(gh, @s.S), dash="4 4")
+  c.arrow(c.anchor(drive, @s.N), c.anchor(gh, @s.S), dash=Some("4 4"))
 
   // -- supervisor + repair (bottom) ----------------------------------
   let watch = c.box(230.0, 285.0, @s.Auto, 44.0, label="watchmerge.sh\n再起動+衝突検出", color=c.color(4))

@@ -18,7 +18,7 @@ fn main {
     opacity=Some(0.65),
   )
 
-  let body = c.box(0.0, 44.0, @s.Fixed(330.0), 300.0, dash="6 4")
+  let body = c.box(0.0, 44.0, @s.Fixed(330.0), 300.0, dash=Some("6 4"))
   c.text(body.x + 14.0, body.y + 22.0, "Scope.run <| fn s -> { ... }", size=12.0)
 
   let ok = c.color(2)
@@ -48,7 +48,7 @@ fn main {
   let ox = body.x + body.w + 110.0
   y = body.y + 34.0
   for t in outside {
-    let b = c.box(ox, y, @s.Auto, 36.0, label=t, size=12.0, color=ng, dash="4 3")
+    let b = c.box(ox, y, @s.Auto, 36.0, label=t, size=12.0, color=ng, dash=Some("4 3"))
     c.arrow(
       (body.x + body.w - 30.0, b.y + 18.0),
       c.anchor(b, @s.W),

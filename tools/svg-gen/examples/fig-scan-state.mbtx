@@ -68,10 +68,10 @@ fn main {
       label=label,
       size=11.0,
       rx=4.0,
-      dash="3 3",
+      dash=Some("3 3"),
       opacity=Some(0.7),
     )
-    c.line(c.anchor(v, @s.N), (174.0, 192.0), dash="3 3", opacity=Some(0.5))
+    c.line(c.anchor(v, @s.N), (174.0, 192.0), dash=Some("3 3"), opacity=Some(0.5))
   }
   c.text(
     24.0,

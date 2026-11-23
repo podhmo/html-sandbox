@@ -79,7 +79,7 @@ fn main {
       48.0,
       label="CSS (従来から)\n.field:has(:user-invalid) → 赤表示",
       size=12.0,
-      dash="5 4",
+      dash=Some("5 4"),
     ),
   )
   c.text(

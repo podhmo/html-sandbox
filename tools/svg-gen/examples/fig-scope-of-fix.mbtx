@@ -24,7 +24,7 @@ fn main {
 
   // the host, which the agent cannot modify, and the sandbox
   // inside it
-  let host = c.box(200.0, 26.0, @s.Fixed(320.0), 250.0, dash="6 5", rx=14.0)
+  let host = c.box(200.0, 26.0, @s.Fixed(320.0), 250.0, dash=Some("6 5"), rx=14.0)
   c.text(208.0, 46.0, "変更できない領域（ホスト / Windows）", size=11.0, opacity=Some(0.7))
 
   let sandbox = c.box(220.0, 60.0, @s.Fixed(280.0), 134.0, color=c.color(2), rx=12.0)
@@ -48,7 +48,7 @@ fn main {
       @s.Auto,
       34.0,
       label="apt で直す",
-      dash="4 4",
+      dash=Some("4 4"),
       size=12.0,
       opacity=Some(0.6),
     ),
@@ -61,7 +61,7 @@ fn main {
     44.0,
     label="ドライバを\n更新する",
     color=c.color(3),
-    dash="4 4",
+    dash=Some("4 4"),
     size=12.0,
   )
 
@@ -76,7 +76,7 @@ fn main {
       (driver.x + driver.w / 2.0, 300.0),
     ],
     color=c.color(3),
-    dash="5 4",
+    dash=Some("5 4"),
   )
 
   // annotations sit beside the two boxes, so each names its own

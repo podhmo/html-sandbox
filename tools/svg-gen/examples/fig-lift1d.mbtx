@@ -50,10 +50,10 @@ fn main {
   if !(mid_lift.1 > y_chord) {
     abort("skipped point below the chord (screen y down)")
   }
-  c.line(lx0, lx2, dash="5 3", width=1.5, color=c.color(3))
+  c.line(lx0, lx2, dash=Some("5 3"), width=1.5, color=c.color(3))
 
   for i, p in lifted {
-    c.line((xs[i], axis_y), p, dash="3 3", opacity=Some(0.5))
+    c.line((xs[i], axis_y), p, dash=Some("3 3"), opacity=Some(0.5))
     c.raw(
       "<circle cx=\"\{p.0}\" cy=\"\{p.1}\" r=\"3.5\" fill=\"currentColor\"/>",
       covered=[p],
