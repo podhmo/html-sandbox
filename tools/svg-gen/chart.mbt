@@ -45,10 +45,10 @@ pub fn ticks(lo : Double, hi : Double, count~ : Int32 = 5) -> Array[Double] {
   let f = raw / p
   let step = (if f >= 5.0 { 5.0 } else if f >= 2.0 { 2.0 } else { 1.0 }) * p
   let out : Array[Double] = []
-  let mut v = @math.ceil(lo / step - 1.0e-9) * step
-  while v <= hi + step * 1.0e-6 {
+  for v = @math.ceil(lo / step - 1.0e-9) * step
+      v <= hi + step * 1.0e-6
+      v = v + step {
     out.push(round12(v))
-    v += step
   }
   out
 }
@@ -122,15 +122,13 @@ pub fn Scale::ticks(self : Scale, count~ : Int32 = 5) -> Array[Double] {
   // log axis: mark 1/2/5 of each decade inside the domain.
   let (l, h) = self.spread()
   let out : Array[Double] = []
-  let mut d = @math.floor(l)
-  while d <= @math.ceil(h) {
+  for d = @math.floor(l); d <= @math.ceil(h); d = d + 1.0 {
     for m in [1.0, 2.0, 5.0] {
       let v = m * @math.pow(10.0, d)
       if v >= self.lo && v <= self.hi {
         out.push(v)
       }
     }
-    d += 1.0
   }
   out
 }
@@ -455,7 +453,7 @@ pub fn Plot::step(
     return
   }
   let segs : Array[Point] = [pts[0]]
-  for i = 1; i < pts.length(); i = i + 1 {
+  for i in 1..<pts.length() {
     segs.push((pts[i].0, pts[i - 1].1))
     segs.push(pts[i])
   }
@@ -576,7 +574,10 @@ pub fn Plot::boxplot(
     let cx = self.xs.map(i.to_double() + 0.5)
     let bw = (self.xs.map(i.to_double() + 0.5 + box_w) - cx) * 2.0
     if overlay > 0 && rand is Some(r) {
-      for j = 0; j < s.length(); j = j + stride {
+      for j in 0..<s.length() {
+        if j % stride != 0 {
+          continue
+        }
         let jx = @cmp.minimum(
           @cmp.maximum(cx + (r() - 0.5) * bw * 1.6, self.x0 + 1.5),
           self.x1 - 1.5,
@@ -694,7 +695,7 @@ pub fn Plot::heat_legend(
   let (min, max) = mm
   let steps = 6
   let sw = w / steps.to_double()
-  for i = 0; i < steps; i = i + 1 {
+  for i in 0..<steps {
     let o = 0.06 + 0.9 * (i.to_double() / (steps - 1).to_double())
     self.c.raw(
       "<rect x=\"\{fixed1(x + i.to_double() * sw)}\" y=\"\{num(y)}\" width=\"\{fixed1(sw - 1.0)}\" height=\"8\" fill=\"currentColor\" fill-opacity=\"\{fixed(o, d=2)}\" stroke=\"none\"/>",
@@ -735,10 +736,8 @@ pub fn bins(values : Array[Double], w~ : Double) -> Array[Bin] {
   let lo = @math.floor(mn / w) * w
   let hi = @math.ceil(mx / w) * w
   let out : Array[Bin] = []
-  let mut x = lo
-  while x < hi - 1.0e-9 {
+  for x = lo; x < hi - 1.0e-9; x = x + w {
     out.push({ x0: x, x1: x + w, n: 0, })
-    x += w
   }
   for v in values {
     let i = @cmp.minimum(out.length() - 1, @math.floor((v - lo) / w).to_int())
@@ -761,7 +760,10 @@ pub fn Plot::ecdf_points(
   s.sort()
   let stride = @cmp.maximum(1.0, @math.floor(s.length().to_double() / max)).to_int()
   let pts : Array[Point] = []
-  for i = 0; i < s.length(); i = i + stride {
+  for i in 0..<s.length() {
+    if i % stride != 0 {
+      continue
+    }
     pts.push(
       (
         self.xs.map(s[i]),

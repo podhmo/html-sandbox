@@ -80,7 +80,7 @@ pub fn delaunay(pts : Array[Point]) -> Array[Tri] {
   let work = pts +
     [(cx - 2.0 * m, cy - m), (cx, cy + 2.0 * m), (cx + 2.0 * m, cy - m)]
   let tris : Array[Tri] = [(n, n + 1, n + 2)]
-  for i = 0; i < n; i = i + 1 {
+  for i in 0..<n {
     let p = work[i]
     // cavity: triangle indices whose circumcircle contains p
     let bad : Array[Bool] = Array::make(tris.length(), false)
