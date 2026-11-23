@@ -1,0 +1,58 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// Two Booleans give a 2x2 product of states, but only some
+// combinations are meaningful. An enum carries just the valid
+// variants: the impossible cell disappears instead of being a
+// runtime rule.
+fn main {
+  let c = @s.Canvas()
+
+  // left: Bool x Bool product
+  let ok = 2 // green: valid combination
+  let bad = 0 // palette black -> stays currentColor, but dashed + faint
+  let cell = fn(x : Double, y : Double, a : Bool, b : Bool, valid : Bool) -> @s.Shape {
+    c.box(
+      x,
+      y,
+      @s.Fixed(92.0),
+      40.0,
+      label=Some("\{a}, \{b}"),
+      color=c.color(if valid { ok } else { bad }),
+      dash=(if valid { None } else { Some("4 3") }),
+      opacity=Some(if valid { 0.95 } else { 0.35 }),
+      size=12.0,
+    )
+  }
+  c.text(0.0, 0.0, "2 Bools = 4 states", size=13.0)
+  ignore(cell(0.0, 14.0, true, true, true))
+  ignore(cell(104.0, 14.0, true, false, true))
+  ignore(cell(0.0, 64.0, false, true, true))
+  ignore(cell(104.0, 64.0, false, false, false))
+  c.text(104.0, 124.0, "one combination cannot occur,", anchor=@s.Middle, size=10.0, opacity=Some(0.6))
+  c.text(104.0, 137.0, "but nothing stops it", anchor=@s.Middle, size=10.0, opacity=Some(0.6))
+
+  // arrow between the models
+  c.arrow((226.0, 56.0), (268.0, 56.0), ends=@s.Single(@s.End), opacity=Some(0.7))
+
+  // right: enum variants
+  c.text(276.0, 0.0, "enum = 3 variants", size=13.0)
+  for i, name in ["VariantA", "VariantB", "VariantC"] {
+    ignore(
+      c.box(
+        276.0,
+        14.0 + i.to_double() * 50.0,
+        @s.Fixed(104.0),
+        40.0,
+        label=Some(name),
+        color=c.color(i + 1),
+        size=12.0,
+      ),
+    )
+  }
+  c.text(328.0, 170.0, "the type holds only", anchor=@s.Middle, size=10.0, opacity=Some(0.6))
+  c.text(328.0, 183.0, "what can happen", anchor=@s.Middle, size=10.0, opacity=Some(0.6))
+
+  println(c.render(label=Some("modelling states: a Bool pair admits a meaningless combination; an enum admits exactly the valid ones")))
+}
