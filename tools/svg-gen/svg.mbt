@@ -168,40 +168,57 @@ pub struct Canvas {
   margin : Double
   backdrop : Array[String]
   parts : Array[String]
-  mut min_x : Double
-  mut min_y : Double
-  mut max_x : Double
-  mut max_y : Double
+  // None until `cover` has seen a point; the TS version tracked bounds
+  // through +inf/-inf sentinels, where "empty canvas" was a valid
+  // numeric state that rendered as an inverted viewBox.
+  mut bounds : Bounds?
 }
 
 ///|
 pub fn Canvas::new(margin~ : Double = 10) -> Canvas {
+  { margin, backdrop: [], parts: [], bounds: None, }
+}
+
+///|
+struct Bounds {
+  min_x : Double
+  min_y : Double
+  max_x : Double
+  max_y : Double
+}
+
+///|
+fn Bounds::cover(self : Bounds, p : Point) -> Bounds {
   {
-    margin,
-    backdrop: [],
-    parts: [],
-    min_x: @double.infinity,
-    min_y: @double.infinity,
-    max_x: @double.neg_infinity,
-    max_y: @double.neg_infinity,
+    min_x: if p.0 < self.min_x {
+      p.0
+    } else {
+      self.min_x
+    },
+    min_y: if p.1 < self.min_y {
+      p.1
+    } else {
+      self.min_y
+    },
+    max_x: if p.0 > self.max_x {
+      p.0
+    } else {
+      self.max_x
+    },
+    max_y: if p.1 > self.max_y {
+      p.1
+    } else {
+      self.max_y
+    },
   }
 }
 
 ///|
 fn Canvas::cover(self : Canvas, pts : Array[Point]) -> Unit {
   for p in pts {
-    let (x, y) = p
-    if x < self.min_x {
-      self.min_x = x
-    }
-    if y < self.min_y {
-      self.min_y = y
-    }
-    if x > self.max_x {
-      self.max_x = x
-    }
-    if y > self.max_y {
-      self.max_y = y
+    self.bounds = match self.bounds {
+      None => Some({ min_x: p.0, min_y: p.1, max_x: p.0, max_y: p.1, })
+      Some(b) => Some(b.cover(p))
     }
   }
 }
@@ -706,9 +723,22 @@ pub fn Canvas::render(
   label~ : String = "",
 ) -> String {
   let m = self.margin
-  let w = self.max_x - self.min_x + 2.0 * m
-  let h = self.max_y - self.min_y + 2.0 * m
-  let vb = "\{num(self.min_x - m)} \{num(self.min_y - m)} \{num(w)} \{num(h)}"
+  let vb = match self.bounds {
+    Some(b) => {
+      let w = b.max_x - b.min_x + 2.0 * m
+      let h = b.max_y - b.min_y + 2.0 * m
+      "\{num(b.min_x - m)} \{num(b.min_y - m)} \{num(w)} \{num(h)}"
+    }
+    None => "0 0 0 0"
+  }
+  let w = match self.bounds {
+    Some(b) => b.max_x - b.min_x + 2.0 * m
+    None => 0.0
+  }
+  let h = match self.bounds {
+    Some(b) => b.max_y - b.min_y + 2.0 * m
+    None => 0.0
+  }
   let wv = match width {
     Some(v) => v.to_string()
     None => w.round().to_int64().to_string()

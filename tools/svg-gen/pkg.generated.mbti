@@ -74,6 +74,8 @@ pub(all) struct Bisector {
   dir : (Double, Double)
 }
 
+type Bounds
+
 #derive(@debug.Debug)
 pub(all) struct BoxGroup {
   label : String
@@ -84,10 +86,7 @@ pub struct Canvas {
   margin : Double
   backdrop : Array[String]
   parts : Array[String]
-  mut min_x : Double
-  mut min_y : Double
-  mut max_x : Double
-  mut max_y : Double
+  mut bounds : Bounds?
 }
 pub fn Canvas::above(Self, Shape, Double, Double) -> Double
 pub fn Canvas::anchor(Self, Shape, Side) -> (Double, Double)
