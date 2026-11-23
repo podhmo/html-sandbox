@@ -90,9 +90,11 @@ pub fn delaunay(pts : Array[Point]) -> Array[Tri] {
         bad[k] = true
       }
     }
-    // boundary edges of the cavity: edges of bad triangles counted
-    // exactly once (insertion-ordered assoc list keeps output stable)
-    let edges : Array[((Int32, Int32), Int32)] = [] // key -> times seen (0/1)
+    // boundary edges of the cavity: edges of bad triangles seen
+    // exactly once, kept in the triangle's own direction. The toggle
+    // (insert on first sight, delete on repeat) mirrors the TS Map,
+    // so the emitted triangle vertex order matches it.
+    let edges : Array[((Int32, Int32), (Int32, Int32))] = [] // key -> directed edge
     for k, t in tris {
       if !bad[k] {
         continue
@@ -102,8 +104,8 @@ pub fn delaunay(pts : Array[Point]) -> Array[Tri] {
         let b = if e.1 == 0 { t.0 } else if e.1 == 1 { t.1 } else { t.2 }
         let key = if a < b { (a, b) } else { (b, a) }
         match edges.search_by(fn(e) { e.0 == key }) {
-          Some(j) => edges[j] = (edges[j].0, edges[j].1 + 1)
-          None => edges.push((key, 1))
+          Some(j) => edges.remove(j) |> ignore
+          None => edges.push((key, (a, b)))
         }
       }
     }
@@ -119,9 +121,7 @@ pub fn delaunay(pts : Array[Point]) -> Array[Tri] {
       tris.push(t)
     }
     for entry in edges {
-      if entry.1 == 1 {
-        tris.push((entry.0.0, entry.0.1, i))
-      }
+      tris.push((entry.1.0, entry.1.1, i))
     }
   }
   tris.filter(fn(t) { t.0 < n && t.1 < n && t.2 < n })
@@ -378,6 +378,11 @@ pub fn poly_el(
   opacity~ : Double,
   extra~ : String = "",
 ) -> String {
-  let s = pts.map(fn(p) { fixed(p.0, d=1) + "," + fixed(p.1, d=1) }).join(" ")
+  // +v.toFixed(1) rounds to one decimal and prints without the ".0".
+  let s = pts
+    .map(fn(p) {
+      num((p.0 * 10.0).round() / 10.0) + "," + num((p.1 * 10.0).round() / 10.0)
+    })
+    .join(" ")
   "<polygon points=\"\{s}\" fill=\"\{fill}\" fill-opacity=\"\{opacity}\"\{extra}/>"
 }
