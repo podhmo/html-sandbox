@@ -1,0 +1,89 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-toolchain.mbtx -- the throwaway /tmp tooling behind the merge
+// sweep. Left column: how tasks.json was built (gh pr list +
+// ls-remote tips). Center: the merge driver loop with its
+// resumable state files. Right: GitHub's async merge. Bottom: the
+// supervisor and the repair scripts that turn a CONFLICTING PR
+// back into a mergeable one.
+
+fn main {
+  let c = @s.Canvas::new(margin=12.0)
+
+  // -- scan phase (left column) -----------------------------------
+  let ghlist = c.box(30.0, 30.0, @s.Auto, 36.0, label="gh pr list", color=c.color(0))
+  let prs = c.box(30.0, 90.0, @s.Auto, 36.0, label="prs.json", color=c.color(0))
+  c.arrow(c.anchor(ghlist, @s.S), c.anchor(prs, @s.N))
+
+  let lsr = c.box(30.0, 150.0, @s.Auto, 36.0, label="git ls-remote", color=c.color(0))
+  let heads = c.box(30.0, 210.0, @s.Auto, 40.0, label="orig_heads.txt\n252 tips", color=c.color(0))
+  c.arrow(c.anchor(lsr, @s.S), c.anchor(heads, @s.N))
+
+  let tasks = c.box(230.0, 140.0, @s.Auto, 52.0, label="tasks.json\n{num,head,parent_num,…}", color=c.color(1))
+  c.arrow(c.anchor(prs, @s.E), c.anchor(tasks, @s.W), via=[(205.0, 108.0), (205.0, 166.0)])
+  c.arrow(c.anchor(heads, @s.E), c.anchor(tasks, @s.S), via=[(334.0, 228.0)])
+  c.text(
+    30.0,
+    270.0,
+    "走査: base→head の解決 + tip凍結 → トポロジカル順のキュー",
+    size=12.0,
+    opacity=Some(0.75),
+  )
+
+  // -- driver loop (center) ----------------------------------------
+  let mergeall = c.box(460.0, 120.0, @s.Auto, 52.0, label="mergeall.py\nenqueue→poll", color=c.color(2))
+  c.arrow(c.anchor(tasks, @s.E), c.anchor(mergeall, @s.W))
+
+  let done = c.box(460.0, 195.0, @s.Auto, 36.0, label="merge_done.json", color=c.color(1))
+  c.arrow(c.anchor(mergeall, @s.S), c.anchor(done, @s.N))
+
+  let log = c.box(460.0, 245.0, @s.Auto, 36.0, label="mergeall.log", color=c.color(1))
+  c.arrow(c.anchor(done, @s.S), c.anchor(log, @s.N))
+
+  // -- GitHub (right) ------------------------------------------------
+  let gh = c.box(640.0, 50.0, @s.Auto, 90.0, label="GitHub\nmerge-async\nsquash", color=c.color(3))
+  c.arrow(c.anchor(mergeall, @s.E), c.anchor(gh, @s.W), split=5.0)
+
+  let drive = c.box(640.0, 195.0, @s.Auto, 40.0, label="drive.py\n終盤の単発版", color=c.color(2))
+  c.arrow(c.anchor(drive, @s.N), c.anchor(gh, @s.S), dash="4 4")
+
+  // -- supervisor + repair (bottom) ----------------------------------
+  let watch = c.box(230.0, 285.0, @s.Auto, 44.0, label="watchmerge.sh\n再起動+衝突検出", color=c.color(4))
+  c.arrow(c.anchor(log, @s.W), c.anchor(watch, @s.E), via=[(420.0, 263.0), (420.0, 307.0)])
+  c.text(230.0, 258.0, "log: merge conflict", size=12.0, opacity=Some(0.75))
+
+  let fix = c.box(
+    430.0,
+    295.0,
+    @s.Auto,
+    56.0,
+    label="fixconflict.py / fixone.sh\n(restack.py, fix_budgets)",
+    color=c.color(5),
+  )
+  c.arrow(c.anchor(watch, @s.E), c.anchor(fix, @s.W))
+
+  // the repaired head goes back; GitHub sees the PR mergeable again
+  c.arrow(c.anchor(fix, @s.E), c.anchor(gh, @s.E), via=[(850.0, 323.0), (850.0, 95.0)])
+  c.text(858.0, 215.0, "force-push → mergeableに戻す", size=12.0, opacity=Some(0.75))
+
+  c.text(
+    30.0,
+    370.0,
+    "青=走査  橙=状態/キュー  緑=ドライバ  紫=監督  空色=修復  朱=GitHub",
+    size=12.0,
+    opacity=Some(0.75),
+  )
+  c.text(
+    430.0,
+    385.0,
+    "修復ルール: budgets→--theirs, TODO→--union+dedupe / それ以外は停止して人間へ",
+    size=12.0,
+    opacity=Some(0.75),
+  )
+
+  println(
+    c.render(label="throwaway /tmp tooling: scan, queue, merge loop, supervisor, repair"),
+  )
+}
