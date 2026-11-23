@@ -171,7 +171,7 @@ pub fn Plot::heat_legend(Self, (Double, Double), Double, Double, w? : Double, fm
 pub fn Plot::heatmap(Self, Array[Array[Double]], color? : String) -> (Double, Double)
 pub fn Plot::histogram(Self, Array[Bin], color? : String) -> Unit
 pub fn Plot::hline(Self, Double, label? : String, dash? : String, opacity? : Double) -> Unit
-pub fn Plot::new(Canvas, ChartMeta, (Double, Double), (Double, Double), x? : Double, y? : Double, w? : Double, h? : Double, xlog? : Bool, ylog? : Bool, xtitle? : String, ytitle? : String, xfmt? : (Double) -> String, yfmt? : (Double) -> String, grid? : Bool) -> Self
+pub fn Plot::new(Canvas, ChartMeta, (Double, Double), (Double, Double), x? : Double, y? : Double, w? : Double, h? : Double, xscale? : ScaleKind, yscale? : ScaleKind, xtitle? : String, ytitle? : String, xfmt? : (Double) -> String, yfmt? : (Double) -> String, grid? : Bool) -> Self
 pub fn Plot::series(Self, Array[(Double, Double)], label? : String, dash? : String, opacity? : Double?, width? : Double, color? : String) -> Unit
 pub fn Plot::step(Self, Array[(Double, Double)], label? : String, dash? : String, opacity? : Double?, width? : Double, color? : String) -> Unit
 pub fn Plot::vline(Self, Double, label? : String, dash? : String, opacity? : Double) -> Unit
@@ -182,11 +182,17 @@ pub(all) struct Scale {
   hi : Double
   a : Double
   b : Double
-  log : Bool
+  kind : ScaleKind
 }
 pub fn Scale::map(Self, Double) -> Double
-pub fn Scale::new(Double, Double, Double, Double, log? : Bool) -> Self
+pub fn Scale::new(Double, Double, Double, Double, kind? : ScaleKind) -> Self
 pub fn Scale::ticks(Self, count? : Int32) -> Array[Double]
+
+#derive(Eq, @debug.Debug)
+pub(all) enum ScaleKind {
+  Linear
+  Log
+}
 
 #derive(@debug.Debug)
 pub(all) struct Shape {

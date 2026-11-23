@@ -57,7 +57,7 @@ fn main {
     (0.0, 400.0),
     w=420.0,
     h=190.0,
-    xlog=true,
+    xscale=@s.Log,
     xtitle="ペイロード (KiB, log)",
     ytitle="レイテンシ (ms)",
     grid=true,

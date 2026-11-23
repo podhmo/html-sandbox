@@ -64,14 +64,24 @@ fn round12(v : Double) -> Double {
 }
 
 ///|
-/// A data->pixel mapping. `log` works on the data value (v > 0 only).
+/// How a `Scale` maps data to pixels. A Bool flag would name only two
+/// states without saying which is which at the call site; `Log` works
+/// on the data value (v > 0 only).
+#derive(Debug, Eq)
+pub(all) enum ScaleKind {
+  Linear
+  Log
+}
+
+///|
+/// A data->pixel mapping.
 #derive(Debug)
 pub(all) struct Scale {
   lo : Double
   hi : Double
   a : Double
   b : Double
-  log : Bool
+  kind : ScaleKind
 }
 
 ///|
@@ -80,31 +90,34 @@ pub fn Scale::new(
   hi : Double,
   a : Double,
   b : Double,
-  log~ : Bool = false,
+  kind~ : ScaleKind = Linear,
 ) -> Scale {
-  { lo, hi, a, b, log, }
+  { lo, hi, a, b, kind, }
 }
 
 ///|
 fn Scale::spread(self : Scale) -> (Double, Double) {
-  if self.log {
-    (@math.log10(self.lo), @math.log10(self.hi))
-  } else {
-    (self.lo, self.hi)
+  match self.kind {
+    Log => (@math.log10(self.lo), @math.log10(self.hi))
+    Linear => (self.lo, self.hi)
   }
 }
 
 ///|
 pub fn Scale::map(self : Scale, v : Double) -> Double {
   let (l, h) = self.spread()
-  let x = if self.log { @math.log10(v) } else { v }
+  let x = match self.kind {
+    Log => @math.log10(v)
+    Linear => v
+  }
   self.a + (x - l) / (h - l) * (self.b - self.a)
 }
 
 ///|
 pub fn Scale::ticks(self : Scale, count~ : Int32 = 5) -> Array[Double] {
-  if !self.log {
-    return ticks(self.lo, self.hi, count~)
+  match self.kind {
+    Linear => return ticks(self.lo, self.hi, count~)
+    Log => ()
   }
   // log axis: mark 1/2/5 of each decade inside the domain.
   let (l, h) = self.spread()
@@ -210,8 +223,8 @@ pub fn Plot::new(
   y~ : Double = 0,
   w~ : Double = 420,
   h~ : Double = 200,
-  xlog~ : Bool = false,
-  ylog~ : Bool = false,
+  xscale~ : ScaleKind = Linear,
+  yscale~ : ScaleKind = Linear,
   xtitle~ : String = "",
   ytitle~ : String = "",
   xfmt~ : (Double) -> String = fmt_num,
@@ -227,8 +240,8 @@ pub fn Plot::new(
     y0,
     x1,
     y1,
-    xs: Scale::new(xdom.0, xdom.1, x0, x1, log=xlog),
-    ys: Scale::new(ydom.0, ydom.1, y1, y0, log=ylog),
+    xs: Scale::new(xdom.0, xdom.1, x0, x1, kind=xscale),
+    ys: Scale::new(ydom.0, ydom.1, y1, y0, kind=yscale),
     meta,
     xfmt,
     yfmt,
