@@ -33,7 +33,7 @@ fn main {
   let mut y = body.y + 48.0
   for t in inside {
     ignore(
-      c.box(body.x + 20.0, y, @s.Auto, 36.0, label=t, size=12.0, color=ok),
+      c.box(body.x + 20.0, y, @s.Auto, 36.0, label=Some(t), size=12.0, color=ok),
     )
     y = y + 50.0
   }
@@ -48,7 +48,7 @@ fn main {
   let ox = body.x + body.w + 110.0
   y = body.y + 34.0
   for t in outside {
-    let b = c.box(ox, y, @s.Auto, 36.0, label=t, size=12.0, color=ng, dash=Some("4 3"))
+    let b = c.box(ox, y, @s.Auto, 36.0, label=Some(t), size=12.0, color=ng, dash=Some("4 3"))
     c.arrow(
       (body.x + body.w - 30.0, b.y + 18.0),
       c.anchor(b, @s.W),
@@ -66,6 +66,6 @@ fn main {
   )
 
   println(
-    c.render(label="a dashed region for the Scope.run body holds the accepted uses of s (registration, passing to a helper, a non-escaping List.iter lambda, an immediate call, an eager argument); arrows cross its edge to the rejected uses (returning s, storing it, Task.spawn, an outer cleanup capturing it, a partial application holding it)"),
+    c.render(label=Some("a dashed region for the Scope.run body holds the accepted uses of s (registration, passing to a helper, a non-escaping List.iter lambda, an immediate call, an eager argument); arrows cross its edge to the rejected uses (returning s, storing it, Task.spawn, an outer cleanup capturing it, a partial application holding it)")),
   )
 }

@@ -14,6 +14,6 @@ fn main {
     )
   }
   println(
-    c.render(label="the shared input: ten points, no structure yet"),
+    c.render(label=Some("the shared input: ten points, no structure yet")),
   )
 }

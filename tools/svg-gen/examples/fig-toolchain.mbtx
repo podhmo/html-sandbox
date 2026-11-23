@@ -13,15 +13,15 @@ fn main {
   let c = @s.Canvas(margin=12.0)
 
   // -- scan phase (left column) -----------------------------------
-  let ghlist = c.box(30.0, 30.0, @s.Auto, 36.0, label="gh pr list", color=c.color(0))
-  let prs = c.box(30.0, 90.0, @s.Auto, 36.0, label="prs.json", color=c.color(0))
+  let ghlist = c.box(30.0, 30.0, @s.Auto, 36.0, label=Some("gh pr list"), color=c.color(0))
+  let prs = c.box(30.0, 90.0, @s.Auto, 36.0, label=Some("prs.json"), color=c.color(0))
   c.arrow(c.anchor(ghlist, @s.S), c.anchor(prs, @s.N))
 
-  let lsr = c.box(30.0, 150.0, @s.Auto, 36.0, label="git ls-remote", color=c.color(0))
-  let heads = c.box(30.0, 210.0, @s.Auto, 40.0, label="orig_heads.txt\n252 tips", color=c.color(0))
+  let lsr = c.box(30.0, 150.0, @s.Auto, 36.0, label=Some("git ls-remote"), color=c.color(0))
+  let heads = c.box(30.0, 210.0, @s.Auto, 40.0, label=Some("orig_heads.txt\n252 tips"), color=c.color(0))
   c.arrow(c.anchor(lsr, @s.S), c.anchor(heads, @s.N))
 
-  let tasks = c.box(230.0, 140.0, @s.Auto, 52.0, label="tasks.json\n{num,head,parent_num,…}", color=c.color(1))
+  let tasks = c.box(230.0, 140.0, @s.Auto, 52.0, label=Some("tasks.json\n{num,head,parent_num,…}"), color=c.color(1))
   c.arrow(c.anchor(prs, @s.E), c.anchor(tasks, @s.W), via=[(205.0, 108.0), (205.0, 166.0)])
   c.arrow(c.anchor(heads, @s.E), c.anchor(tasks, @s.S), via=[(334.0, 228.0)])
   c.text(
@@ -33,24 +33,24 @@ fn main {
   )
 
   // -- driver loop (center) ----------------------------------------
-  let mergeall = c.box(460.0, 120.0, @s.Auto, 52.0, label="mergeall.py\nenqueue→poll", color=c.color(2))
+  let mergeall = c.box(460.0, 120.0, @s.Auto, 52.0, label=Some("mergeall.py\nenqueue→poll"), color=c.color(2))
   c.arrow(c.anchor(tasks, @s.E), c.anchor(mergeall, @s.W))
 
-  let done = c.box(460.0, 195.0, @s.Auto, 36.0, label="merge_done.json", color=c.color(1))
+  let done = c.box(460.0, 195.0, @s.Auto, 36.0, label=Some("merge_done.json"), color=c.color(1))
   c.arrow(c.anchor(mergeall, @s.S), c.anchor(done, @s.N))
 
-  let log = c.box(460.0, 245.0, @s.Auto, 36.0, label="mergeall.log", color=c.color(1))
+  let log = c.box(460.0, 245.0, @s.Auto, 36.0, label=Some("mergeall.log"), color=c.color(1))
   c.arrow(c.anchor(done, @s.S), c.anchor(log, @s.N))
 
   // -- GitHub (right) ------------------------------------------------
-  let gh = c.box(640.0, 50.0, @s.Auto, 90.0, label="GitHub\nmerge-async\nsquash", color=c.color(3))
+  let gh = c.box(640.0, 50.0, @s.Auto, 90.0, label=Some("GitHub\nmerge-async\nsquash"), color=c.color(3))
   c.arrow(c.anchor(mergeall, @s.E), c.anchor(gh, @s.W), ends=@s.Pair(5.0))
 
-  let drive = c.box(640.0, 195.0, @s.Auto, 40.0, label="drive.py\n終盤の単発版", color=c.color(2))
+  let drive = c.box(640.0, 195.0, @s.Auto, 40.0, label=Some("drive.py\n終盤の単発版"), color=c.color(2))
   c.arrow(c.anchor(drive, @s.N), c.anchor(gh, @s.S), dash=Some("4 4"))
 
   // -- supervisor + repair (bottom) ----------------------------------
-  let watch = c.box(230.0, 285.0, @s.Auto, 44.0, label="watchmerge.sh\n再起動+衝突検出", color=c.color(4))
+  let watch = c.box(230.0, 285.0, @s.Auto, 44.0, label=Some("watchmerge.sh\n再起動+衝突検出"), color=c.color(4))
   c.arrow(c.anchor(log, @s.W), c.anchor(watch, @s.E), via=[(420.0, 263.0), (420.0, 307.0)])
   c.text(230.0, 258.0, "log: merge conflict", size=12.0, opacity=Some(0.75))
 
@@ -59,7 +59,7 @@ fn main {
     295.0,
     @s.Auto,
     56.0,
-    label="fixconflict.py / fixone.sh\n(restack.py, fix_budgets)",
+    label=Some("fixconflict.py / fixone.sh\n(restack.py, fix_budgets)"),
     color=c.color(5),
   )
   c.arrow(c.anchor(watch, @s.E), c.anchor(fix, @s.W))
@@ -84,6 +84,6 @@ fn main {
   )
 
   println(
-    c.render(label="throwaway /tmp tooling: scan, queue, merge loop, supervisor, repair"),
+    c.render(label=Some("throwaway /tmp tooling: scan, queue, merge loop, supervisor, repair")),
   )
 }

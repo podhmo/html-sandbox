@@ -32,13 +32,13 @@ fn main {
       size=11.0,
       opacity=Some(0.6),
     )
-    let a = c.box(170.0, y, @s.Auto, 40.0, label="plain", size=12.0)
+    let a = c.box(170.0, y, @s.Auto, 40.0, label=Some("plain"), size=12.0)
     let b = c.box(
       c.right_of(a, 60.0),
       y,
       @s.Auto,
       40.0,
-      label="emphasized",
+      label=Some("emphasized"),
       size=12.0,
       width=width,
       underline=underline,
@@ -47,5 +47,5 @@ fn main {
     mark(b)
   }
 
-  println(c.render(label="five low-key ways to emphasize a box"))
+  println(c.render(label=Some("five low-key ways to emphasize a box")))
 }

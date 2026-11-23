@@ -90,6 +90,6 @@ fn main {
   c.text(115.0 + dx, 225.0, "crossing edge: not a triangulation", anchor=@s.Middle, size=12.0, opacity=Some(0.7))
 
   println(
-    c.render(label="valid triangulation vs a chord that crosses existing edges"),
+    c.render(label=Some("valid triangulation vs a chord that crosses existing edges")),
   )
 }

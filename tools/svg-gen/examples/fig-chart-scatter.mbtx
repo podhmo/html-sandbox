@@ -58,8 +58,8 @@ fn main {
     w=420.0,
     h=190.0,
     xscale=@s.Log,
-    xtitle="ペイロード (KiB, log)",
-    ytitle="レイテンシ (ms)",
+    xtitle=Some("ペイロード (KiB, log)"),
+    ytitle=Some("レイテンシ (ms)"),
     grid=true,
   )
   p.frame()
@@ -103,6 +103,6 @@ fn main {
   }
 
   println(
-    c.render(label="scatter of payload size vs latency: about +\{per_decade} ms per decade of payload (virtual data)"),
+    c.render(label=Some("scatter of payload size vs latency: about +\{per_decade} ms per decade of payload (virtual data)")),
   )
 }

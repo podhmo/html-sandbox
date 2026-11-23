@@ -26,6 +26,6 @@ fn main {
   }
 
   println(
-    c.render(label="convex hull: the boundary every triangulation must cover"),
+    c.render(label=Some("convex hull: the boundary every triangulation must cover")),
   )
 }

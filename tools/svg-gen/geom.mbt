@@ -376,7 +376,7 @@ pub fn poly_el(
   pts : Array[Point],
   fill~ : String,
   opacity~ : Double,
-  extra~ : String = "",
+  extra~ : String? = None,
 ) -> String {
   // +v.toFixed(1) rounds to one decimal and prints without the ".0".
   let s = pts
@@ -384,5 +384,5 @@ pub fn poly_el(
       num((p.0 * 10.0).round() / 10.0) + "," + num((p.1 * 10.0).round() / 10.0)
     })
     .join(" ")
-  "<polygon points=\"\{s}\" fill=\"\{fill}\" fill-opacity=\"\{opacity}\"\{extra}/>"
+  "<polygon points=\"\{s}\" fill=\"\{fill}\" fill-opacity=\"\{opacity}\"\{extra.unwrap_or("")}/>"
 }

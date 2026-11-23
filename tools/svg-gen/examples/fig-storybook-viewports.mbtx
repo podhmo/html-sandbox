@@ -13,7 +13,7 @@ fn main {
 
   let c = @s.Canvas()
 
-  let nav = c.box(0.0, 0.0, @s.Auto, h, label="story\nnav")
+  let nav = c.box(0.0, 0.0, @s.Auto, h, label=Some("story\nnav"))
   let x0 = c.right_of(nav, 48.0)
 
   // widths drawn to scale: the 768 frame is visibly wider than
@@ -55,5 +55,5 @@ fn main {
     }
   }
 
-  println(c.render(label="one story previewed at 320, 360 and 768 css px"))
+  println(c.render(label=Some("one story previewed at 320, 360 and 768 css px")))
 }

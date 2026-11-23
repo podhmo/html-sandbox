@@ -23,7 +23,7 @@ fn main {
       y,
       @s.Auto,
       30.0,
-      label=label,
+      label=Some(label),
       color=c.color(if k { kept } else { gone }),
       dash=(if k { None } else { Some("5 4") }),
       size=12.0,
@@ -78,6 +78,6 @@ fn main {
   ignore(node(400.0, 200.0, "notRendered", false))
 
   println(
-    c.render(label="content-visibility を <li> から .comment-body に移すと AX ツリーに listitem とパーマリンクが残る図"),
+    c.render(label=Some("content-visibility を <li> から .comment-body に移すと AX ツリーに listitem とパーマリンクが残る図")),
   )
 }

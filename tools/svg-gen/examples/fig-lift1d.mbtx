@@ -68,6 +68,6 @@ fn main {
   c.text(15.0, 20.0, "x²", size=11.0, central=true)
 
   println(
-    c.render(label="1D lifting: points on x go up to the parabola x^2; the lower hull is exactly adjacent pairs — Delaunay in 1D is sorted adjacency"),
+    c.render(label=Some("1D lifting: points on x go up to the parabola x^2; the lower hull is exactly adjacent pairs — Delaunay in 1D is sorted adjacency")),
   )
 }

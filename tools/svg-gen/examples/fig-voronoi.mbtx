@@ -44,6 +44,6 @@ fn main {
   }
 
   println(
-    c.render(label="the Voronoi diagram: every point of the plane assigned to its nearest site"),
+    c.render(label=Some("the Voronoi diagram: every point of the plane assigned to its nearest site")),
   )
 }

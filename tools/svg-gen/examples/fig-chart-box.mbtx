@@ -37,7 +37,7 @@ fn main {
     (40.0, 260.0),
     w=420.0,
     h=190.0,
-    ytitle="試行時間 (ms)",
+    ytitle=Some("試行時間 (ms)"),
     grid=true,
   )
   p.frame(
@@ -56,6 +56,6 @@ fn main {
   }
 
   println(
-    c.render(label="box plot of four benchmark variants; the cached group is secretly bimodal (virtual data)"),
+    c.render(label=Some("box plot of four benchmark variants; the cached group is secretly bimodal (virtual data)")),
   )
 }

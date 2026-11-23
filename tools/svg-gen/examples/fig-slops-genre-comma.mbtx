@@ -88,6 +88,6 @@ fn main {
     abort("row count")
   }
   println(
-    c.render(label="comma density by genre and author: devin ranges 10 to 27 across genres while claude stays high in every shared genre"),
+    c.render(label=Some("comma density by genre and author: devin ranges 10 to 27 across genres while claude stays high in every shared genre")),
   )
 }

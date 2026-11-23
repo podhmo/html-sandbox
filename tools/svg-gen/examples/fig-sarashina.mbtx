@@ -13,17 +13,17 @@ fn main {
   let dash = Some("4 3")
 
   // Row 1: the people and the code
-  let human = c.box(20.0, 20.0, @s.Auto, 40.0, label="人", size=13.0)
-  let devin = c.box(c.right_of(human, 70.0), human.y, @s.Auto, 40.0, label="Devin CLI", size=13.0)
-  let ext = c.box(c.right_of(devin, 60.0), human.y, @s.Auto, 40.0, label="pi-sarashina 拡張", size=13.0)
+  let human = c.box(20.0, 20.0, @s.Auto, 40.0, label=Some("人"), size=13.0)
+  let devin = c.box(c.right_of(human, 70.0), human.y, @s.Auto, 40.0, label=Some("Devin CLI"), size=13.0)
+  let ext = c.box(c.right_of(devin, 60.0), human.y, @s.Auto, 40.0, label=Some("pi-sarashina 拡張"), size=13.0)
 
   // Row 2: the runtime
-  let pi = c.box(devin.x, devin.y + 110.0, @s.Auto, 44.0, label="pi agent", size=13.0)
-  let proxy = c.box(c.right_of(pi, 50.0), pi.y, @s.Auto, 44.0, label="trace-proxy :8787", size=12.0)
-  let api = c.box(c.right_of(proxy, 45.0), pi.y, @s.Auto, 44.0, label="Sarashina\nAPI", size=11.0)
+  let pi = c.box(devin.x, devin.y + 110.0, @s.Auto, 44.0, label=Some("pi agent"), size=13.0)
+  let proxy = c.box(c.right_of(pi, 50.0), pi.y, @s.Auto, 44.0, label=Some("trace-proxy :8787"), size=12.0)
+  let api = c.box(c.right_of(proxy, 45.0), pi.y, @s.Auto, 44.0, label=Some("Sarashina\nAPI"), size=11.0)
 
   // Row 3: what pi writes
-  let files = c.box(pi.x, c.below(pi, 54.0), @s.Auto, 40.0, label="main.go, *.txt", size=12.0)
+  let files = c.box(pi.x, c.below(pi, 54.0), @s.Auto, 40.0, label=Some("main.go, *.txt"), size=12.0)
 
   // Edges
   let label = fn(s : String, p : @s.Point, dy : Double, size : Double) {
@@ -74,6 +74,6 @@ fn main {
   c.text(m2.0 + 8.0, m2.1, "write/edit", anchor=@s.Start, size=11.0)
 
   println(
-    c.render(label="作業の構造: 人は Devin に指示するだけで、Devin が拡張を実装し、pi を実行・監督する。pi は拡張をロードしてプロキシ越しに Sarashina API を呼びながら Go のファイルを書く"),
+    c.render(label=Some("作業の構造: 人は Devin に指示するだけで、Devin が拡張を実装し、pi を実行・監督する。pi は拡張をロードしてプロキシ越しに Sarashina API を呼びながら Go のファイルを書く")),
   )
 }

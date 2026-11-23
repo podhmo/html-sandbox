@@ -107,6 +107,6 @@ fn main {
   }
 
   println(
-    c.render(label="Delaunay triangulation (solid) and its dual Voronoi diagram (dashed); one empty circumcircle shown"),
+    c.render(label=Some("Delaunay triangulation (solid) and its dual Voronoi diagram (dashed); one empty circumcircle shown")),
   )
 }

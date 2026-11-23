@@ -200,8 +200,8 @@ pub struct Plot {
   meta : ChartMeta
   xfmt : (Double) -> String
   yfmt : (Double) -> String
-  xtitle : String
-  ytitle : String
+  xtitle : String?
+  ytitle : String?
   grid : Bool
   mut framed : Bool
   c : Canvas
@@ -223,8 +223,8 @@ pub fn Plot::Plot(
   h~ : Double = 200,
   xscale~ : ScaleKind = Linear,
   yscale~ : ScaleKind = Linear,
-  xtitle~ : String = "",
-  ytitle~ : String = "",
+  xtitle~ : String? = None,
+  ytitle~ : String? = None,
   xfmt~ : (Double) -> String = fmt_num,
   yfmt~ : (Double) -> String = fmt_num,
   grid~ : Bool = false,
@@ -388,19 +388,19 @@ pub fn Plot::frame(
       opacity=Some(0.7),
     )
   }
-  if self.xtitle != "" {
+  if self.xtitle is Some(t) {
     c.text(
       (self.x0 + self.x1) / 2.0,
       self.y1 + 30.0,
-      self.xtitle,
+      t,
       anchor=Middle,
       size=10.0,
       opacity=Some(0.7),
     )
   }
-  if self.ytitle != "" {
+  if self.ytitle is Some(t) {
     // horizontal, above the axis top-left: readable without rotation.
-    c.text(self.x0, self.y0 - 8.0, self.ytitle, size=10.0, opacity=Some(0.7))
+    c.text(self.x0, self.y0 - 8.0, t, size=10.0, opacity=Some(0.7))
   }
 }
 
@@ -411,7 +411,7 @@ pub fn Plot::frame(
 pub fn Plot::series(
   self : Plot,
   pts : Array[Point],
-  label~ : String = "",
+  label~ : String? = None,
   dash~ : String? = None,
   opacity~ : Double? = None,
   width~ : Double = 1.5,
@@ -426,11 +426,11 @@ pub fn Plot::series(
     "<path d=\"\{d}\" fill=\"none\"\{sattrs(dash~, opacity~, width~, color~)}/>",
     pts,
   )
-  if label != "" {
+  if label is Some(l) {
     self.c.text(
       self.x1 + 6.0,
       pts[pts.length() - 1].1,
-      label,
+      l,
       central=true,
       size=10.0,
     )
@@ -443,7 +443,7 @@ pub fn Plot::series(
 pub fn Plot::step(
   self : Plot,
   pts : Array[Point],
-  label~ : String = "",
+  label~ : String? = None,
   dash~ : String? = None,
   opacity~ : Double? = None,
   width~ : Double = 1.5,
@@ -463,11 +463,11 @@ pub fn Plot::step(
     "<path d=\"\{d}\" fill=\"none\"\{sattrs(dash~, opacity~, width~, color~)}/>",
     segs,
   )
-  if label != "" {
+  if label is Some(l) {
     self.c.text(
       self.x1 + 6.0,
       pts[pts.length() - 1].1,
-      label,
+      l,
       central=true,
       size=10.0,
     )
@@ -499,7 +499,7 @@ pub fn Plot::dots(
 pub fn Plot::vline(
   self : Plot,
   xv : Double,
-  label~ : String = "",
+  label~ : String? = None,
   dash~ : String? = Some("4 3"),
   opacity~ : Double = 0.6,
 ) -> Unit {
@@ -509,8 +509,8 @@ pub fn Plot::vline(
     [(px, self.y0), (px, self.y1)],
   )
   self.inside([(px, self.y0)]) |> ignore
-  if label != "" {
-    self.c.text(px + 4.0, self.y0 + 10.0, label, size=10.0, opacity=Some(0.8))
+  if label is Some(l) {
+    self.c.text(px + 4.0, self.y0 + 10.0, l, size=10.0, opacity=Some(0.8))
   }
 }
 
@@ -520,7 +520,7 @@ pub fn Plot::vline(
 pub fn Plot::hline(
   self : Plot,
   yv : Double,
-  label~ : String = "",
+  label~ : String? = None,
   dash~ : String? = Some("4 3"),
   opacity~ : Double = 0.6,
 ) -> Unit {
@@ -530,11 +530,11 @@ pub fn Plot::hline(
     [(self.x0, py), (self.x1, py)],
   )
   self.inside([(self.x1, py)]) |> ignore
-  if label != "" {
+  if label is Some(l) {
     self.c.text(
       self.x1 - 4.0,
       py - 4.0,
-      label,
+      l,
       anchor=End,
       size=10.0,
       opacity=Some(0.8),
@@ -690,7 +690,7 @@ pub fn Plot::heat_legend(
   y : Double,
   w~ : Double = 70,
   fmt~ : (Double) -> String = fmt_num,
-  label~ : String = "",
+  label~ : String? = None,
 ) -> Unit {
   let (min, max) = mm
   let steps = 6
@@ -710,11 +710,11 @@ pub fn Plot::heat_legend(
     size=9.0,
     opacity=Some(0.6),
   )
-  if label != "" {
+  if label is Some(l) {
     self.c.text(
       x - 6.0,
       y + 4.0,
-      label,
+      l,
       anchor=End,
       central=true,
       size=9.0,

@@ -58,7 +58,7 @@ fn main {
   p.data(fn(p) {
     mm = p.heatmap(rows.map(fn(r) { r.1.map(fn(v) { v.abs() }) }))
   })
-  p.heat_legend(mm, p.x1 - 80.0, p.y1 + 56.0, fmt=fn(v) { @s.fixed(v, d=1) }, label="|d|")
+  p.heat_legend(mm, p.x1 - 80.0, p.y1 + 56.0, fmt=fn(v) { @s.fixed(v, d=1) }, label=Some("|d|"))
 
   let cw = (p.x1 - p.x0) / n_c.to_double()
   let ch = (p.y1 - p.y0) / n_r.to_double()
@@ -102,6 +102,6 @@ fn main {
   }
 
   println(
-    c.render(label="claude-vs-devin effect sizes overall vs within the 変更の報告 genre: the clause-chaining signature persists, dependency depth collapses"),
+    c.render(label=Some("claude-vs-devin effect sizes overall vs within the 変更の報告 genre: the clause-chaining signature persists, dependency depth collapses")),
   )
 }

@@ -23,7 +23,7 @@ fn main {
       62.0,
       @s.Fixed(92.0),
       28.0,
-      label=label,
+      label=Some(label),
       size=12.0,
       rx=4.0,
       color=(if i == 1 { live } else { "currentColor" }),
@@ -45,7 +45,7 @@ fn main {
       164.0,
       @s.Fixed(92.0),
       28.0,
-      label=label,
+      label=Some(label),
       size=12.0,
       rx=4.0,
       color=(if i == 1 { live } else { "currentColor" }),
@@ -65,7 +65,7 @@ fn main {
       206.0,
       @s.Fixed(88.0),
       24.0,
-      label=label,
+      label=Some(label),
       size=11.0,
       rx=4.0,
       dash=Some("3 3"),
@@ -90,7 +90,7 @@ fn main {
     62.0,
     @s.Fixed(180.0),
     28.0,
-    label="Items([it])",
+    label=Some("Items([it])"),
     size=12.0,
     rx=4.0,
     color=live,
@@ -112,7 +112,7 @@ fn main {
     134.0,
     @s.Fixed(180.0),
     56.0,
-    label="Details {\n  depth, in_code, lines }",
+    label=Some("Details {\n  depth, in_code, lines }"),
     size=12.0,
     rx=4.0,
     color=live,
@@ -150,6 +150,6 @@ fn main {
   }
 
   println(
-    c.render(label="before: many slots, one live, kept by hand; after: two slots, variant carries its own vars"),
+    c.render(label=Some("before: many slots, one live, kept by hand; after: two slots, variant carries its own vars")),
   )
 }

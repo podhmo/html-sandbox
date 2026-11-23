@@ -45,14 +45,14 @@ fn main {
     (0.0, 320.0),
     w=420.0,
     h=170.0,
-    xtitle="日付 (JST)",
-    ytitle="レイテンシ (ms)",
+    xtitle=Some("日付 (JST)"),
+    ytitle=Some("レイテンシ (ms)"),
     xfmt=fn(v) { "10/\{v.to_int64()}" },
     grid=true,
   )
   p.frame()
   p.data(fn(p) {
-    p.vline(8.0, label="10/08 v2.3 デプロイ")
+    p.vline(8.0, label=Some("10/08 v2.3 デプロイ"))
     // colorful option: hue does the series distinction, width/dash
     // stays as a grayscale fallback so the figure still reads when
     // colors are unavailable (print, copy).
@@ -83,6 +83,6 @@ fn main {
   }
 
   println(
-    c.render(label="daily p50/p90 latency: p90 drops about \{drop_i}% after the 10/08 deploy (virtual data)"),
+    c.render(label=Some("daily p50/p90 latency: p90 drops about \{drop_i}% after the 10/08 deploy (virtual data)")),
   )
 }

@@ -116,6 +116,6 @@ fn main {
   }
 
   println(
-    c.render(label="bar per SKILL.md section by line count: figure sections take 67 of 128 lines, content honesty 8, and no line covers narrator, standpoint or voice"),
+    c.render(label=Some("bar per SKILL.md section by line count: figure sections take 67 of 128 lines, content honesty 8, and no line covers narrator, standpoint or voice")),
   )
 }

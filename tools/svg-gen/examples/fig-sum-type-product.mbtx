@@ -107,6 +107,6 @@ fn main {
   }
 
   println(
-    c.render(label="product grids of the two split states; O marks combinations that occur, x marks ones the types allow but no input produces"),
+    c.render(label=Some("product grids of the two split states; O marks combinations that occur, x marks ones the types allow but no input produces")),
   )
 }

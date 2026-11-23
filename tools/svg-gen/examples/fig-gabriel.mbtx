@@ -67,6 +67,6 @@ fn main {
   )
 
   println(
-    c.render(label="longest edge of an obtuse triangle: its circumcircle is empty (Delaunay) but its diameter circle holds the third vertex (not Gabriel)"),
+    c.render(label=Some("longest edge of an obtuse triangle: its circumcircle is empty (Delaunay) but its diameter circle holds the third vertex (not Gabriel)")),
   )
 }

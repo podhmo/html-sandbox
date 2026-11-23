@@ -57,7 +57,7 @@ fn main {
         abort("first item decides the tag")
       }
     }
-    let tag = c.box(260.0, ry - 16.0, @s.Auto, 34.0, label=tag_s, color=col, width=2.0)
+    let tag = c.box(260.0, ry - 16.0, @s.Auto, 34.0, label=Some(tag_s), color=col, width=2.0)
     c.arrow(
       (152.0, ry - 4.0),
       c.anchor(tag, @s.W),
@@ -69,6 +69,6 @@ fn main {
   }
 
   println(
-    c.render(label="a list run's first item marker picks <ol> or <ul>; later markers only tag their own li"),
+    c.render(label=Some("a list run's first item marker picks <ol> or <ul>; later markers only tag their own li")),
   )
 }

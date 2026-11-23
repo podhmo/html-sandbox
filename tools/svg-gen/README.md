@@ -16,8 +16,8 @@ gets a small throwaway generator sharing a thin helper.
   properties:
   - `c.anchor(shape, @s.E)` and friends compute edge endpoints from shape
     geometry, so an arrow endpoint cannot drift off its box.
-  - `box(x, y, @s.Auto, h, label=...)` sizes the box to the estimated label
-    width, so a label cannot outgrow its box.
+  - `box(x, y, @s.Auto, h, label=Some(...))` sizes the box to the estimated
+    label width, so a label cannot outgrow its box.
   - `arrow` takes `ends=@s.Single(@s.Both)` (or `Start`/`NoHead`) for
     bidirectional edges such as request/response pairs, or `Pair` for
     two opposing arrows; `midpoint` finds label positions, and a

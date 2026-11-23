@@ -368,7 +368,7 @@ pub fn Canvas::box(
   y : Double,
   w : Sizing,
   h : Double,
-  label~ : String = "",
+  label~ : String? = None,
   rx~ : Double = 8,
   pad_x~ : Double = 16,
   size~ : Double = 14,
@@ -379,17 +379,17 @@ pub fn Canvas::box(
   underline~ : Underline = No,
 ) -> Shape {
   let ww = match w {
-    Auto => {
-      if label == "" {
-        abort("box w=Auto needs a label")
+    Auto =>
+      match label {
+        None => abort("box w=Auto needs a label")
+        Some(l) =>
+          l
+          .split("\n")
+          .fold(init=0.0, fn(m, s) {
+            @cmp.maximum(m, text_width(s.to_owned(), size~))
+          }) +
+          2.0 * pad_x
       }
-      label
-      .split("\n")
-      .fold(init=0.0, fn(m, s) {
-        @cmp.maximum(m, text_width(s.to_owned(), size~))
-      }) +
-      2.0 * pad_x
-    }
     Fixed(v) => v
   }
   let rect = El(
@@ -397,20 +397,20 @@ pub fn Canvas::box(
     " fill=\"none\"\{stroke_attrs(dash~, opacity~, width~, color~)}/>",
     [(x, y), (x + ww, y + h)],
   )
-  let node = if label != "" {
-    Group([
-      rect,
-      self.label_lines(
-        x + ww / 2.0,
-        y + h / 2.0,
-        label,
-        size,
-        opacity~,
-        underline~,
-      ),
-    ])
-  } else {
-    rect
+  let node = match label {
+    Some(l) =>
+      Group([
+        rect,
+        self.label_lines(
+          x + ww / 2.0,
+          y + h / 2.0,
+          l,
+          size,
+          opacity~,
+          underline~,
+        ),
+      ])
+    None => rect
   }
   self.push(node)
   { x, y, w: ww, h, }
@@ -422,7 +422,7 @@ pub fn Canvas::circle(
   cx : Double,
   cy : Double,
   r : Double,
-  label~ : String = "",
+  label~ : String? = None,
   size~ : Double = 14,
   dash~ : String? = None,
   opacity~ : Double? = None,
@@ -435,10 +435,10 @@ pub fn Canvas::circle(
     " fill=\"none\"\{stroke_attrs(dash~, opacity~, width~, color~)}/>",
     [(cx - r, cy - r), (cx + r, cy + r)],
   )
-  let node = if label != "" {
-    Group([ring, self.label_lines(cx, cy, label, size, opacity~, underline~)])
-  } else {
-    ring
+  let node = match label {
+    Some(l) =>
+      Group([ring, self.label_lines(cx, cy, l, size, opacity~, underline~)])
+    None => ring
   }
   self.push(node)
   { x: cx - r, y: cy - r, w: 2.0 * r, h: 2.0 * r, }
@@ -828,7 +828,7 @@ pub fn Canvas::render(
   self : Canvas,
   width~ : Double? = None,
   height~ : Double? = None,
-  label~ : String = "",
+  label~ : String? = None,
 ) -> String {
   let m = self.margin
   let bounds = merge_bounds(
@@ -860,10 +860,9 @@ pub fn Canvas::render(
     None => h.round().to_int64().to_string()
   }
   let size = " width=\"\{wv}\" height=\"\{hv}\""
-  let aria = if label != "" {
-    " role=\"img\" aria-label=\"\{esc(label)}\""
-  } else {
-    ""
+  let aria = match label {
+    Some(l) => " role=\"img\" aria-label=\"\{esc(l)}\""
+    None => ""
   }
   "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"\{vb}\"\{size}\{aria}>\n" +
   emit_nodes(self.backdrop) +

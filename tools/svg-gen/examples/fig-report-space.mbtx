@@ -55,6 +55,6 @@ fn main {
   }
 
   println(
-    c.render(label="five report variants on a formality vs. reader-distance plane"),
+    c.render(label=Some("five report variants on a formality vs. reader-distance plane")),
   )
 }

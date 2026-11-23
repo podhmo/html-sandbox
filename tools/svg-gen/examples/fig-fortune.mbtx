@@ -103,6 +103,6 @@ fn main {
   c.text(x1 - 6.0, ly - 8.0, "sweep", anchor=@s.End, size=11.0, opacity=Some(0.7))
 
   println(
-    c.render(label="Fortune's sweep: site parabolas (dashed), their top envelope is the beach line (thick), breakpoints trace Voronoi edges"),
+    c.render(label=Some("Fortune's sweep: site parabolas (dashed), their top envelope is the beach line (thick), breakpoints trace Voronoi edges")),
   )
 }

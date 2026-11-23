@@ -14,10 +14,10 @@ fn main {
   let gy = 74.0
   let c = @s.Canvas()
 
-  let a = c.box(0.0, 0.0, @s.Auto, h, label="振る舞いが\n出力に入る")
-  let b = c.box(c.right_of(a, gx), a.y, @s.Auto, h, label="止められない\n（沈黙）")
-  let cc = c.box(b.x, b.y + h + gy, @s.Auto, h, label="文脈に前例\nとして残る")
-  let d = c.box(a.x, cc.y, @s.Auto, h, label="次回の exemplar\nに化ける")
+  let a = c.box(0.0, 0.0, @s.Auto, h, label=Some("振る舞いが\n出力に入る"))
+  let b = c.box(c.right_of(a, gx), a.y, @s.Auto, h, label=Some("止められない\n（沈黙）"))
+  let cc = c.box(b.x, b.y + h + gy, @s.Auto, h, label=Some("文脈に前例\nとして残る"))
+  let d = c.box(a.x, cc.y, @s.Auto, h, label=Some("次回の exemplar\nに化ける"))
 
   c.arrow(c.anchor(a, @s.E), c.anchor(b, @s.W))
   c.arrow(c.anchor(b, @s.S), c.anchor(cc, @s.N))
@@ -51,7 +51,7 @@ fn main {
     cc.y + h + gy,
     @s.Auto,
     h,
-    label="skill に書き込まれる\n＝明示要求に昇格",
+    label=Some("skill に書き込まれる\n＝明示要求に昇格"),
   )
   c.arrow(
     c.anchor(cc, @s.S),
@@ -74,6 +74,6 @@ fn main {
   }
 
   println(
-    c.render(label="silence loop: each unflagged output becomes the next exemplar; writing it down escapes the loop"),
+    c.render(label=Some("silence loop: each unflagged output becomes the next exemplar; writing it down escapes the loop")),
   )
 }

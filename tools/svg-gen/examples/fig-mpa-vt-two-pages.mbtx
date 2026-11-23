@@ -43,6 +43,6 @@ fn main {
   c.arrow(c.anchor(reveal, @s.S), c.anchor(css, @s.E), dash=Some("4 3"), opacity=Some(0.8))
 
   println(
-    c.render(label="旧ページの pageswap と新ページの pagereveal の両方で type を付けないと :active-view-transition-type が効かない図"),
+    c.render(label=Some("旧ページの pageswap と新ページの pagereveal の両方で type を付けないと :active-view-transition-type が効かない図")),
   )
 }

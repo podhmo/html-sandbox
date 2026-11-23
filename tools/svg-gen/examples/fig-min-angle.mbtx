@@ -134,6 +134,6 @@ fn main {
   )
 
   println(
-    c.render(label="Delaunay maximizes the minimum angle; the other diagonal leaves a smaller one"),
+    c.render(label=Some("Delaunay maximizes the minimum angle; the other diagonal leaves a smaller one")),
   )
 }

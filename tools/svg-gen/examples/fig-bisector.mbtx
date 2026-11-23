@@ -47,6 +47,6 @@ fn main {
   }
 
   println(
-    c.render(label="perpendicular bisector: locus of points equidistant from two sites"),
+    c.render(label=Some("perpendicular bisector: locus of points equidistant from two sites")),
   )
 }

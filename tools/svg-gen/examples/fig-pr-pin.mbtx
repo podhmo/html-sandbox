@@ -76,6 +76,6 @@ fn main {
   )
 
   println(
-    c.render(label="close・merge 時に記録された head コミットを pin ref が保持し続ける図"),
+    c.render(label=Some("close・merge 時に記録された head コミットを pin ref が保持し続ける図")),
   )
 }

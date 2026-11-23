@@ -108,6 +108,6 @@ fn main {
   )
 
   println(
-    c.render(label="edge flip: an illegal diagonal (site inside the circumcircle) is swapped for the Delaunay one"),
+    c.render(label=Some("edge flip: an illegal diagonal (site inside the circumcircle) is swapped for the Delaunay one")),
   )
 }

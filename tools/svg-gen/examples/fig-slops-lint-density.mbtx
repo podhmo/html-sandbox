@@ -47,7 +47,7 @@ fn main {
   )
   let mut mm = (0.0, 0.0)
   p.data(fn(p) { mm = p.heatmap(rows.map(fn(r) { r.1 })) })
-  p.heat_legend(mm, p.x1 - 80.0, p.y1 + 56.0, fmt=fn(v) { @s.fixed(v, d=1) }, label="候補/千字")
+  p.heat_legend(mm, p.x1 - 80.0, p.y1 + 56.0, fmt=fn(v) { @s.fixed(v, d=1) }, label=Some("候補/千字"))
 
   // value labels inside every cell: the gap between a dark cell
   // and a near-zero neighbour is the whole point, so keep the
@@ -73,6 +73,6 @@ fn main {
   }
 
   println(
-    c.render(label="yomiyasu lint candidate density by author: pause_comma separates the authors, meaning-level rules stay flat"),
+    c.render(label=Some("yomiyasu lint candidate density by author: pause_comma separates the authors, meaning-level rules stay flat")),
   )
 }

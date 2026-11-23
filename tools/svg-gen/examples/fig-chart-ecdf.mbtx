@@ -41,8 +41,8 @@ fn main {
     (0.0, 1.0),
     w=420.0,
     h=190.0,
-    xtitle="レイテンシ (ms)",
-    ytitle="累積割合",
+    xtitle=Some("レイテンシ (ms)"),
+    ytitle=Some("累積割合"),
     yfmt=fn(v) { @s.fixed(v, d=1) },
     grid=true,
   )
@@ -51,7 +51,7 @@ fn main {
   // off axes.
   p.data(fn(p) {
     for q in [0.5, 0.9, 0.99] {
-      p.hline(q, label="p\{(q * 100.0).to_int64()}", opacity=0.25)
+      p.hline(q, label=Some("p\{(q * 100.0).to_int64()}"), opacity=0.25)
     }
     // stride-thinned to ~150 vertices per curve for inline embedding;
     // the ECDF statistic itself is unchanged.
@@ -80,6 +80,6 @@ fn main {
   }
 
   println(
-    c.render(label="ECDF of request latency: p99 improves \{gain_i}% in v2.3 (virtual data)"),
+    c.render(label=Some("ECDF of request latency: p99 improves \{gain_i}% in v2.3 (virtual data)")),
   )
 }

@@ -47,6 +47,6 @@ fn main {
   c.text(cc.o.0 + 8.0, cc.o.1, "外心", size=12.0, central=true)
 
   println(
-    c.render(label="three non-collinear sites: two bisectors meet at the circumcenter, one circle through all three"),
+    c.render(label=Some("three non-collinear sites: two bisectors meet at the circumcenter, one circle through all three")),
   )
 }

@@ -65,6 +65,6 @@ fn main {
     abort("1024px is the more expensive run")
   }
   println(
-    c.render(label="peak VRAM of the local LoRA training: 512px 400 steps 3.00 GiB, 1024px 10 steps 4.99 GiB, on an 8 GiB card"),
+    c.render(label=Some("peak VRAM of the local LoRA training: 512px 400 steps 3.00 GiB, 1024px 10 steps 4.99 GiB, on an 8 GiB card")),
   )
 }

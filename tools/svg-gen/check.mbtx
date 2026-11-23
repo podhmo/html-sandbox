@@ -245,8 +245,8 @@ async fn check(file : String) -> Unit {
 
   if !(
       svg.contains("role=\"img\"") ||
-      svg.contains("aria-label=") ||
-      svg.contains("<title>")
+      svg.contains("aria-label=Some(") ||
+      svg.contains(")<title>")
     ) {
     report(Warn, file, "no aria-label, role=img, or <title>")
   }

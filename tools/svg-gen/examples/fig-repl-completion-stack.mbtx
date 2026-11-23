@@ -55,6 +55,6 @@ fn main {
   }
 
   println(
-    c.render(label="nine stacked pull requests layered on main, merging bottom-up"),
+    c.render(label=Some("nine stacked pull requests layered on main, merging bottom-up")),
   )
 }

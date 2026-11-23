@@ -17,7 +17,7 @@ fn main {
       Some(i) => c.color(i)
       None => "currentColor"
     }
-    c.box(x, y, w, 34.0, label=label, color=color, size=12.0, pad_x=10.0)
+    c.box(x, y, w, 34.0, label=Some(label), color=color, size=12.0, pad_x=10.0)
   }
 
   // ---- top row: inline script, blocked ----
@@ -47,6 +47,6 @@ fn main {
   c.text(360.0, 330.0, "no <script> element → CSP と共存", size=11.0, opacity=Some(0.7))
 
   println(
-    c.render(label="inline speculationrules は CSP にブロックされるが Speculation-Rules ヘッダ配信なら共存できる図"),
+    c.render(label=Some("inline speculationrules は CSP にブロックされるが Speculation-Rules ヘッダ配信なら共存できる図")),
   )
 }

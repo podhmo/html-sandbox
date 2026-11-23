@@ -101,6 +101,6 @@ fn main {
   c.text(tx - 11.0, y0 + 6.0 * row - 15.0, "#133 が指した記事", anchor=@s.End, size=10.0, opacity=Some(0.75))
 
   println(
-    c.render(label="slops articles by date and use case: twelve feature reports spread through October; claim-examining and meta articles appear only from Nov 3"),
+    c.render(label=Some("slops articles by date and use case: twelve feature reports spread through October; claim-examining and meta articles appear only from Nov 3")),
   )
 }

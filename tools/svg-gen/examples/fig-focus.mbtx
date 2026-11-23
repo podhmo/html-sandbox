@@ -9,13 +9,13 @@ fn main {
   let c = @s.Canvas()
   let dim = 0.35
 
-  let focus = c.box(140.0, 60.0, @s.Fixed(130.0), 46.0, label="focus pkg")
+  let focus = c.box(140.0, 60.0, @s.Fixed(130.0), 46.0, label=Some("focus pkg"))
   let users = c.box(
     c.left_of(focus, 40.0, 110.0),
     60.0,
     @s.Fixed(110.0),
     46.0,
-    label="users of it",
+    label=Some("users of it"),
     size=13.0,
     opacity=Some(dim),
   )
@@ -24,7 +24,7 @@ fn main {
     c.above(focus, 24.0, 40.0),
     @s.Fixed(130.0),
     40.0,
-    label="a library",
+    label=Some("a library"),
     size=13.0,
     opacity=Some(dim),
   )
@@ -33,7 +33,7 @@ fn main {
     60.0,
     @s.Fixed(110.0),
     46.0,
-    label="its tests",
+    label=Some("its tests"),
     size=13.0,
     opacity=Some(dim),
   )
@@ -42,7 +42,7 @@ fn main {
     c.below(focus, 24.0),
     @s.Fixed(130.0),
     40.0,
-    label="the app",
+    label=Some("the app"),
     size=13.0,
     opacity=Some(dim),
   )
@@ -60,5 +60,5 @@ fn main {
     abort("top and bottom boxes share the column")
   }
 
-  println(c.render(label="one package in focus, related packages dimmed"))
+  println(c.render(label=Some("one package in focus, related packages dimmed")))
 }

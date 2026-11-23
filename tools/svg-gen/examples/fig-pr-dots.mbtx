@@ -83,6 +83,6 @@ fn main {
   }
 
   println(
-    c.render(label="two-dot base..head と three-dot merge-base..head の対象範象範囲の違い"),
+    c.render(label=Some("two-dot base..head と three-dot merge-base..head の対象範象範囲の違い")),
   )
 }

@@ -107,6 +107,6 @@ fn main {
   c.text(115.0 + dx, 218.0, "retriangulated", anchor=@s.Middle, size=11.0, opacity=Some(0.7))
 
   println(
-    c.render(label="Bowyer-Watson step: remove triangles whose circumcircle contains the new point, then stitch the cavity to it"),
+    c.render(label=Some("Bowyer-Watson step: remove triangles whose circumcircle contains the new point, then stitch the cavity to it")),
   )
 }

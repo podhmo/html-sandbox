@@ -139,6 +139,6 @@ fn main {
   panel(dt, dx - 25.0, dy - 15.0, "Delaunay (\{dt.length()})")
 
   println(
-    c.render(label="proximity graph chain on one point set: NNG inside EMST inside Gabriel inside Delaunay"),
+    c.render(label=Some("proximity graph chain on one point set: NNG inside EMST inside Gabriel inside Delaunay")),
   )
 }

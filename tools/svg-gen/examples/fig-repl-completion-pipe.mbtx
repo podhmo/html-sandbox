@@ -15,9 +15,9 @@ fn main {
   let gap = 26.0
   let colx = 170.0
 
-  let input = c.box(colx, 0.0, @s.Auto, h, label="`strings.To`\nline + cursor", size=13.0)
-  let ctx = c.box(colx, c.below(input, gap), @s.Auto, h, label="completeContext\nscanner offsets", size=13.0, color=c.color(0))
-  let base = c.box(colx, c.below(ctx, gap), @s.Auto, h, label="resolveBase\nwhat is left of `.`", size=13.0)
+  let input = c.box(colx, 0.0, @s.Auto, h, label=Some("`strings.To`\nline + cursor"), size=13.0)
+  let ctx = c.box(colx, c.below(input, gap), @s.Auto, h, label=Some("completeContext\nscanner offsets"), size=13.0, color=c.color(0))
+  let base = c.box(colx, c.below(ctx, gap), @s.Auto, h, label=Some("resolveBase\nwhat is left of `.`"), size=13.0)
 
   // suppression exit on the left of the context box
   let suppress = c.box(
@@ -25,7 +25,7 @@ fn main {
     ctx.y + 10.0,
     @s.Fixed(140.0),
     36.0,
-    label="no candidates",
+    label=Some("no candidates"),
     size=12.0,
     dash=Some("5 3"),
     opacity=Some(0.85),
@@ -33,11 +33,11 @@ fn main {
 
   // two resolution tiers side by side below the base
   let tier_y = c.below(base, gap)
-  let statik = c.box(0.0, tier_y, @s.Auto, h, label="resolveExpr\nAST walk only", size=13.0, color=c.color(2))
-  let evaled = c.box(c.right_of(statik, 60.0), tier_y, @s.Auto, h, label="evalBase (opt-in)\nEvalExpr + memo", size=13.0, color=c.color(3))
+  let statik = c.box(0.0, tier_y, @s.Auto, h, label=Some("resolveExpr\nAST walk only"), size=13.0, color=c.color(2))
+  let evaled = c.box(c.right_of(statik, 60.0), tier_y, @s.Auto, h, label=Some("evalBase (opt-in)\nEvalExpr + memo"), size=13.0, color=c.color(3))
 
-  let members = c.box(colx, c.below(statik, gap), @s.Auto, h, label="members / keys\ndedupe + Ambiguous", size=13.0)
-  let splice = c.box(colx, c.below(members, gap), @s.Auto, h, label="splice prefix\nor list", size=13.0)
+  let members = c.box(colx, c.below(statik, gap), @s.Auto, h, label=Some("members / keys\ndedupe + Ambiguous"), size=13.0)
+  let splice = c.box(colx, c.below(members, gap), @s.Auto, h, label=Some("splice prefix\nor list"), size=13.0)
 
   c.arrow(c.anchor(input, @s.S), c.anchor(ctx, @s.N))
   c.arrow(c.anchor(ctx, @s.S), c.anchor(base, @s.N))
@@ -62,6 +62,6 @@ fn main {
   }
 
   println(
-    c.render(label="TAB completion pipeline: context scan, two base-resolution tiers, member enumeration, splice"),
+    c.render(label=Some("TAB completion pipeline: context scan, two base-resolution tiers, member enumeration, splice")),
   )
 }

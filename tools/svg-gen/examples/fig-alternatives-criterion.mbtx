@@ -23,6 +23,6 @@ fn main {
   ignore(c.box(10.0, 186.0, @s.Fixed(400.0), 44.0, dash=Some("2 3")))
   item(32.0, 208.0, "VOICEVOX、Fish Speech（Grok の候補。検討の記録なし）")
   println(
-    c.render(label="捨てた代替案を残す二つの基準の包含関係と、TTS の件の案の位置"),
+    c.render(label=Some("捨てた代替案を残す二つの基準の包含関係と、TTS の件の案の位置")),
   )
 }

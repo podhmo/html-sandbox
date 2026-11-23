@@ -54,6 +54,6 @@ fn main {
   )
 
   println(
-    c.render(label="a Voronoi vertex sits at the circumcenter of its three sites; the circle contains no other site"),
+    c.render(label=Some("a Voronoi vertex sits at the circumcenter of its three sites; the circle contains no other site")),
   )
 }

@@ -90,6 +90,6 @@ fn main {
   )
 
   println(
-    c.render(label="three bars over program order: a block-scoped defer closes f when the if ends, before it is used; Go's function-scoped defer keeps it until the function ends; Scope.run keeps it until the explicit scope body ends"),
+    c.render(label=Some("three bars over program order: a block-scoped defer closes f when the if ends, before it is used; Go's function-scoped defer keeps it until the function ends; Scope.run keeps it until the explicit scope body ends")),
   )
 }

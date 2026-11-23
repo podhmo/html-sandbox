@@ -58,8 +58,8 @@ fn main {
     (0.0, @math.ceil(peak.to_double() * 1.1 / 10.0) * 10.0),
     w=420.0,
     h=170.0,
-    xtitle="試行時間 (ms)",
-    ytitle="件数",
+    xtitle=Some("試行時間 (ms)"),
+    ytitle=Some("件数"),
     grid=true,
   )
   p.frame()
@@ -73,6 +73,6 @@ fn main {
   }
 
   println(
-    c.render(label="histogram of cached trials showing two modes (same virtual data as the box plot)"),
+    c.render(label=Some("histogram of cached trials showing two modes (same virtual data as the box plot)")),
   )
 }

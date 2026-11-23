@@ -36,7 +36,7 @@ fn main {
     w=400.0,
     h=180.0,
     xscale=@s.Log,
-    xtitle="RTF（音声 1 秒あたりの合成秒数、対数軸）",
+    xtitle=Some("RTF（音声 1 秒あたりの合成秒数、対数軸）"),
     grid=true,
   )
 
@@ -52,7 +52,7 @@ fn main {
   )
 
   p.data(fn(p) {
-    p.vline(1.0, label="実時間の境界")
+    p.vline(1.0, label=Some("実時間の境界"))
     for row in rows {
       let (ry, rtf, label, cause) = row
       p.dots([(p.xs.map(rtf), p.ys.map(ry))], r=5.0, opacity=1.0, color=c.color(cause))
@@ -73,6 +73,6 @@ fn main {
   }
 
   println(
-    c.render(label="dot plot of RTF for three Qwen configurations and two Piper measurements: the Qwen change tracks the driver, the Piper change is measurement noise"),
+    c.render(label=Some("dot plot of RTF for three Qwen configurations and two Piper measurements: the Qwen change tracks the driver, the Piper change is measurement noise")),
   )
 }

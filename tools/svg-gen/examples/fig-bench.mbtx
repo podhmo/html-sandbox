@@ -42,5 +42,5 @@ fn main {
     }
   }
 
-  println(c.render(label="SVG file size by renderer and layout"))
+  println(c.render(label=Some("SVG file size by renderer and layout")))
 }

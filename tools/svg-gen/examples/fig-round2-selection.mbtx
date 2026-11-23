@@ -83,6 +83,6 @@ fn main {
   )
 
   println(
-    c.render(label="208 ガイドを「宣言的優先・storybook 検証可能な JS のみ」「対象 UI と明確な不足」の2フィルタで絞り、8 タスクを全てマージした概略図"),
+    c.render(label=Some("208 ガイドを「宣言的優先・storybook 検証可能な JS のみ」「対象 UI と明確な不足」の2フィルタで絞り、8 タスクを全てマージした概略図")),
   )
 }

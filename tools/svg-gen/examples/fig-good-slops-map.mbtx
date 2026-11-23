@@ -77,6 +77,6 @@ fn main {
   }
 
   println(
-    c.render(label="qualitative map: x from what the requester could already see to what only the AI knew, y from content to voice; the TTS article's properties sit on the visible side, the unwritten reflection on the AI-only content side"),
+    c.render(label=Some("qualitative map: x from what the requester could already see to what only the AI knew, y from content to voice; the TTS article's properties sit on the visible side, the unwritten reflection on the AI-only content side")),
   )
 }

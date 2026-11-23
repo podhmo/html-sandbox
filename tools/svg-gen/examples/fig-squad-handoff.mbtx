@@ -14,9 +14,9 @@ fn main {
   let c = @s.Canvas()
 
   // Ephemeral workers. Colour = the mark that dies with the session.
-  let s1 = c.box(0.0, 0.0, @s.Auto, h, label="実装セッション 1\n（揮発）", color=c.color(0))
-  let s2 = c.box(c.right_of(s1, gx), s1.y, @s.Auto, h, label="実装セッション 2\n（揮発）", color=c.color(1))
-  let s3 = c.box(c.right_of(s2, gx), s1.y, @s.Auto, h, label="実装セッション 3\n（揮発）", color=c.color(2))
+  let s1 = c.box(0.0, 0.0, @s.Auto, h, label=Some("実装セッション 1\n（揮発）"), color=c.color(0))
+  let s2 = c.box(c.right_of(s1, gx), s1.y, @s.Auto, h, label=Some("実装セッション 2\n（揮発）"), color=c.color(1))
+  let s3 = c.box(c.right_of(s2, gx), s1.y, @s.Auto, h, label=Some("実装セッション 3\n（揮発）"), color=c.color(2))
 
   // The absent channel: dashed = the path that does not exist.
   c.arrow(c.anchor(s1, @s.E), c.anchor(s2, @s.W), dash=Some("4 4"), opacity=Some(0.5))
@@ -72,10 +72,10 @@ fn main {
   )
 
   let inner_w = (lane.w - 2.0 * 18.0 - 3.0 * 14.0) / 4.0
-  let d1 = c.box(lane.x + 18.0, lane.y + 44.0, @s.Fixed(inner_w), 60.0, label="decisions/\n決定の記録", size=12.0)
-  let d2 = c.box(c.right_of(d1, 14.0), d1.y, @s.Fixed(inner_w), 60.0, label="sketch/\n検証レポート", size=12.0)
-  let d3 = c.box(c.right_of(d2, 14.0), d1.y, @s.Fixed(inner_w), 60.0, label="problems/\n未決の懸念", size=12.0)
-  let d4 = c.box(c.right_of(d3, 14.0), d1.y, @s.Fixed(inner_w), 60.0, label="TODO.md\nタスク＋依存", size=12.0)
+  let d1 = c.box(lane.x + 18.0, lane.y + 44.0, @s.Fixed(inner_w), 60.0, label=Some("decisions/\n決定の記録"), size=12.0)
+  let d2 = c.box(c.right_of(d1, 14.0), d1.y, @s.Fixed(inner_w), 60.0, label=Some("sketch/\n検証レポート"), size=12.0)
+  let d3 = c.box(c.right_of(d2, 14.0), d1.y, @s.Fixed(inner_w), 60.0, label=Some("problems/\n未決の懸念"), size=12.0)
+  let d4 = c.box(c.right_of(d3, 14.0), d1.y, @s.Fixed(inner_w), 60.0, label=Some("TODO.md\nタスク＋依存"), size=12.0)
 
   // Write arrows drop from each session; handoff arrows rise into
   // the next one. Offset pairs so read and write stay
@@ -134,6 +134,6 @@ fn main {
   }
 
   println(
-    c.render(label="squad handoff: three coloured session boxes sit above a document lane (decisions, sketch, problems, TODO); dashed arrows between sessions mark the missing direct channel while coloured arrows show each session writing down into the lane and the next session reading up from it"),
+    c.render(label=Some("squad handoff: three coloured session boxes sit above a document lane (decisions, sketch, problems, TODO); dashed arrows between sessions mark the missing direct channel while coloured arrows show each session writing down into the lane and the next session reading up from it")),
   )
 }
