@@ -266,21 +266,18 @@ fn fixed1(v : Double) -> String {
 
 ///|
 fn sattrs(
-  dash~ : String?,
+  dash~ : String,
   opacity~ : Double?,
-  width~ : Double?,
-  color~ : String?,
+  width~ : Double,
+  color~ : String,
 ) -> String {
-  let w = " stroke-width=\"\{num(width.unwrap_or(1.5))}\""
-  let d = match dash {
-    Some(v) => " stroke-dasharray=\"\{v}\""
-    None => ""
-  }
+  let w = " stroke-width=\"\{num(width)}\""
+  let d = if dash == "" { "" } else { " stroke-dasharray=\"\{dash}\"" }
   let o = match opacity {
     Some(v) => " opacity=\"\{v}\""
     None => ""
   }
-  " stroke=\"\{color.unwrap_or("currentColor")}\"" + w + d + o
+  " stroke=\"\{color}\"" + w + d + o
 }
 
 /// Run mark-emitting calls; their elements go into a
@@ -315,8 +312,8 @@ pub fn Plot::frame(
   }
   self.framed = true
   let c = self.c
-  c.line((self.x0, self.y0), (self.x0, self.y1), opacity=Some(0.45), width=Some(1.0))
-  c.line((self.x0, self.y1), (self.x1, self.y1), opacity=Some(0.45), width=Some(1.0))
+  c.line((self.x0, self.y0), (self.x0, self.y1), opacity=Some(0.45), width=1.0)
+  c.line((self.x0, self.y1), (self.x1, self.y1), opacity=Some(0.45), width=1.0)
   let yts = if yticks.length() > 0 {
     yticks
   } else {
@@ -328,10 +325,10 @@ pub fn Plot::frame(
       Lab(v, s) => (v, s)
     }
     let py = self.ys.map(v)
-    c.line((self.x0 - 3.0, py), (self.x0, py), opacity=Some(0.5), width=Some(1.0))
+    c.line((self.x0 - 3.0, py), (self.x0, py), opacity=Some(0.5), width=1.0)
     c.text(self.x0 - 6.0, py, label, anchor=End, central=true, size=10.0, opacity=Some(0.7))
     if self.grid {
-      c.line((self.x0, py), (self.x1, py), opacity=Some(0.1), width=Some(1.0))
+      c.line((self.x0, py), (self.x1, py), opacity=Some(0.1), width=1.0)
     }
   }
   let xts = if xticks.length() > 0 {
@@ -345,7 +342,7 @@ pub fn Plot::frame(
       Lab(v, s) => (v, s)
     }
     let px = self.xs.map(v)
-    c.line((px, self.y1), (px, self.y1 + 3.0), opacity=Some(0.5), width=Some(1.0))
+    c.line((px, self.y1), (px, self.y1 + 3.0), opacity=Some(0.5), width=1.0)
     c.text(px, self.y1 + 16.0, label, anchor=Middle, size=10.0, opacity=Some(0.7))
   }
   if self.xtitle != "" {
@@ -364,10 +361,10 @@ pub fn Plot::series(
   self : Plot,
   pts : Array[Point],
   label~ : String = "",
-  dash~ : String? = None,
+  dash~ : String = "",
   opacity~ : Double? = None,
-  width~ : Double? = None,
-  color~ : String? = None,
+  width~ : Double = 1.5,
+  color~ : String = "currentColor",
 ) -> Unit {
   if pts.length() < 2 {
     return
@@ -385,10 +382,10 @@ pub fn Plot::step(
   self : Plot,
   pts : Array[Point],
   label~ : String = "",
-  dash~ : String? = None,
+  dash~ : String = "",
   opacity~ : Double? = None,
-  width~ : Double? = None,
-  color~ : String? = None,
+  width~ : Double = 1.5,
+  color~ : String = "currentColor",
 ) -> Unit {
   if pts.length() < 2 {
     return
@@ -411,9 +408,9 @@ pub fn Plot::dots(
   pts : Array[Point],
   r~ : Double = 1.8,
   opacity~ : Double = 0.5,
-  color~ : String? = None,
+  color~ : String = "currentColor",
 ) -> Unit {
-  let fill = color.unwrap_or("currentColor")
+  let fill = color
   for p in self.inside(pts) {
     let (x, y) = p
     self.put(
@@ -435,7 +432,7 @@ pub fn Plot::vline(
 ) -> Unit {
   let px = self.xs.map(xv)
   self.put(
-    "<line x1=\"\{num(px)}\" y1=\"\{num(self.y0)}\" x2=\"\{num(px)}\" y2=\"\{num(self.y1)}\"\{sattrs(dash=Some(dash), opacity=Some(opacity), width=Some(1.0), color=None)}/>",
+    "<line x1=\"\{num(px)}\" y1=\"\{num(self.y0)}\" x2=\"\{num(px)}\" y2=\"\{num(self.y1)}\"\{sattrs(dash~, opacity=Some(opacity), width=1.0, color="currentColor")}/>",
     [(px, self.y0), (px, self.y1)],
   )
   self.inside([(px, self.y0)]) |> ignore
@@ -455,7 +452,7 @@ pub fn Plot::hline(
 ) -> Unit {
   let py = self.ys.map(yv)
   self.put(
-    "<line x1=\"\{num(self.x0)}\" y1=\"\{num(py)}\" x2=\"\{num(self.x1)}\" y2=\"\{num(py)}\"\{sattrs(dash=Some(dash), opacity=Some(opacity), width=Some(1.0), color=None)}/>",
+    "<line x1=\"\{num(self.x0)}\" y1=\"\{num(py)}\" x2=\"\{num(self.x1)}\" y2=\"\{num(py)}\"\{sattrs(dash~, opacity=Some(opacity), width=1.0, color="currentColor")}/>",
     [(self.x0, py), (self.x1, py)],
   )
   self.inside([(self.x1, py)]) |> ignore
@@ -475,7 +472,7 @@ pub fn Plot::boxplot(
   groups : Array[BoxGroup],
   box_w~ : Double = 0.44,
   overlay~ : Double = 0,
-  color~ : String? = None,
+  color~ : String = "currentColor",
   rand~ : (() -> Double)? = None,
 ) -> Unit {
   let stride = if overlay > 0 && overlay < 1 {
@@ -501,7 +498,7 @@ pub fn Plot::boxplot(
           self.x1 - 1.5,
         ) // jitter stays inside the domain
         self.put(
-          "<circle cx=\"\{fixed1(jx)}\" cy=\"\{fixed1(self.ys.map(s[j]))}\" r=\"1.3\" fill=\"\{color.unwrap_or("currentColor")}\" fill-opacity=\"0.28\" stroke=\"none\"/>",
+          "<circle cx=\"\{fixed1(jx)}\" cy=\"\{fixed1(self.ys.map(s[j]))}\" r=\"1.3\" fill=\"\{color}\" fill-opacity=\"0.28\" stroke=\"none\"/>",
           [],
         )
       }
@@ -511,33 +508,33 @@ pub fn Plot::boxplot(
     let lo_y = self.ys.map(lo)
     let hi_y = self.ys.map(hi)
     self.put(
-      "<line x1=\"\{num(cx)}\" y1=\"\{num(lo_y)}\" x2=\"\{num(cx)}\" y2=\"\{num(hi_y)}\"\{sattrs(dash=None, opacity=Some(0.8), width=Some(1.0), color~)}/>",
+      "<line x1=\"\{num(cx)}\" y1=\"\{num(lo_y)}\" x2=\"\{num(cx)}\" y2=\"\{num(hi_y)}\"\{sattrs(dash="", opacity=Some(0.8), width=1.0, color~)}/>",
       [],
     )
     self.put(
-      "<line x1=\"\{num(cx - bw * 0.2)}\" y1=\"\{num(lo_y)}\" x2=\"\{num(cx + bw * 0.2)}\" y2=\"\{num(lo_y)}\"\{sattrs(dash=None, opacity=None, width=Some(1.0), color~)}/>",
+      "<line x1=\"\{num(cx - bw * 0.2)}\" y1=\"\{num(lo_y)}\" x2=\"\{num(cx + bw * 0.2)}\" y2=\"\{num(lo_y)}\"\{sattrs(dash="", opacity=None, width=1.0, color~)}/>",
       [],
     )
     self.put(
-      "<line x1=\"\{num(cx - bw * 0.2)}\" y1=\"\{num(hi_y)}\" x2=\"\{num(cx + bw * 0.2)}\" y2=\"\{num(hi_y)}\"\{sattrs(dash=None, opacity=None, width=Some(1.0), color~)}/>",
+      "<line x1=\"\{num(cx - bw * 0.2)}\" y1=\"\{num(hi_y)}\" x2=\"\{num(cx + bw * 0.2)}\" y2=\"\{num(hi_y)}\"\{sattrs(dash="", opacity=None, width=1.0, color~)}/>",
       [],
     )
     // outliers beyond the fences
     for v in s {
       if v < lo || v > hi {
         self.put(
-          "<circle cx=\"\{fixed1(cx)}\" cy=\"\{fixed1(self.ys.map(v))}\" r=\"1.6\" fill=\"none\" stroke=\"\{color.unwrap_or("currentColor")}\" stroke-width=\"1\" opacity=\"0.6\"/>",
+          "<circle cx=\"\{fixed1(cx)}\" cy=\"\{fixed1(self.ys.map(v))}\" r=\"1.6\" fill=\"none\" stroke=\"\{color}\" stroke-width=\"1\" opacity=\"0.6\"/>",
           [],
         )
       }
     }
     // IQR box + median
     self.put(
-      "<rect x=\"\{fixed1(cx - bw / 2.0)}\" y=\"\{fixed1(self.ys.map(q3))}\" width=\"\{fixed1(bw)}\" height=\"\{fixed1(self.ys.map(q1) - self.ys.map(q3))}\" fill=\"\{color.unwrap_or("currentColor")}\" fill-opacity=\"0.18\" stroke=\"\{color.unwrap_or("currentColor")}\" stroke-width=\"1.5\"/>",
+      "<rect x=\"\{fixed1(cx - bw / 2.0)}\" y=\"\{fixed1(self.ys.map(q3))}\" width=\"\{fixed1(bw)}\" height=\"\{fixed1(self.ys.map(q1) - self.ys.map(q3))}\" fill=\"\{color}\" fill-opacity=\"0.18\" stroke=\"\{color}\" stroke-width=\"1.5\"/>",
       [],
     )
     self.put(
-      "<line x1=\"\{num(cx - bw / 2.0)}\" y1=\"\{num(self.ys.map(q2))}\" x2=\"\{num(cx + bw / 2.0)}\" y2=\"\{num(self.ys.map(q2))}\"\{sattrs(dash=None, opacity=None, width=Some(2.5), color~)}/>",
+      "<line x1=\"\{num(cx - bw / 2.0)}\" y1=\"\{num(self.ys.map(q2))}\" x2=\"\{num(cx + bw / 2.0)}\" y2=\"\{num(self.ys.map(q2))}\"\{sattrs(dash="", opacity=None, width=2.5, color~)}/>",
       [],
     )
   }
@@ -545,13 +542,13 @@ pub fn Plot::boxplot(
 
 /// Histogram bars from bins() output; heights are counts.
 ///|
-pub fn Plot::histogram(self : Plot, bins : Array[Bin], color~ : String? = None) -> Unit {
+pub fn Plot::histogram(self : Plot, bins : Array[Bin], color~ : String = "currentColor") -> Unit {
   for b in bins {
     let x = self.xs.map(b.x0)
     let w = self.xs.map(b.x1) - x
     let top = self.inside([(self.xs.map(b.x0), self.ys.map(b.n.to_double()))])[0].1
     self.put(
-      "<rect x=\"\{fixed1(x)}\" y=\"\{fixed1(top)}\" width=\"\{fixed1(w)}\" height=\"\{fixed1(self.y1 - top)}\" fill=\"\{color.unwrap_or("currentColor")}\" fill-opacity=\"0.35\" stroke=\"\{color.unwrap_or("currentColor")}\" stroke-width=\"1\"/>",
+      "<rect x=\"\{fixed1(x)}\" y=\"\{fixed1(top)}\" width=\"\{fixed1(w)}\" height=\"\{fixed1(self.y1 - top)}\" fill=\"\{color}\" fill-opacity=\"0.35\" stroke=\"\{color}\" stroke-width=\"1\"/>",
       [],
     )
   }
@@ -562,7 +559,7 @@ pub fn Plot::histogram(self : Plot, bins : Array[Bin], color~ : String? = None) 
 /// theme-following). Row 0 draws at the top. Returns (min, max) for
 /// the legend.
 ///|
-pub fn Plot::heatmap(self : Plot, grid : Array[Array[Double]], color~ : String? = None) -> (Double, Double) {
+pub fn Plot::heatmap(self : Plot, grid : Array[Array[Double]], color~ : String = "currentColor") -> (Double, Double) {
   let rows = grid.length()
   let cols = grid[0].length()
   let cw = (self.x1 - self.x0) / cols.to_double()
@@ -584,7 +581,7 @@ pub fn Plot::heatmap(self : Plot, grid : Array[Array[Double]], color~ : String? 
     for i, v in row {
       let o = 0.06 + 0.9 * ((v - min) / span)
       self.put(
-        "<rect x=\"\{fixed1(self.x0 + i.to_double() * cw)}\" y=\"\{fixed1(self.y0 + j.to_double() * ch)}\" width=\"\{fixed1(cw - 0.6)}\" height=\"\{fixed1(ch - 0.6)}\" fill=\"\{color.unwrap_or("currentColor")}\" fill-opacity=\"\{fixed(o, 2)}\" stroke=\"none\"/>",
+        "<rect x=\"\{fixed1(self.x0 + i.to_double() * cw)}\" y=\"\{fixed1(self.y0 + j.to_double() * ch)}\" width=\"\{fixed1(cw - 0.6)}\" height=\"\{fixed1(ch - 0.6)}\" fill=\"\{color}\" fill-opacity=\"\{fixed(o, 2)}\" stroke=\"none\"/>",
         [],
       )
     }

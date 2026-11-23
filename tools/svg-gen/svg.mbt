@@ -179,24 +179,18 @@ fn Canvas::cover(self : Canvas, pts : Array[Point]) -> Unit {
 
 ///|
 fn stroke_attrs(
-  dash~ : String?,
+  dash~ : String,
   opacity~ : Double?,
-  width~ : Double?,
-  color~ : String?,
+  width~ : Double,
+  color~ : String,
 ) -> String {
-  let w = match width {
-    Some(v) if v != 1.5 => " stroke-width=\"\{v}\""
-    _ => " stroke-width=\"1.5\""
-  }
-  let d = match dash {
-    Some(v) => " stroke-dasharray=\"\{v}\""
-    None => ""
-  }
+  let w = " stroke-width=\"\{num(width)}\""
+  let d = if dash == "" { "" } else { " stroke-dasharray=\"\{dash}\"" }
   let o = match opacity {
     Some(v) => " opacity=\"\{v}\""
     None => ""
   }
-  " stroke=\"\{esc(color.unwrap_or("currentColor"))}\"" + w + d + o
+  " stroke=\"\{esc(color)}\"" + w + d + o
 }
 
 /// Palette color for the colorful option. Indexes wrap around, but
@@ -248,10 +242,10 @@ pub fn Canvas::box(
   rx~ : Double = 8,
   pad_x~ : Double = 16,
   size~ : Double = 14,
-  dash~ : String? = None,
+  dash~ : String = "",
   opacity~ : Double? = None,
-  width~ : Double? = None,
-  color~ : String? = None,
+  width~ : Double = 1.5,
+  color~ : String = "currentColor",
   underline~ : Double = 0,
 ) -> Shape {
   let ww = match w {
@@ -290,10 +284,10 @@ pub fn Canvas::circle(
   r : Double,
   label~ : String = "",
   size~ : Double = 14,
-  dash~ : String? = None,
+  dash~ : String = "",
   opacity~ : Double? = None,
-  width~ : Double? = None,
-  color~ : String? = None,
+  width~ : Double = 1.5,
+  color~ : String = "currentColor",
   underline~ : Double = 0,
 ) -> Shape {
   self.parts.push(
@@ -393,10 +387,10 @@ pub fn Canvas::arrow(
   gap~ : Double = 3,
   gap_start~ : Double? = None,
   gap_end~ : Double? = None,
-  dash~ : String? = None,
+  dash~ : String = "",
   opacity~ : Double? = None,
-  width~ : Double? = None,
-  color~ : String? = None,
+  width~ : Double = 1.5,
+  color~ : String = "currentColor",
 ) -> Unit {
   if split > 0 {
     let dx = to.0 - from.0
@@ -585,10 +579,10 @@ pub fn Canvas::line(
   gap~ : Double = 0,
   gap_start~ : Double? = None,
   gap_end~ : Double? = None,
-  dash~ : String? = None,
+  dash~ : String = "",
   opacity~ : Double? = None,
-  width~ : Double? = None,
-  color~ : String? = None,
+  width~ : Double = 1.5,
+  color~ : String = "currentColor",
 ) -> Unit {
   let pts = trim_ends(
     [from] + via + [to],
@@ -616,10 +610,10 @@ pub fn Canvas::path(
   self : Canvas,
   d : String,
   covered : Array[Point],
-  dash~ : String? = None,
+  dash~ : String = "",
   opacity~ : Double? = None,
-  width~ : Double? = None,
-  color~ : String? = None,
+  width~ : Double = 1.5,
+  color~ : String = "currentColor",
 ) -> Unit {
   self.parts.push(
     "<path d=\"\{d}\" fill=\"none\"\{stroke_attrs(dash~, opacity~, width~, color~)}/>",
