@@ -1,0 +1,81 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-ui-rules-button-order.mbtx -- the drift the ui-rules audit
+// found: two pages disagreed on whether the confirm button goes
+// left or right, and on where the row sits. One ".form-actions"
+// convention fixes both.
+
+fn main {
+  let c = @s.Canvas::new()
+  let strip_w = 310.0
+  let strip_h = 46.0
+  let x = 150.0
+
+  let strip = fn(y : Double, caption : String) -> @s.Shape {
+    let s = c.box(x, y, @s.Fixed(strip_w), strip_h, rx=4.0, opacity=Some(0.7))
+    c.text(
+      x - 14.0,
+      y + strip_h / 2.0,
+      caption,
+      anchor=@s.End,
+      central=true,
+      size=11.0,
+      opacity=Some(0.6),
+    )
+    s
+  }
+
+  let btn = fn(bx : Double, by : Double, label : String, i : Int) -> @s.Shape {
+    c.box(
+      bx,
+      by,
+      @s.Auto,
+      30.0,
+      label=label,
+      size=12.0,
+      pad_x=12.0,
+      rx=6.0,
+      color=c.color(i),
+      width=(if i == 0 { 2.0 } else { 1.5 }),
+    )
+  }
+
+  // before: the create form put Cancel first, left-aligned
+  // (colorful = hue only on the button outlines; text stays
+  // currentColor)
+  let y1 = 10.0
+  ignore(strip(y1, "before: create form"))
+  let a1 = btn(x + 10.0, y1 + 8.0, "Cancel", 2)
+  ignore(btn(c.right_of(a1, 8.0), y1 + 8.0, "Create", 0))
+
+  // before: the delete confirmation put the destructive action
+  // first
+  let y2 = 70.0
+  ignore(strip(y2, "before: delete confirm"))
+  let a2 = btn(x + 10.0, y2 + 8.0, "Delete", 3)
+  ignore(btn(c.right_of(a2, 8.0), y2 + 8.0, "Cancel", 2))
+
+  // after: Cancel left, confirm right, the whole row pushed to
+  // flex-end
+  let y3 = 150.0
+  ignore(strip(y3, "after: .form-actions"))
+  let primary_w = @s.text_width("Confirm", 12.0) + 24.0
+  let cancel_w = @s.text_width("Cancel", 12.0) + 24.0
+  let primary_x = x + strip_w - 10.0 - primary_w
+  let cancel_x = primary_x - 8.0 - cancel_w
+  ignore(btn(cancel_x, y3 + 8.0, "Cancel", 2))
+  ignore(btn(primary_x, y3 + 8.0, "Confirm", 0))
+  // the flex-end anchor: a short spine marking the shared edge
+  c.line(
+    (x + strip_w - 4.0, y3 + 4.0),
+    (x + strip_w - 4.0, y3 + strip_h - 4.0),
+    dash="3 3",
+    opacity=Some(0.5),
+  )
+
+  println(
+    c.render(label="ページごとにずれていた決定ボタンの左右位置を .form-actions の Cancel 左・確定右に統一した図"),
+  )
+}
