@@ -12,12 +12,22 @@ cd "$(dirname "$0")"
 MODULE=podhmo/svg-gen
 VER=$(sed -n 's/^version = "\(.*\)"/\1/p' moon.mod)
 ZIP="_build/publish/podhmo-svg-gen-$VER.zip"
-REG="$HOME/.moon/registry"
+REG="${MOON_HOME:-$HOME/.moon}/registry"
 IDX="$REG/index/user/podhmo/svg-gen.index"
 DST="$REG/cache/$MODULE/$VER.zip"
 
 moon package
-SHA=$(sha256sum "$ZIP" | cut -d' ' -f1)
+# sha256sum is GNU; macOS ships shasum instead. Fail loudly if neither
+# is around — an empty checksum would vendor a package moon then
+# rejects at import time.
+if command -v sha256sum >/dev/null 2>&1; then
+  SHA=$(sha256sum "$ZIP" | cut -d' ' -f1)
+elif command -v shasum >/dev/null 2>&1; then
+  SHA=$(shasum -a 256 "$ZIP" | cut -d' ' -f1)
+else
+  echo "vendor.sh: need sha256sum or shasum to checksum $ZIP" >&2
+  exit 1
+fi
 OLD=$(sed -n 's/.*"checksum": "\([0-9a-f]*\)".*/\1/p' "$IDX" 2>/dev/null || true)
 
 mkdir -p "$(dirname "$IDX")" "$(dirname "$DST")"
