@@ -1,25 +1,31 @@
 # Small SVG generator kit for concept figures (issue #96): generators
-# emit build/*.svg, `make check` lints them, `make png` rasterizes them
-# for eyeballing. Node 26 (runs .ts directly) and rsvg-convert; no install.
+# are MoonBit .mbtx scripts that print SVG on stdout; `make svg`
+# writes build/*.svg, `make check` lints them, `make png` rasterizes
+# them for eyeballing. moon toolchain and rsvg-convert; the library
+# is vendored into the local registry by vendor.sh (see vendor).
 
-NODE ?= node
+MOON ?= moon
 RSVG ?= rsvg-convert
-FIGS := $(patsubst examples/fig-%.ts,build/fig-%.svg,$(wildcard examples/fig-*.ts))
+FIGS := $(patsubst examples/fig-%.mbtx,build/fig-%.svg,$(wildcard examples/fig-*.mbtx))
 
-.PHONY: all svg check png clean help
+.PHONY: all svg check png clean vendor help
 
 all: svg check png
 
-## svg: run every examples/fig-*.ts generator into build/
-svg: $(FIGS)
+## vendor: install podhmo/svg-gen into ~/.moon/registry for .mbtx imports
+vendor:
+	./vendor.sh
 
-build/fig-%.svg: examples/fig-%.ts svg.ts chart.ts examples/data.ts examples/geom.ts
+## svg: run every examples/fig-*.mbtx generator into build/
+svg: vendor $(FIGS)
+
+build/fig-%.svg: examples/fig-%.mbtx vendor
 	@mkdir -p build
-	$(NODE) $<
+	$(MOON) run $< > $@
 
 ## check: lint every SVG in build/ (viewBox, ids, banned constructs)
 check: svg
-	$(NODE) check.ts build/*.svg
+	$(MOON) run check.mbtx build/*.svg
 
 ## png: rasterize every SVG for visual inspection
 png: $(FIGS:.svg=.png)
