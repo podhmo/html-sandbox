@@ -65,29 +65,29 @@ it as a successful illustration or add a bad example to every article.
 
 Hand-written SVG breaks in predictable ways (lines that miss their box,
 labels clipped by the viewBox). This repo keeps `tools/svg-gen`, a
-zero-dependency TypeScript kit for small concept figures: write
-`examples/fig-<name>.ts` there, run `make -C tools/svg-gen` to emit `build/*.svg`
-and lint them with `check.ts`, then embed the output in an `svg` fence.
+zero-dependency MoonBit kit for small concept figures: write
+`examples/fig-<name>.mbtx` there, run `make -C tools/svg-gen` to emit `build/*.svg`
+and lint them with `check.mbtx`, then embed the output in an `svg` fence.
 Anchors and auto-sized boxes keep lines attached to shapes, so prefer it
 whenever the figure is more than a handful of elements. See
 `tools/svg-gen/README.md` and the gallery article
 `slops/2026-10-31-svg-gen-figures.md` for examples.
 
-The generator stays in `examples/` — do not attach `fig-*.ts` sources to
+The generator stays in `examples/` — do not attach `fig-*.mbtx` sources to
 the article bundle; the article carries the rendered figure, not its code.
 
-For data figures (statistical charts), the same directory has `chart.ts`:
+For data figures (statistical charts), the same package has `chart.mbt`:
 a `Plot` with axes, nice ticks, `series`/`step`/`dots`/`vline`/`hline`,
 and a constructor that requires `{title, subtitle, footnote}` — the
 figure guideline's mandatory metadata as mandatory arguments. Seeded
 `rng`/`gauss` produce reproducible virtual data; label it as such.
-`examples/fig-chart-*.ts` are the examples.
+`examples/fig-chart-*.mbtx` are the examples.
 
 Figures are colorless (`currentColor`) by default. The colorful option
 is `color: c.color(i)` on strokes/fills, drawing from `PALETTE` — six
 categorical hues adjusted to read on both light and dark themes. Keep
 text `currentColor`; let hue distinguish only data marks, and keep a
-dash/width fallback so the figure still reads without color. `check.ts`
+dash/width fallback so the figure still reads without color. `check.mbtx`
 warns on literal colors outside `PALETTE`.
 
 When figure work hits a new failure mode — a lint false positive, a

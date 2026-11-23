@@ -11,7 +11,7 @@ gets a small throwaway generator sharing a thin helper.
 
 ## Layout
 
-- `svg.ts` — the shared helper (~250 lines, zero deps). `Canvas` collects
+- `svg.mbt` — the shared helper (zero deps beyond the stdlib). `Canvas` collects
   parts; `box`/`circle`/`text`/`line`/`arrow` draw them. The important
   properties:
   - `c.anchor(shape, "e")` and friends compute edge endpoints from shape
@@ -34,31 +34,34 @@ gets a small throwaway generator sharing a thin helper.
     (including estimated text extents), so nothing falls outside it.
   - Output is `currentColor` + plain `<text>`, so figures follow the
     site's light/dark theme and stay searchable.
-- `chart.ts` — the data-figure half (the "chart-gen" seed from issue
+- `chart.mbt` — the data-figure half (the "chart-gen" seed from issue
   #113's figure guideline, see `docs/sketch/ja/figure-guidelines.md`).
   `Scale` maps data to pixels (linear or log, with nice ticks);
   `Plot` draws the frame — axes, tick labels, series/step/dots,
   event and reference lines. Its constructor requires
   `{title, subtitle, footnote}` so the guideline's mandatory
-  metadata is a mandatory argument. `fig-chart-*.ts` draw charts
+  metadata is a mandatory argument. `fig-chart-*.mbtx` draw charts
   (ECDF, series, scatter, boxplot, histogram, heatmap) from
-  seeded-PRNG virtual data; `examples/data.ts` holds the shared virtual
+  seeded-PRNG virtual data; `data.mbt` holds the shared virtual
   datasets so "same data, different figure" comparisons cite one
-  source; `ecdfPoints` thins step vertices for inline embedding.
+  source; `ecdf_points` thins step vertices for inline embedding.
 - Color is opt-in (the "colorful" option): `color: c.color(i)` on a
   stroke or fill picks from `PALETTE`, six categorical hues adjusted
   to stay legible on both themes. Text stays `currentColor`; use hue
   only to distinguish data marks and keep a dash/width fallback.
-  `check.ts` warns on literal colors outside `PALETTE`.
-- `check.ts` — an SVG lint built from the failure modes recorded in
+  `check.mbtx` warns on literal colors outside `PALETTE`.
+- `check.mbtx` — an SVG lint built from the failure modes recorded in
   `slops/2026-10-27-writing-slops.md/03-svg-pitfalls.md` (see below).
-- `examples/fig-*.ts` — example generators. `node examples/fig-loop.ts` writes
-  `build/fig-loop.svg`. Generators can also `assert` spatial claims the
+- `examples/fig-*.mbtx` — example generators. `moon run
+  examples/fig-loop.mbtx` writes `build/fig-loop.svg` to stdout.
+  Generators can also `abort` spatial claims the
   figure depends on ("these three boxes share the row") so the claim
   fails loudly at build time instead of silently in the picture.
-- `Makefile` — `make all` runs every `examples/fig-*.ts`, lints `build/*.svg`,
-  and rasterizes them with `rsvg-convert`. Node 26 (runs `.ts`
-  directly); no `npm install`.
+- `Makefile` — `make all` runs every `examples/fig-*.mbtx`, lints
+  `build/*.svg`, and rasterizes them with `rsvg-convert`. The `moon`
+  toolchain runs the generators; `vendor.sh` installs `podhmo/svg-gen`
+  into the local moon registry so each `.mbtx` can import it
+  (`make vendor` runs it and `svg` depends on it).
 
 ## Pitfalls checklist
 
@@ -67,12 +70,12 @@ covered:
 
 | Pitfall | Covered by |
 | --- | --- |
-| Label clipped by `viewBox` (`text-anchor="end"` at the edge) | viewBox is derived from drawn content; `check.ts` re-verifies every element, including estimated text boxes, sits inside it |
-| Text wider than its box | `box` `w: "auto"` sizes to the label; `check.ts` finds the shape containing each text's anchor point and fails if the estimated box overflows it |
-| Duplicate `id` across `<pattern>`/`<linearGradient>` | `check.ts` flags duplicate ids per file (bundle-level collision needs a page-level pass) |
-| Literal colors in a `currentColor` figure | `check.ts` warns on `stroke`/`fill`/`color` values outside `PALETTE` (colorful figures mix `currentColor` text with palette marks on purpose) |
-| Text anchor sitting on a data mark treated as a label container | `check.ts` skips shapes below `TEXT_MIN` (12px); scatter dots are marks, not containers |
-| Forbidden constructs in an svg fence (script, `foreignObject`, handlers, remote refs) | `check.ts` fails on them |
+| Label clipped by `viewBox` (`text-anchor="end"` at the edge) | viewBox is derived from drawn content; `check.mbtx` re-verifies every element, including estimated text boxes, sits inside it |
+| Text wider than its box | `box` `w: Auto` sizes to the label; `check.mbtx` finds the shape containing each text's anchor point and fails if the estimated box overflows it |
+| Duplicate `id` across `<pattern>`/`<linearGradient>` | `check.mbtx` flags duplicate ids per file (bundle-level collision needs a page-level pass) |
+| Literal colors in a `currentColor` figure | `check.mbtx` warns on `stroke`/`fill`/`color` values outside `PALETTE` (colorful figures mix `currentColor` text with palette marks on purpose) |
+| Text anchor sitting on a data mark treated as a label container | `check.mbtx` skips shapes below `TEXT_MIN` (12px); scatter dots are marks, not containers |
+| Forbidden constructs in an svg fence (script, `foreignObject`, handlers, remote refs) | `check.mbtx` fails on them |
 | Axis direction inverted ("position means the wrong thing") | not automatable; `assert` in the generator at least states the intended spatial relation in code |
 | One fill carrying two meanings | editorial, still manual |
 | Schematic figure reading as measured data | editorial: caption/prose must say it is schematic |
