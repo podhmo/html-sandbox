@@ -29,7 +29,7 @@ fn main {
     real : (Int, Int) -> Bool,
     caption : String,
   ) -> @s.Shape {
-    c.text(x, y - 22.0, title, size=13.0, underline=@s.Custom(1.0))
+    c.text(x, y - 22.0, title, size=13.0, underline=@s.Yes)
     let mut label_w = 0.0
     for r in rows {
       label_w = label_w.max(@s.text_width(r, size=hdr))

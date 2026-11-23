@@ -25,7 +25,7 @@ fn main {
     if cell.length() < 3 {
       abort("site \{i} has a visible cell")
     }
-    c.raw(@s.poly_el(cell, fill=c.color(i), opacity=0.35), covered=cell)
+    c.raw(@s.poly_el(cell, fill=c.color(i), opacity=0.35, extra=" stroke=\"currentColor\" stroke-width=\"1\""), covered=cell)
   }
   c.text(112.0, 228.0, "Voronoi cells", anchor=@s.Middle, size=12.0, opacity=Some(0.7))
 
@@ -33,7 +33,7 @@ fn main {
   let t = @s.shift(s, dx=dx, dy=0.0)
   for i, tri in tris {
     let pts = [t[tri.0], t[tri.1], t[tri.2]]
-    c.raw(@s.poly_el(pts, fill=c.color(i), opacity=0.45), covered=pts)
+    c.raw(@s.poly_el(pts, fill=c.color(i), opacity=0.45, extra=" stroke=\"currentColor\" stroke-width=\"1\""), covered=pts)
   }
   c.text(112.0 + dx, 228.0, "Delaunay triangles", anchor=@s.Middle, size=12.0, opacity=Some(0.7))
 

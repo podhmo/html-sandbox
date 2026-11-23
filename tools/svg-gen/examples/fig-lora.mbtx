@@ -26,7 +26,7 @@ fn main {
 
   // trigger word activates the delta
   c.text(520.0, 170.0, "prompt:", size=11.0, opacity=Some(0.7))
-  c.text(520.0, 186.0, "dadsillu, a person ...", size=12.0, underline=@s.Custom(1.0))
+  c.text(520.0, 186.0, "dadsillu, a person ...", size=12.0, underline=@s.Yes)
 
   if !(base.w > a_mat.w + b_mat.w) {
     abort("the delta is drawn much smaller than the base")
