@@ -13,7 +13,7 @@ fn main {
   let live = c.color(0) // the active slot / the variant
 
   // ---- before ----
-  c.text(24.0, 30.0, "before", size=14.0, underline=1.0)
+  c.text(24.0, 30.0, "before", size=14.0, underline=@s.Custom(1.0))
   c.text(24.0, 54.0, "pending buffers", size=12.0, opacity=Some(0.7))
   let bufs = ["para []", "items [it]", "quote []", "table []"]
   for i, label in bufs {
@@ -68,10 +68,10 @@ fn main {
       label=label,
       size=11.0,
       rx=4.0,
-      dash="3 3",
+      dash=Some("3 3"),
       opacity=Some(0.7),
     )
-    c.line(c.anchor(v, @s.N), (174.0, 192.0), dash="3 3", opacity=Some(0.5))
+    c.line(c.anchor(v, @s.N), (174.0, 192.0), dash=Some("3 3"), opacity=Some(0.5))
   }
   c.text(
     24.0,
@@ -83,7 +83,7 @@ fn main {
 
   // ---- after ----
   let ax = 470.0
-  c.text(ax, 30.0, "after", size=14.0, underline=1.0)
+  c.text(ax, 30.0, "after", size=14.0, underline=@s.Custom(1.0))
   c.text(ax, 54.0, "pending", size=12.0, opacity=Some(0.7))
   let p = c.box(
     ax,

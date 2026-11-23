@@ -39,7 +39,7 @@ fn main {
   for entry in @s.edge_adjacency(tris) {
     let (ea, eb, t) = entry
     if t.length() == 2 {
-      c.line(centers[t[0]], centers[t[1]], dash="4 3", opacity=Some(0.8), color=col_vor)
+      c.line(centers[t[0]], centers[t[1]], dash=Some("4 3"), opacity=Some(0.8), color=col_vor)
     } else {
       // ray from the single center along the edge's perpendicular
       // bisector, away from the triangle's third vertex.
@@ -76,7 +76,7 @@ fn main {
       c.line(
         o,
         (o.0 + dir.0 * bsize * tscale, o.1 + dir.1 * bsize * tscale),
-        dash="4 3",
+        dash=Some("4 3"),
         opacity=Some(0.8),
         color=col_vor,
       )

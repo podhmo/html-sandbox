@@ -19,8 +19,8 @@ fn main {
   let s3 = c.box(c.right_of(s2, gx), s1.y, @s.Auto, h, label="実装セッション 3\n（揮発）", color=c.color(2))
 
   // The absent channel: dashed = the path that does not exist.
-  c.arrow(c.anchor(s1, @s.E), c.anchor(s2, @s.W), dash="4 4", opacity=Some(0.5))
-  c.arrow(c.anchor(s2, @s.E), c.anchor(s3, @s.W), dash="4 4", opacity=Some(0.5))
+  c.arrow(c.anchor(s1, @s.E), c.anchor(s2, @s.W), dash=Some("4 4"), opacity=Some(0.5))
+  c.arrow(c.anchor(s2, @s.E), c.anchor(s3, @s.W), dash=Some("4 4"), opacity=Some(0.5))
   c.text(
     s1.x + s1.w + gx / 2.0,
     s1.y + h / 2.0 - 14.0,

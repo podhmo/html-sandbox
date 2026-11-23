@@ -22,11 +22,11 @@ fn main {
   // merge arrow into output
   let out = c.box(520.0, 80.0, @s.Auto, 44.0, label="生成時に\nW + ΔW", color=c.color(1))
   c.arrow(c.anchor(base, @s.E), c.anchor(out, @s.W), via=[(240.0, 82.0)])
-  c.arrow((296.0, 130.0), c.anchor(out, @s.S), dash="4 4")
+  c.arrow((296.0, 130.0), c.anchor(out, @s.S), dash=Some("4 4"))
 
   // trigger word activates the delta
   c.text(520.0, 170.0, "prompt:", size=11.0, opacity=Some(0.7))
-  c.text(520.0, 186.0, "dadsillu, a person ...", size=12.0, underline=1.0)
+  c.text(520.0, 186.0, "dadsillu, a person ...", size=12.0, underline=@s.Custom(1.0))
 
   if !(base.w > a_mat.w + b_mat.w) {
     abort("the delta is drawn much smaller than the base")

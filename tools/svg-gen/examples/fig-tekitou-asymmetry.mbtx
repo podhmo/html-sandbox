@@ -22,7 +22,7 @@ fn main {
     )
   }
 
-  let person = fn(cx : Double, cy : Double, role : String, dash : String) {
+  let person = fn(cx : Double, cy : Double, role : String, dash : String?) {
     ignore(c.circle(cx, cy, r, dash=dash, size=11.0))
     c.text(cx, cy + r + 15.0, role, anchor=@s.Middle, size=11.0, opacity=Some(0.85))
   }
@@ -30,12 +30,12 @@ fn main {
   // ---- panel 1: test — knowledge shared ----
   let p1 = 110.0
   c.text(p1, 18.0, "テスト（同門）", anchor=@s.Middle, size=13.0)
-  person(p1, 56.0, "先生", "")
-  person(p1, 146.0, "生徒", "")
+  person(p1, 56.0, "先生", None)
+  person(p1, 146.0, "生徒", None)
   // enclosing box = the shared frame of knowledge, drawn around both
   // roles
   ignore(
-    c.box(p1 - 52.0, 30.0, @s.Fixed(104.0), 172.0, rx=12.0, dash="4 3", opacity=Some(0.55)),
+    c.box(p1 - 52.0, 30.0, @s.Fixed(104.0), 172.0, rx=12.0, dash=Some("4 3"), opacity=Some(0.55)),
   )
   token(p1 + 36.0, 101.0)
   c.text(p1 + 36.0, 126.0, "正解", anchor=@s.Middle, size=10.0, opacity=Some(0.8))
@@ -44,8 +44,8 @@ fn main {
   // ---- panel 2: request — requester does not know ----
   let p2 = 360.0
   c.text(p2, 18.0, "依頼（お任せ）", anchor=@s.Middle, size=13.0)
-  person(p2, 56.0, "依頼者", "")
-  person(p2, 146.0, "受注者", "")
+  person(p2, 56.0, "依頼者", None)
+  person(p2, 146.0, "受注者", None)
   token(p2 + 44.0, 146.0)
   c.arrow(
     c.anchor(@s.Shape::{ x: p2 - r, y: 56.0, w: 2.0 * r, h: 2.0 * r }, @s.S),
@@ -58,13 +58,13 @@ fn main {
   // ---- panel 3: realization — requester cannot evaluate ----
   let p3 = 610.0
   c.text(p3, 18.0, "受注側の気づき", anchor=@s.Middle, size=13.0)
-  person(p3, 56.0, "発注者", "4 3")
-  person(p3, 146.0, "受注者", "")
+  person(p3, 56.0, "発注者", Some("4 3"))
+  person(p3, 146.0, "受注者", None)
   token(p3 + 44.0, 146.0)
   c.arrow(
     c.anchor(@s.Shape::{ x: p3 - r, y: 146.0, w: 2.0 * r, h: 2.0 * r }, @s.N),
     c.anchor(@s.Shape::{ x: p3 - r, y: 56.0, w: 2.0 * r, h: 2.0 * r }, @s.S),
-    dash="4 3",
+    dash=Some("4 3"),
     width=1.5,
     color=loose,
   )
@@ -76,7 +76,7 @@ fn main {
   c.line(
     (110.0, 246.0),
     (610.0, 246.0),
-    dash="2 3",
+    dash=Some("2 3"),
     opacity=Some(0.4),
     gap_end=Some(0.0),
     gap_start=Some(0.0),

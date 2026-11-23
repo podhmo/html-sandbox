@@ -36,7 +36,7 @@ fn main {
   }
   c.line(p, q, width=3.0, color=c.color(0))
   ignore(c.circle(cc.o.0, cc.o.1, cc.r, opacity=Some(0.5)))
-  ignore(c.circle(mid.0, mid.1, dr, dash="5 3", width=1.5, color=c.color(3)))
+  ignore(c.circle(mid.0, mid.1, dr, dash=Some("5 3"), width=1.5, color=c.color(3)))
   for x in [p, q] {
     c.raw(
       "<circle cx=\"\{x.0}\" cy=\"\{x.1}\" r=\"4\" fill=\"currentColor\"/>",

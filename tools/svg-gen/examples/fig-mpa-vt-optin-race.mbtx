@@ -29,7 +29,7 @@ fn main {
 
     if late {
       // external stylesheet streaming — opt-in sits at its tail
-      ignore(c.box(30.0, y + 24.0, @s.Fixed(320.0), 40.0, dash="5 4"))
+      ignore(c.box(30.0, y + 24.0, @s.Fixed(320.0), 40.0, dash=Some("5 4")))
       c.text(38.0, y + 40.0, "app.css loading", size=11.0, opacity=Some(0.8))
       c.text(38.0, y + 55.0, "@view-transition = last bytes", size=10.0, opacity=Some(0.6))
       let optin = c.box(355.0, y + 24.0, @s.Fixed(90.0), 40.0, color=c.color(3))
@@ -39,7 +39,7 @@ fn main {
       // pagereveal fires before the tail arrives
       let reveal = c.circle(180.0, y + 78.0, 5.0, color=c.color(3), width=2.0)
       c.text(180.0, y + 78.0 + 16.0, "pagereveal", size=10.0, anchor=@s.Middle)
-      c.arrow(c.anchor(optin, @s.W), c.anchor(reveal, @s.N), color=c.color(3), dash="4 3")
+      c.arrow(c.anchor(optin, @s.W), c.anchor(reveal, @s.N), color=c.color(3), dash=Some("4 3"))
       c.text(495.0, y + 40.0, "miss", size=12.0)
       c.text(495.0, y + 56.0, "→ fadeなし", size=10.0, opacity=Some(0.7))
     } else {
@@ -48,7 +48,7 @@ fn main {
       ignore(c.box(30.0, y + 24.0, @s.Fixed(120.0), 40.0, color=c.color(0)))
       c.text(38.0, y + 40.0, "inline <style>", size=11.0)
       c.text(38.0, y + 55.0, "opt-in", size=10.0, opacity=Some(0.7))
-      ignore(c.box(170.0, y + 24.0, @s.Fixed(275.0), 40.0, dash="5 4"))
+      ignore(c.box(170.0, y + 24.0, @s.Fixed(275.0), 40.0, dash=Some("5 4")))
       c.text(178.0, y + 40.0, "app.css loading", size=11.0, opacity=Some(0.8))
       c.text(178.0, y + 55.0, "capture styles / keyframes", size=10.0, opacity=Some(0.6))
 

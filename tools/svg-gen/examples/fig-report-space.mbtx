@@ -45,7 +45,7 @@ fn main {
 
   // same design system covers both extremes: dashed span
   // thesis <-> antithesis
-  c.line((110.0, 165.0), (360.0, 140.0), dash="4 4", opacity=Some(0.6))
+  c.line((110.0, 165.0), (360.0, 140.0), dash=Some("4 4"), opacity=Some(0.6))
 
   for p in pts {
     let (x, y, _, _) = p

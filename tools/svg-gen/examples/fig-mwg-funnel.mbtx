@@ -61,12 +61,12 @@ fn main {
       @s.Fixed(w),
       labels.length().to_double() * 15.0 + 20.0,
       label=label,
-      dash="5 4",
+      dash=Some("5 4"),
       opacity=Some(0.85),
       size=11.0,
       pad_x=8.0,
     )
-    c.arrow(c.anchor(g, @s.S), c.anchor(d, @s.N), dash="5 4", opacity=Some(0.7))
+    c.arrow(c.anchor(g, @s.S), c.anchor(d, @s.N), dash=Some("5 4"), opacity=Some(0.7))
   }
 
   drop(g1, ["Temporal / built-in AI", "service worker / INP", "Web Components", "…大半"])
@@ -81,11 +81,11 @@ fn main {
     3.0 * 15.0 + 20.0,
     label="speculation rules:\n宣言的 JSON だが <script> 要素\n→ 実装するかは子が判断 (wontfix 可)",
     color=c.color(3),
-    dash="5 4",
+    dash=Some("5 4"),
     size=11.0,
     pad_x=10.0,
   )
-  c.arrow(c.anchor(out, @s.S), c.anchor(note, @s.N), dash="5 4", opacity=Some(0.7))
+  c.arrow(c.anchor(out, @s.S), c.anchor(note, @s.N), dash=Some("5 4"), opacity=Some(0.7))
 
   c.text(10.0, 16.0, "schematic — dropped counts are not measured", size=11.0, opacity=Some(0.6))
 

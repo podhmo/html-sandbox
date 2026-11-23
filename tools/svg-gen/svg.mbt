@@ -52,24 +52,49 @@ pub(all) enum Heads {
 }
 
 ///|
+/// Underline style for text, porting the TS `boolean | number` option:
+/// `No` draws nothing, `Yes` draws the default 2px rule, `Custom(w)`
+/// draws a rule of width `w`. As a sum type the off/on/custom cases are
+/// exhaustive in `match`, rather than a magic `0` inside a Double.
+#derive(Eq)
+pub(all) enum Underline {
+  No
+  Yes
+  Custom(Double)
+}
+
+///|
+/// What sits at the ends of an `arrow` call: a single polyline with
+/// its `Heads` decoration, or a parallel request/response pair at the
+/// given offset. In the TS kit `heads` and `split` were independent
+/// options, so `heads=Both` together with `split` silently ignored the
+/// heads choice; folding them into one enum removes that state.
+#derive(Eq)
+pub(all) enum Ends {
+  Single(Heads)
+  Pair(Double)
+}
+
+///|
 #derive(Eq)
 pub(all) enum HighlightMode {
   Wash
   Ring
 }
 
-///| Categorical palette for the "colorful" option: Okabe-Ito-derived
+///|
+/// Categorical palette for the "colorful" option: Okabe-Ito-derived
 /// hues with lightness adjusted to stay legible on both light and dark
 /// backgrounds. The default figure is colorless (currentColor only);
 /// pass `color=c.color(i)` on strokes/fills when series distinction
 /// needs hue — six categories max, per the figure guideline.
 pub let palette : Array[String] = [
   "#3B82C4", // blue
-  "#E69F00", // orange
-  "#00A876", // bluish green
-  "#D55E00", // vermillion
-  "#CC79A7", // reddish purple
-  "#56B4E9", // sky blue
+   "#E69F00", // orange
+   "#00A876", // bluish green
+   "#D55E00", // vermillion
+   "#CC79A7", // reddish purple
+   "#56B4E9", // sky blue
 ]
 
 ///|
@@ -101,6 +126,7 @@ fn num(v : Double) -> String {
 }
 
 /// Pull a polyline's ends toward its middle by `start`/`end` px.
+
 ///|
 fn trim_ends(pts : Array[Point], start : Double, end : Double) -> Array[Point] {
   let out = pts.copy()
@@ -114,7 +140,10 @@ fn trim_ends(pts : Array[Point], start : Double, end : Double) -> Array[Point] {
   }
   let n = out.length()
   if end > 0 && n > 1 {
-    let d = @math.hypot(out[n - 1].0 - out[n - 2].0, out[n - 1].1 - out[n - 2].1)
+    let d = @math.hypot(
+      out[n - 1].0 - out[n - 2].0,
+      out[n - 1].1 - out[n - 2].1,
+    )
     let dd = if d == 0 { 1.0 } else { d }
     out[n - 1] = (
       out[n - 1].0 - (out[n - 1].0 - out[n - 2].0) / dd * end,
@@ -139,53 +168,73 @@ pub struct Canvas {
   margin : Double
   backdrop : Array[String]
   parts : Array[String]
-  mut min_x : Double
-  mut min_y : Double
-  mut max_x : Double
-  mut max_y : Double
+  // None until `cover` has seen a point; the TS version tracked bounds
+  // through +inf/-inf sentinels, where "empty canvas" was a valid
+  // numeric state that rendered as an inverted viewBox.
+  mut bounds : Bounds?
 }
 
 ///|
 pub fn Canvas::new(margin~ : Double = 10) -> Canvas {
+  { margin, backdrop: [], parts: [], bounds: None, }
+}
+
+///|
+struct Bounds {
+  min_x : Double
+  min_y : Double
+  max_x : Double
+  max_y : Double
+}
+
+///|
+fn Bounds::cover(self : Bounds, p : Point) -> Bounds {
   {
-    margin,
-    backdrop: [],
-    parts: [],
-    min_x: @double.infinity,
-    min_y: @double.infinity,
-    max_x: @double.neg_infinity,
-    max_y: @double.neg_infinity,
+    min_x: if p.0 < self.min_x {
+      p.0
+    } else {
+      self.min_x
+    },
+    min_y: if p.1 < self.min_y {
+      p.1
+    } else {
+      self.min_y
+    },
+    max_x: if p.0 > self.max_x {
+      p.0
+    } else {
+      self.max_x
+    },
+    max_y: if p.1 > self.max_y {
+      p.1
+    } else {
+      self.max_y
+    },
   }
 }
 
 ///|
 fn Canvas::cover(self : Canvas, pts : Array[Point]) -> Unit {
   for p in pts {
-    let (x, y) = p
-    if x < self.min_x {
-      self.min_x = x
-    }
-    if y < self.min_y {
-      self.min_y = y
-    }
-    if x > self.max_x {
-      self.max_x = x
-    }
-    if y > self.max_y {
-      self.max_y = y
+    self.bounds = match self.bounds {
+      None => Some({ min_x: p.0, min_y: p.1, max_x: p.0, max_y: p.1, })
+      Some(b) => Some(b.cover(p))
     }
   }
 }
 
 ///|
 fn stroke_attrs(
-  dash~ : String,
+  dash~ : String?,
   opacity~ : Double?,
   width~ : Double,
   color~ : String,
 ) -> String {
   let w = " stroke-width=\"\{num(width)}\""
-  let d = if dash == "" { "" } else { " stroke-dasharray=\"\{dash}\"" }
+  let d = match dash {
+    None => ""
+    Some(p) => " stroke-dasharray=\"\{p}\""
+  }
   let o = match opacity {
     Some(v) => " opacity=\"\{v}\""
     None => ""
@@ -195,10 +244,11 @@ fn stroke_attrs(
 
 /// Palette color for the colorful option. Indexes wrap around, but
 /// the guideline caps categorical color use at six anyway.
+
 ///|
-pub fn Canvas::color(_self : Canvas, i : Int) -> String {
+pub fn Canvas::color(_self : Canvas, i : Int32) -> String {
   let n = palette.length()
-  palette[((i % n) + n) % n]
+  palette[(i % n + n) % n]
 }
 
 ///|
@@ -209,7 +259,7 @@ fn Canvas::label_lines(
   label : String,
   size : Double,
   opacity~ : Double?,
-  underline~ : Double,
+  underline~ : Underline,
 ) -> Unit {
   let lines = label.split("\n").map(fn(v) { v.to_owned() }).collect()
   let lh = size * 1.3
@@ -231,6 +281,7 @@ fn Canvas::label_lines(
 /// Shapes return {x, y, w, h}; anchors and placement read from it.
 /// Pass `Auto` for `w` to size the box to its widest label line
 /// (+pad_x each side).
+
 ///|
 pub fn Canvas::box(
   self : Canvas,
@@ -242,11 +293,11 @@ pub fn Canvas::box(
   rx~ : Double = 8,
   pad_x~ : Double = 16,
   size~ : Double = 14,
-  dash~ : String = "",
+  dash~ : String? = None,
   opacity~ : Double? = None,
   width~ : Double = 1.5,
   color~ : String = "currentColor",
-  underline~ : Double = 0,
+  underline~ : Underline = No,
 ) -> Shape {
   let ww = match w {
     Auto => {
@@ -269,9 +320,16 @@ pub fn Canvas::box(
     " fill=\"none\"\{stroke_attrs(dash~, opacity~, width~, color~)}/>",
   )
   if label != "" {
-    self.label_lines(x + ww / 2.0, y + h / 2.0, label, size, opacity~, underline~)
+    self.label_lines(
+      x + ww / 2.0,
+      y + h / 2.0,
+      label,
+      size,
+      opacity~,
+      underline~,
+    )
   }
-  let shape = { x, y, w: ww, h }
+  let shape = { x, y, w: ww, h, }
   self.cover([(x, y), (x + ww, y + h)])
   shape
 }
@@ -284,11 +342,11 @@ pub fn Canvas::circle(
   r : Double,
   label~ : String = "",
   size~ : Double = 14,
-  dash~ : String = "",
+  dash~ : String? = None,
   opacity~ : Double? = None,
   width~ : Double = 1.5,
   color~ : String = "currentColor",
-  underline~ : Double = 0,
+  underline~ : Underline = No,
 ) -> Shape {
   self.parts.push(
     "<circle cx=\"\{num(cx)}\" cy=\"\{num(cy)}\" r=\"\{num(r)}\"" +
@@ -297,7 +355,7 @@ pub fn Canvas::circle(
   if label != "" {
     self.label_lines(cx, cy, label, size, opacity~, underline~)
   }
-  let shape = { x: cx - r, y: cy - r, w: 2.0 * r, h: 2.0 * r }
+  let shape = { x: cx - r, y: cy - r, w: 2.0 * r, h: 2.0 * r, }
   self.cover([(cx - r, cy - r), (cx + r, cy + r)])
   shape
 }
@@ -312,7 +370,7 @@ pub fn Canvas::text(
   central~ : Bool = false,
   size~ : Double = 14,
   opacity~ : Double? = None,
-  underline~ : Double = 0,
+  underline~ : Underline = No,
 ) -> Unit {
   let a = match anchor {
     Start => ""
@@ -335,11 +393,16 @@ pub fn Canvas::text(
   }
   let ty = if central { y - size / 2.0 } else { y - size }
   let by = ty + size * 1.2
-  if underline > 0 {
+  let uw = match underline {
+    No => 0.0
+    Yes => 2.0
+    Custom(w) => w
+  }
+  if uw > 0.0 {
     self.parts.push(
-      "<path d=\"M\{num(lx)} \{num(by + 2.0)} L\{num(lx + w)} \{num(by + 2.0)}\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"\{num(underline)}\"\{o}/>",
+      "<path d=\"M\{num(lx)} \{num(by + 2.0)} L\{num(lx + w)} \{num(by + 2.0)}\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"\{num(uw)}\"\{o}/>",
     )
-    self.cover([(lx, by + 2.0 + underline / 2.0)])
+    self.cover([(lx, by + 2.0 + uw / 2.0)])
   }
   self.cover([(lx, ty), (lx + w, by)])
 }
@@ -355,13 +418,19 @@ pub fn Canvas::center(_self : Canvas, shape : Shape) -> Point {
 }
 
 /// Placement helpers: coordinates for a shape next to another.
+
 ///|
 pub fn Canvas::right_of(_self : Canvas, shape : Shape, gap : Double) -> Double {
   shape.x + shape.w + gap
 }
 
 ///|
-pub fn Canvas::left_of(_self : Canvas, shape : Shape, gap : Double, w : Double) -> Double {
+pub fn Canvas::left_of(
+  _self : Canvas,
+  shape : Shape,
+  gap : Double,
+  w : Double,
+) -> Double {
   shape.x - gap - w
 }
 
@@ -371,7 +440,12 @@ pub fn Canvas::below(_self : Canvas, shape : Shape, gap : Double) -> Double {
 }
 
 ///|
-pub fn Canvas::above(_self : Canvas, shape : Shape, gap : Double, h : Double) -> Double {
+pub fn Canvas::above(
+  _self : Canvas,
+  shape : Shape,
+  gap : Double,
+  h : Double,
+) -> Double {
   shape.y - gap - h
 }
 
@@ -382,92 +456,100 @@ pub fn Canvas::arrow(
   to : Point,
   via~ : Array[Point] = [],
   head~ : Double = 9,
-  heads~ : Heads = End,
-  split~ : Double = 0,
+  ends~ : Ends = Single(End),
   gap~ : Double = 3,
   gap_start~ : Double? = None,
   gap_end~ : Double? = None,
-  dash~ : String = "",
+  dash~ : String? = None,
   opacity~ : Double? = None,
   width~ : Double = 1.5,
   color~ : String = "currentColor",
 ) -> Unit {
-  if split > 0 {
-    let dx = to.0 - from.0
-    let dy = to.1 - from.1
-    let dlen = @math.hypot(dx, dy)
-    let len = if dlen == 0 { 1.0 } else { dlen }
-    let nx = -dy / len * (split / 2.0)
-    let ny = dx / len * (split / 2.0)
-    let shift = fn(p : Point, s : Double) -> Point { (p.0 + nx * s, p.1 + ny * s) }
-    // The forward arrow takes the "above/left of travel" side, like a
-    // sequence diagram: request on top, response below.
-    self.arrow(
-      shift(from, -1.0),
-      shift(to, -1.0),
-      via=via.map(fn(p) { shift(p, -1.0) }),
-      head~,
-      heads=End,
-      gap~,
-      gap_start~,
-      gap_end~,
-      dash~,
-      opacity~,
-      width~,
-      color~,
-    )
-    self.arrow(
-      shift(to, 1.0),
-      shift(from, 1.0),
-      via=via.rev().map(fn(p) { shift(p, 1.0) }),
-      head~,
-      heads=End,
-      gap~,
-      gap_start~,
-      gap_end~,
-      dash~,
-      opacity~,
-      width~,
-      color~,
-    )
-    return
+  match ends {
+    Pair(split) => {
+      let dx = to.0 - from.0
+      let dy = to.1 - from.1
+      let dlen = @math.hypot(dx, dy)
+      let len = if dlen == 0 { 1.0 } else { dlen }
+      let nx = -dy / len * (split / 2.0)
+      let ny = dx / len * (split / 2.0)
+      let shift = fn(p : Point, s : Double) -> Point {
+        (p.0 + nx * s, p.1 + ny * s)
+      }
+      // The forward arrow takes the "above/left of travel" side, like a
+      // sequence diagram: request on top, response below.
+      self.arrow(
+        shift(from, -1.0),
+        shift(to, -1.0),
+        via=via.map(fn(p) { shift(p, -1.0) }),
+        head~,
+        ends=Single(End),
+        gap~,
+        gap_start~,
+        gap_end~,
+        dash~,
+        opacity~,
+        width~,
+        color~,
+      )
+      self.arrow(
+        shift(to, 1.0),
+        shift(from, 1.0),
+        via=via.rev().map(fn(p) { shift(p, 1.0) }),
+        head~,
+        ends=Single(End),
+        gap~,
+        gap_start~,
+        gap_end~,
+        dash~,
+        opacity~,
+        width~,
+        color~,
+      )
+    }
+    Single(heads) => {
+      let pts = trim_ends(
+        [from] + via + [to],
+        gap_start.unwrap_or(gap),
+        gap_end.unwrap_or(gap),
+      )
+      let d = "M" + pts.map(fn(p) { "\{num(p.0)} \{num(p.1)}" }).join(" L")
+      // A head is an open V at `tip`, pointing along (ux, uy).
+      let head_at = fn(tip : Point, seg : Point) -> String {
+        let (qx, qy) = tip
+        let dlen = @math.hypot(tip.0 - seg.0, tip.1 - seg.1)
+        let len = if dlen == 0 { 1.0 } else { dlen }
+        let ux = (tip.0 - seg.0) / len
+        let uy = (tip.1 - seg.1) / len
+        let bx = qx - head * ux
+        let by = qy - head * uy
+        let pxn = -uy * head * 0.45
+        let pyn = ux * head * 0.45
+        self.cover([(bx + pxn, by + pyn), (bx - pxn, by - pyn)])
+        "<path d=\"M\{num(bx + pxn)} \{num(by + pyn)} L\{num(qx)} \{num(qy)} L\{num(bx - pxn)} \{num(by - pyn)}\"" +
+        " fill=\"none\"\{stroke_attrs(dash~, opacity~, width~, color~)}/>"
+      }
+      let heads_svg = match heads {
+        NoHead => ""
+        _ =>
+          (if heads == End || heads == Both {
+            head_at(pts[pts.length() - 1], pts[pts.length() - 2])
+          } else {
+            ""
+          }) +
+          (if heads == Start || heads == Both {
+            head_at(pts[0], pts[1])
+          } else {
+            ""
+          })
+      }
+      self.parts.push(
+        "<path d=\"\{d}\" fill=\"none\"\{stroke_attrs(dash~, opacity~, width~, color~)}/>" +
+        heads_svg,
+      )
+      self.cover(pts)
+    }
   }
-  let pts = trim_ends(
-    [from] + via + [to],
-    gap_start.unwrap_or(gap),
-    gap_end.unwrap_or(gap),
-  )
-  let d = "M" + pts.map(fn(p) { "\{num(p.0)} \{num(p.1)}" }).join(" L")
-  // A head is an open V at `tip`, pointing along (ux, uy).
-  let head_at = fn(tip : Point, seg : Point) -> String {
-    let (qx, qy) = tip
-    let dlen = @math.hypot(tip.0 - seg.0, tip.1 - seg.1)
-    let len = if dlen == 0 { 1.0 } else { dlen }
-    let ux = (tip.0 - seg.0) / len
-    let uy = (tip.1 - seg.1) / len
-    let bx = qx - head * ux
-    let by = qy - head * uy
-    let pxn = -uy * head * 0.45
-    let pyn = ux * head * 0.45
-    self.cover([(bx + pxn, by + pyn), (bx - pxn, by - pyn)])
-    "<path d=\"M\{num(bx + pxn)} \{num(by + pyn)} L\{num(qx)} \{num(qy)} L\{num(bx - pxn)} \{num(by - pyn)}\"" +
-    " fill=\"none\"\{stroke_attrs(dash~, opacity~, width~, color~)}/>"
-  }
-  let heads_svg = match heads {
-    NoHead => ""
-    _ =>
-      (if heads == End || heads == Both {
-        head_at(pts[pts.length() - 1], pts[pts.length() - 2])
-      } else {
-        ""
-      }) +
-      (if heads == Start || heads == Both { head_at(pts[0], pts[1]) } else { "" })
-  }
-  self.parts.push(
-    "<path d=\"\{d}\" fill=\"none\"\{stroke_attrs(dash~, opacity~, width~, color~)}/>" +
-    heads_svg,
-  )
-  self.cover(pts)
 }
 
 ///|
@@ -483,6 +565,7 @@ pub(all) struct Hbar {
 
 /// Horizontal bars for tiny benchmark-style numbers. Bar lengths come
 /// from the values, so a wrong length is impossible by construction.
+
 ///|
 pub fn Canvas::hbars(
   self : Canvas,
@@ -496,7 +579,7 @@ pub fn Canvas::hbars(
   size~ : Double = 12,
   value_fmt~ : (Double) -> String = fn(v) { v.to_string() },
   fill_opacity~ : Double = 0.45,
-  highlight~ : Int? = None,
+  highlight~ : Int32? = None,
 ) -> Unit {
   let lw = match label_w {
     Some(v) => v
@@ -521,8 +604,15 @@ pub fn Canvas::hbars(
   for i, item in items {
     let by = y + i.to_double() * (bar_h + row_gap)
     let w = item.value * scale
-    self.text(x + lw - 8.0, by + bar_h / 2.0, item.label, anchor=End, central=true, size~)
-    let bar = { x: x + lw, y: by, w, h: bar_h }
+    self.text(
+      x + lw - 8.0,
+      by + bar_h / 2.0,
+      item.label,
+      anchor=End,
+      central=true,
+      size~,
+    )
+    let bar = { x: x + lw, y: by, w, h: bar_h, }
     if highlight == Some(i) {
       self.highlight(bar, pad=4.0)
     }
@@ -546,6 +636,7 @@ pub fn Canvas::hbars(
 /// currentColor fill (a grey wash in light theme, a light veil in dark
 /// theme); `Ring` is a dashed enclosure; both render behind the shape
 /// so they never cover its label.
+
 ///|
 pub fn Canvas::highlight(
   self : Canvas,
@@ -579,7 +670,7 @@ pub fn Canvas::line(
   gap~ : Double = 0,
   gap_start~ : Double? = None,
   gap_end~ : Double? = None,
-  dash~ : String = "",
+  dash~ : String? = None,
   opacity~ : Double? = None,
   width~ : Double = 1.5,
   color~ : String = "currentColor",
@@ -598,19 +689,25 @@ pub fn Canvas::line(
 
 /// raw(el) is an escape hatch for elements the builder does not know
 /// (chart.mbt uses it for scatter dots); caller lists the covered points.
+
 ///|
-pub fn Canvas::raw(self : Canvas, el : String, covered~ : Array[Point] = []) -> Unit {
+pub fn Canvas::raw(
+  self : Canvas,
+  el : String,
+  covered~ : Array[Point] = [],
+) -> Unit {
   self.parts.push(el)
   self.cover(covered)
 }
 
 /// path(d) is an escape hatch for curves; caller lists the covered points.
+
 ///|
 pub fn Canvas::path(
   self : Canvas,
   d : String,
   covered : Array[Point],
-  dash~ : String = "",
+  dash~ : String? = None,
   opacity~ : Double? = None,
   width~ : Double = 1.5,
   color~ : String = "currentColor",
@@ -629,9 +726,22 @@ pub fn Canvas::render(
   label~ : String = "",
 ) -> String {
   let m = self.margin
-  let w = self.max_x - self.min_x + 2.0 * m
-  let h = self.max_y - self.min_y + 2.0 * m
-  let vb = "\{num(self.min_x - m)} \{num(self.min_y - m)} \{num(w)} \{num(h)}"
+  let vb = match self.bounds {
+    Some(b) => {
+      let w = b.max_x - b.min_x + 2.0 * m
+      let h = b.max_y - b.min_y + 2.0 * m
+      "\{num(b.min_x - m)} \{num(b.min_y - m)} \{num(w)} \{num(h)}"
+    }
+    None => "0 0 0 0"
+  }
+  let w = match self.bounds {
+    Some(b) => b.max_x - b.min_x + 2.0 * m
+    None => 0.0
+  }
+  let h = match self.bounds {
+    Some(b) => b.max_y - b.min_y + 2.0 * m
+    None => 0.0
+  }
   let wv = match width {
     Some(v) => v.to_string()
     None => w.round().to_int64().to_string()
@@ -641,7 +751,11 @@ pub fn Canvas::render(
     None => h.round().to_int64().to_string()
   }
   let size = " width=\"\{wv}\" height=\"\{hv}\""
-  let aria = if label != "" { " role=\"img\" aria-label=\"\{esc(label)}\"" } else { "" }
+  let aria = if label != "" {
+    " role=\"img\" aria-label=\"\{esc(label)}\""
+  } else {
+    ""
+  }
   "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"\{vb}\"\{size}\{aria}>\n" +
   self.backdrop.join("\n") +
   (if self.backdrop.length() > 0 { "\n" } else { "" }) +

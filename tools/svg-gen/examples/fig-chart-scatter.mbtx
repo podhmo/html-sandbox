@@ -57,7 +57,7 @@ fn main {
     (0.0, 400.0),
     w=420.0,
     h=190.0,
-    xlog=true,
+    xscale=@s.Log,
     xtitle="ペイロード (KiB, log)",
     ytitle="レイテンシ (ms)",
     grid=true,
@@ -77,7 +77,7 @@ fn main {
         (p.xs.map(1.0), p.ys.map(lx(0.0))),
         (p.xs.map(1000.0), p.ys.map(lx(3.0))),
       ],
-      dash="2 3",
+      dash=Some("2 3"),
       opacity=Some(0.8),
       color=c.color(0),
     )

@@ -15,17 +15,17 @@ fn main {
   // lane 1 — classic SSR
   let b1 = c.box(20.0, 52.0, @s.Auto, 56.0, label="browser\ncomment form", color=c.color(0), size=12.0)
   let s1 = c.box(300.0, 52.0, @s.Auto, 56.0, label="server\nPOST → DB → redirect", color=c.color(0), size=12.0)
-  c.arrow(c.anchor(b1, @s.E), c.anchor(s1, @s.W), width=1.5, heads=@s.Both, split=14.0)
+  c.arrow(c.anchor(b1, @s.E), c.anchor(s1, @s.W), width=1.5, ends=@s.Pair(14.0))
   c.text(170.0, 68.0, "POST body=…", size=10.0, opacity=Some(0.75))
   c.text(168.0, 102.0, "303 → GET (full page)", size=10.0, opacity=Some(0.75))
-  let r1 = c.box(620.0, 52.0, @s.Auto, 56.0, label="screen\nwhole page repaints", color=c.color(0), size=12.0, dash="5 4")
+  let r1 = c.box(620.0, 52.0, @s.Auto, 56.0, label="screen\nwhole page repaints", color=c.color(0), size=12.0, dash=Some("5 4"))
   c.arrow(c.anchor(s1, @s.E), c.anchor(r1, @s.W), width=1.5)
   c.text(20.0, 140.0, "classic SSR: every POST repaints the page (PRG)", size=11.0, opacity=Some(0.65))
 
   // lane 2 — partial update
   let b2 = c.box(20.0, 168.0, @s.Auto, 56.0, label="browser\npartial-submit.js", color=c.color(3), size=12.0)
   let s2 = c.box(300.0, 168.0, @s.Auto, 56.0, label="server\nsame handler, X-Partial 分岐", color=c.color(3), size=12.0)
-  c.arrow(c.anchor(b2, @s.E), c.anchor(s2, @s.W), width=1.5, heads=@s.Both, split=14.0)
+  c.arrow(c.anchor(b2, @s.E), c.anchor(s2, @s.W), width=1.5, ends=@s.Pair(14.0))
   c.text(168.0, 184.0, "POST X-Partial", size=10.0, opacity=Some(0.75))
   c.text(168.0, 218.0, "200 <li> fragment", size=10.0, opacity=Some(0.75))
   let r2 = c.box(620.0, 168.0, @s.Auto, 56.0, label="screen\n<li> appended only", color=c.color(3), size=12.0)

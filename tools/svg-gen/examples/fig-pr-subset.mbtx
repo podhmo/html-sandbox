@@ -10,7 +10,7 @@ fn main {
   let c = @s.Canvas::new()
   let imp = [0, 1, 2, 3, 4, 5]
 
-  let outer = c.box(0.0, 0.0, @s.Fixed(720.0), 344.0, rx=12.0, dash="6 4")
+  let outer = c.box(0.0, 0.0, @s.Fixed(720.0), 344.0, rx=12.0, dash=Some("6 4"))
   c.text(outer.x + 16.0, outer.y + 26.0, "GitHub (as a product)", size=15.0)
 
   let h = 40.0
@@ -51,7 +51,7 @@ fn main {
   let y1 = y0 + 4.0 * (h + gap_y) + 4.0
   let off = fn(x : Double, label : String) {
     ignore(
-      c.box(x, y1, @s.Fixed(col_w), h, label=label, dash="5 4", opacity=Some(0.45)),
+      c.box(x, y1, @s.Fixed(col_w), h, label=label, dash=Some("5 4"), opacity=Some(0.45)),
     )
   }
   off(x0, "review verdicts")

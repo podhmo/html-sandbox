@@ -53,8 +53,8 @@ fn main {
 
   // Tool names above each ellipse, underlined in their zone's
   // color.
-  c.text(210.0, 56.0, "playwright-cli", anchor=@s.Middle, size=15.0, underline=2.0)
-  c.text(390.0, 56.0, "chrome-devtools CLI", anchor=@s.Middle, size=15.0, underline=2.0)
+  c.text(210.0, 56.0, "playwright-cli", anchor=@s.Middle, size=15.0, underline=@s.Yes)
+  c.text(390.0, 56.0, "chrome-devtools CLI", anchor=@s.Middle, size=15.0, underline=@s.Yes)
   c.raw(
     "<line x1=\"\{210.0 - 62.0}\" y1=\"64\" x2=\"\{210.0 + 62.0}\" y2=\"64\" stroke=\"\{pw_col}\" stroke-width=\"2\"/>",
     covered=[(210.0 - 62.0, 64.0), (210.0 + 62.0, 64.0)],
@@ -105,8 +105,8 @@ fn main {
   c.arrow(
     (frame.x + frame.w - 6.0, 262.0),
     (out_x - 6.0, 262.0),
-    heads=@s.End,
-    dash="5 4",
+    ends=@s.Single(@s.End),
+    dash=Some("5 4"),
     color=out_col,
   )
 

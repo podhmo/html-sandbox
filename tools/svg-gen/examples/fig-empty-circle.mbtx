@@ -86,7 +86,7 @@ fn main {
     c.line(e.0, e.1, width=1.2)
   }
   c.line(sb, sd, width=2.0, color=c.color(3))
-  ignore(c.circle(bad.o.0, bad.o.1, bad.r, color=c.color(3), dash="5 3"))
+  ignore(c.circle(bad.o.0, bad.o.1, bad.r, color=c.color(3), dash=Some("5 3")))
   for p in [sa, sb, sd] {
     dot(p, "currentColor")
   }

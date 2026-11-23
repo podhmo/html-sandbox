@@ -14,4 +14,5 @@ description = "A small SVG generator kit for concept figures: canvases that deri
 
 // The package is a library: its constructors are for the .mbtx
 // figure scripts and external callers, not for itself.
+
 warnings = "-unused_constructor"

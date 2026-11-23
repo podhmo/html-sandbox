@@ -31,7 +31,7 @@ fn main {
       (input.x - gap / 2.0, c.anchor(check, @s.W).1),
       (input.x - gap / 2.0, c.anchor(input, @s.N).1),
     ],
-    dash="5 4",
+    dash=Some("5 4"),
   )
 
   // Spatial claims the drawing depends on, stated where they can fail

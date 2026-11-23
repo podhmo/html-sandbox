@@ -19,7 +19,7 @@ fn main {
   // widths drawn to scale: the 768 frame is visibly wider than
   // the two phone widths, which differ only slightly.
   let widths = [320.0, 360.0, 768.0]
-  let dashes = ["5 3", "", "2 3"]
+  let dashes = [Some("5 3"), None, Some("2 3")]
   let ws = [1.5, 2.5, 1.5]
   let frames = widths.mapi(fn(i, wpx) {
     c.box(x0, 0.0, @s.Fixed(wpx * px), h, color=c.color(i), dash=dashes[i], width=ws[i])

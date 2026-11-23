@@ -29,7 +29,7 @@ fn main {
   c.text(420.0, 112.0, "vt.types.add(\"forward\")  again", size=10.0, opacity=Some(0.8))
 
   // the transition carries the snapshot across; the types do not
-  c.arrow(c.anchor(swap, @s.E), c.anchor(reveal, @s.W), heads=@s.Both, color=c.color(2))
+  c.arrow(c.anchor(swap, @s.E), c.anchor(reveal, @s.W), ends=@s.Single(@s.Both), color=c.color(2))
   c.text(320.0, 58.0, "same ViewTransition", size=10.0, anchor=@s.Middle)
   c.text(320.0, 72.0, "object", size=10.0, anchor=@s.Middle)
   c.text(320.0, 104.0, "types は引き継がれない", size=10.0, anchor=@s.Middle)
@@ -39,8 +39,8 @@ fn main {
   let css = c.box(230.0, 190.0, @s.Fixed(280.0), 40.0, rx=8.0, color=c.color(4))
   c.text(370.0, 206.0, "CSS matches:", size=11.0, anchor=@s.Middle)
   c.text(370.0, 222.0, ":active-view-transition-type(forward)", size=11.0, anchor=@s.Middle)
-  c.arrow(c.anchor(swap, @s.S), c.anchor(css, @s.W), dash="4 3", opacity=Some(0.8))
-  c.arrow(c.anchor(reveal, @s.S), c.anchor(css, @s.E), dash="4 3", opacity=Some(0.8))
+  c.arrow(c.anchor(swap, @s.S), c.anchor(css, @s.W), dash=Some("4 3"), opacity=Some(0.8))
+  c.arrow(c.anchor(reveal, @s.S), c.anchor(css, @s.E), dash=Some("4 3"), opacity=Some(0.8))
 
   println(
     c.render(label="旧ページの pageswap と新ページの pagereveal の両方で type を付けないと :active-view-transition-type が効かない図"),

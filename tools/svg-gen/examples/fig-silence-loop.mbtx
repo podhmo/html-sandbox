@@ -56,7 +56,7 @@ fn main {
   c.arrow(
     c.anchor(cc, @s.S),
     (e.x + e.w / 2.0, e.y),
-    dash="5 4",
+    dash=Some("5 4"),
     via=[
       (cc.x + cc.w / 2.0, e.y + e.h / 2.0),
       (e.x + e.w / 2.0, e.y + e.h / 2.0),

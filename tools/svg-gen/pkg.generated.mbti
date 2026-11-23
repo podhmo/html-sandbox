@@ -22,6 +22,8 @@ pub fn edge_adjacency(Array[(Int32, Int32, Int32)]) -> Array[(Int32, Int32, Arra
 
 pub let few_sites : Array[(Double, Double)]
 
+pub fn fixed(Double, Int32) -> String
+
 pub fn gauss(() -> Double) -> () -> Double
 
 pub fn hull(Array[(Double, Double)]) -> Array[Int32]
@@ -72,6 +74,8 @@ pub(all) struct Bisector {
   dir : (Double, Double)
 }
 
+type Bounds
+
 #derive(@debug.Debug)
 pub(all) struct BoxGroup {
   label : String
@@ -82,30 +86,27 @@ pub struct Canvas {
   margin : Double
   backdrop : Array[String]
   parts : Array[String]
-  mut min_x : Double
-  mut min_y : Double
-  mut max_x : Double
-  mut max_y : Double
+  mut bounds : Bounds?
 }
 pub fn Canvas::above(Self, Shape, Double, Double) -> Double
 pub fn Canvas::anchor(Self, Shape, Side) -> (Double, Double)
-pub fn Canvas::arrow(Self, (Double, Double), (Double, Double), via? : Array[(Double, Double)], head? : Double, heads? : Heads, split? : Double, gap? : Double, gap_start? : Double?, gap_end? : Double?, dash? : String, opacity? : Double?, width? : Double, color? : String) -> Unit
+pub fn Canvas::arrow(Self, (Double, Double), (Double, Double), via? : Array[(Double, Double)], head? : Double, ends? : Ends, gap? : Double, gap_start? : Double?, gap_end? : Double?, dash? : String?, opacity? : Double?, width? : Double, color? : String) -> Unit
 pub fn Canvas::below(Self, Shape, Double) -> Double
-pub fn Canvas::box(Self, Double, Double, Sizing, Double, label? : String, rx? : Double, pad_x? : Double, size? : Double, dash? : String, opacity? : Double?, width? : Double, color? : String, underline? : Double) -> Shape
+pub fn Canvas::box(Self, Double, Double, Sizing, Double, label? : String, rx? : Double, pad_x? : Double, size? : Double, dash? : String?, opacity? : Double?, width? : Double, color? : String, underline? : Underline) -> Shape
 pub fn Canvas::center(Self, Shape) -> (Double, Double)
-pub fn Canvas::circle(Self, Double, Double, Double, label? : String, size? : Double, dash? : String, opacity? : Double?, width? : Double, color? : String, underline? : Double) -> Shape
+pub fn Canvas::circle(Self, Double, Double, Double, label? : String, size? : Double, dash? : String?, opacity? : Double?, width? : Double, color? : String, underline? : Underline) -> Shape
 pub fn Canvas::color(Self, Int32) -> String
 pub fn Canvas::hbars(Self, Array[Hbar], x? : Double, y? : Double, bar_h? : Double, row_gap? : Double, max_w? : Double, label_w? : Double?, size? : Double, value_fmt? : (Double) -> String, fill_opacity? : Double, highlight? : Int32?) -> Unit
 pub fn Canvas::highlight(Self, Shape, pad? : Double, opacity? : Double, mode? : HighlightMode, rx? : Double?) -> Unit
 pub fn Canvas::left_of(Self, Shape, Double, Double) -> Double
-pub fn Canvas::line(Self, (Double, Double), (Double, Double), via? : Array[(Double, Double)], gap? : Double, gap_start? : Double?, gap_end? : Double?, dash? : String, opacity? : Double?, width? : Double, color? : String) -> Unit
+pub fn Canvas::line(Self, (Double, Double), (Double, Double), via? : Array[(Double, Double)], gap? : Double, gap_start? : Double?, gap_end? : Double?, dash? : String?, opacity? : Double?, width? : Double, color? : String) -> Unit
 pub fn Canvas::midpoint(Self, (Double, Double), (Double, Double)) -> (Double, Double)
 pub fn Canvas::new(margin? : Double) -> Self
-pub fn Canvas::path(Self, String, Array[(Double, Double)], dash? : String, opacity? : Double?, width? : Double, color? : String) -> Unit
+pub fn Canvas::path(Self, String, Array[(Double, Double)], dash? : String?, opacity? : Double?, width? : Double, color? : String) -> Unit
 pub fn Canvas::raw(Self, String, covered? : Array[(Double, Double)]) -> Unit
 pub fn Canvas::render(Self, width? : Double?, height? : Double?, label? : String) -> String
 pub fn Canvas::right_of(Self, Shape, Double) -> Double
-pub fn Canvas::text(Self, Double, Double, String, anchor? : TextAnchor, central? : Bool, size? : Double, opacity? : Double?, underline? : Double) -> Unit
+pub fn Canvas::text(Self, Double, Double, String, anchor? : TextAnchor, central? : Bool, size? : Double, opacity? : Double?, underline? : Underline) -> Unit
 
 #derive(@debug.Debug)
 pub(all) struct ChartMeta {
@@ -118,6 +119,12 @@ pub(all) struct ChartMeta {
 pub(all) struct Circum {
   o : (Double, Double)
   r : Double
+}
+
+#derive(Eq)
+pub(all) enum Ends {
+  Single(Heads)
+  Pair(Double)
 }
 
 pub(all) struct Hbar {
@@ -163,11 +170,11 @@ pub fn Plot::frame(Self, xticks? : Array[Tick], yticks? : Array[Tick]) -> Unit
 pub fn Plot::heat_legend(Self, (Double, Double), Double, Double, w? : Double, fmt? : (Double) -> String, label? : String) -> Unit
 pub fn Plot::heatmap(Self, Array[Array[Double]], color? : String) -> (Double, Double)
 pub fn Plot::histogram(Self, Array[Bin], color? : String) -> Unit
-pub fn Plot::hline(Self, Double, label? : String, dash? : String, opacity? : Double) -> Unit
-pub fn Plot::new(Canvas, ChartMeta, (Double, Double), (Double, Double), x? : Double, y? : Double, w? : Double, h? : Double, xlog? : Bool, ylog? : Bool, xtitle? : String, ytitle? : String, xfmt? : (Double) -> String, yfmt? : (Double) -> String, grid? : Bool) -> Self
-pub fn Plot::series(Self, Array[(Double, Double)], label? : String, dash? : String, opacity? : Double?, width? : Double, color? : String) -> Unit
-pub fn Plot::step(Self, Array[(Double, Double)], label? : String, dash? : String, opacity? : Double?, width? : Double, color? : String) -> Unit
-pub fn Plot::vline(Self, Double, label? : String, dash? : String, opacity? : Double) -> Unit
+pub fn Plot::hline(Self, Double, label? : String, dash? : String?, opacity? : Double) -> Unit
+pub fn Plot::new(Canvas, ChartMeta, (Double, Double), (Double, Double), x? : Double, y? : Double, w? : Double, h? : Double, xscale? : ScaleKind, yscale? : ScaleKind, xtitle? : String, ytitle? : String, xfmt? : (Double) -> String, yfmt? : (Double) -> String, grid? : Bool) -> Self
+pub fn Plot::series(Self, Array[(Double, Double)], label? : String, dash? : String?, opacity? : Double?, width? : Double, color? : String) -> Unit
+pub fn Plot::step(Self, Array[(Double, Double)], label? : String, dash? : String?, opacity? : Double?, width? : Double, color? : String) -> Unit
+pub fn Plot::vline(Self, Double, label? : String, dash? : String?, opacity? : Double) -> Unit
 
 #derive(@debug.Debug)
 pub(all) struct Scale {
@@ -175,11 +182,17 @@ pub(all) struct Scale {
   hi : Double
   a : Double
   b : Double
-  log : Bool
+  kind : ScaleKind
 }
 pub fn Scale::map(Self, Double) -> Double
-pub fn Scale::new(Double, Double, Double, Double, log? : Bool) -> Self
+pub fn Scale::new(Double, Double, Double, Double, kind? : ScaleKind) -> Self
 pub fn Scale::ticks(Self, count? : Int32) -> Array[Double]
+
+#derive(Eq, @debug.Debug)
+pub(all) enum ScaleKind {
+  Linear
+  Log
+}
 
 #derive(@debug.Debug)
 pub(all) struct Shape {
@@ -214,6 +227,13 @@ pub(all) enum TextAnchor {
 pub(all) enum Tick {
   Num(Double)
   Lab(Double, String)
+}
+
+#derive(Eq)
+pub(all) enum Underline {
+  No
+  Yes
+  Custom(Double)
 }
 
 // Type aliases

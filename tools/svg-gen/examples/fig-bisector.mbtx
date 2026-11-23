@@ -38,8 +38,8 @@ fn main {
     if diff >= 1.0e-9 {
       abort("locus point must be equidistant to both sites")
     }
-    c.line(w, a, dash="3 3", opacity=Some(0.6), color=col_a)
-    c.line(w, b, dash="3 3", opacity=Some(0.6), color=col_b)
+    c.line(w, a, dash=Some("3 3"), opacity=Some(0.6), color=col_a)
+    c.line(w, b, dash=Some("3 3"), opacity=Some(0.6), color=col_b)
     c.raw(
       "<circle cx=\"\{w.0}\" cy=\"\{w.1}\" r=\"2.5\" fill=\"currentColor\"/>",
       covered=[w],

@@ -45,7 +45,7 @@ fn main {
   label_w = label_w + 16.0
   let cap_x = label_w + gib * px_per_gib
   let bottom = runs.length().to_double() * (20.0 + 14.0) - 14.0
-  c.line((cap_x, -26.0), (cap_x, bottom + 10.0), dash="4 3", width=1.5)
+  c.line((cap_x, -26.0), (cap_x, bottom + 10.0), dash=Some("4 3"), width=1.5)
   c.text(cap_x, -34.0, "8 GiB (このGPUのVRAM)", anchor=@s.Middle, size=11.0, opacity=Some(0.7))
 
   c.text(

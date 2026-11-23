@@ -37,7 +37,7 @@ fn main {
 
   // the region the inference points at
   ignore(
-    c.box(380.0, 150.0, @s.Fixed(230.0), 140.0, rx=6.0, dash="5 4", width=1.5, opacity=Some(0.7)),
+    c.box(380.0, 150.0, @s.Fixed(230.0), 140.0, rx=6.0, dash=Some("5 4"), width=1.5, opacity=Some(0.7)),
   )
   c.text(600.0, 166.0, "良い記事の側（推測）", anchor=@s.End, size=11.0, opacity=Some(0.8))
 
@@ -62,9 +62,9 @@ fn main {
 
   // the reflection that was asked for but not written
   let miss : @s.Point = (430.0, 276.0)
-  ignore(c.circle(miss.0, miss.1, 6.0, dash="2 2", width=1.5))
+  ignore(c.circle(miss.0, miss.1, 6.0, dash=Some("2 2"), width=1.5))
   c.text(miss.0 + 12.0, miss.1 + 4.0, "書かれなかった反省", size=11.0, opacity=Some(0.85))
-  c.arrow((176.0, 252.0), (422.0, 275.0), dash="4 3", opacity=Some(0.6))
+  c.arrow((176.0, 252.0), (422.0, 275.0), dash=Some("4 3"), opacity=Some(0.6))
 
   for p in pts {
     let (x, y, _, _, _) = p

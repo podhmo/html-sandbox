@@ -4,7 +4,8 @@
 // not measurements. Each accessor re-seeds its own PRNG, so callers
 // get identical data every time.
 
-///| Virtual benchmark trials (ms), n=160 per implementation. "cached"
+///|
+/// Virtual benchmark trials (ms), n=160 per implementation. "cached"
 /// is secretly bimodal: a fast path hit vs. a miss path. A box plot
 /// reports it as one compact distribution; a histogram shows the two
 /// modes. The choice of figure changes what the data says — which is
@@ -12,7 +13,7 @@
 pub fn bench() -> Array[BoxGroup] {
   let rand = rng(20261102)
   let g = gauss(rand)
-  let nrm = fn(mu : Double, sd : Double, n : Int) -> Array[Double] {
+  let nrm = fn(mu : Double, sd : Double, n : Int32) -> Array[Double] {
     let out : Array[Double] = []
     for i = 0; i < n; i = i + 1 {
       out.push(mu + sd * g())
@@ -20,9 +21,9 @@ pub fn bench() -> Array[BoxGroup] {
     out
   }
   [
-    { label: "naive", values: nrm(150.0, 18.0, 160) },
-    { label: "simd", values: nrm(105.0, 12.0, 160) },
-    { label: "cached", values: nrm(88.0, 9.0, 96) + nrm(168.0, 14.0, 64) },
+    { label: "naive", values: nrm(150.0, 18.0, 160), },
+    { label: "simd", values: nrm(105.0, 12.0, 160), },
+    { label: "cached", values: nrm(88.0, 9.0, 96) + nrm(168.0, 14.0, 64), },
     {
       label: "async-io",
       values: nrm(120.0, 22.0, 160).map(fn(v) {
@@ -36,13 +37,14 @@ pub fn bench() -> Array[BoxGroup] {
   ]
 }
 
-///| Virtual hourly traffic (req/s), 7 days x 24 hours: a daytime
+///|
+/// Virtual hourly traffic (req/s), 7 days x 24 hours: a daytime
 /// plateau, a lunchtime dip, quieter weekends, and an incident
 /// window on Tuesday 14:00-17:00.
 pub fn traffic() -> Array[Array[Double]] {
   let rand = rng(20261102)
   let g = gauss(rand)
-  let hourly = fn(h : Int) -> Double {
+  let hourly = fn(h : Int32) -> Double {
     if h < 7 {
       15.0
     } else if h < 9 {

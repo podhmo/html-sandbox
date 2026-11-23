@@ -38,7 +38,7 @@ fn main {
   for j in nbr {
     let bi = @s.bisector(site, s[j])
     let (p, q) = @s.line_rect(bi.mid, bi.dir, clip)
-    c.line(p, q, dash="4 3", opacity=Some(0.55))
+    c.line(p, q, dash=Some("4 3"), opacity=Some(0.55))
     c.raw(
       "<circle cx=\"\{s[j].0}\" cy=\"\{s[j].1}\" r=\"3.5\" fill=\"currentColor\"/>",
       covered=[s[j]],
