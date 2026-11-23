@@ -1,0 +1,156 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-item-kind.mbtx -- Where the list kind lives, before and after
+// the refactor. Before: "num = 0" on every Item is the bullet marker
+// and the renderer re-reads items[0].num to pick <ul>/<ol>; children
+// recurse to the same record, so a nested list has nowhere to keep
+// its kind. After: ItemList owns kind once per level and
+// Item.children points back at the list type, not at an item.
+
+fn main {
+  let c = @s.Canvas::new()
+  let kind = c.color(0) // where the kind lives
+  let sent = c.color(1) // sentinel value
+  let w = 148.0
+  let fh = 26.0
+  let gap = 6.0
+  let pad = 8.0
+
+  // A record: its name above a column of field cells inside a thin
+  // frame. Returns (frame, cells).
+  let record = fn(x : Double, y : Double, name : String, fields : Array[(String, String)]) -> (@s.Shape, Array[@s.Shape]) {
+    c.text(x + 2.0, y - 8.0, name, size=13.0)
+    let cells = fields.mapi(fn(i, f) {
+      let (label, col) = f
+      c.box(
+        x + pad,
+        y + pad + i.to_double() * (fh + gap),
+        @s.Fixed(w),
+        fh,
+        label=label,
+        size=12.0,
+        rx=4.0,
+        color=(if col == "" { "currentColor" } else { col }),
+        width=(if col == "" { 1.0 } else { 2.0 }),
+      )
+    })
+    let frame = c.box(
+      x,
+      y,
+      @s.Fixed(w + pad * 2.0),
+      pad + fields.length().to_double() * (fh + gap) + pad - gap,
+      rx=8.0,
+      opacity=Some(0.5),
+    )
+    (frame, cells)
+  }
+
+  // ---- before ----
+  c.text(24.0, 30.0, "before", size=14.0, underline=1.0)
+  let item = record(24.0, 52.0, "Item", [
+    ("text : String", ""),
+    ("num : Int32", sent),
+    ("children : Array[Item]", ""),
+  ])
+  // children recurses to the same record (dashed).
+  let ch = item.1[2]
+  c.line(c.anchor(ch, @s.W), (12.0, ch.y + ch.h / 2.0), dash="4 3")
+  c.line(
+    (12.0, ch.y + ch.h / 2.0),
+    (12.0, item.0.y + item.0.h / 2.0),
+    dash="4 3",
+  )
+  c.arrow(
+    (12.0, item.0.y + item.0.h / 2.0),
+    c.anchor(item.0, @s.W),
+    gap=0.0,
+    dash="4 3",
+  )
+  let list_before = c.box(
+    24.0 + pad,
+    178.0,
+    @s.Fixed(w),
+    fh,
+    label="List(items)",
+    size=12.0,
+    rx=4.0,
+  )
+  c.arrow(c.anchor(list_before, @s.N), c.anchor(item.0, @s.S), gap=2.0)
+  c.text(24.0, 232.0, "num == 0 marks bullet items", size=11.0, opacity=Some(0.75))
+  c.text(
+    24.0,
+    248.0,
+    "render: items[0].num > 0 ? <ol> : <ul>",
+    size=11.0,
+    opacity=Some(0.75),
+  )
+
+  // ---- after ----
+  let ax = 300.0
+  c.text(ax, 30.0, "after", size=14.0, underline=1.0)
+  let item_list = record(ax, 52.0, "ItemList", [
+    ("kind : ListKind", kind),
+    ("items : Array[Item]", ""),
+  ])
+  let item_after = record(ax, 156.0, "Item", [
+    ("text : String", ""),
+    ("children : ItemList?", ""),
+  ])
+  // items holds the Items.
+  let it = item_list.1[1]
+  c.line(c.anchor(it, @s.W), (ax - 16.0, it.y + it.h / 2.0))
+  c.line(
+    (ax - 16.0, it.y + it.h / 2.0),
+    (ax - 16.0, item_after.0.y + item_after.0.h / 2.0),
+  )
+  c.arrow(
+    (ax - 16.0, item_after.0.y + item_after.0.h / 2.0),
+    c.anchor(item_after.0, @s.W),
+    gap=0.0,
+  )
+  // children points back at the list type, not at an item (dashed).
+  let ch2 = item_after.1[1]
+  c.line(c.anchor(ch2, @s.W), (ax - 34.0, ch2.y + ch2.h / 2.0), dash="4 3")
+  c.line(
+    (ax - 34.0, ch2.y + ch2.h / 2.0),
+    (ax - 34.0, item_list.0.y + item_list.0.h / 2.0),
+    dash="4 3",
+  )
+  c.arrow(
+    (ax - 34.0, item_list.0.y + item_list.0.h / 2.0),
+    c.anchor(item_list.0, @s.W),
+    gap=0.0,
+    dash="4 3",
+  )
+  // List wraps the ItemList.
+  let list_after = c.box(
+    ax + w + pad * 2.0 + 60.0,
+    item_list.0.y + item_list.0.h / 2.0 - fh / 2.0,
+    @s.Fixed(w),
+    fh,
+    label="List(item_list)",
+    size=12.0,
+    rx=4.0,
+  )
+  c.arrow(c.anchor(list_after, @s.W), c.anchor(item_list.0, @s.E), gap=2.0)
+  c.text(ax, 262.0, "kind = Bullet | Ordered(start~)", size=11.0, opacity=Some(0.75))
+  c.text(
+    ax,
+    278.0,
+    "render: match list.kind { ... }",
+    size=11.0,
+    opacity=Some(0.75),
+  )
+
+  // The before panel's widest element is its frame; keep the panels
+  // apart.
+  if !(24.0 + w + 40.0 < ax) {
+    abort("panels must not overlap")
+  }
+
+  println(
+    c.render(label="before: num on every Item doubles as the list kind; after: ItemList owns kind and Item.children points back at it"),
+  )
+}

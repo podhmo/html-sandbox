@@ -1,0 +1,43 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-unslop-flow.mbtx -- the unslop pipeline and where the five
+// DADS reports exit it. The skill runs audit -> direction -> nine
+// fix passes, but its "no slop" branch stops before editing. The
+// reports, built on a design system, exit there: the craft gate
+// passes, the remaining question is direction (template look),
+// which sits outside the fix passes.
+
+fn main {
+  let c = @s.Canvas::new(margin=12.0)
+
+  // main pipeline, left to right
+  let audit = c.box(30.0, 80.0, @s.Auto, 40.0, label="監査\nsigns.md", color=c.color(0))
+  let verdict = c.box(190.0, 80.0, @s.Auto, 40.0, label="slopの\n量を判定", color=c.color(1))
+  let direction = c.box(350.0, 80.0, @s.Auto, 40.0, label="Direction\n(5行)", color=c.color(2))
+  let passes = c.box(520.0, 80.0, @s.Auto, 40.0, label="9パス修正", color=c.color(3))
+
+  c.arrow(c.anchor(audit, @s.E), c.anchor(verdict, @s.W))
+  c.arrow(c.anchor(verdict, @s.E), c.anchor(direction, @s.W))
+  c.arrow(c.anchor(direction, @s.E), c.anchor(passes, @s.W))
+
+  // the no-slop exit: down and out before the passes
+  let exit = c.box(190.0, 180.0, @s.Auto, 40.0, label="no slop\n→ polishのみ", color=c.color(4))
+  c.arrow(c.anchor(verdict, @s.S), c.anchor(exit, @s.N), dash="4 4")
+  c.text(240.0, 155.0, "DADSレポート5種はここ", anchor=@s.Start, size=12.0)
+
+  // what still lives past the exit: direction-level gap
+  c.text(
+    30.0,
+    250.0,
+    "抜けているもの: 型ごとの「世界」(個人メモに行政デザイン)・テンプレート同一感 — craft ではなく direction の領分",
+    anchor=@s.Start,
+    size=12.0,
+    opacity=Some(0.8),
+  )
+
+  println(
+    c.render(label="unslop pipeline with the no-slop exit where the DADS reports land"),
+  )
+}

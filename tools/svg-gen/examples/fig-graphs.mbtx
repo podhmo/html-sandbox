@@ -1,0 +1,144 @@
+---
+import {
+  "podhmo/svg-gen" @s,
+  "moonbitlang/core/math" @math,
+  "moonbitlang/core/double" @double,
+}
+---
+
+// fig-graphs.mbtx -- G1: the proximity-graph chain on the same point
+// set. NNG ⊂ EMST ⊂ Gabriel ⊂ Delaunay, drawn as four small panels,
+// so the nesting is visible as edge sets thinning/thickening, not
+// as a text diagram. Asserts the set inclusions edge by edge.
+
+fn main {
+  let s = @s.sites
+  let tris = @s.delaunay(s)
+  let c = @s.Canvas::new()
+  let dx = 260.0
+  let dy = 230.0
+
+  let dist = fn(a : @s.Point, b : @s.Point) {
+    @math.hypot(a.0 - b.0, a.1 - b.1)
+  }
+  let ekey = fn(a : Int, b : Int) -> (Int, Int) {
+    if a < b {
+      (a, b)
+    } else {
+      (b, a)
+    }
+  }
+
+  let dt : Array[(Int, Int)] = []
+  for entry in @s.edge_adjacency(tris) {
+    let (ea, eb, _ts) = entry
+    let k = ekey(ea, eb)
+    if !dt.contains(k) {
+      dt.push(k)
+    }
+  }
+
+  let nng : Array[(Int, Int)] = []
+  for i, p in s {
+    let mut best = -1
+    let mut bd = @double.infinity
+    for j, q in s {
+      if i != j && dist(p, q) < bd {
+        bd = dist(p, q)
+        best = j
+      }
+    }
+    let k = ekey(i, best)
+    if !nng.contains(k) {
+      nng.push(k)
+    }
+  }
+
+  // EMST = Prim over Delaunay edges (EMST ⊆ DT, so this is safe &
+  // cheap).
+  let emst : Array[(Int, Int)] = []
+  let in_tree : Array[Int] = [0]
+  let edges = dt
+  while in_tree.length() < s.length() {
+    let mut best : (Int, Int)? = None
+    let mut bd = @double.infinity
+    for e in edges {
+      let (ea, eb) = e
+      if in_tree.contains(ea) != in_tree.contains(eb) && dist(s[ea], s[eb]) < bd {
+        bd = dist(s[ea], s[eb])
+        best = Some(e)
+      }
+    }
+    let (ea, eb) = best.unwrap()
+    emst.push(ekey(ea, eb))
+    if !in_tree.contains(ea) {
+      in_tree.push(ea)
+    }
+    if !in_tree.contains(eb) {
+      in_tree.push(eb)
+    }
+  }
+
+  // Gabriel = Delaunay edges whose diameter circle contains no other
+  // site.
+  let gg : Array[(Int, Int)] = []
+  for e in edges {
+    let (ea, eb) = e
+    let mid : @s.Point = ((s[ea].0 + s[eb].0) / 2.0, (s[ea].1 + s[eb].1) / 2.0)
+    let rr = dist(s[ea], s[eb]) / 2.0
+    let mut empty = true
+    for i, p in s {
+      if i != ea && i != eb && !(dist(p, mid) > rr - 1.0e-9) {
+        empty = false
+      }
+    }
+    if empty {
+      gg.push(ekey(ea, eb))
+    }
+  }
+
+  for k in nng {
+    if !emst.contains(k) {
+      abort("NNG edge missing from EMST")
+    }
+  }
+  for k in emst {
+    if !gg.contains(k) {
+      abort("EMST edge missing from Gabriel")
+    }
+  }
+  for k in gg {
+    if !dt.contains(k) {
+      abort("Gabriel edge missing from DT")
+    }
+  }
+
+  let panel = fn(set : Array[(Int, Int)], ox : Double, oy : Double, cap : String) {
+    for k in set {
+      let (ea, eb) = k
+      c.line(
+        (s[ea].0 + ox, s[ea].1 + oy),
+        (s[eb].0 + ox, s[eb].1 + oy),
+        width=1.5,
+        color=c.color(0),
+      )
+    }
+    for p in s {
+      let q : @s.Point = (p.0 + ox, p.1 + oy)
+      c.raw(
+        "<circle cx=\"\{q.0}\" cy=\"\{q.1}\" r=\"3\" fill=\"currentColor\"/>",
+        covered=[q],
+      )
+    }
+    c.text(110.0 + ox, 215.0 + oy, cap, anchor=@s.Middle, size=12.0, opacity=Some(0.7))
+  }
+
+  panel(nng, -25.0, -15.0, "NNG (\{nng.length()})")
+  panel(emst, dx - 25.0, -15.0, "EMST (\{emst.length()})")
+  panel(gg, -25.0, dy - 15.0, "Gabriel (\{gg.length()})")
+  panel(dt, dx - 25.0, dy - 15.0, "Delaunay (\{dt.length()})")
+
+  println(
+    c.render(label="proximity graph chain on one point set: NNG inside EMST inside Gabriel inside Delaunay"),
+  )
+}

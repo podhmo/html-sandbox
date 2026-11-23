@@ -1,0 +1,155 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-scan-state.mbtx -- The scanner's state, before and after.
+// Before: four accumulation buffers and three mode flags sit side
+// by side, each mode's own variables floating loose; the "at most
+// one is active" rule is kept by hand. After: two slots, and each
+// variant carries only its own state.
+
+fn main {
+  let c = @s.Canvas::new()
+  let live = c.color(0) // the active slot / the variant
+
+  // ---- before ----
+  c.text(24.0, 30.0, "before", size=14.0, underline=1.0)
+  c.text(24.0, 54.0, "pending buffers", size=12.0, opacity=Some(0.7))
+  let bufs = ["para []", "items [it]", "quote []", "table []"]
+  for i, label in bufs {
+    let x = 24.0 + i.to_double() * 104.0
+    let b = c.box(
+      x,
+      62.0,
+      @s.Fixed(92.0),
+      28.0,
+      label=label,
+      size=12.0,
+      rx=4.0,
+      color=(if i == 1 { live } else { "currentColor" }),
+      width=(if i == 1 { 2.0 } else { 1.0 }),
+      opacity=Some(if i == 1 { 1.0 } else { 0.6 }),
+    )
+    if i == 1 {
+      c.highlight(b, opacity=0.06)
+    }
+  }
+  c.text(24.0, 112.0, "at most one non-empty", size=11.0, opacity=Some(0.6))
+
+  c.text(24.0, 156.0, "mode flags + loose vars", size=12.0, opacity=Some(0.7))
+  let flags = ["in_code", "in_details", "in_foot"]
+  for i, label in flags {
+    let x = 24.0 + i.to_double() * 104.0
+    let b = c.box(
+      x,
+      164.0,
+      @s.Fixed(92.0),
+      28.0,
+      label=label,
+      size=12.0,
+      rx=4.0,
+      color=(if i == 1 { live } else { "currentColor" }),
+      width=(if i == 1 { 2.0 } else { 1.0 }),
+      opacity=Some(if i == 1 { 1.0 } else { 0.6 }),
+    )
+    if i == 1 {
+      c.highlight(b, opacity=0.06)
+    }
+  }
+  // The vars that exist only while in_details — floating, not bound
+  // to it.
+  let var_labels = ["details []", "details_depth", "details_code"]
+  for i, label in var_labels {
+    let v = c.box(
+      128.0 + i.to_double() * 96.0,
+      206.0,
+      @s.Fixed(88.0),
+      24.0,
+      label=label,
+      size=11.0,
+      rx=4.0,
+      dash="3 3",
+      opacity=Some(0.7),
+    )
+    c.line(c.anchor(v, @s.N), (174.0, 192.0), dash="3 3", opacity=Some(0.5))
+  }
+  c.text(
+    24.0,
+    248.0,
+    "one group active at a time — a rule kept by hand",
+    size=11.0,
+    opacity=Some(0.6),
+  )
+
+  // ---- after ----
+  let ax = 470.0
+  c.text(ax, 30.0, "after", size=14.0, underline=1.0)
+  c.text(ax, 54.0, "pending", size=12.0, opacity=Some(0.7))
+  let p = c.box(
+    ax,
+    62.0,
+    @s.Fixed(180.0),
+    28.0,
+    label="Items([it])",
+    size=12.0,
+    rx=4.0,
+    color=live,
+    width=2.0,
+  )
+  c.highlight(p, opacity=0.06)
+  c.text(
+    ax + 190.0,
+    76.0,
+    "= one of Nothing | Para | Items | Quote | Table",
+    size=11.0,
+    opacity=Some(0.6),
+    central=true,
+  )
+
+  c.text(ax, 126.0, "mode", size=12.0, opacity=Some(0.7))
+  let m = c.box(
+    ax,
+    134.0,
+    @s.Fixed(180.0),
+    56.0,
+    label="Details {\n  depth, in_code, lines }",
+    size=12.0,
+    rx=4.0,
+    color=live,
+    width=2.0,
+  )
+  c.highlight(m, opacity=0.06)
+  c.text(
+    ax + 190.0,
+    162.0,
+    "= one of Normal | Code | Details | Footnote",
+    size=11.0,
+    opacity=Some(0.6),
+    central=true,
+  )
+  c.text(
+    ax + 190.0,
+    178.0,
+    "its vars ride inside the variant",
+    size=11.0,
+    opacity=Some(0.6),
+    central=true,
+  )
+  c.text(
+    ax,
+    248.0,
+    "one slot each; the type keeps the rule",
+    size=11.0,
+    opacity=Some(0.6),
+  )
+
+  // The flags row is 3 cells of 92 + 2 gaps; loose vars hang below
+  // the mid cell.
+  if 24.0 + 104.0 != 128.0 {
+    abort("var column starts under the second flag")
+  }
+
+  println(
+    c.render(label="before: many slots, one live, kept by hand; after: two slots, variant carries its own vars"),
+  )
+}
