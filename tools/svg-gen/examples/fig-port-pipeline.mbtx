@@ -1,12 +1,12 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // The porting run: three stacked PRs, then a full diff against the
 // TypeScript oracle. Each stage regenerates all 80 figures, so a
 // regression cannot hide inside a later, prettier commit.
 fn main {
-  let c = @s.Canvas()
+  let c = @svg.Canvas()
   let stages = ["1. port", "2. idiomatic", "3. modernize", "4. oracle"]
   let subs = [
     "TS -> MoonBit",
@@ -15,23 +15,23 @@ fn main {
     "80 figs, byte diff",
   ]
   let xs = [0.0, 150.0, 300.0, 450.0]
-  let mut prev : @s.Shape? = None
+  let mut prev : @svg.Shape? = None
   for i, name in stages {
     let b = c.box(
       xs[i],
       30.0,
-      @s.Fixed(120.0),
+      @svg.Fixed(120.0),
       44.0,
       label=Some(name),
       color=c.color(i + 1),
       size=11.0,
     )
-    c.text(xs[i] + 60.0, 90.0, subs[i], anchor=@s.Middle, size=9.0, opacity=Some(0.6))
+    c.text(xs[i] + 60.0, 90.0, subs[i], anchor=@svg.Middle, size=9.0, opacity=Some(0.6))
     if prev is Some(p) {
       c.arrow(
-        c.anchor(p, @s.E),
-        c.anchor(b, @s.W),
-        ends=@s.Single(@s.End),
+        c.anchor(p, @svg.E),
+        c.anchor(b, @svg.W),
+        ends=@svg.Single(@svg.End),
         gap=4.0,
         opacity=Some(0.7),
       )
@@ -43,11 +43,11 @@ fn main {
     (510.0, 100.0),
     (60.0, 100.0),
     via=[(510.0, 118.0), (60.0, 118.0)],
-    ends=@s.Single(@s.End),
+    ends=@svg.Single(@svg.End),
     dash=Some("4 3"),
     color=c.color(4),
     opacity=Some(0.7),
   )
-  c.text(285.0, 128.0, "a diff means the port was wrong; fix the port, not the diff", anchor=@s.Middle, size=9.0, opacity=Some(0.6))
+  c.text(285.0, 128.0, "a diff means the port was wrong; fix the port, not the diff", anchor=@svg.Middle, size=9.0, opacity=Some(0.6))
   println(c.render(label=Some("the porting pipeline: port, refactor, modernize, then diff every figure against the TypeScript original")))
 }

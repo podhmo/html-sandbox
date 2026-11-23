@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-media-art.mbtx -- "generative art" usage of the two
@@ -10,9 +10,9 @@ import { "podhmo/svg-gen" @s }
 // set, and they are duals of each other.
 
 fn main {
-  let s = @s.sites
-  let tris = @s.delaunay(s)
-  let c = @s.Canvas()
+  let s = @svg.sites
+  let tris = @svg.delaunay(s)
+  let c = @svg.Canvas()
 
   // Panel layout: left panel uses S as-is; right panel is S +
   // (DX, 0).
@@ -21,21 +21,21 @@ fn main {
 
   // Left: Voronoi cells filled (stained glass idiom).
   for i, site in s {
-    let cell = @s.voronoi_cell(site, sites=s, rect=clip)
+    let cell = @svg.voronoi_cell(site, sites=s, rect=clip)
     if cell.length() < 3 {
       abort("site \{i} has a visible cell")
     }
-    c.raw(@s.poly_el(cell, fill=c.color(i), opacity=0.35, extra=Some(" stroke=\"currentColor\" stroke-width=\"1\"")), covered=cell)
+    c.raw(@svg.poly_el(cell, fill=c.color(i), opacity=0.35, extra=Some(" stroke=\"currentColor\" stroke-width=\"1\"")), covered=cell)
   }
-  c.text(112.0, 228.0, "Voronoi cells", anchor=@s.Middle, size=12.0, opacity=Some(0.7))
+  c.text(112.0, 228.0, "Voronoi cells", anchor=@svg.Middle, size=12.0, opacity=Some(0.7))
 
   // Right: Delaunay triangles filled (low-poly facet idiom).
-  let t = @s.shift(s, dx=dx, dy=0.0)
+  let t = @svg.shift(s, dx=dx, dy=0.0)
   for i, tri in tris {
     let pts = [t[tri.0], t[tri.1], t[tri.2]]
-    c.raw(@s.poly_el(pts, fill=c.color(i), opacity=0.45, extra=Some(" stroke=\"currentColor\" stroke-width=\"1\"")), covered=pts)
+    c.raw(@svg.poly_el(pts, fill=c.color(i), opacity=0.45, extra=Some(" stroke=\"currentColor\" stroke-width=\"1\"")), covered=pts)
   }
-  c.text(112.0 + dx, 228.0, "Delaunay triangles", anchor=@s.Middle, size=12.0, opacity=Some(0.7))
+  c.text(112.0 + dx, 228.0, "Delaunay triangles", anchor=@svg.Middle, size=12.0, opacity=Some(0.7))
 
   // Same site dots on top of both panels — the shared input.
   for p in s + t {

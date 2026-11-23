@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-loop.mbtx -- generate -> render -> check -> fix loop, the same
@@ -9,27 +9,27 @@ import { "podhmo/svg-gen" @s }
 fn main {
   let h = 44.0
   let gap = 40.0
-  let c = @s.Canvas()
+  let c = @svg.Canvas()
 
   // Widths come from the labels, so no label can outgrow its box.
-  let input = c.box(0.0, 80.0, @s.Auto, h, label=Some("Input"))
-  let conv = c.box(c.right_of(input, gap), input.y, @s.Auto, h, label=Some("Convert"))
-  let out = c.box(c.right_of(conv, gap), input.y, @s.Auto, h, label=Some("Output"))
-  let check = c.box(conv.x, input.y - 1.5 * gap - h, @s.Auto, h, label=Some("Check + fix"))
+  let input = c.box(0.0, 80.0, @svg.Auto, h, label=Some("Input"))
+  let conv = c.box(c.right_of(input, gap), input.y, @svg.Auto, h, label=Some("Convert"))
+  let out = c.box(c.right_of(conv, gap), input.y, @svg.Auto, h, label=Some("Output"))
+  let check = c.box(conv.x, input.y - 1.5 * gap - h, @svg.Auto, h, label=Some("Check + fix"))
 
-  c.arrow(c.anchor(input, @s.E), c.anchor(conv, @s.W))
-  c.arrow(c.anchor(conv, @s.E), c.anchor(out, @s.W))
+  c.arrow(c.anchor(input, @svg.E), c.anchor(conv, @svg.W))
+  c.arrow(c.anchor(conv, @svg.E), c.anchor(out, @svg.W))
   c.arrow(
-    c.anchor(out, @s.N),
-    c.anchor(check, @s.E),
-    via=[(c.anchor(out, @s.N).0, c.anchor(check, @s.E).1)],
+    c.anchor(out, @svg.N),
+    c.anchor(check, @svg.E),
+    via=[(c.anchor(out, @svg.N).0, c.anchor(check, @svg.E).1)],
   )
   c.arrow(
-    c.anchor(check, @s.W),
-    c.anchor(input, @s.N),
+    c.anchor(check, @svg.W),
+    c.anchor(input, @svg.N),
     via=[
-      (input.x - gap / 2.0, c.anchor(check, @s.W).1),
-      (input.x - gap / 2.0, c.anchor(input, @s.N).1),
+      (input.x - gap / 2.0, c.anchor(check, @svg.W).1),
+      (input.x - gap / 2.0, c.anchor(input, @svg.N).1),
     ],
     dash=Some("5 4"),
   )

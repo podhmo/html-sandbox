@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // Meaning-drift spectrum for the tekitou article: "適当に" (fitting
@@ -8,7 +8,7 @@ import { "podhmo/svg-gen" @s }
 // the meaning: the strictness of the criterion fades left to right.
 
 fn main {
-  let c = @s.Canvas()
+  let c = @svg.Canvas()
 
   let y = 90.0
   let x0 = 60.0
@@ -19,7 +19,7 @@ fn main {
   c.arrow((x3 - 60.0, y), (x3 + 30.0, y), width=2.0)
 
   c.text(x0, y - 34.0, "基準が明確（正解が共有されている）", size=12.0, opacity=Some(0.8))
-  c.text(x3 + 30.0, y - 34.0, "基準を問わない", anchor=@s.End, size=12.0, opacity=Some(0.8))
+  c.text(x3 + 30.0, y - 34.0, "基準を問わない", anchor=@svg.End, size=12.0, opacity=Some(0.8))
 
   // fading criterion: a bar whose fill thins out left to right
   c.raw(
@@ -45,9 +45,9 @@ fn main {
     // ring + filled dot so the mark still reads without color
     ignore(c.circle(x, y, 9.0, color=col, width=2.0))
     c.raw("<circle cx=\"\{x}\" cy=\"\{y}\" r=\"4.5\" fill=\"\{col}\"/>", covered=[(x, y)])
-    c.text(x, y - 20.0, scene, anchor=@s.Middle, size=11.0, opacity=Some(0.75))
-    c.text(x, y + 30.0, word, anchor=@s.Middle, size=14.0)
-    c.text(x, y + 100.0, gloss, anchor=@s.Middle, size=11.0, opacity=Some(0.7))
+    c.text(x, y - 20.0, scene, anchor=@svg.Middle, size=11.0, opacity=Some(0.75))
+    c.text(x, y + 30.0, word, anchor=@svg.Middle, size=14.0)
+    c.text(x, y + 100.0, gloss, anchor=@svg.Middle, size=11.0, opacity=Some(0.7))
   }
 
   println(

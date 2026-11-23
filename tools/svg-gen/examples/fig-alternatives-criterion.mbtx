@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // Which dropped alternatives each criterion keeps, using the TTS
@@ -9,10 +9,10 @@ import { "podhmo/svg-gen" @s }
 // and items outside both are post-hoc candidates.
 
 fn main {
-  let c = @s.Canvas()
-  ignore(c.box(10.0, 10.0, @s.Fixed(400.0), 160.0))
+  let c = @svg.Canvas()
+  ignore(c.box(10.0, 10.0, @svg.Fixed(400.0), 160.0))
   c.text(22.0, 32.0, "条件・限界・再現に関係する案（GPT 版）", size=12.0)
-  ignore(c.box(30.0, 48.0, @s.Fixed(360.0), 62.0, dash=Some("5 4")))
+  ignore(c.box(30.0, 48.0, @svg.Fixed(360.0), 62.0, dash=Some("5 4")))
   c.text(42.0, 68.0, "進路を変えた案（Claude 版）", size=12.0)
   let item = fn(x : Double, y : Double, s : String) {
     ignore(c.circle(x, y, 4.0))
@@ -20,7 +20,7 @@ fn main {
   }
   item(52.0, 92.0, "既定の CUDA 13.2 ビルド → cu128 に固定")
   item(52.0, 146.0, "ホスト側のドライバ更新（範囲外ですぐ外れた）")
-  ignore(c.box(10.0, 186.0, @s.Fixed(400.0), 44.0, dash=Some("2 3")))
+  ignore(c.box(10.0, 186.0, @svg.Fixed(400.0), 44.0, dash=Some("2 3")))
   item(32.0, 208.0, "VOICEVOX、Fish Speech（Grok の候補。検討の記録なし）")
   println(
     c.render(label=Some("捨てた代替案を残す二つの基準の包含関係と、TTS の件の案の位置")),

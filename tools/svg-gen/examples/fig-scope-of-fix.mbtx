@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-scope-of-fix.mbtx -- the retry's central fact in space: the
@@ -10,13 +10,13 @@ import { "podhmo/svg-gen" @s }
 // one is the cause it skipped.
 
 fn main {
-  let c = @s.Canvas(margin=14.0)
+  let c = @svg.Canvas(margin=14.0)
 
   // the log line the agent saw
   let log = c.box(
     10.0,
     110.0,
-    @s.Auto,
+    @svg.Auto,
     46.0,
     label=Some("CUDA initialization:\ndriver too old"),
     size=12.0,
@@ -24,17 +24,17 @@ fn main {
 
   // the host, which the agent cannot modify, and the sandbox
   // inside it
-  let host = c.box(200.0, 26.0, @s.Fixed(320.0), 250.0, dash=Some("6 5"), rx=14.0)
+  let host = c.box(200.0, 26.0, @svg.Fixed(320.0), 250.0, dash=Some("6 5"), rx=14.0)
   c.text(208.0, 46.0, "変更できない領域（ホスト / Windows）", size=11.0, opacity=Some(0.7))
 
-  let sandbox = c.box(220.0, 60.0, @s.Fixed(280.0), 134.0, color=c.color(2), rx=12.0)
+  let sandbox = c.box(220.0, 60.0, @svg.Fixed(280.0), 134.0, color=c.color(2), rx=12.0)
   c.text(228.0, 78.0, "変更できる領域（WSL2, root なし）", size=11.0, opacity=Some(0.7))
 
   // inside: the action that was taken
   let pin = c.box(
     238.0,
     96.0,
-    @s.Auto,
+    @svg.Auto,
     44.0,
     label=Some("torch を cu128 に\n下げる"),
     color=c.color(2),
@@ -45,7 +45,7 @@ fn main {
     c.box(
       238.0,
       150.0,
-      @s.Auto,
+      @svg.Auto,
       34.0,
       label=Some("apt で直す"),
       dash=Some("4 4"),
@@ -57,7 +57,7 @@ fn main {
   let driver = c.box(
     232.0,
     212.0,
-    @s.Auto,
+    @svg.Auto,
     44.0,
     label=Some("ドライバを\n更新する"),
     color=c.color(3),
@@ -65,7 +65,7 @@ fn main {
     size=12.0,
   )
 
-  c.arrow(c.anchor(log, @s.E), (pin.x, pin.y + pin.h / 2.0), color=c.color(2))
+  c.arrow(c.anchor(log, @svg.E), (pin.x, pin.y + pin.h / 2.0), color=c.color(2))
   // the skipped cause crosses the host border once, entering from
   // below
   c.arrow(

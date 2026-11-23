@@ -1,6 +1,6 @@
 ---
 import {
-  "podhmo/svg-gen" @s,
+  "podhmo/svg-gen" @svg,
   "moonbitlang/core/math" @math,
 }
 ---
@@ -13,14 +13,14 @@ import {
 // *some* empty circle through both endpoints.
 
 fn main {
-  let p : @s.Point = (55.0, 130.0)
-  let q : @s.Point = (190.0, 130.0)
-  let r : @s.Point = (125.0, 80.0)
-  let c = @s.Canvas()
+  let p : @svg.Point = (55.0, 130.0)
+  let q : @svg.Point = (190.0, 130.0)
+  let r : @svg.Point = (125.0, 80.0)
+  let c = @svg.Canvas()
 
-  let mid : @s.Point = ((p.0 + q.0) / 2.0, (p.1 + q.1) / 2.0)
+  let mid : @svg.Point = ((p.0 + q.0) / 2.0, (p.1 + q.1) / 2.0)
   let dr = @math.hypot(p.0 - q.0, p.1 - q.1) / 2.0
-  let cc = @s.circum(p, q, r)
+  let cc = @svg.circum(p, q, r)
 
   // checks the figure depends on: obtuse at r, r inside diameter
   // circle.
@@ -53,7 +53,7 @@ fn main {
     mid.0,
     cc.o.1 + cc.r + 16.0,
     "solid circle: circumcircle, empty",
-    anchor=@s.Middle,
+    anchor=@svg.Middle,
     size=11.0,
     opacity=Some(0.7),
   )
@@ -61,7 +61,7 @@ fn main {
     mid.0,
     cc.o.1 + cc.r + 30.0,
     "dashed circle: diameter, contains r",
-    anchor=@s.Middle,
+    anchor=@svg.Middle,
     size=11.0,
     opacity=Some(0.7),
   )

@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-unslop-flow.mbtx -- the unslop pipeline and where the five
@@ -10,29 +10,29 @@ import { "podhmo/svg-gen" @s }
 // which sits outside the fix passes.
 
 fn main {
-  let c = @s.Canvas(margin=12.0)
+  let c = @svg.Canvas(margin=12.0)
 
   // main pipeline, left to right
-  let audit = c.box(30.0, 80.0, @s.Auto, 40.0, label=Some("監査\nsigns.md"), color=c.color(0))
-  let verdict = c.box(190.0, 80.0, @s.Auto, 40.0, label=Some("slopの\n量を判定"), color=c.color(1))
-  let direction = c.box(350.0, 80.0, @s.Auto, 40.0, label=Some("Direction\n(5行)"), color=c.color(2))
-  let passes = c.box(520.0, 80.0, @s.Auto, 40.0, label=Some("9パス修正"), color=c.color(3))
+  let audit = c.box(30.0, 80.0, @svg.Auto, 40.0, label=Some("監査\nsigns.md"), color=c.color(0))
+  let verdict = c.box(190.0, 80.0, @svg.Auto, 40.0, label=Some("slopの\n量を判定"), color=c.color(1))
+  let direction = c.box(350.0, 80.0, @svg.Auto, 40.0, label=Some("Direction\n(5行)"), color=c.color(2))
+  let passes = c.box(520.0, 80.0, @svg.Auto, 40.0, label=Some("9パス修正"), color=c.color(3))
 
-  c.arrow(c.anchor(audit, @s.E), c.anchor(verdict, @s.W))
-  c.arrow(c.anchor(verdict, @s.E), c.anchor(direction, @s.W))
-  c.arrow(c.anchor(direction, @s.E), c.anchor(passes, @s.W))
+  c.arrow(c.anchor(audit, @svg.E), c.anchor(verdict, @svg.W))
+  c.arrow(c.anchor(verdict, @svg.E), c.anchor(direction, @svg.W))
+  c.arrow(c.anchor(direction, @svg.E), c.anchor(passes, @svg.W))
 
   // the no-slop exit: down and out before the passes
-  let exit = c.box(190.0, 180.0, @s.Auto, 40.0, label=Some("no slop\n→ polishのみ"), color=c.color(4))
-  c.arrow(c.anchor(verdict, @s.S), c.anchor(exit, @s.N), dash=Some("4 4"))
-  c.text(240.0, 155.0, "DADSレポート5種はここ", anchor=@s.Start, size=12.0)
+  let exit = c.box(190.0, 180.0, @svg.Auto, 40.0, label=Some("no slop\n→ polishのみ"), color=c.color(4))
+  c.arrow(c.anchor(verdict, @svg.S), c.anchor(exit, @svg.N), dash=Some("4 4"))
+  c.text(240.0, 155.0, "DADSレポート5種はここ", anchor=@svg.Start, size=12.0)
 
   // what still lives past the exit: direction-level gap
   c.text(
     30.0,
     250.0,
     "抜けているもの: 型ごとの「世界」(個人メモに行政デザイン)・テンプレート同一感 — craft ではなく direction の領分",
-    anchor=@s.Start,
+    anchor=@svg.Start,
     size=12.0,
     opacity=Some(0.8),
   )

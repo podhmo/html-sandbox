@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // The mirror figure for the tekitou article: the same "仲間内" frame,
@@ -10,7 +10,7 @@ import { "podhmo/svg-gen" @s }
 // toward 程々.
 
 fn main {
-  let c = @s.Canvas()
+  let c = @svg.Canvas()
   let token_col = c.color(2)
   let loose = c.color(3)
 
@@ -29,26 +29,26 @@ fn main {
   }
 
   // ---- row 1: test — converge on the shared answer ----
-  let _r1 = c.box(40.0, 30.0, @s.Fixed(600.0), 92.0, rx=12.0, opacity=Some(0.75))
+  let _r1 = c.box(40.0, 30.0, @svg.Fixed(600.0), 92.0, rx=12.0, opacity=Some(0.75))
   c.text(56.0, 52.0, "同門（テスト）", size=12.0, opacity=Some(0.85))
   token(180.0, 76.0, false)
-  c.text(180.0, 106.0, "共有の正解", anchor=@s.Middle, size=10.0, opacity=Some(0.75))
+  c.text(180.0, 106.0, "共有の正解", anchor=@svg.Middle, size=10.0, opacity=Some(0.75))
   let worker1 = c.circle(520.0, 76.0, 20.0, size=11.0)
-  c.text(520.0, 76.0, "生徒", anchor=@s.Middle, central=true, size=11.0)
-  c.arrow(c.anchor(worker1, @s.W), (196.0, 76.0), width=2.0)
-  c.text(355.0, 62.0, "正解にぴったり合わせる", anchor=@s.Middle, size=11.0, opacity=Some(0.8))
+  c.text(520.0, 76.0, "生徒", anchor=@svg.Middle, central=true, size=11.0)
+  c.arrow(c.anchor(worker1, @svg.W), (196.0, 76.0), width=2.0)
+  c.text(355.0, 62.0, "正解にぴったり合わせる", anchor=@svg.Middle, size=11.0, opacity=Some(0.8))
 
   // ---- row 2: work group — the criterion is present but
   // unenforced ----
-  let _r2 = c.box(40.0, 160.0, @s.Fixed(600.0), 92.0, rx=12.0, opacity=Some(0.75))
+  let _r2 = c.box(40.0, 160.0, @svg.Fixed(600.0), 92.0, rx=12.0, opacity=Some(0.75))
   c.text(56.0, 182.0, "作業グループ", size=12.0, opacity=Some(0.85))
   token(180.0, 206.0, true)
-  c.text(180.0, 238.0, "正解（評価者不在）", anchor=@s.Middle, size=10.0, opacity=Some(0.75))
+  c.text(180.0, 238.0, "正解（評価者不在）", anchor=@svg.Middle, size=10.0, opacity=Some(0.75))
   let worker2 = c.circle(340.0, 206.0, 20.0, size=11.0)
-  c.text(340.0, 206.0, "作業者", anchor=@s.Middle, central=true, size=11.0)
-  let ease = c.box(500.0, 186.0, @s.Auto, 40.0, label=Some("程々・力を抜く"), color=loose, size=12.0)
-  c.arrow(c.anchor(worker2, @s.E), c.anchor(ease, @s.W), width=2.0, color=loose)
-  c.text(340.0, 246.0, "「適当でいいよ」と仲間が助言", anchor=@s.Middle, size=10.0, opacity=Some(0.8))
+  c.text(340.0, 206.0, "作業者", anchor=@svg.Middle, central=true, size=11.0)
+  let ease = c.box(500.0, 186.0, @svg.Auto, 40.0, label=Some("程々・力を抜く"), color=loose, size=12.0)
+  c.arrow(c.anchor(worker2, @svg.E), c.anchor(ease, @svg.W), width=2.0, color=loose)
+  c.text(340.0, 246.0, "「適当でいいよ」と仲間が助言", anchor=@svg.Middle, size=10.0, opacity=Some(0.8))
 
   println(
     c.render(label=Some("同じ仲間内の枠組みで向きが逆転する。テストでは正解へ収束する努力、作業グループでは評価不能な正解から離れて程々へ向かう助言")),

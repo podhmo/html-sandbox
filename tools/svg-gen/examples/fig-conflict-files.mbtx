@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-conflict-files.mbtx -- which files conflicted in the
@@ -7,7 +7,7 @@ import { "podhmo/svg-gen" @s }
 // line-budget file, not code.
 
 fn main {
-  let c = @s.Canvas()
+  let c = @svg.Canvas()
 
   // conflicted-path counts from the fix loop log, grouped:
   //  - internal/archcheck/budgets.go: the file-line-count ratchet
@@ -18,10 +18,10 @@ fn main {
   let groups = [("budgets.go", 81), ("TODO / docs系", 21), ("コード・テスト", 12)]
   let bs = groups.mapi(fn(i, g) {
     let (_, n) = g
-    @s.Bin::{ x0: i.to_double() + 0.12, x1: i.to_double() + 0.88, n }
+    @svg.Bin::{ x0: i.to_double() + 0.12, x1: i.to_double() + 0.88, n }
   })
 
-  let p = @s.Plot(
+  let p = @svg.Plot(
     c,
     {
       title: "コンフリクトしたファイルの内訳 — ほぼ記録用ファイル",
@@ -39,7 +39,7 @@ fn main {
   p.frame(
     xticks=groups.mapi(fn(i, g) {
       let (label, _) = g
-      @s.Lab(i.to_double() + 0.5, label)
+      @svg.Lab(i.to_double() + 0.5, label)
     }),
   )
   p.data(fn(p) { p.histogram(bs, color=c.color(1)) })

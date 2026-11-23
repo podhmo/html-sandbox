@@ -1,6 +1,6 @@
 ---
 import {
-  "podhmo/svg-gen" @s,
+  "podhmo/svg-gen" @svg,
   "moonbitlang/core/math" @math,
 }
 ---
@@ -10,22 +10,22 @@ import {
 // contains no other site. This is the bridge to the Delaunay dual.
 
 fn main {
-  let s = @s.sites
-  let tris = @s.delaunay(s)
+  let s = @svg.sites
+  let tris = @svg.delaunay(s)
   let clip = (0.0, 0.0, 230.0, 230.0)
-  let c = @s.Canvas()
+  let c = @svg.Canvas()
   let col_vor = c.color(1)
 
-  for seg in @s.voronoi_segments(s, tris=tris, rect=clip) {
+  for seg in @svg.voronoi_segments(s, tris=tris, rect=clip) {
     c.line(seg.0, seg.1, dash=Some("4 3"), opacity=Some(0.6), color=col_vor)
   }
 
   // featured Voronoi vertex: circumcenter of a central triangle.
   let feat = tris[4]
-  let cc = @s.circum(s[feat.0], s[feat.1], s[feat.2])
+  let cc = @svg.circum(s[feat.0], s[feat.1], s[feat.2])
   // equidistant to its three sites, and strictly nearer than to any
   // other.
-  let d = fn(p : @s.Point) { @math.hypot(p.0 - cc.o.0, p.1 - cc.o.1) }
+  let d = fn(p : @svg.Point) { @math.hypot(p.0 - cc.o.0, p.1 - cc.o.1) }
   for p in s {
     if !(d(p) > cc.r - 1.0e-9) {
       abort("circle is empty")

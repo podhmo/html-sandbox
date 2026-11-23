@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-gom-scope-lifetime.mbtx -- how long a resource opened inside
@@ -8,7 +8,7 @@ import { "podhmo/svg-gen" @s }
 // is open.
 
 fn main {
-  let c = @s.Canvas()
+  let c = @svg.Canvas()
   let x0 = 170.0
   // Program points, left to right.
   let pts = [
@@ -43,8 +43,8 @@ fn main {
     let (px, label) = p
     c.line((px, axis_y), (px, axis_y + 250.0), dash=Some("2 4"), opacity=Some(0.35))
     let lines = label.split("\n").to_array()
-    c.text(px, axis_y - 14.0, lines[0].to_owned(), anchor=@s.Middle, size=11.0)
-    c.text(px, axis_y + 0.0, lines[1].to_owned(), anchor=@s.Middle, size=11.0)
+    c.text(px, axis_y - 14.0, lines[0].to_owned(), anchor=@svg.Middle, size=11.0)
+    c.text(px, axis_y + 0.0, lines[1].to_owned(), anchor=@svg.Middle, size=11.0)
   }
 
   let rows = [
@@ -57,8 +57,8 @@ fn main {
     let (name, from, to, i, dash) = r
     let y = axis_y + 40.0 + k.to_double() * 70.0
     let names = name.split("\n").to_array()
-    c.text(150.0, y - 6.0, names[0].to_owned(), anchor=@s.End, size=12.0)
-    c.text(150.0, y + 10.0, names[1].to_owned(), anchor=@s.End, size=11.0, opacity=Some(0.75))
+    c.text(150.0, y - 6.0, names[0].to_owned(), anchor=@svg.End, size=12.0)
+    c.text(150.0, y + 10.0, names[1].to_owned(), anchor=@svg.End, size=11.0, opacity=Some(0.75))
     let col = c.color(i)
     let dash_attr = if dash == "" {
       ""
@@ -70,7 +70,7 @@ fn main {
       covered=[(from, y - h / 2.0), (to, y + h / 2.0)],
     )
     if to < use {
-      c.text(use, y + 1.0, "閉じた後に使う", anchor=@s.Middle, central=true, size=11.0)
+      c.text(use, y + 1.0, "閉じた後に使う", anchor=@svg.Middle, central=true, size=11.0)
       c.line((use - 46.0, y + 12.0), (use + 46.0, y + 12.0), color=col, width=2.0)
     }
   }
@@ -84,7 +84,7 @@ fn main {
     (start + 40.0 + scope_end) / 2.0,
     ey + 16.0,
     "Scope.run <| fn s -> { ... } の本体",
-    anchor=@s.Middle,
+    anchor=@svg.Middle,
     size=11.0,
     opacity=Some(0.8),
   )

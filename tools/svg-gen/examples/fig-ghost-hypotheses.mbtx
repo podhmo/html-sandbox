@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-ghost-hypotheses.mbtx -- two readings of "the report names a
@@ -9,7 +9,7 @@ import { "podhmo/svg-gen" @s }
 // frame = the unverified guess.
 
 fn main {
-  let c = @s.Canvas()
+  let c = @svg.Canvas()
   let code = c.color(0)
   let ghost = c.color(3)
 
@@ -38,11 +38,11 @@ fn main {
       covered=[(0.0, y), (x0 + w + 20.0, y + 116.0)],
     )
     c.text(12.0, y + 20.0, title, size=12.0)
-    c.text(x0 + w + 8.0, y + 20.0, sub, anchor=@s.End, size=10.0, opacity=Some(0.7))
+    c.text(x0 + w + 8.0, y + 20.0, sub, anchor=@svg.End, size=10.0, opacity=Some(0.7))
     let cy = y + 50.0
     let ry = y + 78.0
-    c.text(x0 - 10.0, cy, "コード", anchor=@s.End, central=true, size=11.0)
-    c.text(x0 - 10.0, ry, "レポート", anchor=@s.End, central=true, size=11.0)
+    c.text(x0 - 10.0, cy, "コード", anchor=@svg.End, central=true, size=11.0)
+    c.text(x0 - 10.0, ry, "レポート", anchor=@svg.End, central=true, size=11.0)
     c.line((x0, cy), (x0 + w, cy), opacity=Some(0.25), width=1.0)
     c.line((x0, ry), (x0 + w, ry), opacity=Some(0.25), width=1.0)
     match code_span {
@@ -53,7 +53,7 @@ fn main {
     for e in [(tw, "書く"), (tr, "refine")] {
       let (tx, s) = e
       c.line((tx, y + 34.0), (tx, y + 92.0), opacity=Some(0.4), width=1.0, dash=Some("2 3"))
-      c.text(tx, y + 108.0, s, anchor=@s.Middle, size=9.0, opacity=Some(0.7))
+      c.text(tx, y + 108.0, s, anchor=@svg.Middle, size=9.0, opacity=Some(0.7))
     }
   }
 

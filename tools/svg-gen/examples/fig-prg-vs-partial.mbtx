@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // Before/after: a comment POST under classic SSR (303 PRG -> full
@@ -8,28 +8,28 @@ import { "podhmo/svg-gen" @s }
 // round-trip cost.
 
 fn main {
-  let c = @s.Canvas()
+  let c = @svg.Canvas()
 
   c.text(14.0, 20.0, "same action: submit a comment on /issues/2", size=12.0, opacity=Some(0.7))
 
   // lane 1 — classic SSR
-  let b1 = c.box(20.0, 52.0, @s.Auto, 56.0, label=Some("browser\ncomment form"), color=c.color(0), size=12.0)
-  let s1 = c.box(300.0, 52.0, @s.Auto, 56.0, label=Some("server\nPOST → DB → redirect"), color=c.color(0), size=12.0)
-  c.arrow(c.anchor(b1, @s.E), c.anchor(s1, @s.W), width=1.5, ends=@s.Pair(14.0))
+  let b1 = c.box(20.0, 52.0, @svg.Auto, 56.0, label=Some("browser\ncomment form"), color=c.color(0), size=12.0)
+  let s1 = c.box(300.0, 52.0, @svg.Auto, 56.0, label=Some("server\nPOST → DB → redirect"), color=c.color(0), size=12.0)
+  c.arrow(c.anchor(b1, @svg.E), c.anchor(s1, @svg.W), width=1.5, ends=@svg.Pair(14.0))
   c.text(170.0, 68.0, "POST body=…", size=10.0, opacity=Some(0.75))
   c.text(168.0, 102.0, "303 → GET (full page)", size=10.0, opacity=Some(0.75))
-  let r1 = c.box(620.0, 52.0, @s.Auto, 56.0, label=Some("screen\nwhole page repaints"), color=c.color(0), size=12.0, dash=Some("5 4"))
-  c.arrow(c.anchor(s1, @s.E), c.anchor(r1, @s.W), width=1.5)
+  let r1 = c.box(620.0, 52.0, @svg.Auto, 56.0, label=Some("screen\nwhole page repaints"), color=c.color(0), size=12.0, dash=Some("5 4"))
+  c.arrow(c.anchor(s1, @svg.E), c.anchor(r1, @svg.W), width=1.5)
   c.text(20.0, 140.0, "classic SSR: every POST repaints the page (PRG)", size=11.0, opacity=Some(0.65))
 
   // lane 2 — partial update
-  let b2 = c.box(20.0, 168.0, @s.Auto, 56.0, label=Some("browser\npartial-submit.js"), color=c.color(3), size=12.0)
-  let s2 = c.box(300.0, 168.0, @s.Auto, 56.0, label=Some("server\nsame handler, X-Partial 分岐"), color=c.color(3), size=12.0)
-  c.arrow(c.anchor(b2, @s.E), c.anchor(s2, @s.W), width=1.5, ends=@s.Pair(14.0))
+  let b2 = c.box(20.0, 168.0, @svg.Auto, 56.0, label=Some("browser\npartial-submit.js"), color=c.color(3), size=12.0)
+  let s2 = c.box(300.0, 168.0, @svg.Auto, 56.0, label=Some("server\nsame handler, X-Partial 分岐"), color=c.color(3), size=12.0)
+  c.arrow(c.anchor(b2, @svg.E), c.anchor(s2, @svg.W), width=1.5, ends=@svg.Pair(14.0))
   c.text(168.0, 184.0, "POST X-Partial", size=10.0, opacity=Some(0.75))
   c.text(168.0, 218.0, "200 <li> fragment", size=10.0, opacity=Some(0.75))
-  let r2 = c.box(620.0, 168.0, @s.Auto, 56.0, label=Some("screen\n<li> appended only"), color=c.color(3), size=12.0)
-  c.arrow(c.anchor(s2, @s.E), c.anchor(r2, @s.W), width=1.5)
+  let r2 = c.box(620.0, 168.0, @svg.Auto, 56.0, label=Some("screen\n<li> appended only"), color=c.color(3), size=12.0)
+  c.arrow(c.anchor(s2, @svg.E), c.anchor(r2, @svg.W), width=1.5)
   c.text(
     20.0,
     256.0,

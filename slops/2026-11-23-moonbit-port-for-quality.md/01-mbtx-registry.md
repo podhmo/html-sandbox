@@ -5,7 +5,7 @@
 
 ## 問いと結論
 
-`.mbtx` スクリプトの先頭に書く `import { "podhmo/svg-gen" @s }` は、誰がどう解決しているのか。moon（CLI）がやるのか、コンパイラ（moonc）がやるのか。
+`.mbtx` スクリプトの先頭に書く `import { "podhmo/svg-gen" @svg }` は、誰がどう解決しているのか。moon（CLI）がやるのか、コンパイラ（moonc）がやるのか。
 
 結論は moon CLI 側。`crates/moonbuild/src/prepare/single_file/` が front matter を読んで依存を解決し、`mooncake` がレジストリからソースを取って `.mooncakes/` に展開する。コンパイラには解決済みのパッケージパスしか渡らない。レジストリという概念を持つのは moon のビルド系だけだ。
 

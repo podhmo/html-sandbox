@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-cli-coverage.mbtx -- coverage map of the two browser CLIs.
@@ -9,12 +9,12 @@ import { "podhmo/svg-gen" @s }
 // you.
 
 fn main {
-  let c = @s.Canvas(margin=14.0)
+  let c = @svg.Canvas(margin=14.0)
   let pw_col = c.color(0) // blue = playwright-cli
   let cd_col = c.color(1) // orange = chrome-devtools CLI
   let out_col = c.color(3) // vermillion = outside the CLIs' reach
 
-  let ellipse = fn(cx : Double, cy : Double, rx : Double, ry : Double, color : String) -> @s.Shape {
+  let ellipse = fn(cx : Double, cy : Double, rx : Double, ry : Double, color : String) -> @svg.Shape {
     c.raw(
       "<ellipse cx=\"\{cx}\" cy=\"\{cy}\" rx=\"\{rx}\" ry=\"\{ry}\" fill=\"none\" stroke=\"\{color}\" stroke-width=\"2\"/>",
       covered=[
@@ -24,12 +24,12 @@ fn main {
         (cx, cy + ry),
       ],
     )
-    @s.Shape::{ x: cx - rx, y: cy - ry, w: 2.0 * rx, h: 2.0 * ry }
+    @svg.Shape::{ x: cx - rx, y: cy - ry, w: 2.0 * rx, h: 2.0 * ry }
   }
 
   // The frame: everything a browser-automation CLI can verify at
   // all.
-  let frame = @s.Shape::{ x: 0.0, y: 0.0, w: 600.0, h: 290.0 }
+  let frame = @svg.Shape::{ x: 0.0, y: 0.0, w: 600.0, h: 290.0 }
   c.raw(
     "<rect x=\"\{frame.x}\" y=\"\{frame.y}\" width=\"\{frame.w}\" height=\"\{frame.h}\" rx=\"14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-dasharray=\"7 5\"/>",
     covered=[(frame.x, frame.y), (frame.x + frame.w, frame.y + frame.h)],
@@ -53,8 +53,8 @@ fn main {
 
   // Tool names above each ellipse, underlined in their zone's
   // color.
-  c.text(210.0, 56.0, "playwright-cli", anchor=@s.Middle, size=15.0, underline=@s.Yes)
-  c.text(390.0, 56.0, "chrome-devtools CLI", anchor=@s.Middle, size=15.0, underline=@s.Yes)
+  c.text(210.0, 56.0, "playwright-cli", anchor=@svg.Middle, size=15.0, underline=@svg.Yes)
+  c.text(390.0, 56.0, "chrome-devtools CLI", anchor=@svg.Middle, size=15.0, underline=@svg.Yes)
   c.raw(
     "<line x1=\"\{210.0 - 62.0}\" y1=\"64\" x2=\"\{210.0 + 62.0}\" y2=\"64\" stroke=\"\{pw_col}\" stroke-width=\"2\"/>",
     covered=[(210.0 - 62.0, 64.0), (210.0 + 62.0, 64.0)],
@@ -65,20 +65,20 @@ fn main {
   )
 
   // Left-only area: automation + screenshots + arbitrary CDP.
-  c.text(135.0, 158.0, "定型操作・E2E", anchor=@s.Middle, size=12.5)
-  c.text(135.0, 180.0, "screenshot 差分", anchor=@s.Middle, size=12.5)
-  c.text(135.0, 202.0, "任意 CDP", anchor=@s.Middle, size=12.5)
+  c.text(135.0, 158.0, "定型操作・E2E", anchor=@svg.Middle, size=12.5)
+  c.text(135.0, 180.0, "screenshot 差分", anchor=@svg.Middle, size=12.5)
+  c.text(135.0, 202.0, "任意 CDP", anchor=@svg.Middle, size=12.5)
 
   // Overlap lens: what both do. Short labels, small size, near
   // center.
-  c.text(300.0, 172.0, "trace 取得", anchor=@s.Middle, size=11.0)
-  c.text(300.0, 190.0, "net/console", anchor=@s.Middle, size=11.0)
+  c.text(300.0, 172.0, "trace 取得", anchor=@svg.Middle, size=11.0)
+  c.text(300.0, 190.0, "net/console", anchor=@svg.Middle, size=11.0)
 
   // Right-only area: curated DevTools diagnosis.
-  c.text(468.0, 152.0, "perf insight", anchor=@s.Middle, size=12.5)
-  c.text(468.0, 174.0, "自動分析", anchor=@s.Middle, size=12.5)
-  c.text(468.0, 196.0, "CSS cascade 追跡", anchor=@s.Middle, size=12.5)
-  c.text(468.0, 218.0, "lighthouse", anchor=@s.Middle, size=12.5)
+  c.text(468.0, 152.0, "perf insight", anchor=@svg.Middle, size=12.5)
+  c.text(468.0, 174.0, "自動分析", anchor=@svg.Middle, size=12.5)
+  c.text(468.0, 196.0, "CSS cascade 追跡", anchor=@svg.Middle, size=12.5)
+  c.text(468.0, 218.0, "lighthouse", anchor=@svg.Middle, size=12.5)
 
   // Outside the frame: what neither CLI verifies. One color marks
   // "out".
@@ -105,7 +105,7 @@ fn main {
   c.arrow(
     (frame.x + frame.w - 6.0, 262.0),
     (out_x - 6.0, 262.0),
-    ends=@s.Single(@s.End),
+    ends=@svg.Single(@svg.End),
     dash=Some("5 4"),
     color=out_col,
   )

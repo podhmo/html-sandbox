@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-repl-completion-stack.mbtx -- Stack #1409's nine layers,
@@ -7,7 +7,7 @@ import { "podhmo/svg-gen" @s }
 // beneath it, and the whole series lands bottom-up.
 
 fn main {
-  let c = @s.Canvas()
+  let c = @svg.Canvas()
   let w = 345.0
   let lh = 30.0
 
@@ -30,12 +30,12 @@ fn main {
   for i, l in layers {
     let (pr, label) = l
     let y = top + (layers.length() - 1 - i).to_double() * lh
-    ignore(c.box(x, y, @s.Fixed(w), lh, rx=4.0, color=c.color(i % 6)))
+    ignore(c.box(x, y, @svg.Fixed(w), lh, rx=4.0, color=c.color(i % 6)))
     c.text(x + 10.0, y + lh / 2.0, pr, size=12.0, central=true)
     c.text(x + 62.0, y + lh / 2.0, label, size=12.0, central=true)
   }
   let stack_bottom = top + layers.length().to_double() * lh
-  let main_b = c.box(x, stack_bottom + 8.0, @s.Fixed(w), 24.0, rx=4.0, dash=Some("4 3"), opacity=Some(0.7))
+  let main_b = c.box(x, stack_bottom + 8.0, @svg.Fixed(w), 24.0, rx=4.0, dash=Some("4 3"), opacity=Some(0.7))
   c.text(x + 10.0, stack_bottom + 8.0 + 12.0, "main", size=12.0, central=true, opacity=Some(0.7))
 
   // merge-direction arrow on the left, pointing up = bottom merges
@@ -45,7 +45,7 @@ fn main {
     40.0,
     stack_bottom + 8.0 + 36.0,
     "lands bottom-up",
-    anchor=@s.Middle,
+    anchor=@svg.Middle,
     size=12.0,
     opacity=Some(0.8),
   )

@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-good-slops-map.mbtx -- where parts of existing slops sit on
@@ -12,7 +12,7 @@ import { "podhmo/svg-gen" @s }
 // written.
 
 fn main {
-  let c = @s.Canvas(margin=12.0)
+  let c = @svg.Canvas(margin=12.0)
 
   let l = 90.0
   let r = 620.0
@@ -28,18 +28,18 @@ fn main {
     r,
     b + 36.0,
     "AI だけが知っていたもの（見たもの、選んだもの、言わなかったもの）",
-    anchor=@s.End,
+    anchor=@svg.End,
     size=11.0,
     opacity=Some(0.8),
   )
-  c.text(l - 8.0, t + 6.0, "語り口", anchor=@s.End, size=11.0, opacity=Some(0.8))
-  c.text(l - 8.0, b - 6.0, "中身", anchor=@s.End, size=11.0, opacity=Some(0.8))
+  c.text(l - 8.0, t + 6.0, "語り口", anchor=@svg.End, size=11.0, opacity=Some(0.8))
+  c.text(l - 8.0, b - 6.0, "中身", anchor=@svg.End, size=11.0, opacity=Some(0.8))
 
   // the region the inference points at
   ignore(
-    c.box(380.0, 150.0, @s.Fixed(230.0), 140.0, rx=6.0, dash=Some("5 4"), width=1.5, opacity=Some(0.7)),
+    c.box(380.0, 150.0, @svg.Fixed(230.0), 140.0, rx=6.0, dash=Some("5 4"), width=1.5, opacity=Some(0.7)),
   )
-  c.text(600.0, 166.0, "良い記事の側（推測）", anchor=@s.End, size=11.0, opacity=Some(0.8))
+  c.text(600.0, 166.0, "良い記事の側（推測）", anchor=@svg.End, size=11.0, opacity=Some(0.8))
 
   // (x, y, label, palette index, anchor end?)
   let pts = [
@@ -55,13 +55,13 @@ fn main {
       if start { x - 6.0 } else { x + 6.0 },
       y - 14.0,
       label,
-      anchor=(if start { @s.Start } else { @s.End }),
+      anchor=(if start { @svg.Start } else { @svg.End }),
       size=11.0,
     )
   }
 
   // the reflection that was asked for but not written
-  let miss : @s.Point = (430.0, 276.0)
+  let miss : @svg.Point = (430.0, 276.0)
   ignore(c.circle(miss.0, miss.1, 6.0, dash=Some("2 2"), width=1.5))
   c.text(miss.0 + 12.0, miss.1 + 4.0, "書かれなかった反省", size=11.0, opacity=Some(0.85))
   c.arrow((176.0, 252.0), (422.0, 275.0), dash=Some("4 3"), opacity=Some(0.6))

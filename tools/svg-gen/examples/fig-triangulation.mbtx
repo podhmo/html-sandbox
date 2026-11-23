@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-triangulation.mbtx -- P4: a triangulation fills the convex hull
@@ -7,12 +7,12 @@ import { "podhmo/svg-gen" @s }
 // crosses several edges (right, vermillion) — not a triangulation.
 
 fn main {
-  let s = @s.sites
-  let tris = @s.delaunay(s)
-  let c = @s.Canvas()
+  let s = @svg.sites
+  let tris = @svg.delaunay(s)
+  let c = @svg.Canvas()
   let dx = 260.0
 
-  let dot = fn(p : @s.Point) {
+  let dot = fn(p : @svg.Point) {
     c.raw(
       "<circle cx=\"\{p.0}\" cy=\"\{p.1}\" r=\"3.5\" fill=\"currentColor\"/>",
       covered=[p],
@@ -30,11 +30,11 @@ fn main {
   for p in s {
     dot(p)
   }
-  c.text(115.0, 225.0, "a triangulation", anchor=@s.Middle, size=12.0, opacity=Some(0.7))
+  c.text(115.0, 225.0, "a triangulation", anchor=@svg.Middle, size=12.0, opacity=Some(0.7))
 
   // Right: same edges plus one chord through the middle — it crosses
   // Delaunay edges it is not part of, so this is not a triangulation.
-  let t2 = @s.shift(s, dx=dx, dy=0.0)
+  let t2 = @svg.shift(s, dx=dx, dy=0.0)
   for t in tris {
     for e in [(0, 1), (1, 2), (2, 0)] {
       let ea = if e.0 == 0 { t.0 } else if e.0 == 1 { t.1 } else { t.2 }
@@ -43,16 +43,16 @@ fn main {
     }
   }
   // find two non-adjacent sites whose chord crosses the most edges
-  let hv = @s.hull(s)
-  let mut chord : (@s.Point, @s.Point)? = None
-  let mut crossings : Array[@s.Point] = []
+  let hv = @svg.hull(s)
+  let mut chord : (@svg.Point, @svg.Point)? = None
+  let mut crossings : Array[@svg.Point] = []
   for i = 0; i < s.length() && chord is None; i = i + 1 {
     for j = i + 1; j < s.length() && chord is None; j = j + 1 {
       if hv.contains(i) && hv.contains(j) {
         continue
       }
-      let xs : Array[@s.Point] = []
-      for entry in @s.edge_adjacency(tris) {
+      let xs : Array[@svg.Point] = []
+      for entry in @svg.edge_adjacency(tris) {
         let (ea, eb, _ts) = entry
         if ea == i || ea == j || eb == i || eb == j {
           continue
@@ -87,7 +87,7 @@ fn main {
   for p in t2 {
     dot(p)
   }
-  c.text(115.0 + dx, 225.0, "crossing edge: not a triangulation", anchor=@s.Middle, size=12.0, opacity=Some(0.7))
+  c.text(115.0 + dx, 225.0, "crossing edge: not a triangulation", anchor=@svg.Middle, size=12.0, opacity=Some(0.7))
 
   println(
     c.render(label=Some("valid triangulation vs a chord that crosses existing edges")),

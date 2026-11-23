@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-olist-first-item.mbtx -- In a list run that mixes "- " and
@@ -9,7 +9,7 @@ import { "podhmo/svg-gen" @s }
 // their own <li>.
 
 fn main {
-  let c = @s.Canvas()
+  let c = @svg.Canvas()
   let ol = c.color(0)
   let ul = c.color(1)
   let lh = 22.0
@@ -57,10 +57,10 @@ fn main {
         abort("first item decides the tag")
       }
     }
-    let tag = c.box(260.0, ry - 16.0, @s.Auto, 34.0, label=Some(tag_s), color=col, width=2.0)
+    let tag = c.box(260.0, ry - 16.0, @svg.Auto, 34.0, label=Some(tag_s), color=col, width=2.0)
     c.arrow(
       (152.0, ry - 4.0),
-      c.anchor(tag, @s.W),
+      c.anchor(tag, @svg.W),
       color=col,
       width=2.0,
       gap_start=Some(4.0),

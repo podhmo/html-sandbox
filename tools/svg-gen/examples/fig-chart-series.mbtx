@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-chart-series.mbtx -- daily latency percentiles around a deploy.
@@ -8,8 +8,8 @@ import { "podhmo/svg-gen" @s }
 // two weeks of daily-aggregated p50/p90 from a seeded PRNG.
 
 fn main {
-  let c = @s.Canvas()
-  let g = @s.gauss(@s.rng(20261030U))
+  let c = @svg.Canvas()
+  let g = @svg.gauss(@svg.rng(20261030U))
 
   // virtual daily aggregates: a latency drop after the 10/08 deploy,
   // with day-of-week wobble and noise.
@@ -34,7 +34,7 @@ fn main {
     ).round()
   let drop_i = drop.to_int64()
 
-  let p = @s.Plot(
+  let p = @svg.Plot(
     c,
     {
       title: "10/08 デプロイ後に p90 が約 \{drop_i}% 低下（仮想データ）",

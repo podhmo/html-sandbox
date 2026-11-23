@@ -1,13 +1,13 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-points.mbtx -- P0: the article's whole input is ten unlabeled
 // points. Every later figure reuses this set (geom.mbt sites).
 
 fn main {
-  let c = @s.Canvas()
-  for p in @s.sites {
+  let c = @svg.Canvas()
+  for p in @svg.sites {
     c.raw(
       "<circle cx=\"\{p.0}\" cy=\"\{p.1}\" r=\"3.5\" fill=\"currentColor\"/>",
       covered=[p],

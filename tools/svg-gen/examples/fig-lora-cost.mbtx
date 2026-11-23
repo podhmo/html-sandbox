@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-lora-cost.mbtx -- listed trainer prices for one LoRA run
@@ -9,13 +9,13 @@ import { "podhmo/svg-gen" @s }
 // than as a bar.
 
 fn main {
-  let c = @s.Canvas()
+  let c = @svg.Canvas()
 
   let usd = [
-    @s.Hbar::{ label: "Replicate FLUX.1 dev", value: 1.46 },
-    @s.Hbar::{ label: "fal FLUX.1 dev fast", value: 2.0 },
-    @s.Hbar::{ label: "fal Klein系", value: 4.3 },
-    @s.Hbar::{ label: "fal FLUX.2 dev", value: 6.4 },
+    @svg.Hbar::{ label: "Replicate FLUX.1 dev", value: 1.46 },
+    @svg.Hbar::{ label: "fal FLUX.1 dev fast", value: 2.0 },
+    @svg.Hbar::{ label: "fal Klein系", value: 4.3 },
+    @svg.Hbar::{ label: "fal FLUX.2 dev", value: 6.4 },
   ]
 
   c.hbars(usd, x=0.0, y=0.0, value_fmt=fn(v) { "$\{v}" }, highlight=Some(0))

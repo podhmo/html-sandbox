@@ -1,19 +1,19 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-focus.mbtx -- focus + context: one node in full strength, its
 // neighbours dimmed, drawn without a layout engine.
 
 fn main {
-  let c = @s.Canvas()
+  let c = @svg.Canvas()
   let dim = 0.35
 
-  let focus = c.box(140.0, 60.0, @s.Fixed(130.0), 46.0, label=Some("focus pkg"))
+  let focus = c.box(140.0, 60.0, @svg.Fixed(130.0), 46.0, label=Some("focus pkg"))
   let users = c.box(
     c.left_of(focus, 40.0, 110.0),
     60.0,
-    @s.Fixed(110.0),
+    @svg.Fixed(110.0),
     46.0,
     label=Some("users of it"),
     size=13.0,
@@ -22,7 +22,7 @@ fn main {
   let lib = c.box(
     focus.x,
     c.above(focus, 24.0, 40.0),
-    @s.Fixed(130.0),
+    @svg.Fixed(130.0),
     40.0,
     label=Some("a library"),
     size=13.0,
@@ -31,7 +31,7 @@ fn main {
   let tests = c.box(
     c.right_of(focus, 40.0),
     60.0,
-    @s.Fixed(110.0),
+    @svg.Fixed(110.0),
     46.0,
     label=Some("its tests"),
     size=13.0,
@@ -40,7 +40,7 @@ fn main {
   let app = c.box(
     focus.x,
     c.below(focus, 24.0),
-    @s.Fixed(130.0),
+    @svg.Fixed(130.0),
     40.0,
     label=Some("the app"),
     size=13.0,
@@ -48,10 +48,10 @@ fn main {
   )
 
   // Edges join focus anchors to neighbour anchors; also dimmed.
-  c.arrow(c.anchor(focus, @s.W), c.anchor(users, @s.E), opacity=Some(dim))
-  c.arrow(c.anchor(focus, @s.N), c.anchor(lib, @s.S), opacity=Some(dim))
-  c.arrow(c.anchor(focus, @s.E), c.anchor(tests, @s.W), opacity=Some(dim))
-  c.arrow(c.anchor(focus, @s.S), c.anchor(app, @s.N), opacity=Some(dim))
+  c.arrow(c.anchor(focus, @svg.W), c.anchor(users, @svg.E), opacity=Some(dim))
+  c.arrow(c.anchor(focus, @svg.N), c.anchor(lib, @svg.S), opacity=Some(dim))
+  c.arrow(c.anchor(focus, @svg.E), c.anchor(tests, @svg.W), opacity=Some(dim))
+  c.arrow(c.anchor(focus, @svg.S), c.anchor(app, @svg.N), opacity=Some(dim))
 
   if !(users.y == tests.y) {
     abort("side boxes share the row")

@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-chart-tts-retry.mbtx -- the retry's two kinds of change on
@@ -11,7 +11,7 @@ import { "podhmo/svg-gen" @s }
 // improvement story.
 
 fn main {
-  let c = @s.Canvas()
+  let c = @svg.Canvas()
 
   // measured values, one run each (Qwen: the warmed-up second run)
   let rows = [
@@ -22,7 +22,7 @@ fn main {
     (0.0, 0.072, "0.072", 4),
   ]
 
-  let p = @s.Plot(
+  let p = @svg.Plot(
     c,
     {
       title: "同じ RTF の差でも、原因は 2 種類ある",
@@ -35,19 +35,19 @@ fn main {
     y=0.0,
     w=400.0,
     h=180.0,
-    xscale=@s.Log,
+    xscale=@svg.Log,
     xtitle=Some("RTF（音声 1 秒あたりの合成秒数、対数軸）"),
     grid=true,
   )
 
   p.frame(
-    xticks=[0.05, 0.1, 0.2, 0.5, 1.0, 2.0].map(fn(v) { @s.Num(v) }),
+    xticks=[0.05, 0.1, 0.2, 0.5, 1.0, 2.0].map(fn(v) { @svg.Num(v) }),
     yticks=[
-      @s.Lab(4.0, "Qwen1.7B 573.22 / cu128"),
-      @s.Lab(3.0, "Qwen1.7B 617.42 / cu128 venv"),
-      @s.Lab(2.0, "Qwen1.7B 617.42 / cu132 既定"),
-      @s.Lab(1.0, "Piper 初回（573.22）"),
-      @s.Lab(0.0, "Piper 同じ venv で再測"),
+      @svg.Lab(4.0, "Qwen1.7B 573.22 / cu128"),
+      @svg.Lab(3.0, "Qwen1.7B 617.42 / cu128 venv"),
+      @svg.Lab(2.0, "Qwen1.7B 617.42 / cu132 既定"),
+      @svg.Lab(1.0, "Piper 初回（573.22）"),
+      @svg.Lab(0.0, "Piper 同じ venv で再測"),
     ],
   )
 

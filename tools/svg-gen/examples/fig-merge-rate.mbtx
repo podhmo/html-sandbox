@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-merge-rate.mbtx -- PR merges completed per hour during the
@@ -7,16 +7,16 @@ import { "podhmo/svg-gen" @s }
 // Real data: squash-commit committer timestamps from main.
 
 fn main {
-  let c = @s.Canvas()
+  let c = @svg.Canvas()
 
   // merges per hour, 20:00 -> 06:00 JST (x = hours since 20:00).
   let counts = [44, 27, 36, 42, 44, 30, 10, 13, 12, 13, 7]
   let bs = counts.mapi(fn(i, n) {
-    @s.Bin::{ x0: i.to_double() + 0.08, x1: i.to_double() + 0.92, n }
+    @svg.Bin::{ x0: i.to_double() + 0.08, x1: i.to_double() + 0.92, n }
   })
   let clock = fn(i : Int) { "\{(20 + i) % 24}:00" }
 
-  let p = @s.Plot(
+  let p = @svg.Plot(
     c,
     {
       title: "1時間あたりのマージ完了数 — 02時すぎから鈍化した",
@@ -33,7 +33,7 @@ fn main {
   )
   p.frame(
     xticks=[0, 2, 4, 6, 8, 10].map(fn(i) {
-      @s.Lab(i.to_double() + 0.5, clock(i))
+      @svg.Lab(i.to_double() + 0.5, clock(i))
     }),
   )
   p.data(fn(p) {

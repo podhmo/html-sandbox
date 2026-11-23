@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-ax-comment.mbtx -- What the accessibility tree kept, before
@@ -12,16 +12,16 @@ import { "podhmo/svg-gen" @s }
 // (vermillion, dashed).
 
 fn main {
-  let c = @s.Canvas()
+  let c = @svg.Canvas()
 
   let kept = 2 // green
   let gone = 3 // vermillion
 
-  let node = fn(x : Double, y : Double, label : String, k : Bool) -> @s.Shape {
+  let node = fn(x : Double, y : Double, label : String, k : Bool) -> @svg.Shape {
     c.box(
       x,
       y,
-      @s.Auto,
+      @svg.Auto,
       30.0,
       label=Some(label),
       color=c.color(if k { kept } else { gone }),
@@ -31,10 +31,10 @@ fn main {
     )
   }
 
-  let edge = fn(a : @s.Shape, b : @s.Shape, k : Bool) {
+  let edge = fn(a : @svg.Shape, b : @svg.Shape, k : Bool) {
     c.line(
-      c.anchor(a, @s.S),
-      c.anchor(b, @s.N),
+      c.anchor(a, @svg.S),
+      c.anchor(b, @svg.N),
       color=c.color(if k { kept } else { gone }),
       dash=(if k { None } else { Some("5 4") }),
       opacity=Some(if k { 0.9 } else { 0.7 }),

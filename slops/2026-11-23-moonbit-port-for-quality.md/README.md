@@ -67,7 +67,7 @@ sentinel の別の例として、canvas の bounds は `±infinity` を空の意
 
 - 先頭引数をドメイン型にして `x.f(...)` 形式にする。`Canvas::box` は `c.box(...)` と呼べる
 - 先頭以外は `label=`、`dash=`、`color=` などの名前付き引数にデフォルトを付ける。引数の意味を読むだけで分かる
-- コンストラクタは `Type::Type(...)` で呼ぶ。`@s.Canvas()` と書け、`::new` という旧流儀の名前付けを引きずらなくて済む
+- コンストラクタは `Type::Type(...)` で呼ぶ。`@svg.Canvas()` と書け、`::new` という旧流儀の名前付けを引きずらなくて済む
 - `if heads is (End | Both)` のように `is` パターンで「この variant のときだけ」を式の中に書く
 - 配列内包 `[for x in xs => expr]` と、条件に合うインデックスを引く `search_by(fn)` を使う
 - 蓄積ループは `fold` や `for` 式に寄せて `let mut` を減らす
@@ -147,7 +147,7 @@ sentinel の別の例として、canvas の bounds は `±infinity` を空の意
 - 配列内包 `[for x in xs => expr]` と functional-for で `let mut` を減らせる。蓄積型ループはまずここを見る
 - `Ref` は `{ val: None }` と書けて、遅延初期化や共有 stream の保持に素直
 - variant の payload を `as` 束縛で取り出して中身を変えられる。`Details(..) as d` として `d.depth += 1` と書く
-- `Type::Type` コンストラクタで呼び出せる形にすると `@s.Canvas()` と書ける。`::new` という名前の公開関数は古い流儀
+- `Type::Type` コンストラクタで呼び出せる形にすると `@svg.Canvas()` と書ける。`::new` という名前の公開関数は古い流儀
 - `.mbti` は `moon info` で再生成する。インターフェースの差分が見えるので、意図しない公開面の変化を拾える
 
 ## まとめ
