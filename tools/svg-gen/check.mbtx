@@ -1,0 +1,547 @@
+---
+import {
+  "podhmo/svg-gen" @s,
+  "moonbitlang/core/env" @env,
+  "moonbitlang/core/string" @string,
+  "moonbitlang/core/double" @double,
+  "moonbitlang/async/fs" @fs,
+}
+---
+// check.mbtx -- lint an SVG for the breakage patterns recorded in
+// slops/2026-10-27-writing-slops.md/03-svg-pitfalls.md. Port of
+// check.ts; same checks, same FAIL/WARN levels, exit 1 on FAIL.
+//
+// What it catches:
+//   - elements or estimated text boxes outside the viewBox
+//     ("text-anchor=end label clipped at the edge")
+//   - duplicate id attributes inside one file
+//     ("<pattern>/<linearGradient> ids collide on the combined page")
+//   - constructs the svg fence must not contain
+//     (script, foreignObject, event handlers, remote refs)
+//   - text whose estimated box overflows the shape it sits in
+//     ("label wider than its box")
+//   - literal colors outside PALETTE
+//     (colorful figures mix currentColor text with palette marks;
+//     only off-palette colors break the dark-theme contract)
+//   - missing role/aria-label
+//
+// Usage: moon run check.mbtx -- file.svg [more.svg ...]
+
+
+
+#derive(Debug)
+enum Level {
+  Fail
+  Warn
+}
+
+///|
+fn level_name(l : Level) -> String {
+  match l {
+    Fail => "FAIL"
+    Warn => "WARN"
+  }
+}
+
+///|
+let fails : Ref[Int] = Ref(0)
+
+///|
+let warns : Ref[Int] = Ref(0)
+
+///|
+fn report(level : Level, file : String, msg : String) -> Unit {
+  match level {
+    Fail => fails.val += 1
+    Warn => warns.val += 1
+  }
+  println("\{level_name(level)} \{file}: \{msg}")
+}
+
+///| The core regex dialect uses POSIX classes; `\w`/`[\w:-]` become
+/// `[[:word:]]` / `[[:word:]:\\-]`.
+let tag_re : @string.Regex = @string.Regex::unsafe_from_string("<(/?)([[:word:]][[:word:]:\\-]*)([^<>]*)/?>")
+
+///|
+let attr_re : @string.Regex = @string.Regex::unsafe_from_string("([[:word:]:\\-]+)=\"([^\"]*)\"")
+
+///|
+let num_re : @string.Regex = @string.Regex::unsafe_from_string("-?[0-9]*\\.?[0-9]+([eE]-?[0-9]+)?")
+
+///|
+let path_tok_re : @string.Regex = @string.Regex::unsafe_from_string(
+  "[MLHVZmlhvzCSQTAa]|-?[0-9]*\\.?[0-9]+([eE]-?[0-9]+)?",
+)
+
+///|
+fn attrs(s : StringView) -> Map[String, String] {
+  let m = Map([])
+  for mt in attr_re.find(s) {
+    match (mt.group(1), mt.group(2)) {
+      (Some(k), Some(v)) => m[k.to_owned()] = v.to_owned()
+      _ => ()
+    }
+  }
+  m
+}
+
+///|
+fn nums(s : StringView) -> Array[Double] {
+  let out : Array[Double] = []
+  for m in num_re.find(s) {
+    out.push(
+      @string.parse_double(m.content()) catch {
+        _ => abort("nums: unparseable number")
+      },
+    )
+  }
+  out
+}
+
+///| Collect the coordinate pairs a `d` attribute uses. Only the
+/// absolute commands this kit emits (M, L, H, V, Z) are understood;
+/// anything else is reported as unchecked rather than silently
+/// misparsed. A point may hold just one coordinate (H/V commands).
+fn path_points(d : StringView) -> (Array[(Double?, Double?)], Char?) {
+  let pts : Array[(Double?, Double?)] = []
+  let pending : Array[Double] = []
+  let mut bad : Char? = None
+  let mut cmd = ' '
+  for m in path_tok_re.find(d) {
+    let t = m.content()
+    let is_letter = t.length() == 1 && t.get_char(0) is Some(c) && c.is_ascii_alphabetic()
+    if is_letter {
+      let c = t.get_char(0).unwrap()
+      if "MLHVZ".contains(c.to_string()) {
+        ()
+      } else if bad is None {
+        bad = Some(c)
+      }
+      cmd = c
+      continue
+    }
+    let n = @string.parse_double(t) catch {
+      _ => continue
+    }
+    if cmd == 'H' || cmd == 'V' {
+      if cmd == 'H' {
+        pts.push((Some(n), None))
+      } else {
+        pts.push((None, Some(n)))
+      }
+      continue
+    }
+    if cmd == 'M' || cmd == 'L' {
+      pending.push(n)
+      if pending.length() == 2 {
+        pts.push((Some(pending[0]), Some(pending[1])))
+        pending.clear()
+      }
+      continue
+    }
+    if cmd.is_ascii_lowercase() {
+      if bad is None {
+        bad = Some(cmd)
+      }
+    } else if bad is None && !"MLHV".contains(cmd.to_string()) {
+      bad = Some(cmd)
+    }
+  }
+  (pts, bad)
+}
+
+///|
+struct Bounds {
+  x : Double
+  y : Double
+  w : Double
+  h : Double
+  ellipse : Bool
+}
+
+///|
+struct TextBox {
+  body : String
+  ax : Double
+  ay : Double
+  lx : Double
+  ty : Double
+  rx : Double
+  by : Double
+}
+
+///|
+fn num_attr(a : Map[String, String], k : String) -> Double {
+  match a.get(k) {
+    Some(v) =>
+      @string.parse_double(v) catch {
+        _ => 0.0
+      }
+    None => 0.0
+  }
+}
+
+///|
+async fn check(file : String) -> Unit {
+  let svg = @fs.read_file(file).text() catch {
+    e => {
+      report(Fail, file, "cannot read: \{e}")
+      return
+    }
+  }
+  let low = svg.to_lower()
+  // Banned constructs. The TS patterns are /i; here the file is
+  // lowered once and literals are lowercase.
+  let banned : Array[(String, String)] = [
+    ("<script", "<script> is not allowed in an svg fence"),
+    ("<foreignobject", "<foreignObject> is not allowed"),
+    ("xlink:href", "href (remote or internal reference) is not allowed"),
+    ("href=", "href (remote or internal reference) is not allowed"),
+    ("url(", "external resource reference is not allowed"),
+    ("@import", "external resource reference is not allowed"),
+    ("data:", "external resource reference is not allowed"),
+  ]
+  for b in banned {
+    if low.contains(b.0) {
+      report(Fail, file, b.1)
+    }
+  }
+  // \son\w+=/i -> attribute named on*
+  let on_re : @string.Regex = @string.Regex::unsafe_from_string("[[:space:]]on[[:word:]:\\-]+=")
+  if on_re.find(low).next() is Some(_) {
+    report(Fail, file, "event handler attribute is not allowed")
+  }
+
+  let svg_tag_re : @string.Regex = @string.Regex::unsafe_from_string("<svg([^>]*)>")
+  guard svg_tag_re.find(svg).next() is Some(svg_tag) else {
+    report(Fail, file, "no <svg> element")
+    return
+  }
+  let svg_attrs = attrs(svg_tag.group(1).unwrap_or(""))
+  let vb = nums(svg_attrs.get("viewBox").unwrap_or(""))
+  if vb.length() != 4 {
+    report(Fail, file, "missing or malformed viewBox")
+    return
+  }
+  let (vx, vy, vw, vh) = (vb[0], vb[1], vb[2], vb[3])
+  // <g data-plot="x0 y0 x1 y1"> marks the plot's data region; marks
+  // inside it must fit the plot rect (epsilon for stroke width), not
+  // just the viewBox — catches bars/dots poking past the domain.
+  let plots : Array[Array[Double]] = []
+  let inside = fn(x : Double, y : Double) -> Bool {
+    let r = if plots.length() > 0 {
+      plots[plots.length() - 1]
+    } else {
+      [vx, vy, vw, vh]
+    }
+    x >= r[0] - 2.0 &&
+    x <= r[0] + r[2] + 2.0 &&
+    y >= r[1] - 2.0 &&
+    y <= r[1] + r[3] + 2.0
+  }
+  let outside = fn(what : String, x : Double, y : Double) -> Unit {
+    report(Fail, file, "\{what} at (\{x.to_string()}, \{y.to_string()}) outside viewBox")
+  }
+
+  if !(
+      svg.contains("role=\"img\"") ||
+      svg.contains("aria-label=") ||
+      svg.contains("<title>")
+    ) {
+    report(Warn, file, "no aria-label, role=img, or <title>")
+  }
+
+  let ids : Map[String, String] = Map([])
+  let colors : Map[String, Bool] = Map([])
+  let mut text_count = 0
+  // Containers and texts are checked against each other after the
+  // scan. A shape too small to hold any label is a mark (scatter
+  // dots, bar slivers), not a text container, so it is not
+  // registered here.
+  let text_min = 12.0
+  let containers : Array[Bounds] = []
+  let container = fn(b : Bounds) -> Unit {
+    if b.w.min(b.h) >= text_min {
+      containers.push(b)
+    }
+  }
+  let texts : Array[TextBox] = []
+
+  for m in tag_re.find(svg) {
+    let close = match m.group(1) {
+      Some(v) => v.length() > 0
+      None => false
+    }
+    let tag = m.group(2).unwrap_or("").to_owned()
+    let raw = m.group(3).unwrap_or("")
+    if tag == "g" {
+      if close {
+        if plots.length() > 0 {
+          plots.pop() |> ignore
+        }
+      } else {
+        let a = attrs(raw)
+        match a.get("data-plot") {
+          Some(dp) => plots.push(nums(dp))
+          None => ()
+        }
+      }
+      continue
+    }
+    if close {
+      continue
+    }
+    let a = attrs(raw)
+    match a.get("id") {
+      Some(id) => {
+        match ids.get(id) {
+          Some(prev) =>
+            report(
+              Fail,
+              file,
+              "duplicate id \"\{id}\" (first seen in <\{prev}>)",
+            )
+          None => ()
+        }
+        ids[id] = tag
+      }
+      None => ()
+    }
+    for k in ["stroke", "fill", "color"] {
+      match a.get(k) {
+        Some(v) =>
+          if v != "none" &&
+            v != "currentColor" &&
+            !v.has_prefix("url(") {
+            colors[v] = true
+          }
+        None => ()
+      }
+    }
+
+    match tag {
+      "rect" => {
+        let x = num_attr(a, "x")
+        let y = num_attr(a, "y")
+        let w = num_attr(a, "width")
+        let h = num_attr(a, "height")
+        container({ x, y, w, h, ellipse: false })
+        for p in [(x, y), (x + w, y + h)] {
+          if !inside(p.0, p.1) {
+            outside("<rect> corner", p.0, p.1)
+          }
+        }
+      }
+      "circle" => {
+        let cx = num_attr(a, "cx")
+        let cy = num_attr(a, "cy")
+        let r = num_attr(a, "r")
+        container({ x: cx - r, y: cy - r, w: 2.0 * r, h: 2.0 * r, ellipse: true })
+        for p in [(cx - r, cy - r), (cx + r, cy + r)] {
+          if !inside(p.0, p.1) {
+            outside("<circle> edge", p.0, p.1)
+          }
+        }
+      }
+      "ellipse" => {
+        let cx = num_attr(a, "cx")
+        let cy = num_attr(a, "cy")
+        let rx = num_attr(a, "rx")
+        let ry = num_attr(a, "ry")
+        container({ x: cx - rx, y: cy - ry, w: 2.0 * rx, h: 2.0 * ry, ellipse: true })
+        for p in [(cx - rx, cy - ry), (cx + rx, cy + ry)] {
+          if !inside(p.0, p.1) {
+            outside("<ellipse> edge", p.0, p.1)
+          }
+        }
+      }
+      "line" => {
+        for p in [
+            (num_attr(a, "x1"), num_attr(a, "y1")),
+            (num_attr(a, "x2"), num_attr(a, "y2")),
+          ] {
+          if !inside(p.0, p.1) {
+            outside("<line> end", p.0, p.1)
+          }
+        }
+      }
+      "polyline" | "polygon" => {
+        let ns = nums(a.get("points").unwrap_or(""))
+        let mut i = 0
+        while i + 1 < ns.length() {
+          if !inside(ns[i], ns[i + 1]) {
+            outside("<\{tag}> point", ns[i], ns[i + 1])
+          }
+          i += 2
+        }
+      }
+      "path" => {
+        let (pts, bad) = path_points(a.get("d").unwrap_or(""))
+        match bad {
+          Some(b) =>
+            report(
+              Warn,
+              file,
+              "<path> uses '\{b}' commands; coordinates not checked",
+            )
+          None => ()
+        }
+        let mut last = (0.0, 0.0)
+        for p in pts {
+          let (px, py) = p
+          let x = px.unwrap_or(last.0)
+          let y = py.unwrap_or(last.1)
+          last = (x, y)
+          if !inside(x, y) {
+            outside("<path> point", x, y)
+          }
+        }
+      }
+      "text" => {
+        text_count += 1
+        let size = match num_attr(a, "font-size") {
+          0.0 => 16.0
+          v => v
+        }
+        let x = num_attr(a, "x")
+        let y = num_attr(a, "y")
+        let after = m.after()
+        let body = match after.find("</text>") {
+          Some(i) =>
+            after
+            .exact_view(end=i)
+            .to_owned()
+            .replace_all(old="&lt;", new="<")
+            .replace_all(old="&gt;", new=">")
+            .replace_all(old="&quot;", new="\"")
+            .replace_all(old="&amp;", new="&")
+          None => ""
+        }
+        // strip any nested tags (tspan etc.), then trim
+        let body_text = strip_tags(body).trim().to_owned()
+        let w = @s.text_width(body_text, size)
+        let lx = match a.get("text-anchor") {
+          Some("middle") => x - w / 2.0
+          Some("end") => x - w
+          _ => x
+        }
+        let central = m.content().contains("dominant-baseline=\"central\"")
+        let ty = if central { y - size / 2.0 } else { y - size }
+        texts.push({
+          body: body_text,
+          ax: x,
+          ay: y,
+          lx,
+          ty,
+          rx: lx + w,
+          by: ty + size * 1.2,
+        })
+        for p in [(lx, ty), (lx + w, ty + size * 1.2)] {
+          if !inside(p.0, p.1) {
+            outside("<text> \"\{body_text}\" box", p.0, p.1)
+          }
+        }
+      }
+      _ => ()
+    }
+  }
+
+  // A text whose anchor point sits inside a shape is meant to be
+  // inside it; flag when the estimated text box escapes that shape.
+  for t in texts {
+    let mut mine : Bounds? = None
+    let mut best = @double.infinity
+    for b in containers {
+      if t.ax >= b.x && t.ax <= b.x + b.w && t.ay >= b.y && t.ay <= b.y + b.h {
+        let area = b.w * b.h
+        if area < best {
+          best = area
+          mine = Some(b)
+        }
+      }
+    }
+    guard mine is Some(mine) else {
+      continue
+    }
+    if mine.ellipse {
+      let cx = mine.x + mine.w / 2.0
+      let cy = mine.y + mine.h / 2.0
+      let in_ellipse = fn(px : Double, py : Double) -> Bool {
+        let dx = (px - cx) / (mine.w / 2.0)
+        let dy = (py - cy) / (mine.h / 2.0)
+        dx * dx + dy * dy <= 1.0
+      }
+      for p in [(t.lx, t.ty), (t.rx, t.ty), (t.lx, t.by), (t.rx, t.by)] {
+        if !in_ellipse(p.0, p.1) {
+          report(
+            Fail,
+            file,
+            "<text> \"\{t.body}\" overflows its ellipse at (\{p.0}, \{p.1})",
+          )
+          break
+        }
+      }
+    } else if t.lx < mine.x ||
+      t.rx > mine.x + mine.w ||
+      t.ty < mine.y ||
+      t.by > mine.y + mine.h {
+      report(
+        Fail,
+        file,
+        "<text> \"\{t.body}\" estimated box (\{t.lx},\{t.ty})-(\{t.rx},\{t.by}) overflows its shape (\{mine.x},\{mine.y})-(\{mine.x + mine.w},\{mine.y + mine.h})",
+      )
+    }
+  }
+
+  if text_count == 0 {
+    report(Warn, file, "no <text> elements; labels will not be searchable")
+  }
+  let off : Array[String] = []
+  for c, _ in colors {
+    if !@s.palette.contains(c) {
+      off.push(c)
+    }
+  }
+  if off.length() > 0 {
+    report(
+      Warn,
+      file,
+      "literal color(s) \{off.join(", ")} outside PALETTE (use Canvas.color(i))",
+    )
+  }
+}
+
+///| Remove <...> markup inside a text body (tspan etc.).
+fn strip_tags(s : String) -> String {
+  let out = StringBuilder()
+  let mut depth = 0
+  for c in s {
+    if c == '<' {
+      depth += 1
+    } else if c == '>' {
+      depth -= 1
+    } else if depth == 0 {
+      out.write_char(c)
+    }
+  }
+  out.to_string()
+}
+
+///|
+async fn main {
+  let args = @env.args()
+  let files = args[1:]
+  if files.length() == 0 {
+    eprintln("usage: moon run check.mbtx -- file.svg ...")
+    @env.exit(2)
+  }
+  for f in files {
+    check(f)
+  }
+  println(
+    "\n\{files.length()} file(s), \{fails.val} failure(s), \{warns.val} warning(s)",
+  )
+  if fails.val > 0 {
+    @env.exit(1)
+  }
+}

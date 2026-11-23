@@ -8,7 +8,7 @@
 
 ///|
 #derive(Eq)
-pub enum Side {
+pub(all) enum Side {
   N
   S
   E
@@ -29,14 +29,14 @@ pub(all) struct Shape {
 
 ///|
 #derive(Debug)
-pub enum Sizing {
+pub(all) enum Sizing {
   Auto
   Fixed(Double)
 }
 
 ///|
 #derive(Eq)
-pub enum TextAnchor {
+pub(all) enum TextAnchor {
   Start
   Middle
   End
@@ -44,7 +44,7 @@ pub enum TextAnchor {
 
 ///|
 #derive(Eq)
-pub enum Heads {
+pub(all) enum Heads {
   End
   Start
   Both
@@ -53,7 +53,7 @@ pub enum Heads {
 
 ///|
 #derive(Eq)
-pub enum HighlightMode {
+pub(all) enum HighlightMode {
   Wash
   Ring
 }

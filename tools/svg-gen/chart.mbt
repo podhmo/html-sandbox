@@ -145,7 +145,7 @@ fn fmt_num(v : Double) -> String {
 ///| A tick is either a position formatted by xfmt/yfmt, or
 /// Lab(pos, label) for categorical axes.
 #derive(Debug)
-pub enum Tick {
+pub(all) enum Tick {
   Num(Double)
   Lab(Double, String)
 }
