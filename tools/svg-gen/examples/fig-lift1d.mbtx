@@ -1,0 +1,73 @@
+---
+import {
+  "podhmo/svg-gen" @s,
+  "moonbitlang/core/math" @math,
+}
+---
+
+// fig-lift1d.mbtx -- A3: lifting in one dimension. Points on the axis
+// go up to the parabola z=x^2; the lower hull is exactly the
+// adjacent-pair segments (Delaunay in 1D is sorted adjacency). A
+// chord over a skipped point (vermillion) leaves that point below
+// it — so it is not hull.
+
+fn main {
+  let c = @s.Canvas::new()
+  let axis_y = 200.0
+  let scale = 0.010
+  let x0 = 30.0
+  let x1 = 220.0
+  let lift = fn(x : Double) -> @s.Point {
+    (x, axis_y - (x - 125.0) * (x - 125.0) * scale)
+  }
+  let xs = [45.0, 70.0, 105.0, 150.0, 195.0]
+
+  // parabola + lifted points + lower hull = adjacent segments.
+  let para_pts = @s.sample(fn(x) { lift(x).1 }, x0, x1, n=120)
+  c.path(@s.path_of(para_pts), para_pts, width=1.5, opacity=Some(0.7))
+  c.line((x0, axis_y), (x1, axis_y), width=1.5)
+
+  let lifted = xs.map(lift)
+  for i = 0; i < xs.length() - 1; i = i + 1 {
+    c.line(lifted[i], lifted[i + 1], width=3.0, color=c.color(0))
+    // adjacency on the axis, mirrored below as small arcs
+    let midx = (xs[i] + xs[i + 1]) / 2.0
+    c.raw(
+      "<path d=\"M\{xs[i]} \{axis_y + 14.0} Q\{midx} \{axis_y + 26.0} \{xs[i + 1]} \{axis_y + 14.0}\" fill=\"none\" stroke=\"\{c.color(0)}\" stroke-width=\"1.5\"/>",
+      covered=[
+        (xs[i], axis_y + 14.0),
+        (xs[i + 1], axis_y + 14.0),
+        (midx, axis_y + 26.0),
+      ],
+    )
+  }
+  // a chord skipping one site: the middle lifted point falls below
+  // it.
+  let lx0 = lift(xs[0])
+  let lx2 = lift(xs[2])
+  let mid_lift = lift(xs[1])
+  let y_chord = lx0.1 + (lx2.1 - lx0.1) * (xs[1] - xs[0]) / (xs[2] - xs[0])
+  if !(mid_lift.1 > y_chord) {
+    abort("skipped point below the chord (screen y down)")
+  }
+  c.line(lx0, lx2, dash="5 3", width=1.5, color=c.color(3))
+
+  for i, p in lifted {
+    c.line((xs[i], axis_y), p, dash="3 3", opacity=Some(0.5))
+    c.raw(
+      "<circle cx=\"\{p.0}\" cy=\"\{p.1}\" r=\"3.5\" fill=\"currentColor\"/>",
+      covered=[p],
+    )
+    let q : @s.Point = (xs[i], axis_y)
+    c.raw(
+      "<circle cx=\"\{xs[i]}\" cy=\"\{axis_y}\" r=\"3.5\" fill=\"currentColor\"/>",
+      covered=[q],
+    )
+  }
+  c.text(15.0, axis_y, "x", size=11.0, central=true)
+  c.text(15.0, 20.0, "x²", size=11.0, central=true)
+
+  println(
+    c.render(label="1D lifting: points on x go up to the parabola x^2; the lower hull is exactly adjacent pairs — Delaunay in 1D is sorted adjacency"),
+  )
+}

@@ -1,0 +1,59 @@
+---
+import {
+  "podhmo/svg-gen" @s,
+  "moonbitlang/core/math" @math,
+}
+---
+
+// fig-voronoi-circle.mbtx -- V3: a Voronoi vertex is where three cells
+// meet — it is the circumcenter of the three sites, and its circle
+// contains no other site. This is the bridge to the Delaunay dual.
+
+fn main {
+  let s = @s.sites
+  let tris = @s.delaunay(s)
+  let clip = (0.0, 0.0, 230.0, 230.0)
+  let c = @s.Canvas::new()
+  let col_vor = c.color(1)
+
+  for seg in @s.voronoi_segments(s, tris, clip) {
+    c.line(seg.0, seg.1, dash="4 3", opacity=Some(0.6), color=col_vor)
+  }
+
+  // featured Voronoi vertex: circumcenter of a central triangle.
+  let feat = tris[4]
+  let cc = @s.circum(s[feat.0], s[feat.1], s[feat.2])
+  // equidistant to its three sites, and strictly nearer than to any
+  // other.
+  let d = fn(p : @s.Point) { @math.hypot(p.0 - cc.o.0, p.1 - cc.o.1) }
+  for p in s {
+    if !(d(p) > cc.r - 1.0e-9) {
+      abort("circle is empty")
+    }
+  }
+
+  ignore(c.circle(cc.o.0, cc.o.1, cc.r, width=1.5))
+  for i in [feat.0, feat.1, feat.2] {
+    c.raw(
+      "<circle cx=\"\{s[i].0}\" cy=\"\{s[i].1}\" r=\"4\" fill=\"\{c.color(0)}\"/>",
+      covered=[s[i]],
+    )
+    c.line(s[i], cc.o, dash="3 3", opacity=Some(0.5))
+  }
+  for i, p in s {
+    if i != feat.0 && i != feat.1 && i != feat.2 {
+      c.raw(
+        "<circle cx=\"\{p.0}\" cy=\"\{p.1}\" r=\"3.5\" fill=\"currentColor\"/>",
+        covered=[p],
+      )
+    }
+  }
+  c.raw(
+    "<circle cx=\"\{cc.o.0}\" cy=\"\{cc.o.1}\" r=\"3\" fill=\"currentColor\"/>",
+    covered=[cc.o],
+  )
+
+  println(
+    c.render(label="a Voronoi vertex sits at the circumcenter of its three sites; the circle contains no other site"),
+  )
+}
