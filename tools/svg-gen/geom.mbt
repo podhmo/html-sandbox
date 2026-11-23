@@ -101,16 +101,9 @@ pub fn delaunay(pts : Array[Point]) -> Array[Tri] {
         let a = if e.0 == 0 { t.0 } else if e.0 == 1 { t.1 } else { t.2 }
         let b = if e.1 == 0 { t.0 } else if e.1 == 1 { t.1 } else { t.2 }
         let key = if a < b { (a, b) } else { (b, a) }
-        let mut found = false
-        for j = 0; j < edges.length(); j = j + 1 {
-          if edges[j].0 == key {
-            edges[j] = (edges[j].0, edges[j].1 + 1)
-            found = true
-            break
-          }
-        }
-        if !found {
-          edges.push((key, 1))
+        match edges.search_by(fn(e) { e.0 == key }) {
+          Some(j) => edges[j] = (edges[j].0, edges[j].1 + 1)
+          None => edges.push((key, 1))
         }
       }
     }
@@ -144,16 +137,9 @@ pub fn edge_adjacency(tris : Array[Tri]) -> Array[(Int32, Int32, Array[Int32])] 
       let va = if e.0 == 0 { t.0 } else if e.0 == 1 { t.1 } else { t.2 }
       let vb = if e.1 == 0 { t.0 } else if e.1 == 1 { t.1 } else { t.2 }
       let (a, b) = if va < vb { (va, vb) } else { (vb, va) }
-      let mut found = false
-      for j = 0; j < adj.length(); j = j + 1 {
-        if adj[j].0 == a && adj[j].1 == b {
-          adj[j].2.push(k)
-          found = true
-          break
-        }
-      }
-      if !found {
-        adj.push((a, b, [k]))
+      match adj.search_by(fn(e) { e.0 == a && e.1 == b }) {
+        Some(j) => adj[j].2.push(k)
+        None => adj.push((a, b, [k]))
       }
     }
   }
@@ -216,8 +202,7 @@ pub fn voronoi_cell(
       (p.0 - mid.0) * d.0 + (p.1 - mid.1) * d.1
     }
     let out : Array[Point] = []
-    for i = 0; i < poly.length(); i = i + 1 {
-      let cur = poly[i]
+    for i, cur in poly {
       let prev = poly[(i + poly.length() - 1) % poly.length()]
       let sc = side(cur)
       let sp = side(prev)
@@ -340,18 +325,24 @@ pub fn voronoi_segments(
     let dir : Point = (-sgn * d.0 / l, -sgn * d.1 / l)
     let o = centers[t[0]]
     // smallest positive t where o + t*dir reaches the rect boundary
-    let mut tmin = @double.infinity
-    for wall in [(rect.0, 0), (rect.2, 0), (rect.1, 1), (rect.3, 1)] {
-      let (w, axis) = wall
-      let dv = if axis == 0 { dir.0 } else { dir.1 }
-      let ov = if axis == 0 { o.0 } else { o.1 }
-      if dv != 0.0 {
-        let tt = (w - ov) / dv
-        if tt > 0.0 && tt < tmin {
-          tmin = tt
+    let tmin = [(rect.0, 0), (rect.2, 0), (rect.1, 1), (rect.3, 1)].fold(
+      init=@double.infinity,
+      fn(tmin, wall) {
+        let (w, axis) = wall
+        let dv = if axis == 0 { dir.0 } else { dir.1 }
+        let ov = if axis == 0 { o.0 } else { o.1 }
+        if dv != 0.0 {
+          let tt = (w - ov) / dv
+          if tt > 0.0 && tt < tmin {
+            tt
+          } else {
+            tmin
+          }
+        } else {
+          tmin
         }
-      }
-    }
+      },
+    )
     out.push((o, (o.0 + dir.0 * tmin, o.1 + dir.1 * tmin)))
   }
   out
@@ -365,12 +356,12 @@ pub fn sample(
   x1~ : Double,
   n~ : Int32 = 64,
 ) -> Array[Point] {
-  let pts : Array[Point] = []
-  for i = 0; i <= n; i = i + 1 {
-    let x = x0 + (x1 - x0) * i.to_double() / n.to_double()
-    pts.push((x, f(x)))
-  }
-  pts
+  [
+    for i in 0..<=n => {
+      let x = x0 + (x1 - x0) * i.to_double() / n.to_double()
+      (x, f(x))
+    }
+  ]
 }
 
 ///|

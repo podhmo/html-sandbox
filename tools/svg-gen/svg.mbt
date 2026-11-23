@@ -332,7 +332,7 @@ fn Canvas::label_lines(
   opacity~ : Double?,
   underline~ : Underline,
 ) -> Node {
-  let lines = label.split("\n").map(fn(v) { v.to_owned() }).collect()
+  let lines = [ for s in label.split("\n") => s.to_owned() ]
   let lh = size * 1.3
   let k = lines.length()
   Group(

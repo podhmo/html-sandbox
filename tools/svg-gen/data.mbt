@@ -14,11 +14,9 @@ pub fn bench() -> Array[BoxGroup] {
   let rand = rng(20261102)
   let g = gauss(rand)
   let nrm = fn(mu : Double, sd : Double, n : Int32) -> Array[Double] {
-    let out : Array[Double] = []
-    for i = 0; i < n; i = i + 1 {
-      out.push(mu + sd * g())
-    }
-    out
+    [
+      for _ in 0..<n => mu + sd * g()
+    ]
   }
   [
     { label: "naive", values: nrm(150.0, 18.0, 160), },
