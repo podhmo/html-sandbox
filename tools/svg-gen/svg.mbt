@@ -634,12 +634,12 @@ pub fn Canvas::arrow(
       let heads_out = match heads {
         NoHead => ("", [])
         _ => {
-          let end = if heads == End || heads == Both {
+          let end = if heads is (End | Both) {
             head_at(pts[pts.length() - 1], pts[pts.length() - 2])
           } else {
             ("", [])
           }
-          let start = if heads == Start || heads == Both {
+          let start = if heads is (Start | Both) {
             head_at(pts[0], pts[1])
           } else {
             ("", [])
@@ -709,7 +709,7 @@ pub fn Canvas::hbars(
       size~,
     )
     let bar = { x: x + lw, y: by, w, h: bar_h, }
-    if highlight == Some(i) {
+    if highlight is Some(h) && h == i {
       self.highlight(bar, pad=4.0)
     }
     let rect = El(
