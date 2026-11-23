@@ -13,8 +13,8 @@ pub fn rng(seed : UInt32) -> () -> Double {
   fn() {
     a.val = a.val + 0x6d2b79f5U
     let ai = a.val
-    let mut t = (ai ^ (ai >> 15)) * (ai | 1U)
-    t = (t + (t ^ (t >> 7)) * (t | 61U)) ^ t
+    let t0 = (ai ^ (ai >> 15)) * (ai | 1U)
+    let t = (t0 + (t0 ^ (t0 >> 7)) * (t0 | 61U)) ^ t0
     (t ^ (t >> 14)).to_double() / 4294967296.0
   }
 }
