@@ -62,14 +62,11 @@ pub fn traffic() -> Array[Array[Double]] {
   traffic_days.mapi(fn(d, _name) {
     let weekend = if d >= 5 { 0.35 } else { 1.0 }
     Array::makei(24, fn(h) {
-      let mut v = hourly(h) * weekend + 6.0 * g()
-      if d == 1 && h >= 14 && h <= 16 {
-        v *= 2.2 // Tue incident
-      }
-      if d == 6 && h >= 1 && h <= 4 {
-        v *= 1.8 // Sunday late-night batch
-      }
-      v.max(1.0)
+      // Tue incident and the Sunday late-night batch show up as
+      // multiplicative bumps on the baseline.
+      let bump = (if d == 1 && h >= 14 && h <= 16 { 2.2 } else { 1.0 }) *
+        (if d == 6 && h >= 1 && h <= 4 { 1.8 } else { 1.0 })
+      ((hourly(h) * weekend + 6.0 * g()) * bump).max(1.0)
     })
   })
 }
