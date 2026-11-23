@@ -25,10 +25,10 @@ fn main {
   c.arrow(c.anchor(mux, @s.S), c.anchor(app, @s.N), width=1.5)
   c.text(480.0, 126.0, "catch-all mux.Handle(\"/\")", size=10.0, opacity=Some(0.75))
   let page = c.box(620.0, 152.0, @s.Auto, 56.0, label="real app pages\n/issues/2, POST …/comments", color=c.color(3), size=12.0)
-  c.arrow(c.anchor(app, @s.E), c.anchor(page, @s.W), width=1.5, heads=@s.Both, split=14.0)
+  c.arrow(c.anchor(app, @s.E), c.anchor(page, @s.W), width=1.5, ends=@s.Pair(14.0))
   c.text(505.0, 218.0, "fragment / 303 / 422", size=10.0, opacity=Some(0.75))
 
-  c.arrow(c.anchor(browser, @s.S), (20.0, 240.0), heads=@s.NoHead)
+  c.arrow(c.anchor(browser, @s.S), (20.0, 240.0), ends=@s.Single(@s.NoHead))
   c.text(
     20.0,
     260.0,

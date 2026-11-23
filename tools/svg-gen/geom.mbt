@@ -4,23 +4,39 @@
 // figure", like data.mbt for charts) plus the primitives the
 // generators assert on.
 
-///| Triangle as three indices into the point set.
-pub type Tri = (Int, Int, Int)
+///|
+/// Triangle as three indices into the point set.
+pub type Tri = (Int32, Int32, Int32)
 
-///| The article's shared point set: 10 points, no 4 cocircular,
+///|
+/// The article's shared point set: 10 points, no 4 cocircular,
 /// no 3 collinear.
 pub let sites : Array[Point] = [
-  (45.0, 60.0), (95.0, 35.0), (140.0, 70.0), (70.0, 115.0), (120.0, 130.0),
-  (35.0, 145.0), (175.0, 45.0), (185.0, 115.0), (65.0, 185.0), (150.0, 175.0),
+  (45.0, 60.0),
+  (95.0, 35.0),
+  (140.0, 70.0),
+  (70.0, 115.0),
+  (120.0, 130.0),
+  (35.0, 145.0),
+  (175.0, 45.0),
+  (185.0, 115.0),
+  (65.0, 185.0),
+  (150.0, 175.0),
 ]
 
-///| A smaller set for figures that color each site differently
+///|
+/// A smaller set for figures that color each site differently
 /// (palette has 6).
 pub let few_sites : Array[Point] = [
-  (50.0, 70.0), (140.0, 45.0), (85.0, 120.0), (165.0, 140.0), (55.0, 165.0),
+  (50.0, 70.0),
+  (140.0, 45.0),
+  (85.0, 120.0),
+  (165.0, 140.0),
+  (55.0, 165.0),
 ]
 
-///| Circumcircle of the triangle through a, b, c.
+///|
+/// Circumcircle of the triangle through a, b, c.
 #derive(Debug)
 pub(all) struct Circum {
   o : Point
@@ -29,20 +45,24 @@ pub(all) struct Circum {
 
 ///|
 pub fn circum(a : Point, b : Point, c : Point) -> Circum {
-  let d = 2.0 *
-    (a.0 * (b.1 - c.1) + b.0 * (c.1 - a.1) + c.0 * (a.1 - b.1))
-  let ux = ((a.0 * a.0 + a.1 * a.1) * (b.1 - c.1) +
-    (b.0 * b.0 + b.1 * b.1) * (c.1 - a.1) +
-    (c.0 * c.0 + c.1 * c.1) * (a.1 - b.1)) /
+  let d = 2.0 * (a.0 * (b.1 - c.1) + b.0 * (c.1 - a.1) + c.0 * (a.1 - b.1))
+  let ux = (
+      (a.0 * a.0 + a.1 * a.1) * (b.1 - c.1) +
+      (b.0 * b.0 + b.1 * b.1) * (c.1 - a.1) +
+      (c.0 * c.0 + c.1 * c.1) * (a.1 - b.1)
+    ) /
     d
-  let uy = ((a.0 * a.0 + a.1 * a.1) * (c.0 - b.0) +
-    (b.0 * b.0 + b.1 * b.1) * (a.0 - c.0) +
-    (c.0 * c.0 + c.1 * c.1) * (b.0 - a.0)) /
+  let uy = (
+      (a.0 * a.0 + a.1 * a.1) * (c.0 - b.0) +
+      (b.0 * b.0 + b.1 * b.1) * (a.0 - c.0) +
+      (c.0 * c.0 + c.1 * c.1) * (b.0 - a.0)
+    ) /
     d
-  { o: (ux, uy), r: @math.hypot(a.0 - ux, a.1 - uy) }
+  { o: (ux, uy), r: @math.hypot(a.0 - ux, a.1 - uy), }
 }
 
-///| Bowyer-Watson: supertriangle + insert each point into the cavity
+///|
+/// Bowyer-Watson: supertriangle + insert each point into the cavity
 /// of triangles whose circumcircle contains it.
 pub fn delaunay(pts : Array[Point]) -> Array[Tri] {
   let n = pts.length()
@@ -59,7 +79,8 @@ pub fn delaunay(pts : Array[Point]) -> Array[Tri] {
   let cx = (minx + maxx) / 2.0
   let cy = (miny + maxy) / 2.0
   let m = 30.0 * (maxx - minx).max(maxy - miny)
-  let work = pts + [(cx - 2.0 * m, cy - m), (cx, cy + 2.0 * m), (cx + 2.0 * m, cy - m)]
+  let work = pts +
+    [(cx - 2.0 * m, cy - m), (cx, cy + 2.0 * m), (cx + 2.0 * m, cy - m)]
   let tris : Array[Tri] = [(n, n + 1, n + 2)]
   for i = 0; i < n; i = i + 1 {
     let p = work[i]
@@ -73,7 +94,7 @@ pub fn delaunay(pts : Array[Point]) -> Array[Tri] {
     }
     // boundary edges of the cavity: edges of bad triangles counted
     // exactly once (insertion-ordered assoc list keeps output stable)
-    let edges : Array[((Int, Int), Int)] = [] // key -> times seen (0/1)
+    let edges : Array[((Int32, Int32), Int32)] = [] // key -> times seen (0/1)
     for k, t in tris {
       if !bad[k] {
         continue
@@ -115,10 +136,11 @@ pub fn delaunay(pts : Array[Point]) -> Array[Tri] {
   tris.filter(fn(t) { t.0 < n && t.1 < n && t.2 < n })
 }
 
-///| Delaunay edge -> adjacent triangle indices (1 at the boundary,
+///|
+/// Delaunay edge -> adjacent triangle indices (1 at the boundary,
 /// 2 inside). Assoc-list, insertion ordered like the TS Map.
-pub fn edge_adjacency(tris : Array[Tri]) -> Array[(Int, Int, Array[Int])] {
-  let adj : Array[(Int, Int, Array[Int])] = []
+pub fn edge_adjacency(tris : Array[Tri]) -> Array[(Int32, Int32, Array[Int32])] {
+  let adj : Array[(Int32, Int32, Array[Int32])] = []
   for k, t in tris {
     for e in [(0, 1), (1, 2), (2, 0)] {
       let va = if e.0 == 0 { t.0 } else if e.0 == 1 { t.1 } else { t.2 }
@@ -140,10 +162,11 @@ pub fn edge_adjacency(tris : Array[Tri]) -> Array[(Int, Int, Array[Int])] {
   adj
 }
 
-///| Monotone chain hull; returns hull vertex indices ccw, used for
+///|
+/// Monotone chain hull; returns hull vertex indices ccw, used for
 /// the Euler-formula check (T = 2n-2-h).
-pub fn hull(pts : Array[Point]) -> Array[Int] {
-  let idx : Array[Int] = Array::makei(pts.length(), fn(i) { i })
+pub fn hull(pts : Array[Point]) -> Array[Int32] {
+  let idx : Array[Int32] = Array::makei(pts.length(), fn(i) { i })
   idx.sort_by(fn(a, b) {
     let d = pts[a].0 - pts[b].0
     if d != 0.0 {
@@ -152,12 +175,12 @@ pub fn hull(pts : Array[Point]) -> Array[Int] {
       (pts[a].1 - pts[b].1).compare(0.0)
     }
   })
-  let cross = fn(o : Int, a : Int, b : Int) -> Double {
+  let cross = fn(o : Int32, a : Int32, b : Int32) -> Double {
     (pts[a].0 - pts[o].0) * (pts[b].1 - pts[o].1) -
     (pts[a].1 - pts[o].1) * (pts[b].0 - pts[o].0)
   }
-  let half = fn(h : Array[Int]) -> Array[Int] {
-    let out : Array[Int] = []
+  let half = fn(h : Array[Int32]) -> Array[Int32] {
+    let out : Array[Int32] = []
     for i in h {
       while out.length() >= 2 &&
             cross(out[out.length() - 2], out[out.length() - 1], i) <= 0.0 {
@@ -169,13 +192,21 @@ pub fn hull(pts : Array[Point]) -> Array[Int] {
   }
   let lower = half(idx)
   let upper = half(idx.rev())
-  lower[:lower.length() - 1].iter().concat(upper[:upper.length() - 1].iter()).collect()
+  lower[:lower.length() - 1]
+  .iter()
+  .concat(upper[:upper.length() - 1].iter())
+  .collect()
 }
 
-///| Voronoi cell of site s, clipped to `rect` (CCW polygon in screen
+///|
+/// Voronoi cell of site s, clipped to `rect` (CCW polygon in screen
 /// coords: half-plane intersection of the box with every perpendicular
 /// bisector, keeping the side nearer to s).
-pub fn voronoi_cell(s : Point, sites : Array[Point], rect : Array[Point]) -> Array[Point] {
+pub fn voronoi_cell(
+  s : Point,
+  sites : Array[Point],
+  rect : Array[Point],
+) -> Array[Point] {
   let poly = rect.copy()
   for t in sites {
     if t == s {
@@ -215,12 +246,14 @@ fn isect(a : Point, b : Point, sa : Double, sb : Double) -> Point {
   (a.0 + t * (b.0 - a.0), a.1 + t * (b.1 - a.1))
 }
 
-///| Shift a point set so several panels can share one canvas.
+///|
+/// Shift a point set so several panels can share one canvas.
 pub fn shift(pts : Array[Point], dx : Double, dy : Double) -> Array[Point] {
   pts.map(fn(p) { (p.0 + dx, p.1 + dy) })
 }
 
-///| Perpendicular bisector of s-t: passes through the midpoint,
+///|
+/// Perpendicular bisector of s-t: passes through the midpoint,
 /// along dir.
 #derive(Debug)
 pub(all) struct Bisector {
@@ -236,7 +269,8 @@ pub fn bisector(s : Point, t : Point) -> Bisector {
   }
 }
 
-///| Clip the infinite line through o with direction d to the rect
+///|
+/// Clip the infinite line through o with direction d to the rect
 /// (x0, y0, x1, y1); returns its two endpoints on the boundary.
 pub fn line_rect(
   o : Point,
@@ -256,7 +290,10 @@ pub fn line_rect(
   for t in ts {
     let x = o.0 + t * d.0
     let y = o.1 + t * d.1
-    if x >= r.0 - 1.0e-9 && x <= r.2 + 1.0e-9 && y >= r.1 - 1.0e-9 && y <= r.3 + 1.0e-9 {
+    if x >= r.0 - 1.0e-9 &&
+      x <= r.2 + 1.0e-9 &&
+      y >= r.1 - 1.0e-9 &&
+      y <= r.3 + 1.0e-9 {
       ok.push(t)
     }
   }
@@ -269,7 +306,8 @@ pub fn line_rect(
   ((o.0 + a * d.0, o.1 + a * d.1), (o.0 + b * d.0, o.1 + b * d.1))
 }
 
-///| Voronoi diagram as line segments: for every Delaunay edge, the
+///|
+/// Voronoi diagram as line segments: for every Delaunay edge, the
 /// dual segment between the adjacent circumcenters; at the boundary,
 /// a ray from the single center along the bisector, clipped to rect.
 pub fn voronoi_segments(
@@ -299,8 +337,7 @@ pub fn voronoi_segments(
     )
     let d : Point = (-(pts[eb].1 - pts[ea].1), pts[eb].0 - pts[ea].0)
     let l = @math.hypot(d.0, d.1)
-    let sign = ((pts[third].0 - mid.0) * d.0 + (pts[third].1 - mid.1) * d.1)
-      .signum()
+    let sign = ((pts[third].0 - mid.0) * d.0 + (pts[third].1 - mid.1) * d.1).signum()
     let sgn = if sign == 0.0 { 1.0 } else { sign }
     let dir : Point = (-sgn * d.0 / l, -sgn * d.1 / l)
     let o = centers[t[0]]
@@ -322,12 +359,13 @@ pub fn voronoi_segments(
   out
 }
 
-///| Sample a function to a polyline for c.path().
+///|
+/// Sample a function to a polyline for c.path().
 pub fn sample(
   f : (Double) -> Double,
   x0 : Double,
   x1 : Double,
-  n~ : Int = 64,
+  n~ : Int32 = 64,
 ) -> Array[Point] {
   let pts : Array[Point] = []
   for i = 0; i <= n; i = i + 1 {
@@ -337,12 +375,14 @@ pub fn sample(
   pts
 }
 
-///| Sampled polyline -> SVG path data.
+///|
+/// Sampled polyline -> SVG path data.
 pub fn path_of(pts : Array[Point]) -> String {
   "M" + pts.map(fn(p) { "\{fixed(p.0, 1)} \{fixed(p.1, 1)}" }).join(" L")
 }
 
-///| Filled polygon element (escape hatch for cell/triangle fills).
+///|
+/// Filled polygon element (escape hatch for cell/triangle fills).
 pub fn poly_el(
   pts : Array[Point],
   fill : String,

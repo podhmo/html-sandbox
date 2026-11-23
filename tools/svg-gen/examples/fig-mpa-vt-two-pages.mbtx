@@ -29,7 +29,7 @@ fn main {
   c.text(420.0, 112.0, "vt.types.add(\"forward\")  again", size=10.0, opacity=Some(0.8))
 
   // the transition carries the snapshot across; the types do not
-  c.arrow(c.anchor(swap, @s.E), c.anchor(reveal, @s.W), heads=@s.Both, color=c.color(2))
+  c.arrow(c.anchor(swap, @s.E), c.anchor(reveal, @s.W), ends=@s.Single(@s.Both), color=c.color(2))
   c.text(320.0, 58.0, "same ViewTransition", size=10.0, anchor=@s.Middle)
   c.text(320.0, 72.0, "object", size=10.0, anchor=@s.Middle)
   c.text(320.0, 104.0, "types は引き継がれない", size=10.0, anchor=@s.Middle)

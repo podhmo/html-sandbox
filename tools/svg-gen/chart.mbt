@@ -5,9 +5,10 @@
 // frame, and makes the "required metadata" required in the type:
 // every Plot needs {title, subtitle, footnote} up front.
 
-///| Deterministic PRNG (mulberry32) so a figure's virtual data is
+///|
+/// Deterministic PRNG (mulberry32) so a figure's virtual data is
 /// reproducible from its seed alone.
-pub fn rng(seed : UInt) -> () -> Double {
+pub fn rng(seed : UInt32) -> () -> Double {
   let a = Ref(seed)
   fn() {
     a.val = a.val + 0x6d2b79f5U
@@ -18,7 +19,8 @@ pub fn rng(seed : UInt) -> () -> Double {
   }
 }
 
-///| Box-Muller on top of rng().
+///|
+/// Box-Muller on top of rng().
 pub fn gauss(rand : () -> Double) -> () -> Double {
   fn() {
     let u = @cmp.maximum(rand(), 1.0e-12)
@@ -35,8 +37,9 @@ pub fn quantile(sorted : Array[Double], q : Double) -> Double {
   sorted[lo] + (sorted[hi] - sorted[lo]) * (i - lo.to_double())
 }
 
-///| 1/2/5-style nice ticks covering [lo, hi], about `count` of them.
-pub fn ticks(lo : Double, hi : Double, count~ : Int = 5) -> Array[Double] {
+///|
+/// 1/2/5-style nice ticks covering [lo, hi], about `count` of them.
+pub fn ticks(lo : Double, hi : Double, count~ : Int32 = 5) -> Array[Double] {
   let raw = (hi - lo) / count.to_double()
   let p = @math.pow(10.0, @math.floor(@math.log10(raw)))
   let f = raw / p
@@ -60,7 +63,8 @@ fn round12(v : Double) -> Double {
   (v * p).round() / p
 }
 
-///| A data->pixel mapping. `log` works on the data value (v > 0 only).
+///|
+/// A data->pixel mapping. `log` works on the data value (v > 0 only).
 #derive(Debug)
 pub(all) struct Scale {
   lo : Double
@@ -78,7 +82,7 @@ pub fn Scale::new(
   b : Double,
   log~ : Bool = false,
 ) -> Scale {
-  { lo, hi, a, b, log }
+  { lo, hi, a, b, log, }
 }
 
 ///|
@@ -98,7 +102,7 @@ pub fn Scale::map(self : Scale, v : Double) -> Double {
 }
 
 ///|
-pub fn Scale::ticks(self : Scale, count~ : Int = 5) -> Array[Double] {
+pub fn Scale::ticks(self : Scale, count~ : Int32 = 5) -> Array[Double] {
   if !self.log {
     return ticks(self.lo, self.hi, count~)
   }
@@ -126,8 +130,9 @@ pub(all) struct ChartMeta {
   footnote : String // provenance: source / period / n / aggregation / generator
 }
 
-///| toFixed(d) for element attributes: x.toFixed(1), o.toFixed(2), ...
-pub fn fixed(v : Double, d : Int) -> String {
+///|
+/// toFixed(d) for element attributes: x.toFixed(1), o.toFixed(2), ...
+pub fn fixed(v : Double, d : Int32) -> String {
   let p = @math.pow(10.0, d.to_double())
   let scaled = (v * p).round()
   let neg = scaled < 0.0
@@ -137,7 +142,11 @@ pub fn fixed(v : Double, d : Int) -> String {
   let fs = frac.to_string()
   let pad = "0".repeat(d - fs.length())
   let body = if d > 0 { "\{whole}.\{pad}\{fs}" } else { whole.to_string() }
-  if neg { "-" + body } else { body }
+  if neg {
+    "-" + body
+  } else {
+    body
+  }
 }
 
 ///|
@@ -145,7 +154,8 @@ fn fmt_num(v : Double) -> String {
   v.to_string()
 }
 
-///| A tick is either a position formatted by xfmt/yfmt, or
+///|
+/// A tick is either a position formatted by xfmt/yfmt, or
 /// Lab(pos, label) for categorical axes.
 #derive(Debug)
 pub(all) enum Tick {
@@ -165,7 +175,7 @@ pub(all) struct BoxGroup {
 pub(all) struct Bin {
   x0 : Double
   x1 : Double
-  mut n : Int
+  mut n : Int32
 }
 
 ///|
@@ -246,6 +256,7 @@ fn Plot::put(self : Plot, el : String, covered : Array[Point]) -> Unit {
 
 /// Marks must stay inside the plot domain: a value outside it is a
 /// wrong domain choice, not a detail to clip silently.
+
 ///|
 fn Plot::inside(self : Plot, pts : Array[Point]) -> Array[Point] {
   for p in pts {
@@ -254,9 +265,7 @@ fn Plot::inside(self : Plot, pts : Array[Point]) -> Array[Point] {
       x > self.x1 + 0.01 ||
       y < self.y0 - 0.01 ||
       y > self.y1 + 0.01 {
-      abort(
-        "point (\{fixed1(x)}, \{fixed1(y)}) outside the plot domain",
-      )
+      abort("point (\{fixed1(x)}, \{fixed1(y)}) outside the plot domain")
     }
   }
   pts
@@ -286,6 +295,7 @@ fn sattrs(
 /// Run mark-emitting calls; their elements go into a
 /// <g data-plot="x0 y0 x1 y1"> group so the linter can verify them
 /// against the plot area instead of only the viewBox.
+
 ///|
 pub fn Plot::data(self : Plot, f : (Plot) -> Unit) -> Unit {
   let buf : Array[String] = []
@@ -304,6 +314,7 @@ pub fn Plot::data(self : Plot, f : (Plot) -> Unit) -> Unit {
 /// Axis lines, tick labels, axis titles. Called once per plot.
 /// Pass xticks/yticks to override the generated ones — e.g. for
 /// categorical axes (Lab(pos, label) entries).
+
 ///|
 pub fn Plot::frame(
   self : Plot,
@@ -329,7 +340,15 @@ pub fn Plot::frame(
     }
     let py = self.ys.map(v)
     c.line((self.x0 - 3.0, py), (self.x0, py), opacity=Some(0.5), width=1.0)
-    c.text(self.x0 - 6.0, py, label, anchor=End, central=true, size=10.0, opacity=Some(0.7))
+    c.text(
+      self.x0 - 6.0,
+      py,
+      label,
+      anchor=End,
+      central=true,
+      size=10.0,
+      opacity=Some(0.7),
+    )
     if self.grid {
       c.line((self.x0, py), (self.x1, py), opacity=Some(0.1), width=1.0)
     }
@@ -346,10 +365,24 @@ pub fn Plot::frame(
     }
     let px = self.xs.map(v)
     c.line((px, self.y1), (px, self.y1 + 3.0), opacity=Some(0.5), width=1.0)
-    c.text(px, self.y1 + 16.0, label, anchor=Middle, size=10.0, opacity=Some(0.7))
+    c.text(
+      px,
+      self.y1 + 16.0,
+      label,
+      anchor=Middle,
+      size=10.0,
+      opacity=Some(0.7),
+    )
   }
   if self.xtitle != "" {
-    c.text((self.x0 + self.x1) / 2.0, self.y1 + 30.0, self.xtitle, anchor=Middle, size=10.0, opacity=Some(0.7))
+    c.text(
+      (self.x0 + self.x1) / 2.0,
+      self.y1 + 30.0,
+      self.xtitle,
+      anchor=Middle,
+      size=10.0,
+      opacity=Some(0.7),
+    )
   }
   if self.ytitle != "" {
     // horizontal, above the axis top-left: readable without rotation.
@@ -359,6 +392,7 @@ pub fn Plot::frame(
 
 /// A connected series. `label` draws the series name at its right end
 /// (direct labelling, not a legend box).
+
 ///|
 pub fn Plot::series(
   self : Plot,
@@ -372,14 +406,25 @@ pub fn Plot::series(
   if pts.length() < 2 {
     return
   }
-  let d = "M" + self.inside(pts).map(fn(p) { "\{num(p.0)} \{num(p.1)}" }).join(" L")
-  self.put("<path d=\"\{d}\" fill=\"none\"\{sattrs(dash~, opacity~, width~, color~)}/>", pts)
+  let d = "M" +
+    self.inside(pts).map(fn(p) { "\{num(p.0)} \{num(p.1)}" }).join(" L")
+  self.put(
+    "<path d=\"\{d}\" fill=\"none\"\{sattrs(dash~, opacity~, width~, color~)}/>",
+    pts,
+  )
   if label != "" {
-    self.c.text(self.x1 + 6.0, pts[pts.length() - 1].1, label, central=true, size=10.0)
+    self.c.text(
+      self.x1 + 6.0,
+      pts[pts.length() - 1].1,
+      label,
+      central=true,
+      size=10.0,
+    )
   }
 }
 
 /// Step series for ECDF: horizontal then vertical at each point.
+
 ///|
 pub fn Plot::step(
   self : Plot,
@@ -398,10 +443,20 @@ pub fn Plot::step(
     segs.push((pts[i].0, pts[i - 1].1))
     segs.push(pts[i])
   }
-  let d = "M" + self.inside(segs).map(fn(p) { "\{num(p.0)} \{num(p.1)}" }).join(" L")
-  self.put("<path d=\"\{d}\" fill=\"none\"\{sattrs(dash~, opacity~, width~, color~)}/>", segs)
+  let d = "M" +
+    self.inside(segs).map(fn(p) { "\{num(p.0)} \{num(p.1)}" }).join(" L")
+  self.put(
+    "<path d=\"\{d}\" fill=\"none\"\{sattrs(dash~, opacity~, width~, color~)}/>",
+    segs,
+  )
   if label != "" {
-    self.c.text(self.x1 + 6.0, pts[pts.length() - 1].1, label, central=true, size=10.0)
+    self.c.text(
+      self.x1 + 6.0,
+      pts[pts.length() - 1].1,
+      label,
+      central=true,
+      size=10.0,
+    )
   }
 }
 
@@ -425,6 +480,7 @@ pub fn Plot::dots(
 }
 
 /// An event marker: vertical line at data x, with a short label above.
+
 ///|
 pub fn Plot::vline(
   self : Plot,
@@ -445,6 +501,7 @@ pub fn Plot::vline(
 }
 
 /// A reference line (SLO, baseline): horizontal line at data y.
+
 ///|
 pub fn Plot::hline(
   self : Plot,
@@ -460,7 +517,14 @@ pub fn Plot::hline(
   )
   self.inside([(self.x1, py)]) |> ignore
   if label != "" {
-    self.c.text(self.x1 - 4.0, py - 4.0, label, anchor=End, size=10.0, opacity=Some(0.8))
+    self.c.text(
+      self.x1 - 4.0,
+      py - 4.0,
+      label,
+      anchor=End,
+      size=10.0,
+      opacity=Some(0.8),
+    )
   }
 }
 
@@ -469,6 +533,7 @@ pub fn Plot::hline(
 /// to the data range; values beyond are outlier dots. `overlay`
 /// jitters raw points behind the boxes — the guideline wants raw
 /// points overlaid for small n because the box alone hides shape.
+
 ///|
 pub fn Plot::boxplot(
   self : Plot,
@@ -544,8 +609,13 @@ pub fn Plot::boxplot(
 }
 
 /// Histogram bars from bins() output; heights are counts.
+
 ///|
-pub fn Plot::histogram(self : Plot, bins : Array[Bin], color~ : String = "currentColor") -> Unit {
+pub fn Plot::histogram(
+  self : Plot,
+  bins : Array[Bin],
+  color~ : String = "currentColor",
+) -> Unit {
   for b in bins {
     let x = self.xs.map(b.x0)
     let w = self.xs.map(b.x1) - x
@@ -561,8 +631,13 @@ pub fn Plot::histogram(self : Plot, bins : Array[Bin], color~ : String = "curren
 /// the data max (sequential single-hue scale: currentColor keeps it
 /// theme-following). Row 0 draws at the top. Returns (min, max) for
 /// the legend.
+
 ///|
-pub fn Plot::heatmap(self : Plot, grid : Array[Array[Double]], color~ : String = "currentColor") -> (Double, Double) {
+pub fn Plot::heatmap(
+  self : Plot,
+  grid : Array[Array[Double]],
+  color~ : String = "currentColor",
+) -> (Double, Double) {
   let rows = grid.length()
   let cols = grid[0].length()
   let cw = (self.x1 - self.x0) / cols.to_double()
@@ -595,6 +670,7 @@ pub fn Plot::heatmap(self : Plot, grid : Array[Array[Double]], color~ : String =
 /// Legend ramp for heatmap(): N steps of increasing fill-opacity
 /// with min/max labels below and an optional caption to the left.
 /// Position it above the plot top so labels stay clear of cells.
+
 ///|
 pub fn Plot::heat_legend(
   self : Plot,
@@ -615,13 +691,29 @@ pub fn Plot::heat_legend(
     )
   }
   self.c.text(x, y + 16.0, fmt(min), size=9.0, opacity=Some(0.6))
-  self.c.text(x + w, y + 16.0, fmt(max), anchor=End, size=9.0, opacity=Some(0.6))
+  self.c.text(
+    x + w,
+    y + 16.0,
+    fmt(max),
+    anchor=End,
+    size=9.0,
+    opacity=Some(0.6),
+  )
   if label != "" {
-    self.c.text(x - 6.0, y + 4.0, label, anchor=End, central=true, size=9.0, opacity=Some(0.6))
+    self.c.text(
+      x - 6.0,
+      y + 4.0,
+      label,
+      anchor=End,
+      central=true,
+      size=9.0,
+      opacity=Some(0.6),
+    )
   }
 }
 
 /// Count samples into width-w bins aligned to w*k boundaries.
+
 ///|
 pub fn bins(values : Array[Double], w : Double) -> Array[Bin] {
   let mut mn = @double.infinity
@@ -639,14 +731,11 @@ pub fn bins(values : Array[Double], w : Double) -> Array[Bin] {
   let out : Array[Bin] = []
   let mut x = lo
   while x < hi - 1.0e-9 {
-    out.push({ x0: x, x1: x + w, n: 0 })
+    out.push({ x0: x, x1: x + w, n: 0, })
     x += w
   }
   for v in values {
-    let i = @cmp.minimum(
-      out.length() - 1,
-      @math.floor((v - lo) / w).to_int(),
-    )
+    let i = @cmp.minimum(out.length() - 1, @math.floor((v - lo) / w).to_int())
     out[i].n += 1
   }
   out
@@ -655,6 +744,7 @@ pub fn bins(values : Array[Double], w : Double) -> Array[Bin] {
 /// Build an ECDF's pixel points from raw samples on a Plot. `max`
 /// thins the step vertices for inline embedding — the statistic is
 /// the same, only fewer of its vertices are drawn.
+
 ///|
 pub fn ecdf_points(
   p : Plot,
@@ -666,7 +756,9 @@ pub fn ecdf_points(
   let stride = @cmp.maximum(1.0, @math.floor(s.length().to_double() / max)).to_int()
   let pts : Array[Point] = []
   for i = 0; i < s.length(); i = i + stride {
-    pts.push((p.xs.map(s[i]), p.ys.map((i + 1).to_double() / s.length().to_double())))
+    pts.push(
+      (p.xs.map(s[i]), p.ys.map((i + 1).to_double() / s.length().to_double())),
+    )
   }
   pts.push((p.xs.map(s[s.length() - 1]), p.ys.map(1.0)))
   pts

@@ -61,8 +61,8 @@ fn main {
   // Request and response as two opposing arrows, not one
   // double-headed line.
   let split = 12.0
-  c.arrow(c.anchor(pi, @s.E), c.anchor(proxy, @s.W), split=split)
-  c.arrow(c.anchor(proxy, @s.E), c.anchor(api, @s.W), split=split)
+  c.arrow(c.anchor(pi, @s.E), c.anchor(proxy, @s.W), ends=@s.Pair(split))
+  c.arrow(c.anchor(proxy, @s.E), c.anchor(api, @s.W), ends=@s.Pair(split))
   for e in [(pi, proxy, "HTTP", 11.0), (proxy, api, "HTTPS", 10.0)] {
     let (a, b, s, size) = e
     let m = c.midpoint(c.anchor(a, @s.E), c.anchor(b, @s.W))

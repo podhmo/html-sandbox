@@ -22,6 +22,8 @@ pub fn edge_adjacency(Array[(Int32, Int32, Int32)]) -> Array[(Int32, Int32, Arra
 
 pub let few_sites : Array[(Double, Double)]
 
+pub fn fixed(Double, Int32) -> String
+
 pub fn gauss(() -> Double) -> () -> Double
 
 pub fn hull(Array[(Double, Double)]) -> Array[Int32]
@@ -89,7 +91,7 @@ pub struct Canvas {
 }
 pub fn Canvas::above(Self, Shape, Double, Double) -> Double
 pub fn Canvas::anchor(Self, Shape, Side) -> (Double, Double)
-pub fn Canvas::arrow(Self, (Double, Double), (Double, Double), via? : Array[(Double, Double)], head? : Double, heads? : Heads, split? : Double, gap? : Double, gap_start? : Double?, gap_end? : Double?, dash? : String, opacity? : Double?, width? : Double, color? : String) -> Unit
+pub fn Canvas::arrow(Self, (Double, Double), (Double, Double), via? : Array[(Double, Double)], head? : Double, ends? : Ends, gap? : Double, gap_start? : Double?, gap_end? : Double?, dash? : String, opacity? : Double?, width? : Double, color? : String) -> Unit
 pub fn Canvas::below(Self, Shape, Double) -> Double
 pub fn Canvas::box(Self, Double, Double, Sizing, Double, label? : String, rx? : Double, pad_x? : Double, size? : Double, dash? : String, opacity? : Double?, width? : Double, color? : String, underline? : Double) -> Shape
 pub fn Canvas::center(Self, Shape) -> (Double, Double)
@@ -118,6 +120,12 @@ pub(all) struct ChartMeta {
 pub(all) struct Circum {
   o : (Double, Double)
   r : Double
+}
+
+#derive(Eq)
+pub(all) enum Ends {
+  Single(Heads)
+  Pair(Double)
 }
 
 pub(all) struct Hbar {
