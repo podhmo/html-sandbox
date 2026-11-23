@@ -12,7 +12,7 @@ import {
 // it — so it is not hull.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let axis_y = 200.0
   let scale = 0.010
   let x0 = 30.0
@@ -23,7 +23,7 @@ fn main {
   let xs = [45.0, 70.0, 105.0, 150.0, 195.0]
 
   // parabola + lifted points + lower hull = adjacent segments.
-  let para_pts = @s.sample(fn(x) { lift(x).1 }, x0, x1, n=120)
+  let para_pts = @s.sample(fn(x) { lift(x).1 }, x0=x0, x1=x1, n=120)
   c.path(@s.path_of(para_pts), para_pts, width=1.5, opacity=Some(0.7))
   c.line((x0, axis_y), (x1, axis_y), width=1.5)
 
@@ -68,6 +68,6 @@ fn main {
   c.text(15.0, 20.0, "x²", size=11.0, central=true)
 
   println(
-    c.render(label="1D lifting: points on x go up to the parabola x^2; the lower hull is exactly adjacent pairs — Delaunay in 1D is sorted adjacency"),
+    c.render(label=Some("1D lifting: points on x go up to the parabola x^2; the lower hull is exactly adjacent pairs — Delaunay in 1D is sorted adjacency")),
   )
 }

@@ -8,7 +8,7 @@ import { "podhmo/svg-gen" @s }
 // deletion.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let pin = 1
   let live = 0
   let r = 9.0
@@ -76,6 +76,6 @@ fn main {
   )
 
   println(
-    c.render(label="close・merge 時に記録された head コミットを pin ref が保持し続ける図"),
+    c.render(label=Some("close・merge 時に記録された head コミットを pin ref が保持し続ける図")),
   )
 }

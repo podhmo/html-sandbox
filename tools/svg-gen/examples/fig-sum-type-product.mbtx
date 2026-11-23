@@ -12,7 +12,7 @@ import { "podhmo/svg-gen" @s }
 // guidelines' second sign.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let cw = 58.0
   let ch = 26.0
   let hdr = 11.0
@@ -29,10 +29,10 @@ fn main {
     real : (Int, Int) -> Bool,
     caption : String,
   ) -> @s.Shape {
-    c.text(x, y - 22.0, title, size=13.0, underline=@s.Custom(1.0))
+    c.text(x, y - 22.0, title, size=13.0, underline=@s.Yes)
     let mut label_w = 0.0
     for r in rows {
-      label_w = label_w.max(@s.text_width(r, hdr))
+      label_w = label_w.max(@s.text_width(r, size=hdr))
     }
     label_w = label_w + 8.0
     for j, col in cols {
@@ -107,6 +107,6 @@ fn main {
   }
 
   println(
-    c.render(label="product grids of the two split states; O marks combinations that occur, x marks ones the types allow but no input produces"),
+    c.render(label=Some("product grids of the two split states; O marks combinations that occur, x marks ones the types allow but no input produces")),
   )
 }

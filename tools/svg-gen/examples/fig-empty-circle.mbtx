@@ -13,7 +13,7 @@ import {
 fn main {
   let s = @s.sites
   let tris = @s.delaunay(s)
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let dx = 260.0
 
   // an interior Delaunay edge (a,c) with triangles abc and acd →
@@ -74,10 +74,10 @@ fn main {
 
   // Right: the other diagonal bd. Its triangle abd has bcd's vertex c
   // inside the circumcircle — violation.
-  let sa = @s.shift([a], dx, 0.0)[0]
-  let sb = @s.shift([b], dx, 0.0)[0]
-  let scc = @s.shift([cc], dx, 0.0)[0]
-  let sd = @s.shift([d], dx, 0.0)[0]
+  let sa = @s.shift([a], dx=dx, dy=0.0)[0]
+  let sb = @s.shift([b], dx=dx, dy=0.0)[0]
+  let scc = @s.shift([cc], dx=dx, dy=0.0)[0]
+  let sd = @s.shift([d], dx=dx, dy=0.0)[0]
   let bad = @s.circum(sa, sb, sd)
   if !(@math.hypot(scc.0 - bad.o.0, scc.1 - bad.o.1) < bad.r) {
     abort("vertex c must lie inside the bad circumcircle")
@@ -94,6 +94,6 @@ fn main {
   c.text(120.0 + dx, 215.0, "a site inside: not Delaunay", anchor=@s.Middle, size=12.0, opacity=Some(0.7))
 
   println(
-    c.render(label="empty circumcircle: every Delaunay triangle's circumcircle contains no other site (left); the other diagonal puts a site inside (right)"),
+    c.render(label=Some("empty circumcircle: every Delaunay triangle's circumcircle contains no other site (left); the other diagonal puts a site inside (right)")),
   )
 }

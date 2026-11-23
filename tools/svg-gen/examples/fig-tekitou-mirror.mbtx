@@ -10,7 +10,7 @@ import { "podhmo/svg-gen" @s }
 // toward 程々.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let token_col = c.color(2)
   let loose = c.color(3)
 
@@ -46,11 +46,11 @@ fn main {
   c.text(180.0, 238.0, "正解（評価者不在）", anchor=@s.Middle, size=10.0, opacity=Some(0.75))
   let worker2 = c.circle(340.0, 206.0, 20.0, size=11.0)
   c.text(340.0, 206.0, "作業者", anchor=@s.Middle, central=true, size=11.0)
-  let ease = c.box(500.0, 186.0, @s.Auto, 40.0, label="程々・力を抜く", color=loose, size=12.0)
+  let ease = c.box(500.0, 186.0, @s.Auto, 40.0, label=Some("程々・力を抜く"), color=loose, size=12.0)
   c.arrow(c.anchor(worker2, @s.E), c.anchor(ease, @s.W), width=2.0, color=loose)
   c.text(340.0, 246.0, "「適当でいいよ」と仲間が助言", anchor=@s.Middle, size=10.0, opacity=Some(0.8))
 
   println(
-    c.render(label="同じ仲間内の枠組みで向きが逆転する。テストでは正解へ収束する努力、作業グループでは評価不能な正解から離れて程々へ向かう助言"),
+    c.render(label=Some("同じ仲間内の枠組みで向きが逆転する。テストでは正解へ収束する努力、作業グループでは評価不能な正解から離れて程々へ向かう助言")),
   )
 }

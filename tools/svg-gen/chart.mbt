@@ -13,8 +13,8 @@ pub fn rng(seed : UInt32) -> () -> Double {
   fn() {
     a.val = a.val + 0x6d2b79f5U
     let ai = a.val
-    let mut t = (ai ^ (ai >> 15)) * (ai | 1U)
-    t = (t + (t ^ (t >> 7)) * (t | 61U)) ^ t
+    let t0 = (ai ^ (ai >> 15)) * (ai | 1U)
+    let t = (t0 + (t0 ^ (t0 >> 7)) * (t0 | 61U)) ^ t0
     (t ^ (t >> 14)).to_double() / 4294967296.0
   }
 }
@@ -30,7 +30,7 @@ pub fn gauss(rand : () -> Double) -> () -> Double {
 }
 
 ///|
-pub fn quantile(sorted : Array[Double], q : Double) -> Double {
+pub fn quantile(sorted : Array[Double], q~ : Double) -> Double {
   let i = (sorted.length() - 1).to_double() * q
   let lo = @math.floor(i).to_int()
   let hi = @math.ceil(i).to_int()
@@ -45,10 +45,10 @@ pub fn ticks(lo : Double, hi : Double, count~ : Int32 = 5) -> Array[Double] {
   let f = raw / p
   let step = (if f >= 5.0 { 5.0 } else if f >= 2.0 { 2.0 } else { 1.0 }) * p
   let out : Array[Double] = []
-  let mut v = @math.ceil(lo / step - 1.0e-9) * step
-  while v <= hi + step * 1.0e-6 {
+  for v = @math.ceil(lo / step - 1.0e-9) * step
+      v <= hi + step * 1.0e-6
+      v = v + step {
     out.push(round12(v))
-    v += step
   }
   out
 }
@@ -85,7 +85,7 @@ pub(all) struct Scale {
 }
 
 ///|
-pub fn Scale::new(
+pub fn Scale::Scale(
   lo : Double,
   hi : Double,
   a : Double,
@@ -122,15 +122,13 @@ pub fn Scale::ticks(self : Scale, count~ : Int32 = 5) -> Array[Double] {
   // log axis: mark 1/2/5 of each decade inside the domain.
   let (l, h) = self.spread()
   let out : Array[Double] = []
-  let mut d = @math.floor(l)
-  while d <= @math.ceil(h) {
+  for d = @math.floor(l); d <= @math.ceil(h); d = d + 1.0 {
     for m in [1.0, 2.0, 5.0] {
       let v = m * @math.pow(10.0, d)
       if v >= self.lo && v <= self.hi {
         out.push(v)
       }
     }
-    d += 1.0
   }
   out
 }
@@ -145,7 +143,7 @@ pub(all) struct ChartMeta {
 
 ///|
 /// toFixed(d) for element attributes: x.toFixed(1), o.toFixed(2), ...
-pub fn fixed(v : Double, d : Int32) -> String {
+pub fn fixed(v : Double, d~ : Int32) -> String {
   let p = @math.pow(10.0, d.to_double())
   let scaled = (v * p).round()
   let neg = scaled < 0.0
@@ -164,7 +162,7 @@ pub fn fixed(v : Double, d : Int32) -> String {
 
 ///|
 fn fmt_num(v : Double) -> String {
-  v.to_string()
+  num(v)
 }
 
 ///|
@@ -202,8 +200,8 @@ pub struct Plot {
   meta : ChartMeta
   xfmt : (Double) -> String
   yfmt : (Double) -> String
-  xtitle : String
-  ytitle : String
+  xtitle : String?
+  ytitle : String?
   grid : Bool
   mut framed : Bool
   c : Canvas
@@ -214,7 +212,7 @@ pub struct Plot {
 }
 
 ///|
-pub fn Plot::new(
+pub fn Plot::Plot(
   c : Canvas,
   meta : ChartMeta,
   xdom : Point,
@@ -225,8 +223,8 @@ pub fn Plot::new(
   h~ : Double = 200,
   xscale~ : ScaleKind = Linear,
   yscale~ : ScaleKind = Linear,
-  xtitle~ : String = "",
-  ytitle~ : String = "",
+  xtitle~ : String? = None,
+  ytitle~ : String? = None,
   xfmt~ : (Double) -> String = fmt_num,
   yfmt~ : (Double) -> String = fmt_num,
   grid~ : Bool = false,
@@ -240,8 +238,8 @@ pub fn Plot::new(
     y0,
     x1,
     y1,
-    xs: Scale::new(xdom.0, xdom.1, x0, x1, kind=xscale),
-    ys: Scale::new(ydom.0, ydom.1, y1, y0, kind=yscale),
+    xs: Scale::Scale(xdom.0, xdom.1, x0, x1, kind=xscale),
+    ys: Scale::Scale(ydom.0, ydom.1, y1, y0, kind=yscale),
     meta,
     xfmt,
     yfmt,
@@ -286,7 +284,7 @@ fn Plot::inside(self : Plot, pts : Array[Point]) -> Array[Point] {
 
 ///|
 fn fixed1(v : Double) -> String {
-  fixed(v, 1)
+  fixed(v, d=1)
 }
 
 ///|
@@ -302,7 +300,7 @@ fn sattrs(
     Some(p) => " stroke-dasharray=\"\{p}\""
   }
   let o = match opacity {
-    Some(v) => " opacity=\"\{v}\""
+    Some(v) => " opacity=\"\{num(v)}\""
     None => ""
   }
   " stroke=\"\{color}\"" + w + d + o
@@ -390,19 +388,19 @@ pub fn Plot::frame(
       opacity=Some(0.7),
     )
   }
-  if self.xtitle != "" {
+  if self.xtitle is Some(t) {
     c.text(
       (self.x0 + self.x1) / 2.0,
       self.y1 + 30.0,
-      self.xtitle,
+      t,
       anchor=Middle,
       size=10.0,
       opacity=Some(0.7),
     )
   }
-  if self.ytitle != "" {
+  if self.ytitle is Some(t) {
     // horizontal, above the axis top-left: readable without rotation.
-    c.text(self.x0, self.y0 - 8.0, self.ytitle, size=10.0, opacity=Some(0.7))
+    c.text(self.x0, self.y0 - 8.0, t, size=10.0, opacity=Some(0.7))
   }
 }
 
@@ -413,7 +411,7 @@ pub fn Plot::frame(
 pub fn Plot::series(
   self : Plot,
   pts : Array[Point],
-  label~ : String = "",
+  label~ : String? = None,
   dash~ : String? = None,
   opacity~ : Double? = None,
   width~ : Double = 1.5,
@@ -428,11 +426,11 @@ pub fn Plot::series(
     "<path d=\"\{d}\" fill=\"none\"\{sattrs(dash~, opacity~, width~, color~)}/>",
     pts,
   )
-  if label != "" {
+  if label is Some(l) {
     self.c.text(
       self.x1 + 6.0,
       pts[pts.length() - 1].1,
-      label,
+      l,
       central=true,
       size=10.0,
     )
@@ -445,7 +443,7 @@ pub fn Plot::series(
 pub fn Plot::step(
   self : Plot,
   pts : Array[Point],
-  label~ : String = "",
+  label~ : String? = None,
   dash~ : String? = None,
   opacity~ : Double? = None,
   width~ : Double = 1.5,
@@ -455,7 +453,7 @@ pub fn Plot::step(
     return
   }
   let segs : Array[Point] = [pts[0]]
-  for i = 1; i < pts.length(); i = i + 1 {
+  for i in 1..<pts.length() {
     segs.push((pts[i].0, pts[i - 1].1))
     segs.push(pts[i])
   }
@@ -465,11 +463,11 @@ pub fn Plot::step(
     "<path d=\"\{d}\" fill=\"none\"\{sattrs(dash~, opacity~, width~, color~)}/>",
     segs,
   )
-  if label != "" {
+  if label is Some(l) {
     self.c.text(
       self.x1 + 6.0,
       pts[pts.length() - 1].1,
-      label,
+      l,
       central=true,
       size=10.0,
     )
@@ -488,7 +486,7 @@ pub fn Plot::dots(
   for p in self.inside(pts) {
     let (x, y) = p
     self.put(
-      "<circle cx=\"\{num(x)}\" cy=\"\{num(y)}\" r=\"\{num(r)}\" fill=\"\{fill}\" fill-opacity=\"\{opacity}\" stroke=\"none\"/>",
+      "<circle cx=\"\{num(x)}\" cy=\"\{num(y)}\" r=\"\{num(r)}\" fill=\"\{fill}\" fill-opacity=\"\{num(opacity)}\" stroke=\"none\"/>",
       [(x, y)],
     )
   }
@@ -501,7 +499,7 @@ pub fn Plot::dots(
 pub fn Plot::vline(
   self : Plot,
   xv : Double,
-  label~ : String = "",
+  label~ : String? = None,
   dash~ : String? = Some("4 3"),
   opacity~ : Double = 0.6,
 ) -> Unit {
@@ -511,8 +509,8 @@ pub fn Plot::vline(
     [(px, self.y0), (px, self.y1)],
   )
   self.inside([(px, self.y0)]) |> ignore
-  if label != "" {
-    self.c.text(px + 4.0, self.y0 + 10.0, label, size=10.0, opacity=Some(0.8))
+  if label is Some(l) {
+    self.c.text(px + 4.0, self.y0 + 10.0, l, size=10.0, opacity=Some(0.8))
   }
 }
 
@@ -522,7 +520,7 @@ pub fn Plot::vline(
 pub fn Plot::hline(
   self : Plot,
   yv : Double,
-  label~ : String = "",
+  label~ : String? = None,
   dash~ : String? = Some("4 3"),
   opacity~ : Double = 0.6,
 ) -> Unit {
@@ -532,11 +530,11 @@ pub fn Plot::hline(
     [(self.x0, py), (self.x1, py)],
   )
   self.inside([(self.x1, py)]) |> ignore
-  if label != "" {
+  if label is Some(l) {
     self.c.text(
       self.x1 - 4.0,
       py - 4.0,
-      label,
+      l,
       anchor=End,
       size=10.0,
       opacity=Some(0.8),
@@ -567,16 +565,19 @@ pub fn Plot::boxplot(
   for i, g in groups {
     let s = g.values.copy()
     s.sort()
-    let q1 = quantile(s, 0.25)
-    let q2 = quantile(s, 0.5)
-    let q3 = quantile(s, 0.75)
+    let q1 = quantile(s, q=0.25)
+    let q2 = quantile(s, q=0.5)
+    let q3 = quantile(s, q=0.75)
     let iqr = q3 - q1
     let lo = @cmp.maximum(s[0], q1 - 1.5 * iqr)
     let hi = @cmp.minimum(s[s.length() - 1], q3 + 1.5 * iqr)
     let cx = self.xs.map(i.to_double() + 0.5)
     let bw = (self.xs.map(i.to_double() + 0.5 + box_w) - cx) * 2.0
     if overlay > 0 && rand is Some(r) {
-      for j = 0; j < s.length(); j = j + stride {
+      for j in 0..<s.length() {
+        if j % stride != 0 {
+          continue
+        }
         let jx = @cmp.minimum(
           @cmp.maximum(cx + (r() - 0.5) * bw * 1.6, self.x0 + 1.5),
           self.x1 - 1.5,
@@ -658,24 +659,18 @@ pub fn Plot::heatmap(
   let cols = grid[0].length()
   let cw = (self.x1 - self.x0) / cols.to_double()
   let ch = (self.y1 - self.y0) / rows.to_double()
-  let mut min = @double.infinity
-  let mut max = @double.neg_infinity
-  for row in grid {
-    for v in row {
-      if v < min {
-        min = v
-      }
-      if v > max {
-        max = v
-      }
-    }
-  }
+  let (min, max) = grid.fold(init=(@double.infinity, @double.neg_infinity), fn(
+    acc,
+    row,
+  ) {
+    row.fold(init=acc, fn(acc, v) { (acc.0.min(v), acc.1.max(v)) })
+  })
   let span = if max - min == 0 { 1.0 } else { max - min }
   for j, row in grid {
     for i, v in row {
       let o = 0.06 + 0.9 * ((v - min) / span)
       self.put(
-        "<rect x=\"\{fixed1(self.x0 + i.to_double() * cw)}\" y=\"\{fixed1(self.y0 + j.to_double() * ch)}\" width=\"\{fixed1(cw - 0.6)}\" height=\"\{fixed1(ch - 0.6)}\" fill=\"\{color}\" fill-opacity=\"\{fixed(o, 2)}\" stroke=\"none\"/>",
+        "<rect x=\"\{fixed1(self.x0 + i.to_double() * cw)}\" y=\"\{fixed1(self.y0 + j.to_double() * ch)}\" width=\"\{fixed1(cw - 0.6)}\" height=\"\{fixed1(ch - 0.6)}\" fill=\"\{color}\" fill-opacity=\"\{fixed(o, d=2)}\" stroke=\"none\"/>",
         [],
       )
     }
@@ -695,15 +690,15 @@ pub fn Plot::heat_legend(
   y : Double,
   w~ : Double = 70,
   fmt~ : (Double) -> String = fmt_num,
-  label~ : String = "",
+  label~ : String? = None,
 ) -> Unit {
   let (min, max) = mm
   let steps = 6
   let sw = w / steps.to_double()
-  for i = 0; i < steps; i = i + 1 {
+  for i in 0..<steps {
     let o = 0.06 + 0.9 * (i.to_double() / (steps - 1).to_double())
     self.c.raw(
-      "<rect x=\"\{fixed1(x + i.to_double() * sw)}\" y=\"\{num(y)}\" width=\"\{fixed1(sw - 1.0)}\" height=\"8\" fill=\"currentColor\" fill-opacity=\"\{fixed(o, 2)}\" stroke=\"none\"/>",
+      "<rect x=\"\{fixed1(x + i.to_double() * sw)}\" y=\"\{num(y)}\" width=\"\{fixed1(sw - 1.0)}\" height=\"8\" fill=\"currentColor\" fill-opacity=\"\{fixed(o, d=2)}\" stroke=\"none\"/>",
     )
   }
   self.c.text(x, y + 16.0, fmt(min), size=9.0, opacity=Some(0.6))
@@ -715,11 +710,11 @@ pub fn Plot::heat_legend(
     size=9.0,
     opacity=Some(0.6),
   )
-  if label != "" {
+  if label is Some(l) {
     self.c.text(
       x - 6.0,
       y + 4.0,
-      label,
+      l,
       anchor=End,
       central=true,
       size=9.0,
@@ -731,24 +726,18 @@ pub fn Plot::heat_legend(
 /// Count samples into width-w bins aligned to w*k boundaries.
 
 ///|
-pub fn bins(values : Array[Double], w : Double) -> Array[Bin] {
-  let mut mn = @double.infinity
-  let mut mx = @double.neg_infinity
-  for v in values {
-    if v < mn {
-      mn = v
-    }
-    if v > mx {
-      mx = v
-    }
-  }
+pub fn bins(values : Array[Double], w~ : Double) -> Array[Bin] {
+  let (mn, mx) = values.fold(init=(@double.infinity, @double.neg_infinity), fn(
+    acc,
+    v,
+  ) {
+    (acc.0.min(v), acc.1.max(v))
+  })
   let lo = @math.floor(mn / w) * w
   let hi = @math.ceil(mx / w) * w
   let out : Array[Bin] = []
-  let mut x = lo
-  while x < hi - 1.0e-9 {
+  for x = lo; x < hi - 1.0e-9; x = x + w {
     out.push({ x0: x, x1: x + w, n: 0, })
-    x += w
   }
   for v in values {
     let i = @cmp.minimum(out.length() - 1, @math.floor((v - lo) / w).to_int())
@@ -762,20 +751,26 @@ pub fn bins(values : Array[Double], w : Double) -> Array[Bin] {
 /// the same, only fewer of its vertices are drawn.
 
 ///|
-pub fn ecdf_points(
-  p : Plot,
-  samples : Array[Double],
+pub fn Plot::ecdf_points(
+  self : Plot,
+  samples~ : Array[Double],
   max~ : Double = @double.infinity,
 ) -> Array[Point] {
   let s = samples.copy()
   s.sort()
   let stride = @cmp.maximum(1.0, @math.floor(s.length().to_double() / max)).to_int()
   let pts : Array[Point] = []
-  for i = 0; i < s.length(); i = i + stride {
+  for i in 0..<s.length() {
+    if i % stride != 0 {
+      continue
+    }
     pts.push(
-      (p.xs.map(s[i]), p.ys.map((i + 1).to_double() / s.length().to_double())),
+      (
+        self.xs.map(s[i]),
+        self.ys.map((i + 1).to_double() / s.length().to_double()),
+      ),
     )
   }
-  pts.push((p.xs.map(s[s.length() - 1]), p.ys.map(1.0)))
+  pts.push((self.xs.map(s[s.length() - 1]), self.ys.map(1.0)))
   pts
 }

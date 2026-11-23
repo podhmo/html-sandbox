@@ -8,7 +8,7 @@ import { "podhmo/svg-gen" @s }
 // is open.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let x0 = 170.0
   // Program points, left to right.
   let pts = [
@@ -90,6 +90,6 @@ fn main {
   )
 
   println(
-    c.render(label="three bars over program order: a block-scoped defer closes f when the if ends, before it is used; Go's function-scoped defer keeps it until the function ends; Scope.run keeps it until the explicit scope body ends"),
+    c.render(label=Some("three bars over program order: a block-scoped defer closes f when the if ends, before it is used; Go's function-scoped defer keeps it until the function ends; Scope.run keeps it until the explicit scope body ends")),
   )
 }

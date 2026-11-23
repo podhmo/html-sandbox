@@ -9,13 +9,13 @@ import { "podhmo/svg-gen" @s }
 fn main {
   let h = 44.0
   let gap = 40.0
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
 
   // Widths come from the labels, so no label can outgrow its box.
-  let input = c.box(0.0, 80.0, @s.Auto, h, label="Input")
-  let conv = c.box(c.right_of(input, gap), input.y, @s.Auto, h, label="Convert")
-  let out = c.box(c.right_of(conv, gap), input.y, @s.Auto, h, label="Output")
-  let check = c.box(conv.x, input.y - 1.5 * gap - h, @s.Auto, h, label="Check + fix")
+  let input = c.box(0.0, 80.0, @s.Auto, h, label=Some("Input"))
+  let conv = c.box(c.right_of(input, gap), input.y, @s.Auto, h, label=Some("Convert"))
+  let out = c.box(c.right_of(conv, gap), input.y, @s.Auto, h, label=Some("Output"))
+  let check = c.box(conv.x, input.y - 1.5 * gap - h, @s.Auto, h, label=Some("Check + fix"))
 
   c.arrow(c.anchor(input, @s.E), c.anchor(conv, @s.W))
   c.arrow(c.anchor(conv, @s.E), c.anchor(out, @s.W))
@@ -43,5 +43,5 @@ fn main {
     abort("check box must sit above the input row")
   }
 
-  println(c.render(label="generate, render, then check and fix loop"))
+  println(c.render(label=Some("generate, render, then check and fix loop")))
 }

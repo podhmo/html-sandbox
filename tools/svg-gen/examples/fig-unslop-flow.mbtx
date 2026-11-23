@@ -10,20 +10,20 @@ import { "podhmo/svg-gen" @s }
 // which sits outside the fix passes.
 
 fn main {
-  let c = @s.Canvas::new(margin=12.0)
+  let c = @s.Canvas(margin=12.0)
 
   // main pipeline, left to right
-  let audit = c.box(30.0, 80.0, @s.Auto, 40.0, label="監査\nsigns.md", color=c.color(0))
-  let verdict = c.box(190.0, 80.0, @s.Auto, 40.0, label="slopの\n量を判定", color=c.color(1))
-  let direction = c.box(350.0, 80.0, @s.Auto, 40.0, label="Direction\n(5行)", color=c.color(2))
-  let passes = c.box(520.0, 80.0, @s.Auto, 40.0, label="9パス修正", color=c.color(3))
+  let audit = c.box(30.0, 80.0, @s.Auto, 40.0, label=Some("監査\nsigns.md"), color=c.color(0))
+  let verdict = c.box(190.0, 80.0, @s.Auto, 40.0, label=Some("slopの\n量を判定"), color=c.color(1))
+  let direction = c.box(350.0, 80.0, @s.Auto, 40.0, label=Some("Direction\n(5行)"), color=c.color(2))
+  let passes = c.box(520.0, 80.0, @s.Auto, 40.0, label=Some("9パス修正"), color=c.color(3))
 
   c.arrow(c.anchor(audit, @s.E), c.anchor(verdict, @s.W))
   c.arrow(c.anchor(verdict, @s.E), c.anchor(direction, @s.W))
   c.arrow(c.anchor(direction, @s.E), c.anchor(passes, @s.W))
 
   // the no-slop exit: down and out before the passes
-  let exit = c.box(190.0, 180.0, @s.Auto, 40.0, label="no slop\n→ polishのみ", color=c.color(4))
+  let exit = c.box(190.0, 180.0, @s.Auto, 40.0, label=Some("no slop\n→ polishのみ"), color=c.color(4))
   c.arrow(c.anchor(verdict, @s.S), c.anchor(exit, @s.N), dash=Some("4 4"))
   c.text(240.0, 155.0, "DADSレポート5種はここ", anchor=@s.Start, size=12.0)
 
@@ -38,6 +38,6 @@ fn main {
   )
 
   println(
-    c.render(label="unslop pipeline with the no-slop exit where the DADS reports land"),
+    c.render(label=Some("unslop pipeline with the no-slop exit where the DADS reports land")),
   )
 }

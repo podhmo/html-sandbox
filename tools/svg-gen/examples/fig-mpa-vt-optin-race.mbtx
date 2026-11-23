@@ -12,7 +12,7 @@ import { "podhmo/svg-gen" @s }
 // runs).
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
 
   let lanes = [
     (40.0, "before: opt-in は app.css の末尾", true),
@@ -60,6 +60,6 @@ fn main {
   }
 
   println(
-    c.render(label="external CSS 末尾の opt-in は pagereveal 検査に間に合わず遷移が無効、inline <style> なら間に合う比較図"),
+    c.render(label=Some("external CSS 末尾の opt-in は pagereveal 検査に間に合わず遷移が無効、inline <style> なら間に合う比較図")),
   )
 }

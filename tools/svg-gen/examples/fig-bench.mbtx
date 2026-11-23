@@ -8,7 +8,7 @@ import { "podhmo/svg-gen" @s }
 // label column is measured from the labels.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
 
   // KiB of SVG output for moonbit/'s 17-package, 21-edge graph
   // (issue #85).
@@ -42,5 +42,5 @@ fn main {
     }
   }
 
-  println(c.render(label="SVG file size by renderer and layout"))
+  println(c.render(label=Some("SVG file size by renderer and layout")))
 }

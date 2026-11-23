@@ -14,21 +14,21 @@ gets a small throwaway generator sharing a thin helper.
 - `svg.mbt` — the shared helper (zero deps beyond the stdlib). `Canvas` collects
   parts; `box`/`circle`/`text`/`line`/`arrow` draw them. The important
   properties:
-  - `c.anchor(shape, "e")` and friends compute edge endpoints from shape
+  - `c.anchor(shape, @s.E)` and friends compute edge endpoints from shape
     geometry, so an arrow endpoint cannot drift off its box.
-  - `box(x, y, "auto", h, {label})` sizes the box to the estimated label
-    width, so a label cannot outgrow its box.
-  - `arrow` takes `heads: "both"` (or `"start"`/`"none"`) for
-    bidirectional edges such as request/response pairs, or `split` for
-    two opposing arrows; `midpoint` finds label positions, and
-    `label: [...]` gives multi-line box text.
+  - `box(x, y, @s.Auto, h, label=Some(...))` sizes the box to the estimated
+    label width, so a label cannot outgrow its box.
+  - `arrow` takes `ends=@s.Single(@s.Both)` (or `Start`/`NoHead`) for
+    bidirectional edges such as request/response pairs, or `Pair` for
+    two opposing arrows; `midpoint` finds label positions, and a
+    `\n` inside a `label` string gives multi-line box text.
   - `hbars([{label, value}])` draws a horizontal bar chart sized from
     the values — benchmark-style figures where the scale cannot drift.
   - `highlight(shape, {opacity, mode})` adds a low-key emphasis zone
     behind a shape: a translucent currentColor "wash" (grey in light
     theme, a light veil in dark) or a dashed "ring" — quieter than a
     marker. `width:` thickens a stroke, `underline:` underlines a label,
-    and `fig-highlight.ts` compares the options side by side.
+    and `fig-highlight.mbtx` compares the options side by side.
   - `rightOf`/`leftOf`/`above`/`below` place shapes relative to each
     other; the canvas derives the `viewBox` from everything drawn
     (including estimated text extents), so nothing falls outside it.

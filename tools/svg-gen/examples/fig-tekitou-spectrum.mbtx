@@ -8,7 +8,7 @@ import { "podhmo/svg-gen" @s }
 // the meaning: the strictness of the criterion fades left to right.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
 
   let y = 90.0
   let x0 = 60.0
@@ -51,6 +51,6 @@ fn main {
   }
 
   println(
-    c.render(label="「適当に」から「よしなに・いい感じに」を経て「テキトーに」へ。横軸は判断基準の共有度で、右へ行くほど基準を問わない用法になる"),
+    c.render(label=Some("「適当に」から「よしなに・いい感じに」を経て「テキトーに」へ。横軸は判断基準の共有度で、右へ行くほど基準を問わない用法になる")),
   )
 }

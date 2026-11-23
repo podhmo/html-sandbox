@@ -17,7 +17,7 @@ fn main {
   // sites above the sweep line (screen y grows downward, sweep below).
   let s = @s.sites
   let ly = 200.0 // sweep line y: 4 breakpoints on this set
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let x0 = 0.0
   let x1 = 230.0
 
@@ -70,7 +70,7 @@ fn main {
   }
 
   for i, _st in s {
-    let pts = @s.sample(fns[i], x0, x1, n=160)
+    let pts = @s.sample(fns[i], x0=x0, x1=x1, n=160)
       .filter(fn(p) { p.1 > -10.0 && p.1 < ly + 5.0 })
     if hue_of(i) >= 0 {
       c.path(@s.path_of(pts), pts, dash=Some("5 3"), opacity=Some(0.8), color=c.color(hue_of(i)))
@@ -96,13 +96,13 @@ fn main {
   c.line((x0, ly), (x1, ly), width=2.0, color=c.color(5))
   for bp in breaks {
     c.raw(
-      "<circle cx=\"\{@s.fixed(bp.0, 1)}\" cy=\"\{@s.fixed(bp.1, 1)}\" r=\"3\" fill=\"\{c.color(3)}\"/>",
+      "<circle cx=\"\{@s.fixed(bp.0, d=1)}\" cy=\"\{@s.fixed(bp.1, d=1)}\" r=\"3\" fill=\"\{c.color(3)}\"/>",
       covered=[bp],
     )
   }
   c.text(x1 - 6.0, ly - 8.0, "sweep", anchor=@s.End, size=11.0, opacity=Some(0.7))
 
   println(
-    c.render(label="Fortune's sweep: site parabolas (dashed), their top envelope is the beach line (thick), breakpoints trace Voronoi edges"),
+    c.render(label=Some("Fortune's sweep: site parabolas (dashed), their top envelope is the beach line (thick), breakpoints trace Voronoi edges")),
   )
 }

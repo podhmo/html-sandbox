@@ -9,11 +9,11 @@ import { "podhmo/svg-gen" @s }
 // variant carries only its own state.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let live = c.color(0) // the active slot / the variant
 
   // ---- before ----
-  c.text(24.0, 30.0, "before", size=14.0, underline=@s.Custom(1.0))
+  c.text(24.0, 30.0, "before", size=14.0, underline=@s.Yes)
   c.text(24.0, 54.0, "pending buffers", size=12.0, opacity=Some(0.7))
   let bufs = ["para []", "items [it]", "quote []", "table []"]
   for i, label in bufs {
@@ -23,7 +23,7 @@ fn main {
       62.0,
       @s.Fixed(92.0),
       28.0,
-      label=label,
+      label=Some(label),
       size=12.0,
       rx=4.0,
       color=(if i == 1 { live } else { "currentColor" }),
@@ -45,7 +45,7 @@ fn main {
       164.0,
       @s.Fixed(92.0),
       28.0,
-      label=label,
+      label=Some(label),
       size=12.0,
       rx=4.0,
       color=(if i == 1 { live } else { "currentColor" }),
@@ -65,7 +65,7 @@ fn main {
       206.0,
       @s.Fixed(88.0),
       24.0,
-      label=label,
+      label=Some(label),
       size=11.0,
       rx=4.0,
       dash=Some("3 3"),
@@ -83,14 +83,14 @@ fn main {
 
   // ---- after ----
   let ax = 470.0
-  c.text(ax, 30.0, "after", size=14.0, underline=@s.Custom(1.0))
+  c.text(ax, 30.0, "after", size=14.0, underline=@s.Yes)
   c.text(ax, 54.0, "pending", size=12.0, opacity=Some(0.7))
   let p = c.box(
     ax,
     62.0,
     @s.Fixed(180.0),
     28.0,
-    label="Items([it])",
+    label=Some("Items([it])"),
     size=12.0,
     rx=4.0,
     color=live,
@@ -112,7 +112,7 @@ fn main {
     134.0,
     @s.Fixed(180.0),
     56.0,
-    label="Details {\n  depth, in_code, lines }",
+    label=Some("Details {\n  depth, in_code, lines }"),
     size=12.0,
     rx=4.0,
     color=live,
@@ -150,6 +150,6 @@ fn main {
   }
 
   println(
-    c.render(label="before: many slots, one live, kept by hand; after: two slots, variant carries its own vars"),
+    c.render(label=Some("before: many slots, one live, kept by hand; after: two slots, variant carries its own vars")),
   )
 }

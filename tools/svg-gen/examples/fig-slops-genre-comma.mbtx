@@ -9,7 +9,7 @@ import { "podhmo/svg-gen" @s }
 // still sits at or above devin.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
 
   // rows top-first, ordered by the devin mean (claude-only rows
   // slotted by their claude value). * marks provisional genre
@@ -33,7 +33,7 @@ fn main {
   ]
   let n_r = rows.length()
 
-  let p = @s.Plot::new(
+  let p = @s.Plot(
     c,
     {
       title: "読点密度はジャンルでも大きく動く",
@@ -88,6 +88,6 @@ fn main {
     abort("row count")
   }
   println(
-    c.render(label="comma density by genre and author: devin ranges 10 to 27 across genres while claude stays high in every shared genre"),
+    c.render(label=Some("comma density by genre and author: devin ranges 10 to 27 across genres while claude stays high in every shared genre")),
   )
 }

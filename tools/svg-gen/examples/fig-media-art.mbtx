@@ -12,7 +12,7 @@ import { "podhmo/svg-gen" @s }
 fn main {
   let s = @s.sites
   let tris = @s.delaunay(s)
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
 
   // Panel layout: left panel uses S as-is; right panel is S +
   // (DX, 0).
@@ -21,19 +21,19 @@ fn main {
 
   // Left: Voronoi cells filled (stained glass idiom).
   for i, site in s {
-    let cell = @s.voronoi_cell(site, s, clip)
+    let cell = @s.voronoi_cell(site, sites=s, rect=clip)
     if cell.length() < 3 {
       abort("site \{i} has a visible cell")
     }
-    c.raw(@s.poly_el(cell, c.color(i), 0.35), covered=cell)
+    c.raw(@s.poly_el(cell, fill=c.color(i), opacity=0.35, extra=Some(" stroke=\"currentColor\" stroke-width=\"1\"")), covered=cell)
   }
   c.text(112.0, 228.0, "Voronoi cells", anchor=@s.Middle, size=12.0, opacity=Some(0.7))
 
   // Right: Delaunay triangles filled (low-poly facet idiom).
-  let t = @s.shift(s, dx, 0.0)
+  let t = @s.shift(s, dx=dx, dy=0.0)
   for i, tri in tris {
     let pts = [t[tri.0], t[tri.1], t[tri.2]]
-    c.raw(@s.poly_el(pts, c.color(i), 0.45), covered=pts)
+    c.raw(@s.poly_el(pts, fill=c.color(i), opacity=0.45, extra=Some(" stroke=\"currentColor\" stroke-width=\"1\"")), covered=pts)
   }
   c.text(112.0 + dx, 228.0, "Delaunay triangles", anchor=@s.Middle, size=12.0, opacity=Some(0.7))
 
@@ -46,6 +46,6 @@ fn main {
   }
 
   println(
-    c.render(label="generative-art idioms from one point set: filled Voronoi cells (stained glass) and filled Delaunay triangles (low-poly)"),
+    c.render(label=Some("generative-art idioms from one point set: filled Voronoi cells (stained glass) and filled Delaunay triangles (low-poly)")),
   )
 }

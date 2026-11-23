@@ -9,7 +9,7 @@ import { "podhmo/svg-gen" @s }
 // you.
 
 fn main {
-  let c = @s.Canvas::new(margin=14.0)
+  let c = @s.Canvas(margin=14.0)
   let pw_col = c.color(0) // blue = playwright-cli
   let cd_col = c.color(1) // orange = chrome-devtools CLI
   let out_col = c.color(3) // vermillion = outside the CLIs' reach
@@ -111,6 +111,6 @@ fn main {
   )
 
   println(
-    c.render(label="2つのCLIの届く範囲。重なる中央は両方で可能、枠の外側右は両方でも確認できない領域"),
+    c.render(label=Some("2つのCLIの届く範囲。重なる中央は両方で可能、枠の外側右は両方でも確認できない領域")),
   )
 }

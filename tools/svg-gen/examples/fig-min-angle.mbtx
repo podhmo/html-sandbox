@@ -14,7 +14,7 @@ import {
 fn main {
   let s = @s.sites
   let tris = @s.delaunay(s)
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let dx = 260.0
 
   let mut quad : (Int, Int, Int, Int)? = None
@@ -128,12 +128,12 @@ fn main {
   ignore(
     draw_tri_set(s, [(q.0, q.1, q.2), (q.0, q.2, q.3)], "Delaunay", 112.0),
   )
-  let p2 = @s.shift(s, dx, 0.0)
+  let p2 = @s.shift(s, dx=dx, dy=0.0)
   ignore(
     draw_tri_set(p2, [(q.0, q.1, q.3), (q.1, q.2, q.3)], "other diagonal", 112.0 + dx),
   )
 
   println(
-    c.render(label="Delaunay maximizes the minimum angle; the other diagonal leaves a smaller one"),
+    c.render(label=Some("Delaunay maximizes the minimum angle; the other diagonal leaves a smaller one")),
   )
 }

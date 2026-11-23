@@ -9,7 +9,7 @@ import { "podhmo/svg-gen" @s }
 fn main {
   let s = @s.sites
   let tris = @s.delaunay(s)
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let dx = 260.0
 
   let dot = fn(p : @s.Point) {
@@ -34,7 +34,7 @@ fn main {
 
   // Right: same edges plus one chord through the middle — it crosses
   // Delaunay edges it is not part of, so this is not a triangulation.
-  let t2 = @s.shift(s, dx, 0.0)
+  let t2 = @s.shift(s, dx=dx, dy=0.0)
   for t in tris {
     for e in [(0, 1), (1, 2), (2, 0)] {
       let ea = if e.0 == 0 { t.0 } else if e.0 == 1 { t.1 } else { t.2 }
@@ -90,6 +90,6 @@ fn main {
   c.text(115.0 + dx, 225.0, "crossing edge: not a triangulation", anchor=@s.Middle, size=12.0, opacity=Some(0.7))
 
   println(
-    c.render(label="valid triangulation vs a chord that crosses existing edges"),
+    c.render(label=Some("valid triangulation vs a chord that crosses existing edges")),
   )
 }

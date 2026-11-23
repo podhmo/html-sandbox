@@ -9,7 +9,7 @@ import { "podhmo/svg-gen" @s }
 // converging on the announcer + describedby link.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
 
   c.text(
     14.0,
@@ -24,7 +24,7 @@ fn main {
     44.0,
     @s.Auto,
     64.0,
-    label=":user-invalid\nUA が判定 (interaction後のみ)",
+    label=Some(":user-invalid\nUA が判定 (interaction後のみ)"),
     color=c.color(0),
     size=12.0,
   )
@@ -33,7 +33,7 @@ fn main {
     44.0,
     @s.Auto,
     64.0,
-    label="form-errors.js\nblur capture → syncAria(el, true)",
+    label=Some("form-errors.js\nblur capture → syncAria(el, true)"),
     color=c.color(1),
     size=12.0,
   )
@@ -45,7 +45,7 @@ fn main {
     8.0,
     @s.Auto,
     52.0,
-    label="aria-invalid=\"true\"\nserver-flagged は復元",
+    label=Some("aria-invalid=\"true\"\nserver-flagged は復元"),
     color=c.color(2),
     size=12.0,
   )
@@ -54,7 +54,7 @@ fn main {
     76.0,
     @s.Auto,
     52.0,
-    label="aria-describedby += #comment-error\n表示中だけリンク",
+    label=Some("aria-describedby += #comment-error\n表示中だけリンク"),
     color=c.color(3),
     size=12.0,
   )
@@ -63,7 +63,7 @@ fn main {
     144.0,
     @s.Auto,
     52.0,
-    label="live region (polite)\n\"Add a comment: Comment is required.\"",
+    label=Some("live region (polite)\n\"Add a comment: Comment is required.\""),
     color=c.color(4),
     size=12.0,
   )
@@ -77,7 +77,7 @@ fn main {
       148.0,
       @s.Auto,
       48.0,
-      label="CSS (従来から)\n.field:has(:user-invalid) → 赤表示",
+      label=Some("CSS (従来から)\n.field:has(:user-invalid) → 赤表示"),
       size=12.0,
       dash=Some("5 4"),
     ),
@@ -98,6 +98,6 @@ fn main {
   )
 
   println(
-    c.render(label="必須 textarea を空にして blur した瞬間に、form-errors.js が :user-invalid を見て aria-invalid・aria-describedby・polite live region を同時更新する流れ"),
+    c.render(label=Some("必須 textarea を空にして blur した瞬間に、form-errors.js が :user-invalid を見て aria-invalid・aria-describedby・polite live region を同時更新する流れ")),
   )
 }

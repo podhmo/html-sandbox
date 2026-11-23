@@ -10,7 +10,7 @@ import { "podhmo/svg-gen" @s }
 // one is the cause it skipped.
 
 fn main {
-  let c = @s.Canvas::new(margin=14.0)
+  let c = @s.Canvas(margin=14.0)
 
   // the log line the agent saw
   let log = c.box(
@@ -18,7 +18,7 @@ fn main {
     110.0,
     @s.Auto,
     46.0,
-    label="CUDA initialization:\ndriver too old",
+    label=Some("CUDA initialization:\ndriver too old"),
     size=12.0,
   )
 
@@ -36,7 +36,7 @@ fn main {
     96.0,
     @s.Auto,
     44.0,
-    label="torch を cu128 に\n下げる",
+    label=Some("torch を cu128 に\n下げる"),
     color=c.color(2),
     size=12.0,
   )
@@ -47,7 +47,7 @@ fn main {
       150.0,
       @s.Auto,
       34.0,
-      label="apt で直す",
+      label=Some("apt で直す"),
       dash=Some("4 4"),
       size=12.0,
       opacity=Some(0.6),
@@ -59,7 +59,7 @@ fn main {
     212.0,
     @s.Auto,
     44.0,
-    label="ドライバを\n更新する",
+    label=Some("ドライバを\n更新する"),
     color=c.color(3),
     dash=Some("4 4"),
     size=12.0,
@@ -115,6 +115,6 @@ fn main {
   }
 
   println(
-    c.render(label="a log line 'driver too old' points two ways: to a torch version inside the region the agent can change, and to a driver update outside it in the host"),
+    c.render(label=Some("a log line 'driver too old' points two ways: to a torch version inside the region the agent can change, and to a driver update outside it in the host")),
   )
 }

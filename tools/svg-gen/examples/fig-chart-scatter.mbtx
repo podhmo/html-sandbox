@@ -12,7 +12,7 @@ import {
 // seeded PRNG, with a handful of timeout-ish outliers.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let rand = @s.rng(20261031U)
   let g = @s.gauss(rand)
 
@@ -46,7 +46,7 @@ fn main {
   let slope = num2 / den
   let per_decade = slope.round().to_int64()
 
-  let p = @s.Plot::new(
+  let p = @s.Plot(
     c,
     {
       title: "ペイロード 1 桁ごとにレイテンシ +約 \{per_decade} ms（仮想データ）",
@@ -58,8 +58,8 @@ fn main {
     w=420.0,
     h=190.0,
     xscale=@s.Log,
-    xtitle="ペイロード (KiB, log)",
-    ytitle="レイテンシ (ms)",
+    xtitle=Some("ペイロード (KiB, log)"),
+    ytitle=Some("レイテンシ (ms)"),
     grid=true,
   )
   p.frame()
@@ -103,6 +103,6 @@ fn main {
   }
 
   println(
-    c.render(label="scatter of payload size vs latency: about +\{per_decade} ms per decade of payload (virtual data)"),
+    c.render(label=Some("scatter of payload size vs latency: about +\{per_decade} ms per decade of payload (virtual data)")),
   )
 }

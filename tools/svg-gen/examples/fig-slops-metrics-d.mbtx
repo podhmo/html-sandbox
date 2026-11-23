@@ -11,7 +11,7 @@ import { "podhmo/svg-gen" @s }
 // features, below it devin-high.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
 
   let cols = ["全体 (65)", "変更の報告 (6v6)"]
   // rows top-first; v = [overall d, within-genre d], sign =
@@ -34,7 +34,7 @@ fn main {
   let n_r = rows.length()
   let n_c = cols.length()
 
-  let p = @s.Plot::new(
+  let p = @s.Plot(
     c,
     {
       title: "ジャンルを統制しても執筆者差は残る",
@@ -58,7 +58,7 @@ fn main {
   p.data(fn(p) {
     mm = p.heatmap(rows.map(fn(r) { r.1.map(fn(v) { v.abs() }) }))
   })
-  p.heat_legend(mm, p.x1 - 80.0, p.y1 + 56.0, fmt=fn(v) { @s.fixed(v, 1) }, label="|d|")
+  p.heat_legend(mm, p.x1 - 80.0, p.y1 + 56.0, fmt=fn(v) { @s.fixed(v, d=1) }, label=Some("|d|"))
 
   let cw = (p.x1 - p.x0) / n_c.to_double()
   let ch = (p.y1 - p.y0) / n_r.to_double()
@@ -68,7 +68,7 @@ fn main {
       c.text(
         p.x0 + (i.to_double() + 0.5) * cw,
         p.y0 + (j.to_double() + 0.55) * ch,
-        "\{sign}\{@s.fixed(v, 2)}",
+        "\{sign}\{@s.fixed(v, d=2)}",
         anchor=@s.Middle,
         central=true,
         size=8.0,
@@ -102,6 +102,6 @@ fn main {
   }
 
   println(
-    c.render(label="claude-vs-devin effect sizes overall vs within the 変更の報告 genre: the clause-chaining signature persists, dependency depth collapses"),
+    c.render(label=Some("claude-vs-devin effect sizes overall vs within the 変更の報告 genre: the clause-chaining signature persists, dependency depth collapses")),
   )
 }

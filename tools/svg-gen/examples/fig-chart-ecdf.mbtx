@@ -13,7 +13,7 @@ import {
 // every run.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let g = @s.gauss(@s.rng(20261101U))
   let sample = fn(mu : Double, sigma : Double, n : Int) {
     let arr = Array::makei(n, fn(_i) { @math.exp(mu + sigma * g()) })
@@ -26,11 +26,11 @@ fn main {
   let v23 = sample(@math.ln(105.0), 0.5, 600)
 
   let gain = (
-      (1.0 - @s.quantile(v23, 0.99) / @s.quantile(v22, 0.99)) * 100.0
+      (1.0 - @s.quantile(v23, q=0.99) / @s.quantile(v22, q=0.99)) * 100.0
     ).round()
   let gain_i = gain.to_int64()
 
-  let p = @s.Plot::new(
+  let p = @s.Plot(
     c,
     {
       title: "v2.3 で p99 レイテンシが \{gain_i}% 改善（仮想データ）",
@@ -41,9 +41,9 @@ fn main {
     (0.0, 1.0),
     w=420.0,
     h=190.0,
-    xtitle="レイテンシ (ms)",
-    ytitle="累積割合",
-    yfmt=fn(v) { @s.fixed(v, 1) },
+    xtitle=Some("レイテンシ (ms)"),
+    ytitle=Some("累積割合"),
+    yfmt=fn(v) { @s.fixed(v, d=1) },
     grid=true,
   )
   p.frame()
@@ -51,18 +51,18 @@ fn main {
   // off axes.
   p.data(fn(p) {
     for q in [0.5, 0.9, 0.99] {
-      p.hline(q, label="p\{(q * 100.0).to_int64()}", opacity=0.25)
+      p.hline(q, label=Some("p\{(q * 100.0).to_int64()}"), opacity=0.25)
     }
     // stride-thinned to ~150 vertices per curve for inline embedding;
     // the ECDF statistic itself is unchanged.
     // v2.2 is the grey baseline; v2.3 gets the one palette accent
     // (the guideline's "highlight = one colour, rest grey").
-    p.step(@s.ecdf_points(p, v22, max=150.0), opacity=Some(0.65))
-    p.step(@s.ecdf_points(p, v23, max=150.0), width=2.5, color=c.color(0))
+    p.step(p.ecdf_points(samples=v22, max=150.0), opacity=Some(0.65))
+    p.step(p.ecdf_points(samples=v23, max=150.0), width=2.5, color=c.color(0))
   })
   // direct labels where the curves are far apart (near their p80).
   let at = fn(sm : Array[Double], q : Double) {
-    p.xs.map(@s.quantile(sm, q))
+    p.xs.map(@s.quantile(sm, q=q))
   }
   let y80 = p.ys.map(0.8)
   c.text(
@@ -80,6 +80,6 @@ fn main {
   }
 
   println(
-    c.render(label="ECDF of request latency: p99 improves \{gain_i}% in v2.3 (virtual data)"),
+    c.render(label=Some("ECDF of request latency: p99 improves \{gain_i}% in v2.3 (virtual data)")),
   )
 }

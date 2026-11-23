@@ -7,7 +7,7 @@ import { "podhmo/svg-gen" @s }
 // patterns that 168 points of spaghetti lines would not.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let traffic = @s.traffic()
 
   // find the peak cell for the conclusion title
@@ -24,7 +24,7 @@ fn main {
     }
   }
 
-  let p = @s.Plot::new(
+  let p = @s.Plot(
     c,
     {
       title: "\{@s.traffic_days[peak_d]} \{peak_h} 時台のスパイクと週末の谷（仮想データ）",
@@ -35,7 +35,7 @@ fn main {
     (0.0, 7.0),
     w=440.0,
     h=150.0,
-    xtitle="時刻 (JST)",
+    xtitle=Some("時刻 (JST)"),
   )
   p.frame(
     xticks=[0.0, 6.0, 12.0, 18.0, 24.0].map(fn(h) {
@@ -52,7 +52,7 @@ fn main {
     p.x1 - 80.0,
     p.y0 - 24.0,
     fmt=fn(v) { "\{v.round().to_int64()}" },
-    label="req/s",
+    label=Some("req/s"),
   )
 
   if peak_d != 1 {
@@ -60,6 +60,6 @@ fn main {
   }
 
   println(
-    c.render(label="traffic heatmap: peak on \{@s.traffic_days[peak_d]} around \{peak_h}:00, weekends quiet (virtual data)"),
+    c.render(label=Some("traffic heatmap: peak on \{@s.traffic_days[peak_d]} around \{peak_h}:00, weekends quiet (virtual data)")),
   )
 }

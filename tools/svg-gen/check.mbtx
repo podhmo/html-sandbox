@@ -419,7 +419,7 @@ async fn check(file : String) -> Unit {
         }
         // strip any nested tags (tspan etc.), then trim
         let body_text = strip_tags(body).trim().to_owned()
-        let w = @s.text_width(body_text, size)
+        let w = @s.text_width(body_text, size=size)
         let lx = match a.get("text-anchor") {
           Some("middle") => x - w / 2.0
           Some("end") => x - w

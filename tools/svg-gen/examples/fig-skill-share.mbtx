@@ -10,7 +10,7 @@ import { "podhmo/svg-gen" @s }
 // standpoint, or the voice.
 
 fn main {
-  let c = @s.Canvas::new(margin=12.0)
+  let c = @s.Canvas(margin=12.0)
 
   // (section, non-blank lines, category index)
   let rows = [
@@ -116,6 +116,6 @@ fn main {
   }
 
   println(
-    c.render(label="bar per SKILL.md section by line count: figure sections take 67 of 128 lines, content honesty 8, and no line covers narrator, standpoint or voice"),
+    c.render(label=Some("bar per SKILL.md section by line count: figure sections take 67 of 128 lines, content honesty 8, and no line covers narrator, standpoint or voice")),
   )
 }

@@ -6,7 +6,7 @@ import { "podhmo/svg-gen" @s }
 // points. Every later figure reuses this set (geom.mbt sites).
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   for p in @s.sites {
     c.raw(
       "<circle cx=\"\{p.0}\" cy=\"\{p.1}\" r=\"3.5\" fill=\"currentColor\"/>",
@@ -14,6 +14,6 @@ fn main {
     )
   }
   println(
-    c.render(label="the shared input: ten points, no structure yet"),
+    c.render(label=Some("the shared input: ten points, no structure yet")),
   )
 }

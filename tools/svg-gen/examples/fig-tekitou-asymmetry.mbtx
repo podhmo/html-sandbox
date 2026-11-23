@@ -10,7 +10,7 @@ import { "podhmo/svg-gen" @s }
 // criterion; the drift tracks that asymmetry.
 
 fn main {
-  let c = @s.Canvas::new()
+  let c = @s.Canvas()
   let token_col = c.color(2) // green — the "正解" mark
   let loose = c.color(3) // vermillion — the "テキトー" end
   let r = 20.0
@@ -87,6 +87,6 @@ fn main {
   c.text(360.0, 266.0, "対称 → 非対称", size=11.0, opacity=Some(0.8))
 
   println(
-    c.render(label="三つの場面で正解の持ち主が移る。テストでは両者が共有、依頼では受注者だけが持ち、受注者は発注者が評価できないと気づく"),
+    c.render(label=Some("三つの場面で正解の持ち主が移る。テストでは両者が共有、依頼では受注者だけが持ち、受注者は発注者が評価できないと気づく")),
   )
 }

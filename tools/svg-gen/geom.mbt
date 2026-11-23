@@ -66,23 +66,21 @@ pub fn circum(a : Point, b : Point, c : Point) -> Circum {
 /// of triangles whose circumcircle contains it.
 pub fn delaunay(pts : Array[Point]) -> Array[Tri] {
   let n = pts.length()
-  let mut minx = @double.infinity
-  let mut maxx = @double.neg_infinity
-  let mut miny = @double.infinity
-  let mut maxy = @double.neg_infinity
-  for p in pts {
-    minx = minx.min(p.0)
-    maxx = maxx.max(p.0)
-    miny = miny.min(p.1)
-    maxy = maxy.max(p.1)
-  }
+  let (minx, maxx, miny, maxy) = pts.fold(
+    init=(
+      @double.infinity, @double.neg_infinity, @double.infinity, @double.neg_infinity,
+    ),
+    fn(acc, p) {
+      (acc.0.min(p.0), acc.1.max(p.0), acc.2.min(p.1), acc.3.max(p.1))
+    },
+  )
   let cx = (minx + maxx) / 2.0
   let cy = (miny + maxy) / 2.0
   let m = 30.0 * (maxx - minx).max(maxy - miny)
   let work = pts +
     [(cx - 2.0 * m, cy - m), (cx, cy + 2.0 * m), (cx + 2.0 * m, cy - m)]
   let tris : Array[Tri] = [(n, n + 1, n + 2)]
-  for i = 0; i < n; i = i + 1 {
+  for i in 0..<n {
     let p = work[i]
     // cavity: triangle indices whose circumcircle contains p
     let bad : Array[Bool] = Array::make(tris.length(), false)
@@ -92,9 +90,11 @@ pub fn delaunay(pts : Array[Point]) -> Array[Tri] {
         bad[k] = true
       }
     }
-    // boundary edges of the cavity: edges of bad triangles counted
-    // exactly once (insertion-ordered assoc list keeps output stable)
-    let edges : Array[((Int32, Int32), Int32)] = [] // key -> times seen (0/1)
+    // boundary edges of the cavity: edges of bad triangles seen
+    // exactly once, kept in the triangle's own direction. The toggle
+    // (insert on first sight, delete on repeat) mirrors the TS Map,
+    // so the emitted triangle vertex order matches it.
+    let edges : Array[((Int32, Int32), (Int32, Int32))] = [] // key -> directed edge
     for k, t in tris {
       if !bad[k] {
         continue
@@ -103,16 +103,9 @@ pub fn delaunay(pts : Array[Point]) -> Array[Tri] {
         let a = if e.0 == 0 { t.0 } else if e.0 == 1 { t.1 } else { t.2 }
         let b = if e.1 == 0 { t.0 } else if e.1 == 1 { t.1 } else { t.2 }
         let key = if a < b { (a, b) } else { (b, a) }
-        let mut found = false
-        for j = 0; j < edges.length(); j = j + 1 {
-          if edges[j].0 == key {
-            edges[j] = (edges[j].0, edges[j].1 + 1)
-            found = true
-            break
-          }
-        }
-        if !found {
-          edges.push((key, 1))
+        match edges.search_by(fn(e) { e.0 == key }) {
+          Some(j) => edges.remove(j) |> ignore
+          None => edges.push((key, (a, b)))
         }
       }
     }
@@ -128,9 +121,7 @@ pub fn delaunay(pts : Array[Point]) -> Array[Tri] {
       tris.push(t)
     }
     for entry in edges {
-      if entry.1 == 1 {
-        tris.push((entry.0.0, entry.0.1, i))
-      }
+      tris.push((entry.1.0, entry.1.1, i))
     }
   }
   tris.filter(fn(t) { t.0 < n && t.1 < n && t.2 < n })
@@ -146,16 +137,9 @@ pub fn edge_adjacency(tris : Array[Tri]) -> Array[(Int32, Int32, Array[Int32])] 
       let va = if e.0 == 0 { t.0 } else if e.0 == 1 { t.1 } else { t.2 }
       let vb = if e.1 == 0 { t.0 } else if e.1 == 1 { t.1 } else { t.2 }
       let (a, b) = if va < vb { (va, vb) } else { (vb, va) }
-      let mut found = false
-      for j = 0; j < adj.length(); j = j + 1 {
-        if adj[j].0 == a && adj[j].1 == b {
-          adj[j].2.push(k)
-          found = true
-          break
-        }
-      }
-      if !found {
-        adj.push((a, b, [k]))
+      match adj.search_by(fn(e) { e.0 == a && e.1 == b }) {
+        Some(j) => adj[j].2.push(k)
+        None => adj.push((a, b, [k]))
       }
     }
   }
@@ -204,8 +188,8 @@ pub fn hull(pts : Array[Point]) -> Array[Int32] {
 /// bisector, keeping the side nearer to s).
 pub fn voronoi_cell(
   s : Point,
-  sites : Array[Point],
-  rect : Array[Point],
+  sites~ : Array[Point],
+  rect~ : Array[Point],
 ) -> Array[Point] {
   let poly = rect.copy()
   for t in sites {
@@ -218,8 +202,7 @@ pub fn voronoi_cell(
       (p.0 - mid.0) * d.0 + (p.1 - mid.1) * d.1
     }
     let out : Array[Point] = []
-    for i = 0; i < poly.length(); i = i + 1 {
-      let cur = poly[i]
+    for i, cur in poly {
       let prev = poly[(i + poly.length() - 1) % poly.length()]
       let sc = side(cur)
       let sp = side(prev)
@@ -248,7 +231,7 @@ fn isect(a : Point, b : Point, sa : Double, sb : Double) -> Point {
 
 ///|
 /// Shift a point set so several panels can share one canvas.
-pub fn shift(pts : Array[Point], dx : Double, dy : Double) -> Array[Point] {
+pub fn shift(pts : Array[Point], dx~ : Double, dy~ : Double) -> Array[Point] {
   pts.map(fn(p) { (p.0 + dx, p.1 + dy) })
 }
 
@@ -312,8 +295,8 @@ pub fn line_rect(
 /// a ray from the single center along the bisector, clipped to rect.
 pub fn voronoi_segments(
   pts : Array[Point],
-  tris : Array[Tri],
-  rect : (Double, Double, Double, Double),
+  tris~ : Array[Tri],
+  rect~ : (Double, Double, Double, Double),
 ) -> Array[(Point, Point)] {
   let centers = tris.map(fn(t) { circum(pts[t.0], pts[t.1], pts[t.2]).o })
   let out : Array[(Point, Point)] = []
@@ -342,18 +325,24 @@ pub fn voronoi_segments(
     let dir : Point = (-sgn * d.0 / l, -sgn * d.1 / l)
     let o = centers[t[0]]
     // smallest positive t where o + t*dir reaches the rect boundary
-    let mut tmin = @double.infinity
-    for wall in [(rect.0, 0), (rect.2, 0), (rect.1, 1), (rect.3, 1)] {
-      let (w, axis) = wall
-      let dv = if axis == 0 { dir.0 } else { dir.1 }
-      let ov = if axis == 0 { o.0 } else { o.1 }
-      if dv != 0.0 {
-        let tt = (w - ov) / dv
-        if tt > 0.0 && tt < tmin {
-          tmin = tt
+    let tmin = [(rect.0, 0), (rect.2, 0), (rect.1, 1), (rect.3, 1)].fold(
+      init=@double.infinity,
+      fn(tmin, wall) {
+        let (w, axis) = wall
+        let dv = if axis == 0 { dir.0 } else { dir.1 }
+        let ov = if axis == 0 { o.0 } else { o.1 }
+        if dv != 0.0 {
+          let tt = (w - ov) / dv
+          if tt > 0.0 && tt < tmin {
+            tt
+          } else {
+            tmin
+          }
+        } else {
+          tmin
         }
-      }
-    }
+      },
+    )
     out.push((o, (o.0 + dir.0 * tmin, o.1 + dir.1 * tmin)))
   }
   out
@@ -363,32 +352,37 @@ pub fn voronoi_segments(
 /// Sample a function to a polyline for c.path().
 pub fn sample(
   f : (Double) -> Double,
-  x0 : Double,
-  x1 : Double,
+  x0~ : Double,
+  x1~ : Double,
   n~ : Int32 = 64,
 ) -> Array[Point] {
-  let pts : Array[Point] = []
-  for i = 0; i <= n; i = i + 1 {
-    let x = x0 + (x1 - x0) * i.to_double() / n.to_double()
-    pts.push((x, f(x)))
-  }
-  pts
+  [
+    for i in 0..<=n => {
+      let x = x0 + (x1 - x0) * i.to_double() / n.to_double()
+      (x, f(x))
+    }
+  ]
 }
 
 ///|
 /// Sampled polyline -> SVG path data.
 pub fn path_of(pts : Array[Point]) -> String {
-  "M" + pts.map(fn(p) { "\{fixed(p.0, 1)} \{fixed(p.1, 1)}" }).join(" L")
+  "M" + pts.map(fn(p) { "\{fixed(p.0, d=1)} \{fixed(p.1, d=1)}" }).join(" L")
 }
 
 ///|
 /// Filled polygon element (escape hatch for cell/triangle fills).
 pub fn poly_el(
   pts : Array[Point],
-  fill : String,
-  op : Double,
-  extra~ : String = "",
+  fill~ : String,
+  opacity~ : Double,
+  extra~ : String? = None,
 ) -> String {
-  let s = pts.map(fn(p) { fixed(p.0, 1) + "," + fixed(p.1, 1) }).join(" ")
-  "<polygon points=\"\{s}\" fill=\"\{fill}\" fill-opacity=\"\{op}\"\{extra}/>"
+  // +v.toFixed(1) rounds to one decimal and prints without the ".0".
+  let s = pts
+    .map(fn(p) {
+      num((p.0 * 10.0).round() / 10.0) + "," + num((p.1 * 10.0).round() / 10.0)
+    })
+    .join(" ")
+  "<polygon points=\"\{s}\" fill=\"\{fill}\" fill-opacity=\"\{opacity}\"\{extra.unwrap_or("")}/>"
 }
