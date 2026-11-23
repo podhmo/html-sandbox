@@ -1,0 +1,71 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-gom-scope-escape.mbtx -- where a Scope handle `s` may go.
+// The dashed region is the Scope.run body, the only stretch of
+// time in which registering on `s` works; uses inside it are
+// accepted, uses that carry `s` past its edge are E0418.
+
+fn main {
+  let c = @s.Canvas::new()
+  c.text(0.0, 0.0, "Scope のハンドル s が行ってよい場所", size=15.0)
+  c.text(
+    0.0,
+    20.0,
+    "破線の枠が Scope.run の本体。枠の外へ s を運ぶものは E0418",
+    size=11.0,
+    opacity=Some(0.65),
+  )
+
+  let body = c.box(0.0, 44.0, @s.Fixed(330.0), 300.0, dash="6 4")
+  c.text(body.x + 14.0, body.y + 22.0, "Scope.run <| fn s -> { ... }", size=12.0)
+
+  let ok = c.color(2)
+  let ng = c.color(3)
+  let inside = [
+    "Scope.defer s (fn () -> ...)",
+    "helper s r",
+    "List.iter (fn x -> ... s ...) xs",
+    "(fn () -> ... s ...) ()",
+    "add (read s)",
+  ]
+  let mut y = body.y + 48.0
+  for t in inside {
+    ignore(
+      c.box(body.x + 20.0, y, @s.Auto, 36.0, label=t, size=12.0, color=ok),
+    )
+    y = y + 50.0
+  }
+
+  let outside = [
+    "return s",
+    "{ scope = s } / Some s",
+    "Task.spawn (fn () -> ... s ...)",
+    "外側の Scope の cleanup が s を捕捉",
+    "reg s（s を持つ部分適用）",
+  ]
+  let ox = body.x + body.w + 110.0
+  y = body.y + 34.0
+  for t in outside {
+    let b = c.box(ox, y, @s.Auto, 36.0, label=t, size=12.0, color=ng, dash="4 3")
+    c.arrow(
+      (body.x + body.w - 30.0, b.y + 18.0),
+      c.anchor(b, @s.W),
+      color=ng,
+      width=1.5,
+    )
+    y = y + 56.0
+  }
+  c.text(
+    body.x + body.w + 14.0,
+    body.y + body.h + 22.0,
+    "枠を越える矢印 = Scope が閉じた後まで s が残る",
+    size=11.0,
+    opacity=Some(0.75),
+  )
+
+  println(
+    c.render(label="a dashed region for the Scope.run body holds the accepted uses of s (registration, passing to a helper, a non-escaping List.iter lambda, an immediate call, an eager argument); arrows cross its edge to the rejected uses (returning s, storing it, Task.spawn, an outer cleanup capturing it, a partial application holding it)"),
+  )
+}

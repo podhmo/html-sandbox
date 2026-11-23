@@ -1,0 +1,95 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-gom-scope-lifetime.mbtx -- how long a resource opened inside
+// an `if` lives under three cleanup designs. Horizontal position
+// is program order; each bar is the interval during which `f`
+// is open.
+
+fn main {
+  let c = @s.Canvas::new()
+  let x0 = 170.0
+  // Program points, left to right.
+  let pts = [
+    (x0, "関数の\nはじめ"),
+    (x0 + 120.0, "if c {\nf を開く"),
+    (x0 + 250.0, "if を\n抜ける"),
+    (x0 + 380.0, "f を\n使う"),
+    (x0 + 510.0, "Scope の\n終わり"),
+    (x0 + 640.0, "関数の\n終わり"),
+  ]
+  let start = pts[0].0
+  let open = pts[1].0
+  let if_end = pts[2].0
+  let use = pts[3].0
+  let scope_end = pts[4].0
+  let fn_end = pts[5].0
+  if !(open < if_end && if_end < use && use < scope_end && scope_end < fn_end) {
+    abort("program points are ordered")
+  }
+
+  c.text(0.0, 0.0, "if の中で開いた f はいつ閉じられるか", size=15.0)
+  c.text(
+    0.0,
+    20.0,
+    "横軸はプログラムの実行順。帯は f が開いている区間（模式図）",
+    size=11.0,
+    opacity=Some(0.65),
+  )
+
+  let axis_y = 60.0
+  for p in pts {
+    let (px, label) = p
+    c.line((px, axis_y), (px, axis_y + 250.0), dash="2 4", opacity=Some(0.35))
+    let lines = label.split("\n").to_array()
+    c.text(px, axis_y - 14.0, lines[0].to_owned(), anchor=@s.Middle, size=11.0)
+    c.text(px, axis_y + 0.0, lines[1].to_owned(), anchor=@s.Middle, size=11.0)
+  }
+
+  let rows = [
+    ("(B) ブロック末尾\nで走る defer", open, if_end, 3, "5 3"),
+    ("(C) Go の defer\n（関数スコープ）", open, fn_end, 0, ""),
+    ("(E) Scope.run\n（明示的な境界）", open, scope_end, 2, ""),
+  ]
+  let h = 18.0
+  for k, r in rows {
+    let (name, from, to, i, dash) = r
+    let y = axis_y + 40.0 + k.to_double() * 70.0
+    let names = name.split("\n").to_array()
+    c.text(150.0, y - 6.0, names[0].to_owned(), anchor=@s.End, size=12.0)
+    c.text(150.0, y + 10.0, names[1].to_owned(), anchor=@s.End, size=11.0, opacity=Some(0.75))
+    let col = c.color(i)
+    let dash_attr = if dash == "" {
+      ""
+    } else {
+      " stroke-dasharray=\"\{dash}\""
+    }
+    c.raw(
+      "<rect x=\"\{from}\" y=\"\{y - h / 2.0}\" width=\"\{to - from}\" height=\"\{h}\" rx=\"4\" fill=\"\{col}\" fill-opacity=\"0.45\" stroke=\"\{col}\" stroke-width=\"1.5\"\{dash_attr}/>",
+      covered=[(from, y - h / 2.0), (to, y + h / 2.0)],
+    )
+    if to < use {
+      c.text(use, y + 1.0, "閉じた後に使う", anchor=@s.Middle, central=true, size=11.0)
+      c.line((use - 46.0, y + 12.0), (use + 46.0, y + 12.0), color=col, width=2.0)
+    }
+  }
+
+  // The explicit scope bracket for (E): the body of Scope.run.
+  let ey = axis_y + 40.0 + 2.0 * 70.0 + 26.0
+  c.line((start + 40.0, ey), (scope_end, ey), width=1.5)
+  c.line((start + 40.0, ey - 5.0), (start + 40.0, ey + 5.0), width=1.5)
+  c.line((scope_end, ey - 5.0), (scope_end, ey + 5.0), width=1.5)
+  c.text(
+    (start + 40.0 + scope_end) / 2.0,
+    ey + 16.0,
+    "Scope.run <| fn s -> { ... } の本体",
+    anchor=@s.Middle,
+    size=11.0,
+    opacity=Some(0.8),
+  )
+
+  println(
+    c.render(label="three bars over program order: a block-scoped defer closes f when the if ends, before it is used; Go's function-scoped defer keeps it until the function ends; Scope.run keeps it until the explicit scope body ends"),
+  )
+}

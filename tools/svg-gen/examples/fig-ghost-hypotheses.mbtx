@@ -1,0 +1,87 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-ghost-hypotheses.mbtx -- two readings of "the report names a
+// function the code does not have". The refine pass picked (A)
+// without checking; history said (B). Bars: when the name existed
+// in code (left colour) and in the report (right colour). Dashed
+// frame = the unverified guess.
+
+fn main {
+  let c = @s.Canvas::new()
+  let code = c.color(0)
+  let ghost = c.color(3)
+
+  let x0 = 100.0
+  let w = 360.0
+  let tw = x0 + w * 0.15 // report written
+  let tr = x0 + w * 0.85 // refine pass
+
+  let bar = fn(bx0 : Double, bx1 : Double, y : Double, color : String) {
+    c.raw(
+      "<rect x=\"\{bx0}\" y=\"\{y - 6.0}\" width=\"\{bx1 - bx0}\" height=\"12\" rx=\"3\" fill=\"\{color}\" opacity=\"0.45\"/>",
+      covered=[(bx0, y - 6.0), (bx1, y + 6.0)],
+    )
+  }
+
+  let panel = fn(
+    y : Double,
+    title : String,
+    sub : String,
+    code_span : (Double, Double)?,
+    dashed : Bool,
+  ) {
+    let dash_attr = if dashed { " stroke-dasharray=\"5 4\"" } else { "" }
+    c.raw(
+      "<rect x=\"0\" y=\"\{y}\" width=\"\{x0 + w + 20.0}\" height=\"116\" rx=\"10\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\"\{dash_attr} opacity=\"0.6\"/>",
+      covered=[(0.0, y), (x0 + w + 20.0, y + 116.0)],
+    )
+    c.text(12.0, y + 20.0, title, size=12.0)
+    c.text(x0 + w + 8.0, y + 20.0, sub, anchor=@s.End, size=10.0, opacity=Some(0.7))
+    let cy = y + 50.0
+    let ry = y + 78.0
+    c.text(x0 - 10.0, cy, "コード", anchor=@s.End, central=true, size=11.0)
+    c.text(x0 - 10.0, ry, "レポート", anchor=@s.End, central=true, size=11.0)
+    c.line((x0, cy), (x0 + w, cy), opacity=Some(0.25), width=1.0)
+    c.line((x0, ry), (x0 + w, ry), opacity=Some(0.25), width=1.0)
+    match code_span {
+      Some((cs0, cs1)) => bar(cs0, cs1, cy, code)
+      None => ()
+    }
+    bar(tw, x0 + w, ry, ghost)
+    for e in [(tw, "書く"), (tr, "refine")] {
+      let (tx, s) = e
+      c.line((tx, y + 34.0), (tx, y + 92.0), opacity=Some(0.4), width=1.0, dash="2 3")
+      c.text(tx, y + 108.0, s, anchor=@s.Middle, size=9.0, opacity=Some(0.7))
+    }
+  }
+
+  c.text(0.0, 0.0, "「レポートにあってコードに無い」の 2 つの読み方", size=15.0)
+  c.text(
+    0.0,
+    18.0,
+    "模式図。時間は左から右、帯はその名前が存在した期間",
+    size=11.0,
+    opacity=Some(0.65),
+  )
+  panel(
+    34.0,
+    "A: 書いた後でコードから消えた",
+    "refine で選んだ説明 (未確認)",
+    Some((x0, x0 + w * 0.5)),
+    true,
+  )
+  panel(
+    166.0,
+    "B: コードには一度も無かった",
+    "git log -S で確認した事実",
+    None,
+    false,
+  )
+  c.text(0.0, 306.0, "生成: fig-ghost-hypotheses.mbtx", size=10.0, opacity=Some(0.55))
+
+  println(
+    c.render(label="レポートにだけある名前の 2 つの説明。A は書いた後でコードから消えた、B はコードに一度も無かった。確認すると B だった"),
+  )
+}
