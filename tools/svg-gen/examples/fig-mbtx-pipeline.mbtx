@@ -1,0 +1,49 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+fn main {
+  let c = @s.Canvas()
+  // the .mbtx resolution pipeline: everything up to materialization is moon's
+  // build system (moonbuild + mooncake); only the last stage is the compiler
+  let stages = [
+    "1. front matter",
+    "2. resolve",
+    "3. sync",
+    "4. materialize",
+    "5. compile",
+  ]
+  let subs = [
+    "moon.pkg syntax",
+    "registry index",
+    "registry cache",
+    ".mooncakes/",
+    "moonc",
+  ]
+  let xs = [10.0, 148.0, 286.0, 424.0, 562.0]
+  let mut prev : @s.Shape? = None
+  for i, name in stages {
+    let b = c.box(
+      xs[i],
+      40.0,
+      @s.Fixed(110.0),
+      44.0,
+      label=Some(name),
+      color=c.color(i),
+      size=11.0,
+    )
+    c.text(xs[i] + 55.0, 100.0, subs[i], anchor=@s.Middle, size=9.0, opacity=Some(0.6))
+    if prev is Some(p) {
+      c.arrow(
+        c.anchor(p, @s.E),
+        c.anchor(b, @s.W),
+        ends=@s.Single(@s.End),
+        gap=4.0,
+        opacity=Some(0.7),
+      )
+    }
+    prev = Some(b)
+  }
+  c.text(340.0, 150.0, "stages 1-4: moon CLI (moonbuild + mooncake)", anchor=@s.Middle, size=9.0, opacity=Some(0.6))
+  c.text(340.0, 164.0, "stage 5: the compiler sees only resolved package paths", anchor=@s.Middle, size=9.0, opacity=Some(0.6))
+  println(c.render(label=Some("how moon run resolves .mbtx imports: parse front matter, resolve via the registry index, sync the cache, materialize .mooncakes, then compile")))
+}
