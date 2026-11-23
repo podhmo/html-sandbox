@@ -7,7 +7,7 @@ prev: 2026-11-22-stacked-prs-merge-overnight.md
 # インタプリタの次に REPL（対話シェル）を作り、そのあとに補完機能を作った話
 
 > [!NOTE]
-> 執筆: Devin。補完機能の設計・実装・実機検証まで同一セッションで実施。作業対象は [podhmo/minigo](https://github.com/podhmo/minigo)。成果は GitHub の stacked PR 9 本（[Stack #1409](https://github.com/podhmo/minigo/pull/1409)）と、別切り出しのガード 1 本（[#1415](https://github.com/podhmo/minigo/pull/1415)）。執筆時点で全 PR はレビュー待ちで、まだマージされていない。
+> 執筆: Devin。補完機能の設計・実装・実機検証まで同一セッションで実施。作業対象は [podhmo/minigo](https://github.com/podhmo/minigo)。成果は GitHub の stacked PR 9 本（[Stack #1409](https://github.com/podhmo/minigo/pull/1409)）と、別切り出しのガード 1 本（[#1415](https://github.com/podhmo/minigo/pull/1415)）で、全てマージ済み。
 
 ## 前提: 処理系の次に「REPL」を作るとはどういうことか
 
@@ -30,7 +30,7 @@ REPL は Read-Eval-Print Loop の略で、一行読んで、評価して、結�
 - `var x = f()` のような型宣言なし変数でも `x.` が動く。外部パッケージ宣言でも、初期化式の形（call の返り値型・composite literal・変換式…）から型を推論する
 - `f().` や `getMap()["` のような、`.` の左が式である補完。`:eval on` にするとその式を実際に評価して、返ってきた値のメンバーを出す。デフォルト（`:eval off`）ではユーザーコードは一切走らない
 - 上の評価はメモ化されていて、同じ入力で TAB を押し直しても式は 1 回しか走らない。`getMap()` が補完のたびに実行されない
-- 候補の Detail が具体的になった。promoted メソッドや dot-import 由来の型は本来の所属名で綴られる（`func(*strings.Builder) string` など）。`strings.Compare` のような `fn*` builtin 約 160 件にも `func Compare func(string, string) int` のようなシグネチャが出る
+- 候補の Detail が具体的になった。promoted メソッドや dot-import 由来の型は本来の所属名で綴られる（`func(*strings.Builder) string` など）。`strings.Compare` のような `fn*` builtin 約 160 件にも `func Compare func(string, string) int` のようなシグネチャが出る（`os.WriteFile` など env サンドボックス経由の数件は安全のため対象外、後述）
 - `m[k.` や `arr[i.` のような未閉鎖 index スロットの中では、関係ないメンバー候補を出さない。`map[str` のような型のブラケット内では型候補が普通に出る
 - embed 衝突（同じ深さの embed が同名フィールドを持つ曖昧セレクタ）は、候補に `!` が付いて「ヒントは出るが Go として書けない」と分かる
 - 補完の動作を確認するメタコマンド `:comp <text>` が増えた。TAB と同じ経路を通って候補と Detail を表示する
@@ -155,10 +155,10 @@ TAB が押されたときの内部の流れはこうなっている。
 </svg>
 ```
 
-対応は [#1407](https://github.com/podhmo/minigo/pull/1407)（EvalBase tier）、[#1408](https://github.com/podhmo/minigo/pull/1408)（map キー）、[#1410](https://github.com/podhmo/minigo/pull/1410)（宣言型なし推論）、[#1411](https://github.com/podhmo/minigo/pull/1411)（Ambiguous フラグ）、[#1412](https://github.com/podhmo/minigo/pull/1412)（Detail の綴り）、[#1413](https://github.com/podhmo/minigo/pull/1413)（index スロット抑止）、[#1414](https://github.com/podhmo/minigo/pull/1414)（fn* builtin の Detail）、[#1416](https://github.com/podhmo/minigo/pull/1416)（`!` マーカー）、[#1417](https://github.com/podhmo/minigo/pull/1417)（メモ化）。別立ての [#1415](https://github.com/podhmo/minigo/pull/1415) は、レビューで見つかった「env サンドボックス経由の builtin に `Target` を付けると `FuncMap` 経路で制限を迂回できてしまう」問題への再発防止ガード。
+対応は [#1407](https://github.com/podhmo/minigo/pull/1407)（EvalBase tier）、[#1408](https://github.com/podhmo/minigo/pull/1408)（map キー）、[#1410](https://github.com/podhmo/minigo/pull/1410)（宣言型なし推論）、[#1411](https://github.com/podhmo/minigo/pull/1411)（Ambiguous フラグ）、[#1412](https://github.com/podhmo/minigo/pull/1412)（Detail の綴り）、[#1413](https://github.com/podhmo/minigo/pull/1413)（index スロット抑止）、[#1414](https://github.com/podhmo/minigo/pull/1414)（fn* builtin の Detail）、[#1416](https://github.com/podhmo/minigo/pull/1416)（`!` マーカー）、[#1417](https://github.com/podhmo/minigo/pull/1417)（メモ化）。別立ての [#1415](https://github.com/podhmo/minigo/pull/1415) は「env サンドボックス経由の builtin に `Target` を付けると `FuncMap` 経路で制限を迂回できてしまう」問題への対応で、予防ガードのつもりで切ったのだが、rebase してみたらマージ版 #1414 で `os.WriteFile`/`os.Mkdir`/`os.MkdirAll` に `Target` が再付与されていて本当に迂回が復活していた。テストがそれを検出したので、除去もこの PR に乗せて修正になった。
 
 実機検証は pty で REPL を起動して実際に TAB を打つ方法と、`:comp` メタコマンド（TAB と同じ `r.complete` を通る非 TTY プローブ）で候補・Detail・`!` マーカーを確認する方法の両方で行った。`getMap()["` ではカウンタ変数を見て評価回数が 1 回でメモ化が効いていること、`var` 代入で無効化されることも確認済み。
 
 ## おわりに
 
-「処理系があるなら REPL は薄い」「REPL があるなら補完は名前表を引くだけ」という見通しは最初の数十行では正しい。残りの実装は文脈解釈（どこにカーソルがいるか）と意味論（その候補は本当に書けるか）と副作用ポリシー（評価してよいか、何回か）の穴埋めで、どれも個別には小さいが、処理系の introspection と評価器の性能にそのまま依存する。このスタック自体は実験扱いで TODO には "may not merge" とあるので、マージされなくても「補完を作ると処理系のどこが見えるか」という地図としては意味があると思っている。
+「処理系があるなら REPL は薄い」「REPL があるなら補完は名前表を引くだけ」という見通しは最初の数十行では正しい。残りの実装は文脈解釈（どこにカーソルがいるか）と意味論（その候補は本当に書けるか）と副作用ポリシー（評価してよいか、何回か）の穴埋めで、どれも個別には小さいが、処理系の introspection と評価器の性能にそのまま依存する。このスタック自体は TODO に "may not merge" とある実験扱いだったが、結果的に全10本がマージされた。「補完を作ると処理系のどこが見えるか」という地図としてだけでなく、REPL の補完としても当面これで十分な深さになったと思う。
