@@ -1,0 +1,52 @@
+---
+import {
+  "podhmo/svg-gen" @s,
+  "moonbitlang/core/math" @math,
+}
+---
+
+// fig-circumcircle.mbtx -- P2: three non-collinear sites pin down one
+// circle. Two bisectors (dashed) meet at the circumcenter; the circle
+// through the three sites is unique.
+
+fn main {
+  let pts = [@s.sites[0], @s.sites[2], @s.sites[8]]
+  let rect = (0.0, 0.0, 230.0, 230.0)
+  let c = @s.Canvas::new()
+  let cc = @s.circum(pts[0], pts[1], pts[2])
+
+  for e in [(0, 1), (1, 2)] {
+    let bi = @s.bisector(pts[e.0], pts[e.1])
+    let (p, q) = @s.line_rect(bi.mid, bi.dir, rect)
+    c.line(p, q, dash="4 3", opacity=Some(0.6))
+  }
+
+  // The center sits on both bisectors, so it is equidistant to all
+  // three.
+  let d = fn(p : @s.Point) { @math.hypot(p.0 - cc.o.0, p.1 - cc.o.1) }
+  if !(
+      (d(pts[0]) - cc.r).abs() < 1.0e-9 &&
+      (d(pts[1]) - cc.r).abs() < 1.0e-9 &&
+      (d(pts[2]) - cc.r).abs() < 1.0e-9
+    ) {
+    abort("circumcenter must be equidistant to all three sites")
+  }
+
+  ignore(c.circle(cc.o.0, cc.o.1, cc.r, width=1.5))
+  for i, p in pts {
+    c.raw(
+      "<circle cx=\"\{p.0}\" cy=\"\{p.1}\" r=\"4\" fill=\"\{c.color(i)}\"/>",
+      covered=[p],
+    )
+    c.line(p, cc.o, dash="3 3", opacity=Some(0.5), color=c.color(i))
+  }
+  c.raw(
+    "<circle cx=\"\{cc.o.0}\" cy=\"\{cc.o.1}\" r=\"3\" fill=\"currentColor\"/>",
+    covered=[cc.o],
+  )
+  c.text(cc.o.0 + 8.0, cc.o.1, "外心", size=12.0, central=true)
+
+  println(
+    c.render(label="three non-collinear sites: two bisectors meet at the circumcenter, one circle through all three"),
+  )
+}

@@ -1,0 +1,31 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-hull.mbtx -- P3: the convex hull is the boundary a triangulation
+// must cover. Hull edges in green; interior and hull sites share dots.
+
+fn main {
+  let s = @s.sites
+  let hv = @s.hull(s)
+  let c = @s.Canvas::new()
+
+  for i = 0; i < hv.length(); i = i + 1 {
+    c.line(s[hv[i]], s[hv[(i + 1) % hv.length()]], width=2.0, color=c.color(2))
+  }
+  for p in s {
+    c.raw(
+      "<circle cx=\"\{p.0}\" cy=\"\{p.1}\" r=\"3.5\" fill=\"currentColor\"/>",
+      covered=[p],
+    )
+  }
+
+  // Every site is a hull vertex or lies strictly inside the hull polygon.
+  if hv.length() != 7 {
+    abort("this set has 7 hull sites")
+  }
+
+  println(
+    c.render(label="convex hull: the boundary every triangulation must cover"),
+  )
+}

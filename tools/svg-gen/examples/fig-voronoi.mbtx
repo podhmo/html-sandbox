@@ -1,0 +1,49 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-voronoi.mbtx -- V2: the completed Voronoi diagram of the shared
+// set. Dashed cells, one featured cell washed; unbounded cells
+// belong to convex-hull sites (asserted).
+
+fn main {
+  let s = @s.sites
+  let tris = @s.delaunay(s)
+  let clip = (0.0, 0.0, 230.0, 230.0)
+  let c = @s.Canvas::new()
+  let col_vor = c.color(1)
+
+  // Unbounded cells: boundary Delaunay edges (one adjacent triangle)
+  // belong to hull-adjacent site pairs — assert that.
+  let hv = @s.hull(s)
+  for entry in @s.edge_adjacency(tris) {
+    let (ea, eb, ts) = entry
+    if ts.length() == 1 && !(hv.contains(ea) && hv.contains(eb)) {
+      abort("unbounded cell edge between hull sites")
+    }
+  }
+
+  for seg in @s.voronoi_segments(s, tris, clip) {
+    c.line(seg.0, seg.1, dash="4 3", width=1.5, color=col_vor)
+  }
+
+  // one featured cell washed
+  let feat = @s.voronoi_cell(s[3], s, [
+    (clip.0, clip.1),
+    (clip.2, clip.1),
+    (clip.2, clip.3),
+    (clip.0, clip.3),
+  ])
+  c.raw(@s.poly_el(feat, c.color(1), 0.12), covered=feat)
+
+  for p in s {
+    c.raw(
+      "<circle cx=\"\{p.0}\" cy=\"\{p.1}\" r=\"3.5\" fill=\"currentColor\"/>",
+      covered=[p],
+    )
+  }
+
+  println(
+    c.render(label="the Voronoi diagram: every point of the plane assigned to its nearest site"),
+  )
+}
