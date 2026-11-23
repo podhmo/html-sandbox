@@ -162,7 +162,7 @@ pub fn fixed(v : Double, d~ : Int32) -> String {
 
 ///|
 fn fmt_num(v : Double) -> String {
-  v.to_string()
+  num(v)
 }
 
 ///|
@@ -300,7 +300,7 @@ fn sattrs(
     Some(p) => " stroke-dasharray=\"\{p}\""
   }
   let o = match opacity {
-    Some(v) => " opacity=\"\{v}\""
+    Some(v) => " opacity=\"\{num(v)}\""
     None => ""
   }
   " stroke=\"\{color}\"" + w + d + o
@@ -486,7 +486,7 @@ pub fn Plot::dots(
   for p in self.inside(pts) {
     let (x, y) = p
     self.put(
-      "<circle cx=\"\{num(x)}\" cy=\"\{num(y)}\" r=\"\{num(r)}\" fill=\"\{fill}\" fill-opacity=\"\{opacity}\" stroke=\"none\"/>",
+      "<circle cx=\"\{num(x)}\" cy=\"\{num(y)}\" r=\"\{num(r)}\" fill=\"\{fill}\" fill-opacity=\"\{num(opacity)}\" stroke=\"none\"/>",
       [(x, y)],
     )
   }

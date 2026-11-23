@@ -122,7 +122,13 @@ fn esc(s : String) -> String {
 
 ///|
 fn num(v : Double) -> String {
-  v.to_string()
+  // Match JS String(v): integral values print without a fraction
+  // (up to 1e21, where JS switches to exponential notation).
+  if v == v.trunc() && v.abs() < 9.0e18 {
+    v.to_int64().to_string()
+  } else {
+    v.to_string()
+  }
 }
 
 /// Pull a polyline's ends toward its middle by `start`/`end` px.
@@ -307,7 +313,7 @@ fn stroke_attrs(
     Some(p) => " stroke-dasharray=\"\{p}\""
   }
   let o = match opacity {
-    Some(v) => " opacity=\"\{v}\""
+    Some(v) => " opacity=\"\{num(v)}\""
     None => ""
   }
   " stroke=\"\{esc(color)}\"" + w + d + o
@@ -474,7 +480,7 @@ fn Canvas::text_node(
   }
   let bl = if central { " dominant-baseline=\"central\"" } else { "" }
   let o = match opacity {
-    Some(v) => " opacity=\"\{v}\""
+    Some(v) => " opacity=\"\{num(v)}\""
     None => ""
   }
   let w = text_width(s, size~)
@@ -683,7 +689,7 @@ pub fn Canvas::hbars(
   max_w~ : Double = 280,
   label_w~ : Double? = None,
   size~ : Double = 12,
-  value_fmt~ : (Double) -> String = fn(v) { v.to_string() },
+  value_fmt~ : (Double) -> String = num,
   fill_opacity~ : Double = 0.45,
   highlight~ : Int32? = None,
 ) -> Unit {
@@ -714,7 +720,7 @@ pub fn Canvas::hbars(
     }
     let rect = El(
       "<rect x=\"\{num(bar.x)}\" y=\"\{num(by)}\" width=\"\{num(w)}\" height=\"\{num(bar_h)}\"" +
-      " fill=\"currentColor\" fill-opacity=\"\{fill_opacity}\" stroke=\"currentColor\" stroke-width=\"1\"/>",
+      " fill=\"currentColor\" fill-opacity=\"\{num(fill_opacity)}\" stroke=\"currentColor\" stroke-width=\"1\"/>",
       [(x + lw, by), (x + lw + w, by + bar_h)],
     )
     let value = self.text_node(
@@ -752,7 +758,7 @@ pub fn Canvas::highlight(
     Ring =>
       "<rect x=\"\{num(x)}\" y=\"\{num(y)}\" width=\"\{num(w)}\" height=\"\{num(h)}\" rx=\"\{num(r)}\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-dasharray=\"4 3\"/>"
     Wash =>
-      "<rect x=\"\{num(x)}\" y=\"\{num(y)}\" width=\"\{num(w)}\" height=\"\{num(h)}\" rx=\"\{num(r)}\" fill=\"currentColor\" fill-opacity=\"\{opacity}\" stroke=\"none\"/>"
+      "<rect x=\"\{num(x)}\" y=\"\{num(y)}\" width=\"\{num(w)}\" height=\"\{num(h)}\" rx=\"\{num(r)}\" fill=\"currentColor\" fill-opacity=\"\{num(opacity)}\" stroke=\"none\"/>"
   }
   self.backdrop.push(El(el, [(x, y), (x + w, y + h)]))
 }
@@ -846,11 +852,11 @@ pub fn Canvas::render(
     None => 0.0
   }
   let wv = match width {
-    Some(v) => v.to_string()
+    Some(v) => num(v)
     None => w.round().to_int64().to_string()
   }
   let hv = match height {
-    Some(v) => v.to_string()
+    Some(v) => num(v)
     None => h.round().to_int64().to_string()
   }
   let size = " width=\"\{wv}\" height=\"\{hv}\""
