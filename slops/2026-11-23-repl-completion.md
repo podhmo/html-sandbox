@@ -29,43 +29,42 @@ TAB が押されたときにやること自体は単純で、カーソルより�
 今回作ったものの内部はこういう流れになっている。
 
 ```svg
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -76 1032.65 186" width="1033" height="186" role="img" aria-label="TAB completion pipeline: context scan, two base-resolution tiers, member enumeration, splice">
-<rect x="0" y="0" width="124.95000000000002" height="56" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
-<text x="62.47500000000001" y="19.549999999999997" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">`strings.To`</text>
-<text x="62.47500000000001" y="36.45" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">line + cursor</text>
-<rect x="158.95000000000002" y="0" width="139.25000000000003" height="56" rx="8" fill="none" stroke="#3B82C4" stroke-width="1.5"/>
-<text x="228.57500000000005" y="19.549999999999997" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">completeContext</text>
-<text x="228.57500000000005" y="36.45" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">scanner offsets</text>
-<rect x="332.20000000000005" y="0" width="167.85000000000005" height="56" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
-<text x="416.12500000000006" y="19.549999999999997" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">resolveBase</text>
-<text x="416.12500000000006" y="36.45" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">what is left of `.`</text>
-<rect x="158.95000000000002" y="-66" width="117.79999999999998" height="36" rx="8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="5 3" opacity="0.85"/>
-<text x="217.85000000000002" y="-48" font-size="12" text-anchor="middle" dominant-baseline="central" fill="currentColor" opacity="0.85">no candidates</text>
-<rect x="534.0500000000001" y="-34" width="124.95000000000002" height="56" rx="8" fill="none" stroke="#00A876" stroke-width="1.5"/>
-<text x="596.5250000000001" y="-14.450000000000001" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">resolveExpr</text>
-<text x="596.5250000000001" y="2.450000000000001" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">AST walk only</text>
-<rect x="534.0500000000001" y="44" width="153.55000000000004" height="56" rx="8" fill="none" stroke="#D55E00" stroke-width="1.5"/>
-<text x="610.825" y="63.55" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">evalBase (opt-in)</text>
-<text x="610.825" y="80.45" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">EvalExpr + memo</text>
-<rect x="693.0000000000001" y="-14" width="160.70000000000005" height="56" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
-<text x="773.3500000000001" y="5.549999999999999" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">members / keys</text>
-<text x="773.3500000000001" y="22.450000000000003" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">dedupe + Ambiguous</text>
-<rect x="887.7000000000002" y="-14" width="124.95000000000002" height="56" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
-<text x="950.1750000000002" y="5.549999999999999" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">splice prefix</text>
-<text x="950.1750000000002" y="22.450000000000003" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">or list</text>
-<path d="M127.95000000000002 28 L155.95000000000002 28" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M146.95000000000002 32.05 L155.95000000000002 28 L146.95000000000002 23.95" fill="none" stroke="currentColor" stroke-width="1.5"/>
-<path d="M301.20000000000005 28 L329.20000000000005 28" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M320.20000000000005 32.05 L329.20000000000005 28 L320.20000000000005 23.95" fill="none" stroke="currentColor" stroke-width="1.5"/>
-<path d="M502.1713203435597 25.878679656440358 L531.9286796564404 -3.878679656440357" fill="none" stroke="#00A876" stroke-width="1.5"/><path d="M528.4285010895669 5.34906383804409 L531.9286796564404 -3.878679656440357 L522.700936161956 -0.37850108956694184" fill="none" stroke="#00A876" stroke-width="1.5"/>
-<path d="M501.88434250322734 30.3738550041765 L532.2156574967728 69.6261449958235" fill="none" stroke="#D55E00" stroke-width="1.5" stroke-dasharray="5 3"/><path d="M523.5079257314526 64.98094236265085 L532.2156574967728 69.6261449958235 L529.9173342427291 60.028217603937144" fill="none" stroke="#D55E00" stroke-width="1.5" stroke-dasharray="5 3"/>
-<path d="M661.7854300726559 -7.114172029062311 L679.0000000000001 -14 L770.3500000000001 -14" fill="none" stroke="#00A876" stroke-width="1.5"/><path d="M761.3500000000001 -9.95 L770.3500000000001 -14 L761.3500000000001 -18.05" fill="none" stroke="#00A876" stroke-width="1.5"/>
-<path d="M689.2641005886758 69.50384911698647 L707.6000000000001 42 L770.3500000000001 42" fill="none" stroke="#D55E00" stroke-width="1.5" stroke-dasharray="5 3"/><path d="M761.3500000000001 46.05 L770.3500000000001 42 L761.3500000000001 37.95" fill="none" stroke="#D55E00" stroke-width="1.5" stroke-dasharray="5 3"/>
-<path d="M856.7000000000002 14 L884.7000000000002 14" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M875.7000000000002 18.05 L884.7000000000002 14 L875.7000000000002 9.95" fill="none" stroke="currentColor" stroke-width="1.5"/>
-<path d="M227.56509609299184 -2.8249060335893614 L218.85990390700823 -27.17509396641064" fill="none" stroke="#E69F00" stroke-width="1.5" stroke-dasharray="5 3"/><path d="M225.70323877337847 -20.06374614010362 L218.85990390700823 -27.17509396641064 L218.07599248268718 -17.33700559118149" fill="none" stroke="#E69F00" stroke-width="1.5" stroke-dasharray="5 3"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -10 358.50000000000006 486" width="359" height="486" role="img" aria-label="TAB completion pipeline: context scan, two base-resolution tiers, member enumeration, splice">
+<rect x="170" y="0" width="124.95000000000002" height="56" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
+<text x="232.47500000000002" y="19.549999999999997" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">`strings.To`</text>
+<text x="232.47500000000002" y="36.45" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">line + cursor</text>
+<rect x="170" y="82" width="139.25000000000003" height="56" rx="8" fill="none" stroke="#3B82C4" stroke-width="1.5"/>
+<text x="239.625" y="101.55" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">completeContext</text>
+<text x="239.625" y="118.45" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">scanner offsets</text>
+<rect x="170" y="164" width="167.85000000000005" height="56" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
+<text x="253.925" y="183.55" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">resolveBase</text>
+<text x="253.925" y="200.45" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">what is left of `.`</text>
+<rect x="10" y="92" width="140" height="36" rx="8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="5 3" opacity="0.85"/>
+<text x="80" y="110" font-size="12" text-anchor="middle" dominant-baseline="central" fill="currentColor" opacity="0.85">no candidates</text>
+<rect x="0" y="246" width="124.95000000000002" height="56" rx="8" fill="none" stroke="#00A876" stroke-width="1.5"/>
+<text x="62.47500000000001" y="265.55" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">resolveExpr</text>
+<text x="62.47500000000001" y="282.45" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">AST walk only</text>
+<rect x="184.95000000000002" y="246" width="153.55000000000004" height="56" rx="8" fill="none" stroke="#D55E00" stroke-width="1.5"/>
+<text x="261.725" y="265.55" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">evalBase (opt-in)</text>
+<text x="261.725" y="282.45" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">EvalExpr + memo</text>
+<rect x="170" y="328" width="160.70000000000005" height="56" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
+<text x="250.35000000000002" y="347.55" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">members / keys</text>
+<text x="250.35000000000002" y="364.45" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">dedupe + Ambiguous</text>
+<rect x="170" y="410" width="124.95000000000002" height="56" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
+<text x="232.47500000000002" y="429.55" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">splice prefix</text>
+<text x="232.47500000000002" y="446.45" font-size="13" text-anchor="middle" dominant-baseline="central" fill="currentColor">or list</text>
+<path d="M233.27046944906314 58.89261617841137 L238.82953055093688 79.10738382158863" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M232.53809036289215 71.50341904258973 L238.82953055093688 79.10738382158863 L240.34815404460284 69.35565153011929" fill="none" stroke="currentColor" stroke-width="1.5"/>
+<path d="M241.07075624931647 140.62864772602995 L252.47924375068354 161.37135227397005" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M244.59330057259373 155.43718003245743 L252.47924375068354 161.37135227397005 L251.69064943287455 151.533638159303" fill="none" stroke="currentColor" stroke-width="1.5"/>
+<path d="M250.95228789753878 220.4037112283311 L65.44771210246122 245.5962887716689" fill="none" stroke="#00A876" stroke-width="1.5"/><path d="M73.82083825159786 240.3719937483529 L65.44771210246122 245.5962887716689 L74.91085856809188 248.3983164249982" fill="none" stroke="#00A876" stroke-width="1.5"/>
+<path d="M254.78704365669904 222.87347885566345 L260.862956343301 243.12652114433655" fill="none" stroke="#D55E00" stroke-width="1.5" stroke-dasharray="5 3"/><path d="M254.3976289180582 235.6698435138899 L260.862956343301 243.12652114433655 L262.15602182834954 233.3423256408025" fill="none" stroke="#D55E00" stroke-width="1.5" stroke-dasharray="5 3"/>
+<path d="M65.44667852035293 302.41125025431364 L247.3783214796471 327.58874974568636" fill="none" stroke="#00A876" stroke-width="1.5"/><path d="M237.90809807526492 330.3667649852219 L247.3783214796471 327.58874974568636 L239.01847376191174 322.34323298026897" fill="none" stroke="#00A876" stroke-width="1.5"/>
+<path d="M260.5225434979409 304.74847200470657 L251.55245650205916 325.25152799529343" fill="none" stroke="#D55E00" stroke-width="1.5" stroke-dasharray="5 3"/><path d="M251.44938880188263 315.3827957033939 L251.55245650205916 325.25152799529343 L258.87026321459035 318.6294282589535" fill="none" stroke="#D55E00" stroke-width="1.5" stroke-dasharray="5 3"/>
+<path d="M248.6504135313388 386.4721257725981 L234.1745864686612 407.5278742274019" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M235.93597608163734 397.817055176915 L234.1745864686612 407.5278742274019 L242.61071566765222 402.40593864230027" fill="none" stroke="currentColor" stroke-width="1.5"/>
+<path d="M167 110 L153 110" fill="none" stroke="#E69F00" stroke-width="1.5" stroke-dasharray="5 3"/><path d="M162 105.95 L153 110 L162 114.05" fill="none" stroke="#E69F00" stroke-width="1.5" stroke-dasharray="5 3"/>
 </svg>
-
 ```
 
-図は `tools/svg-gen` の PALETTE（colorful オプション）で生成した `examples/fig-repl-completion-pipe.ts` の出力。右上の緑のルートが「AST を歩くだけ」の静的解決、その下の朱色の破線ルートが「実際に式を評価する」opt-in の tier、左上の破線が「この文脈では候補を出さない」という抑止出口。
+図は `tools/svg-gen` の PALETTE（colorful オプション）で生成した `examples/fig-repl-completion-pipe.ts` の出力。上から順に文脈解釈・基底式の解決・メンバー列挙と流れて、resolveBase の下で緑の「AST を歩くだけ」の静的解決と、朱色の破線の「実際に式を評価する」opt-in tier に分かれる。左側の破線が「この文脈では候補を出さない」という抑止出口。スマートフォンの表示幅でも潰れないよう縦長のレイアウトにしてある。
 
 ### 一番基礎的な補完は本当に手軽
 
