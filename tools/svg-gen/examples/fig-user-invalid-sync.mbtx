@@ -1,0 +1,103 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// aria-invalid x :user-invalid sync: what the browser knows vs.
+// what the script writes, on blur of an emptied required
+// textarea. Two lanes — pseudo-class (interaction-gated,
+// automatic) and ARIA (written by JS at the same moment) —
+// converging on the announcer + describedby link.
+
+fn main {
+  let c = @s.Canvas::new()
+
+  c.text(
+    14.0,
+    18.0,
+    "user action: empty a required textarea, then Tab away",
+    size=12.0,
+    opacity=Some(0.7),
+  )
+
+  let browser = c.box(
+    20.0,
+    44.0,
+    @s.Auto,
+    64.0,
+    label=":user-invalid\nUA が判定 (interaction後のみ)",
+    color=c.color(0),
+    size=12.0,
+  )
+  let sync = c.box(
+    320.0,
+    44.0,
+    @s.Auto,
+    64.0,
+    label="form-errors.js\nblur capture → syncAria(el, true)",
+    color=c.color(1),
+    size=12.0,
+  )
+  c.arrow(c.anchor(browser, @s.E), c.anchor(sync, @s.W), width=1.5)
+  c.text(268.0, 56.0, "matches?", size=10.0, opacity=Some(0.7))
+
+  let aria = c.box(
+    600.0,
+    8.0,
+    @s.Auto,
+    52.0,
+    label="aria-invalid=\"true\"\nserver-flagged は復元",
+    color=c.color(2),
+    size=12.0,
+  )
+  let desc = c.box(
+    600.0,
+    76.0,
+    @s.Auto,
+    52.0,
+    label="aria-describedby += #comment-error\n表示中だけリンク",
+    color=c.color(3),
+    size=12.0,
+  )
+  let announce = c.box(
+    600.0,
+    144.0,
+    @s.Auto,
+    52.0,
+    label="live region (polite)\n\"Add a comment: Comment is required.\"",
+    color=c.color(4),
+    size=12.0,
+  )
+  c.arrow(c.anchor(sync, @s.E), c.anchor(aria, @s.W), width=1.5)
+  c.arrow(c.anchor(sync, @s.E), c.anchor(desc, @s.W), width=1.5)
+  c.arrow(c.anchor(sync, @s.E), c.anchor(announce, @s.W), width=1.5)
+
+  ignore(
+    c.box(
+      20.0,
+      148.0,
+      @s.Auto,
+      48.0,
+      label="CSS (従来から)\n.field:has(:user-invalid) → 赤表示",
+      size=12.0,
+      dash="5 4",
+    ),
+  )
+  c.text(
+    24.0,
+    228.0,
+    "before: visual only — AT は気付けない",
+    size=11.0,
+    opacity=Some(0.65),
+  )
+  c.text(
+    600.0,
+    228.0,
+    "after: 見た目と同じ瞬間に ARIA 側も更新",
+    size=11.0,
+    opacity=Some(0.65),
+  )
+
+  println(
+    c.render(label="必須 textarea を空にして blur した瞬間に、form-errors.js が :user-invalid を見て aria-invalid・aria-describedby・polite live region を同時更新する流れ"),
+  )
+}

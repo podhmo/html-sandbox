@@ -1,0 +1,58 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-conflict-files.mbtx -- which files conflicted in the
+// auto-fix rebase loop. The point: 81 of 114 conflicts were the
+// line-budget file, not code.
+
+fn main {
+  let c = @s.Canvas::new()
+
+  // conflicted-path counts from the fix loop log, grouped:
+  //  - internal/archcheck/budgets.go: the file-line-count ratchet
+  //  - docs/next/ja/TODO.md, TODO.md, open-questions.md, follow-up.md:
+  //    task/checklist merges
+  //  - everything else: real code/tests (engine_bench_test.go,
+  //    typehint.go, ...)
+  let groups = [("budgets.go", 81), ("TODO / docs系", 21), ("コード・テスト", 12)]
+  let bs = groups.mapi(fn(i, g) {
+    let (_, n) = g
+    @s.Bin::{ x0: i.to_double() + 0.12, x1: i.to_double() + 0.88, n }
+  })
+
+  let p = @s.Plot::new(
+    c,
+    {
+      title: "コンフリクトしたファイルの内訳 — ほぼ記録用ファイル",
+      subtitle: "自動rebase-fixループのログに現れたコンフリクト154件のうち114ファイル分",
+      footnote: "出典: fixループのログ (実測) / n = 114 ファイル / 生成: tools/svg-gen/examples/fig-conflict-files.mbtx",
+    },
+    (-0.35, 3.1),
+    (0.0, 90.0),
+    w=400.0,
+    h=170.0,
+    xtitle="コンフリクトしたファイル",
+    ytitle="件数",
+    grid=true,
+  )
+  p.frame(
+    xticks=groups.mapi(fn(i, g) {
+      let (label, _) = g
+      @s.Lab(i.to_double() + 0.5, label)
+    }),
+  )
+  p.data(fn(p) { p.histogram(bs, color=c.color(1)) })
+
+  let total = groups.fold(init=0, fn(acc, g) { acc + g.1 })
+  if total != 114 {
+    abort("114 files")
+  }
+  if !(groups[0].1 > groups[1].1 * 3) {
+    abort("budgets.go dominates — the figure exists to show that")
+  }
+
+  println(
+    c.render(label="bar chart: budgets.go 81 conflicts, TODO/docs files 21, code and tests 12"),
+  )
+}
