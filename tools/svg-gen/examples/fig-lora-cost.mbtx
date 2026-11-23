@@ -1,0 +1,45 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-lora-cost.mbtx -- listed trainer prices for one LoRA run
+// (1000 steps where stated), November 2026 price pages. Not
+// measured spend: list prices gathered during the investigation.
+// Local GPU is time, not a fee, so it is noted in text rather
+// than as a bar.
+
+fn main {
+  let c = @s.Canvas::new()
+
+  let usd = [
+    @s.Hbar::{ label: "Replicate FLUX.1 dev", value: 1.46 },
+    @s.Hbar::{ label: "fal FLUX.1 dev fast", value: 2.0 },
+    @s.Hbar::{ label: "fal Klein系", value: 4.3 },
+    @s.Hbar::{ label: "fal FLUX.2 dev", value: 6.4 },
+  ]
+
+  c.hbars(usd, x=0.0, y=0.0, value_fmt=fn(v) { "$\{v}" }, highlight=Some(0))
+  c.text(
+    160.0,
+    -16.0,
+    "LoRA学習1回あたりの表示価格 (2026-11, 各社の価格ページ)",
+    size=11.0,
+    opacity=Some(0.6),
+  )
+  c.text(
+    160.0,
+    150.0,
+    "local GPU (FluxGym等, 12GB VRAM) はGPU時間のみ。CivitaiはBuzz建て",
+    size=11.0,
+    opacity=Some(0.7),
+  )
+
+  for i, k in usd {
+    if i > 0 && !(usd[i - 1].value <= k.value) {
+      abort("bars are sorted ascending")
+    }
+  }
+  println(
+    c.render(label="listed prices for one LoRA training run: Replicate FLUX.1 dev 1.46 USD, fal FLUX.1 dev 2 USD, fal Klein 4.3 USD, fal FLUX.2 dev 6.4 USD"),
+  )
+}

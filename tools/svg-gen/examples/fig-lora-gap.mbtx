@@ -1,0 +1,46 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-lora-gap.mbtx -- the real blocker is not training cost ($2)
+// but the format gap: the pipeline ends in PNG, and slops bundles
+// cannot host raster. SVG went through the same question already
+// and got an embed route; MathML (issue #73) is the same family
+// of question, still open.
+
+fn main {
+  let c = @s.Canvas::new(margin=12.0)
+
+  let data = c.box(20.0, 60.0, @s.Auto, 40.0, label="DADS素材\n74枚", color=c.color(0))
+  let train = c.box(160.0, 60.0, @s.Auto, 40.0, label="学習\n~$2", color=c.color(1))
+  let lora = c.box(300.0, 60.0, @s.Auto, 40.0, label="LoRA\n.safetensors", color=c.color(2))
+  let png = c.box(510.0, 60.0, @s.Auto, 40.0, label="生成\nPNG", color=c.color(3))
+  let wall = c.box(660.0, 60.0, @s.Auto, 40.0, label="slops\nPNG不可", color=c.color(4))
+
+  c.arrow(c.anchor(data, @s.E), c.anchor(train, @s.W))
+  c.arrow(c.anchor(train, @s.E), c.anchor(lora, @s.W))
+  c.arrow(c.anchor(lora, @s.E), c.anchor(png, @s.W))
+  c.arrow(c.anchor(png, @s.E), c.anchor(wall, @s.W), dash="6 4")
+
+  // the same wall, earlier: SVG already got its embed route
+  let svg = c.box(310.0, 170.0, @s.Auto, 40.0, label="SVG\nフェンス", color=c.color(5))
+  let ok = c.box(660.0, 170.0, @s.Auto, 40.0, label="埋め込み可", color=c.color(1))
+  c.arrow(c.anchor(svg, @s.E), c.anchor(ok, @s.W))
+
+  // the same question, still open: MathML
+  let math = c.box(310.0, 250.0, @s.Auto, 40.0, label="MathML\nissue #73")
+  let open = c.box(660.0, 250.0, @s.Auto, 40.0, label="未回答")
+  c.arrow(c.anchor(math, @s.E), c.anchor(open, @s.W), dash="4 4")
+
+  c.text(
+    20.0,
+    320.0,
+    "同じ壁: 「このフォーマットにその表現形式を載せるか」— PNGがぶつかるのは3例目",
+    size=12.0,
+    opacity=Some(0.8),
+  )
+
+  println(
+    c.render(label="pipeline from DADS assets to a PNG that slops cannot host; SVG already has an embed route, MathML issue 73 is still open"),
+  )
+}

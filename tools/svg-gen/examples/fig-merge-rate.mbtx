@@ -1,0 +1,55 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-merge-rate.mbtx -- PR merges completed per hour during the
+// 2026-11-21/22 stacked-chain sweep (podhmo/minigo #1111..#1395).
+// Real data: squash-commit committer timestamps from main.
+
+fn main {
+  let c = @s.Canvas::new()
+
+  // merges per hour, 20:00 -> 06:00 JST (x = hours since 20:00).
+  let counts = [44, 27, 36, 42, 44, 30, 10, 13, 12, 13, 7]
+  let bs = counts.mapi(fn(i, n) {
+    @s.Bin::{ x0: i.to_double() + 0.08, x1: i.to_double() + 0.92, n }
+  })
+  let clock = fn(i : Int) { "\{(20 + i) % 24}:00" }
+
+  let p = @s.Plot::new(
+    c,
+    {
+      title: "1時間あたりのマージ完了数 — 02時すぎから鈍化した",
+      subtitle: "podhmo/minigo 2026-11-21 20:00 → 11-22 06:30 (JST)、squash merge完了コミット時刻で集計",
+      footnote: "出典: main のコミット時刻 (実測) / n = 278 マージ / 生成: tools/svg-gen/examples/fig-merge-rate.mbtx",
+    },
+    (-0.4, 11.2),
+    (0.0, 50.0),
+    w=430.0,
+    h=170.0,
+    xtitle="時刻 (JST)",
+    ytitle="マージ数 / 時間",
+    grid=true,
+  )
+  p.frame(
+    xticks=[0, 2, 4, 6, 8, 10].map(fn(i) {
+      @s.Lab(i.to_double() + 0.5, clock(i))
+    }),
+  )
+  p.data(fn(p) {
+    p.histogram(bs, color=c.color(0))
+    p.vline(6.0, label="手動対応が増え始めた帯")
+  })
+
+  let total = counts.fold(init=0, fn(acc, v) { acc + v })
+  if total != 278 {
+    abort("278 merges")
+  }
+  if !(counts[0] > 40 && counts[10] < 10) {
+    abort("the early/late rate contrast is the point of the figure")
+  }
+
+  println(
+    c.render(label="bar chart of PR merges per hour: ~40/h until 01:00, then ~10/h after 02:00"),
+  )
+}
