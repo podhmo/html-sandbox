@@ -1,0 +1,60 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-report-space.mbtx -- the five report variants placed on two
+// axes: x = formality (informal -> formal), y = distance to the
+// reader (future self -> strangers). The position carries the
+// meaning: a personal memo and an incident report share the
+// design system but sit at opposite corners of the space a
+// report skill must cover.
+
+fn main {
+  let c = @s.Canvas::new(margin=12.0)
+
+  let x0 = 70.0
+  let y0 = 190.0
+  let x1 = 430.0
+  let y1 = 30.0
+
+  // axes: x = formality, y = reader distance
+  c.line((x0, y0), (x1, y0), width=1.5)
+  c.line((x0, y0), (x0, y1), width=1.5)
+  c.arrow((x1 - 1.0, y0), (x1, y0), width=1.5)
+  c.arrow((x0, y1 + 1.0), (x0, y1), width=1.5)
+
+  c.text(x1, y0 + 22.0, "形式度 →", anchor=@s.End, size=12.0)
+  c.text(x0, y0 + 22.0, "← くだけた", anchor=@s.Start, size=12.0, opacity=Some(0.7))
+  c.text(x0 - 8.0, y1 + 4.0, "遠い読者", anchor=@s.End, size=12.0)
+  c.text(x0 - 8.0, y0, "近い読者", anchor=@s.End, size=12.0, opacity=Some(0.7))
+
+  // variants: (x, y, label, palette index)
+  let pts = [
+    (360.0, 140.0, "週次進捗報告", 0), // thesis: formal, close-ish (boss)
+    (110.0, 165.0, "個人メモ", 1), // antithesis: informal, closest (future self)
+    (280.0, 45.0, "技術調査", 2), // shift: formal, far (other dept)
+    (330.0, 62.0, "障害報告", 3), // shift: formal, mid-far (stakeholders)
+    (392.0, 92.0, "意思決定依頼", 4), // shift: most formal, close (approver)
+  ]
+
+  for p in pts {
+    let (x, y, label, i) = p
+    ignore(c.circle(x, y, 4.0, color=c.color(i), width=2.0))
+    c.text(x, y - 12.0, label, anchor=@s.Middle, size=12.0)
+  }
+
+  // same design system covers both extremes: dashed span
+  // thesis <-> antithesis
+  c.line((110.0, 165.0), (360.0, 140.0), dash="4 4", opacity=Some(0.6))
+
+  for p in pts {
+    let (x, y, _, _) = p
+    if !(x > x0 && x < x1 && y < y0 && y > y1) {
+      abort("all variants inside the axes")
+    }
+  }
+
+  println(
+    c.render(label="five report variants on a formality vs. reader-distance plane"),
+  )
+}

@@ -1,0 +1,67 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-repl-completion-pipe.mbtx -- what one TAB press walks through
+// in minigo's REPL completer. The green (static) tier resolves the
+// selector base from AST alone; the vermillion (eval) tier may run
+// user code. Dashed = gates that can end the pipeline with no
+// candidates. Vertical layout so the figure stays readable on
+// narrow (mobile) screens.
+
+fn main {
+  let c = @s.Canvas::new()
+  let h = 56.0
+  let gap = 26.0
+  let colx = 170.0
+
+  let input = c.box(colx, 0.0, @s.Auto, h, label="`strings.To`\nline + cursor", size=13.0)
+  let ctx = c.box(colx, c.below(input, gap), @s.Auto, h, label="completeContext\nscanner offsets", size=13.0, color=c.color(0))
+  let base = c.box(colx, c.below(ctx, gap), @s.Auto, h, label="resolveBase\nwhat is left of `.`", size=13.0)
+
+  // suppression exit on the left of the context box
+  let suppress = c.box(
+    c.left_of(ctx, 20.0, 140.0),
+    ctx.y + 10.0,
+    @s.Fixed(140.0),
+    36.0,
+    label="no candidates",
+    size=12.0,
+    dash="5 3",
+    opacity=Some(0.85),
+  )
+
+  // two resolution tiers side by side below the base
+  let tier_y = c.below(base, gap)
+  let statik = c.box(0.0, tier_y, @s.Auto, h, label="resolveExpr\nAST walk only", size=13.0, color=c.color(2))
+  let evaled = c.box(c.right_of(statik, 60.0), tier_y, @s.Auto, h, label="evalBase (opt-in)\nEvalExpr + memo", size=13.0, color=c.color(3))
+
+  let members = c.box(colx, c.below(statik, gap), @s.Auto, h, label="members / keys\ndedupe + Ambiguous", size=13.0)
+  let splice = c.box(colx, c.below(members, gap), @s.Auto, h, label="splice prefix\nor list", size=13.0)
+
+  c.arrow(c.anchor(input, @s.S), c.anchor(ctx, @s.N))
+  c.arrow(c.anchor(ctx, @s.S), c.anchor(base, @s.N))
+  c.arrow(c.anchor(base, @s.S), c.anchor(statik, @s.N), color=c.color(2))
+  c.arrow(c.anchor(base, @s.S), c.anchor(evaled, @s.N), color=c.color(3), dash="5 3")
+  c.arrow(c.anchor(statik, @s.S), c.anchor(members, @s.N), color=c.color(2))
+  c.arrow(c.anchor(evaled, @s.S), c.anchor(members, @s.N), color=c.color(3), dash="5 3")
+  c.arrow(c.anchor(members, @s.S), c.anchor(splice, @s.N))
+
+  // dashed gate: context may veto the whole walk (index slot,
+  // string tail)
+  c.arrow(c.anchor(ctx, @s.W), c.anchor(suppress, @s.E), dash="5 3", color=c.color(1))
+
+  if !(statik.y + statik.h < members.y) {
+    abort("tiers must not overlap members")
+  }
+  if !(statik.x + statik.w < evaled.x) {
+    abort("tiers must not overlap each other")
+  }
+  if !(suppress.x + suppress.w < ctx.x) {
+    abort("suppress exit sits left of the pipeline")
+  }
+
+  println(
+    c.render(label="TAB completion pipeline: context scan, two base-resolution tiers, member enumeration, splice"),
+  )
+}

@@ -1,0 +1,88 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// Round-2 selection funnel for the go-classic-mpa-sample
+// modern-web-guidance article: 208 guides -> relaxed JS policy
+// (declarative first; JS only when storybook-verifiable) ->
+// target UI + measured gap -> 8 tasks shipped.
+
+fn main {
+  let c = @s.Canvas::new()
+
+  let src = c.box(10.0, 40.0, @s.Fixed(200.0), 60.0, size=13.0)
+  c.text(110.0, 63.0, "208 guides", anchor=@s.Middle, central=true, size=14.0)
+  c.text(
+    110.0,
+    82.0,
+    "modern-web-guidance list",
+    anchor=@s.Middle,
+    central=true,
+    size=12.0,
+    opacity=Some(0.75),
+  )
+
+  // filter 1: declarative first / JS needs storybook verification
+  let f1 = c.box(255.0, 42.0, @s.Fixed(250.0), 56.0, color=c.color(0), size=12.0)
+  c.text(380.0, 61.0, "宣言的で書ける?", anchor=@s.Middle, central=true, size=12.0)
+  c.text(
+    380.0,
+    80.0,
+    "JS は storybook で検証できるものだけ",
+    anchor=@s.Middle,
+    central=true,
+    size=11.0,
+    opacity=Some(0.8),
+  )
+
+  // filter 2: target UI exists + measurable gap
+  let f2 = c.box(540.0, 42.0, @s.Fixed(170.0), 56.0, color=c.color(1), size=12.0)
+  c.text(625.0, 61.0, "対象 UI があり", anchor=@s.Middle, central=true, size=12.0)
+  c.text(625.0, 80.0, "明確な不足がある?", anchor=@s.Middle, central=true, size=12.0)
+
+  let out = c.box(750.0, 40.0, @s.Fixed(170.0), 60.0, color=c.color(3), size=13.0)
+  c.text(835.0, 63.0, "8 tasks", anchor=@s.Middle, central=true, size=14.0)
+  c.text(
+    835.0,
+    82.0,
+    "all merged (PR #28-#35)",
+    anchor=@s.Middle,
+    central=true,
+    size=11.0,
+    opacity=Some(0.8),
+  )
+
+  for e in [(src, f1), (f1, f2), (f2, out)] {
+    let (a, b) = e
+    c.arrow(c.anchor(a, @s.E), c.anchor(b, @s.W), width=1.5)
+  }
+
+  // dropped-by-filter notes
+  ignore(c.box(280.0, 150.0, @s.Fixed(200.0), 58.0, dash="5 4", opacity=Some(0.85), size=11.0))
+  c.text(292.0, 168.0, "検証不能な JS（スクロール", size=11.0, opacity=Some(0.85))
+  c.text(292.0, 184.0, "連動アニメ等）は引き続き除外", size=11.0, opacity=Some(0.85))
+  c.arrow(c.anchor(f1, @s.S), (380.0, 148.0), dash="5 4", width=1.2, opacity=Some(0.7))
+
+  ignore(c.box(535.0, 150.0, @s.Fixed(185.0), 58.0, dash="5 4", opacity=Some(0.85), size=11.0))
+  c.text(547.0, 168.0, "新設フォームがないので", size=11.0, opacity=Some(0.85))
+  c.text(547.0, 184.0, "autofill・日時系は対象外", size=11.0, opacity=Some(0.85))
+  c.arrow(c.anchor(f2, @s.S), (625.0, 148.0), dash="5 4", width=1.2, opacity=Some(0.7))
+
+  // the unlocked items
+  ignore(c.box(742.0, 150.0, @s.Fixed(196.0), 58.0, dash="2 3", opacity=Some(0.85), size=11.0))
+  c.text(752.0, 168.0, "no-JS 時代に見送った2件を回収", size=11.0, opacity=Some(0.85))
+  c.text(752.0, 184.0, "方向アニメ + aria-invalid 同期", size=11.0, opacity=Some(0.85))
+  c.arrow(c.anchor(out, @s.S), (835.0, 148.0), dash="5 4", width=1.2, opacity=Some(0.7))
+
+  c.text(
+    10.0,
+    16.0,
+    "schematic — dropped counts are not measured",
+    size=11.0,
+    opacity=Some(0.6),
+  )
+
+  println(
+    c.render(label="208 ガイドを「宣言的優先・storybook 検証可能な JS のみ」「対象 UI と明確な不足」の2フィルタで絞り、8 タスクを全てマージした概略図"),
+  )
+}
