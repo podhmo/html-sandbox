@@ -658,18 +658,12 @@ pub fn Plot::heatmap(
   let cols = grid[0].length()
   let cw = (self.x1 - self.x0) / cols.to_double()
   let ch = (self.y1 - self.y0) / rows.to_double()
-  let mut min = @double.infinity
-  let mut max = @double.neg_infinity
-  for row in grid {
-    for v in row {
-      if v < min {
-        min = v
-      }
-      if v > max {
-        max = v
-      }
-    }
-  }
+  let (min, max) = grid.fold(init=(@double.infinity, @double.neg_infinity), fn(
+    acc,
+    row,
+  ) {
+    row.fold(init=acc, fn(acc, v) { (acc.0.min(v), acc.1.max(v)) })
+  })
   let span = if max - min == 0 { 1.0 } else { max - min }
   for j, row in grid {
     for i, v in row {
@@ -732,16 +726,12 @@ pub fn Plot::heat_legend(
 
 ///|
 pub fn bins(values : Array[Double], w~ : Double) -> Array[Bin] {
-  let mut mn = @double.infinity
-  let mut mx = @double.neg_infinity
-  for v in values {
-    if v < mn {
-      mn = v
-    }
-    if v > mx {
-      mx = v
-    }
-  }
+  let (mn, mx) = values.fold(init=(@double.infinity, @double.neg_infinity), fn(
+    acc,
+    v,
+  ) {
+    (acc.0.min(v), acc.1.max(v))
+  })
   let lo = @math.floor(mn / w) * w
   let hi = @math.ceil(mx / w) * w
   let out : Array[Bin] = []

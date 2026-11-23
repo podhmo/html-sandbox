@@ -105,11 +105,11 @@ let cjk_w : Double = 1.0
 
 ///|
 pub fn text_width(s : String, size~ : Double) -> Double {
-  let mut w = 0.0
-  for ch in s {
-    w += (if ch.to_int() > 0x2e80 { cjk_w } else { ascii_w }) * size
-  }
-  w
+  s
+  .iter()
+  .fold(init=0.0, fn(w, ch) {
+    w + (if ch.to_int() > 0x2e80 { cjk_w } else { ascii_w }) * size
+  })
 }
 
 ///|
@@ -377,14 +377,12 @@ pub fn Canvas::box(
       if label == "" {
         abort("box w=Auto needs a label")
       }
-      let mut m = 0.0
-      for s in label.split("\n") {
-        let tw = text_width(s.to_owned(), size~)
-        if tw > m {
-          m = tw
-        }
-      }
-      m + 2.0 * pad_x
+      label
+      .split("\n")
+      .fold(init=0.0, fn(m, s) {
+        @cmp.maximum(m, text_width(s.to_owned(), size~))
+      }) +
+      2.0 * pad_x
     }
     Fixed(v) => v
   }
@@ -691,23 +689,13 @@ pub fn Canvas::hbars(
 ) -> Unit {
   let lw = match label_w {
     Some(v) => v
-    None => {
-      let mut m = 0.0
-      for it in items {
-        let tw = text_width(it.label, size~)
-        if tw > m {
-          m = tw
-        }
-      }
-      m + 16.0
-    }
+    None =>
+      items.fold(init=0.0, fn(m, it) {
+        @cmp.maximum(m, text_width(it.label, size~))
+      }) +
+      16.0
   }
-  let mut mv = 0.0
-  for it in items {
-    if it.value > mv {
-      mv = it.value
-    }
-  }
+  let mv = items.fold(init=0.0, fn(m, it) { @cmp.maximum(m, it.value) })
   let scale = max_w / mv
   for i, item in items {
     let by = y + i.to_double() * (bar_h + row_gap)

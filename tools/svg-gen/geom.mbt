@@ -66,16 +66,14 @@ pub fn circum(a : Point, b : Point, c : Point) -> Circum {
 /// of triangles whose circumcircle contains it.
 pub fn delaunay(pts : Array[Point]) -> Array[Tri] {
   let n = pts.length()
-  let mut minx = @double.infinity
-  let mut maxx = @double.neg_infinity
-  let mut miny = @double.infinity
-  let mut maxy = @double.neg_infinity
-  for p in pts {
-    minx = minx.min(p.0)
-    maxx = maxx.max(p.0)
-    miny = miny.min(p.1)
-    maxy = maxy.max(p.1)
-  }
+  let (minx, maxx, miny, maxy) = pts.fold(
+    init=(
+      @double.infinity, @double.neg_infinity, @double.infinity, @double.neg_infinity,
+    ),
+    fn(acc, p) {
+      (acc.0.min(p.0), acc.1.max(p.0), acc.2.min(p.1), acc.3.max(p.1))
+    },
+  )
   let cx = (minx + maxx) / 2.0
   let cy = (miny + maxy) / 2.0
   let m = 30.0 * (maxx - minx).max(maxy - miny)
