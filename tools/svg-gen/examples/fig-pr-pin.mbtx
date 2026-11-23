@@ -1,0 +1,81 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-pr-pin.mbtx -- lifecycle of the pin ref: the live branch moves
+// while the PR is open, then refs/zatudan/pr/<id>/head freezes the
+// recorded tip so the closed view survives branch moves and
+// deletion.
+
+fn main {
+  let c = @s.Canvas::new()
+  let pin = 1
+  let live = 0
+  let r = 9.0
+  let d = 70.0
+  let y = 110.0
+  let x0 = 60.0
+  let cen = fn(s : @s.Shape) -> @s.Point {
+    (s.x + s.w / 2.0, s.y + s.h / 2.0)
+  }
+
+  // commit row: the pin froze at C2; the branch tip later moved to C4
+  let cc : Array[@s.Shape] = []
+  for i = 0; i < 4; i = i + 1 {
+    cc.push(c.circle(x0 + i.to_double() * d, y, r, color=c.color(live)))
+  }
+  for i = 0; i < 3; i = i + 1 {
+    c.line(cen(cc[i]), cen(cc[i + 1]))
+  }
+  for i = 0; i < 4; i = i + 1 {
+    c.text(cc[i].x + r, y + r + 20.0, "C\{i + 1}", anchor=@s.Middle, size=13.0)
+  }
+
+  // live head ref: follows the branch, now at the tip
+  c.text(x0 - 10.0, y - 40.0, "refs/heads/feature", anchor=@s.End, size=13.0)
+  c.arrow(
+    (x0 - 4.0, y - 40.0),
+    (cc[3].x + r, y - r - 4.0),
+    color=c.color(live),
+    head=7.0,
+  )
+
+  // pin ref: written at close/merge, still points at the recorded
+  // commit
+  c.text(
+    cc[1].x + r,
+    y + r + 60.0,
+    "refs/zatudan/pr/1/head",
+    anchor=@s.Middle,
+    size=13.0,
+  )
+  c.arrow(
+    (cc[1].x + r, y + r + 50.0),
+    (cc[1].x + r, y + r + 6.0),
+    color=c.color(pin),
+    head=7.0,
+    width=2.5,
+  )
+  c.highlight(cc[1], mode=@s.Ring)
+
+  // state captions
+  c.text(
+    cc[1].x + r,
+    y + r + 86.0,
+    "closed at this commit — kept forever",
+    anchor=@s.Middle,
+    size=12.0,
+    opacity=Some(0.75),
+  )
+  c.text(
+    cc[3].x + 2.0 * r + 8.0,
+    y - 30.0,
+    "branch moved / can be deleted",
+    size=12.0,
+    opacity=Some(0.75),
+  )
+
+  println(
+    c.render(label="close・merge 時に記録された head コミットを pin ref が保持し続ける図"),
+  )
+}
