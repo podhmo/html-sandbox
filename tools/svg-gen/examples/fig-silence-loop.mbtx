@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-silence-loop.mbtx -- how silence turns one output into a
@@ -12,24 +12,24 @@ fn main {
   let h = 52.0
   let gx = 150.0
   let gy = 74.0
-  let c = @s.Canvas()
+  let c = @svg.Canvas()
 
-  let a = c.box(0.0, 0.0, @s.Auto, h, label=Some("振る舞いが\n出力に入る"))
-  let b = c.box(c.right_of(a, gx), a.y, @s.Auto, h, label=Some("止められない\n（沈黙）"))
-  let cc = c.box(b.x, b.y + h + gy, @s.Auto, h, label=Some("文脈に前例\nとして残る"))
-  let d = c.box(a.x, cc.y, @s.Auto, h, label=Some("次回の exemplar\nに化ける"))
+  let a = c.box(0.0, 0.0, @svg.Auto, h, label=Some("振る舞いが\n出力に入る"))
+  let b = c.box(c.right_of(a, gx), a.y, @svg.Auto, h, label=Some("止められない\n（沈黙）"))
+  let cc = c.box(b.x, b.y + h + gy, @svg.Auto, h, label=Some("文脈に前例\nとして残る"))
+  let d = c.box(a.x, cc.y, @svg.Auto, h, label=Some("次回の exemplar\nに化ける"))
 
-  c.arrow(c.anchor(a, @s.E), c.anchor(b, @s.W))
-  c.arrow(c.anchor(b, @s.S), c.anchor(cc, @s.N))
-  c.arrow(c.anchor(cc, @s.W), c.anchor(d, @s.E))
-  c.arrow(c.anchor(d, @s.N), c.anchor(a, @s.S))
+  c.arrow(c.anchor(a, @svg.E), c.anchor(b, @svg.W))
+  c.arrow(c.anchor(b, @svg.S), c.anchor(cc, @svg.N))
+  c.arrow(c.anchor(cc, @svg.W), c.anchor(d, @svg.E))
+  c.arrow(c.anchor(d, @svg.N), c.anchor(a, @svg.S))
 
   // The loop's centre names what accumulates each time around.
   c.text(
     a.x + a.w + gx / 2.0,
     a.y + h + gy / 2.0 - 12.0,
     "沈黙の意味は",
-    anchor=@s.Middle,
+    anchor=@svg.Middle,
     central=true,
     size=12.0,
     opacity=Some(0.65),
@@ -38,7 +38,7 @@ fn main {
     a.x + a.w + gx / 2.0,
     a.y + h + gy / 2.0 + 12.0,
     "ループで決まる",
-    anchor=@s.Middle,
+    anchor=@svg.Middle,
     central=true,
     size=12.0,
     opacity=Some(0.65),
@@ -49,12 +49,12 @@ fn main {
   let e = c.box(
     cc.x + 30.0,
     cc.y + h + gy,
-    @s.Auto,
+    @svg.Auto,
     h,
     label=Some("skill に書き込まれる\n＝明示要求に昇格"),
   )
   c.arrow(
-    c.anchor(cc, @s.S),
+    c.anchor(cc, @svg.S),
     (e.x + e.w / 2.0, e.y),
     dash=Some("5 4"),
     via=[

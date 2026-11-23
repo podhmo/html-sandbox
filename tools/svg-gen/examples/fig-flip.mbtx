@@ -1,6 +1,6 @@
 ---
 import {
-  "podhmo/svg-gen" @s,
+  "podhmo/svg-gen" @svg,
   "moonbitlang/core/math" @math,
 }
 ---
@@ -11,13 +11,13 @@ import {
 // empty.
 
 fn main {
-  let s = @s.sites
-  let tris = @s.delaunay(s)
-  let c = @s.Canvas()
+  let s = @svg.sites
+  let tris = @svg.delaunay(s)
+  let c = @svg.Canvas()
   let dx = 265.0
 
   let mut quad : (Int, Int, Int, Int)? = None
-  for entry in @s.edge_adjacency(tris) {
+  for entry in @svg.edge_adjacency(tris) {
     let (ea, eb, t) = entry
     if t.length() == 2 {
       let t1 = tris[t[0]]
@@ -46,20 +46,20 @@ fn main {
   let cc = s[q.2]
   let d = s[q.3]
 
-  let dot = fn(p : @s.Point, fill : String) {
+  let dot = fn(p : @svg.Point, fill : String) {
     c.raw(
       "<circle cx=\"\{p.0}\" cy=\"\{p.1}\" r=\"3.5\" fill=\"\{fill}\"/>",
       covered=[p],
     )
   }
-  let quad_outline = fn(pp : Array[@s.Point]) {
+  let quad_outline = fn(pp : Array[@svg.Point]) {
     for e in [(pp[0], pp[1]), (pp[1], pp[2]), (pp[2], pp[3]), (pp[3], pp[0])] {
       c.line(e.0, e.1, width=1.2)
     }
   }
 
   // Left: wrong diagonal bd — circle through abd contains c.
-  let bad = @s.circum(a, b, d)
+  let bad = @svg.circum(a, b, d)
   if !(@math.hypot(cc.0 - bad.o.0, cc.1 - bad.o.1) < bad.r) {
     abort("vertex c must lie inside the bad circumcircle")
   }
@@ -71,29 +71,29 @@ fn main {
   for p in [a, b, cc, d] {
     dot(p, "currentColor")
   }
-  c.text(112.0, 215.0, "illegal: site inside", anchor=@s.Middle, size=11.0, opacity=Some(0.7))
+  c.text(112.0, 215.0, "illegal: site inside", anchor=@svg.Middle, size=11.0, opacity=Some(0.7))
 
   // arrow between panels
   c.arrow((240.0, 105.0), (258.0, 105.0), width=1.5)
 
   // Right: flipped diagonal ac — both circumcircles empty.
-  let sq = @s.shift([a, b, cc, d], dx=dx, dy=0.0)
+  let sq = @svg.shift([a, b, cc, d], dx=dx, dy=0.0)
   let sa = sq[0]
   let sb = sq[1]
   let scc = sq[2]
   let sd = sq[3]
   for case in [([sa, sb, scc], sd), ([sa, scc, sd], sb)] {
     let (t, other) = case
-    let cc2 = @s.circum(t[0], t[1], t[2])
+    let cc2 = @svg.circum(t[0], t[1], t[2])
     if !(@math.hypot(other.0 - cc2.o.0, other.1 - cc2.o.1) > cc2.r - 1.0e-9) {
       abort("flipped diagonal: circumcircles empty")
     }
   }
   quad_outline([sa, sb, scc, sd])
   c.line(sa, scc, width=2.5, color=c.color(0))
-  let c1 = @s.circum(sa, sb, scc)
+  let c1 = @svg.circum(sa, sb, scc)
   ignore(c.circle(c1.o.0, c1.o.1, c1.r, opacity=Some(0.6)))
-  let c2 = @s.circum(sa, scc, sd)
+  let c2 = @svg.circum(sa, scc, sd)
   ignore(c.circle(c2.o.0, c2.o.1, c2.r, opacity=Some(0.6)))
   for p in [sa, sb, scc, sd] {
     dot(p, "currentColor")
@@ -102,7 +102,7 @@ fn main {
     112.0 + dx,
     215.0,
     "legal: circles empty",
-    anchor=@s.Middle,
+    anchor=@svg.Middle,
     size=11.0,
     opacity=Some(0.7),
   )

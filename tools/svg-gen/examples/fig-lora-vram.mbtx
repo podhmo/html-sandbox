@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-lora-vram.mbtx -- measured peak VRAM of the local FLUX.2
@@ -8,14 +8,14 @@ import { "podhmo/svg-gen" @s }
 // training on an RTX 5060 Laptop (8GB, WSL2), 2026-11-03.
 
 fn main {
-  let c = @s.Canvas()
+  let c = @svg.Canvas()
 
   let gib = 8.0 // nominal VRAM of the card
   let px_per_gib = 26.0
 
   let runs = [
-    @s.Hbar::{ label: "512px, 400 steps", value: 3.0 },
-    @s.Hbar::{ label: "1024px, 10 steps", value: 4.99 },
+    @svg.Hbar::{ label: "512px, 400 steps", value: 3.0 },
+    @svg.Hbar::{ label: "1024px, 10 steps", value: 4.99 },
   ]
 
   // hbars scales the largest value to maxW, so set maxW from the
@@ -34,19 +34,19 @@ fn main {
     row_gap=14.0,
     max_w=max_w,
     size=12.0,
-    value_fmt=fn(v) { "\{@s.fixed(v, d=2)} GiB" },
+    value_fmt=fn(v) { "\{@svg.fixed(v, d=2)} GiB" },
   )
 
   // The capacity line is placed at 8 GiB using the same ratio.
   let mut label_w = 0.0
   for r in runs {
-    label_w = label_w.max(@s.text_width(r.label, size=12.0))
+    label_w = label_w.max(@svg.text_width(r.label, size=12.0))
   }
   label_w = label_w + 16.0
   let cap_x = label_w + gib * px_per_gib
   let bottom = runs.length().to_double() * (20.0 + 14.0) - 14.0
   c.line((cap_x, -26.0), (cap_x, bottom + 10.0), dash=Some("4 3"), width=1.5)
-  c.text(cap_x, -34.0, "8 GiB (このGPUのVRAM)", anchor=@s.Middle, size=11.0, opacity=Some(0.7))
+  c.text(cap_x, -34.0, "8 GiB (このGPUのVRAM)", anchor=@svg.Middle, size=11.0, opacity=Some(0.7))
 
   c.text(
     0.0,

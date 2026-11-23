@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-slops-use-cases.mbtx -- every slops article (as of 2026-11-05)
@@ -10,7 +10,7 @@ import { "podhmo/svg-gen" @s }
 // only show up in the last days.
 
 fn main {
-  let c = @s.Canvas(margin=12.0)
+  let c = @svg.Canvas(margin=12.0)
 
   let cats = [
     "変更の報告",
@@ -56,7 +56,7 @@ fn main {
 
   for k, name in cats {
     let y = y0 + k.to_double() * row
-    c.text(x0 - 10.0, y, name, anchor=@s.End, central=true, size=11.0)
+    c.text(x0 - 10.0, y, name, anchor=@svg.End, central=true, size=11.0)
     c.line((x0, y), (xf(dd(11, 5)) + day_w / 2.0, y), opacity=Some(0.15))
   }
 
@@ -93,12 +93,12 @@ fn main {
   for t in [("10/14", dd(10, 14)), ("10/21", dd(10, 21)), ("10/28", dd(10, 28)), ("11/1", dd(11, 1)), ("11/5", dd(11, 5))] {
     let (label, d) = t
     c.line((xf(d), y_axis), (xf(d), y_axis + 4.0), opacity=Some(0.6))
-    c.text(xf(d), y_axis + 16.0, label, anchor=@s.Middle, size=11.0, opacity=Some(0.75))
+    c.text(xf(d), y_axis + 16.0, label, anchor=@svg.Middle, size=11.0, opacity=Some(0.75))
   }
   // mark issue #133's target
   let tx = xf(dd(11, 5))
   c.line((tx - 9.0, y0 + 6.0 * row - 13.0), (tx - 4.0, y0 + 6.0 * row - 7.0), opacity=Some(0.6))
-  c.text(tx - 11.0, y0 + 6.0 * row - 15.0, "#133 が指した記事", anchor=@s.End, size=10.0, opacity=Some(0.75))
+  c.text(tx - 11.0, y0 + 6.0 * row - 15.0, "#133 が指した記事", anchor=@svg.End, size=10.0, opacity=Some(0.75))
 
   println(
     c.render(label=Some("slops articles by date and use case: twelve feature reports spread through October; claim-examining and meta articles appear only from Nov 3")),

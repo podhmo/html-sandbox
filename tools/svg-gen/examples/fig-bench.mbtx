@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-bench.mbtx -- a horizontal bar chart from real numbers: the
@@ -8,17 +8,17 @@ import { "podhmo/svg-gen" @s }
 // label column is measured from the labels.
 
 fn main {
-  let c = @s.Canvas()
+  let c = @svg.Canvas()
 
   // KiB of SVG output for moonbit/'s 17-package, 21-edge graph
   // (issue #85).
   let kib = [
-    @s.Hbar::{ label: "beautiful-mermaid elk", value: 19.8 },
-    @s.Hbar::{ label: "d2 tala", value: 20.8 },
-    @s.Hbar::{ label: "d2 dagre", value: 21.9 },
-    @s.Hbar::{ label: "d2 elk", value: 22.3 },
-    @s.Hbar::{ label: "mermaid elk", value: 46.9 },
-    @s.Hbar::{ label: "mermaid dagre", value: 47.9 },
+    @svg.Hbar::{ label: "beautiful-mermaid elk", value: 19.8 },
+    @svg.Hbar::{ label: "d2 tala", value: 20.8 },
+    @svg.Hbar::{ label: "d2 dagre", value: 21.9 },
+    @svg.Hbar::{ label: "d2 elk", value: 22.3 },
+    @svg.Hbar::{ label: "mermaid elk", value: 46.9 },
+    @svg.Hbar::{ label: "mermaid dagre", value: 47.9 },
   ]
 
   c.hbars(

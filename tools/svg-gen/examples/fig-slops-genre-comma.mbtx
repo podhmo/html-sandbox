@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-slops-genre-comma.mbtx -- comma density (per 1000 prose
@@ -9,7 +9,7 @@ import { "podhmo/svg-gen" @s }
 // still sits at or above devin.
 
 fn main {
-  let c = @s.Canvas()
+  let c = @svg.Canvas()
 
   // rows top-first, ordered by the devin mean (claude-only rows
   // slotted by their claude value). * marks provisional genre
@@ -33,7 +33,7 @@ fn main {
   ]
   let n_r = rows.length()
 
-  let p = @s.Plot(
+  let p = @svg.Plot(
     c,
     {
       title: "読点密度はジャンルでも大きく動く",
@@ -46,9 +46,9 @@ fn main {
     h=340.0,
   )
   p.frame(
-    xticks=[0.0, 5.0, 10.0, 15.0, 20.0, 25.0, 30.0].map(fn(v) { @s.Num(v) }),
+    xticks=[0.0, 5.0, 10.0, 15.0, 20.0, 25.0, 30.0].map(fn(v) { @svg.Num(v) }),
     yticks=rows.mapi(fn(j, r) {
-      @s.Lab(n_r.to_double() - 0.5 - j.to_double(), r.0)
+      @svg.Lab(n_r.to_double() - 0.5 - j.to_double(), r.0)
     }),
   )
   p.data(fn(p) {

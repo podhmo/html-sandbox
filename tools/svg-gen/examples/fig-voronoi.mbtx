@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-voronoi.mbtx -- V2: the completed Voronoi diagram of the shared
@@ -7,34 +7,34 @@ import { "podhmo/svg-gen" @s }
 // belong to convex-hull sites (asserted).
 
 fn main {
-  let s = @s.sites
-  let tris = @s.delaunay(s)
+  let s = @svg.sites
+  let tris = @svg.delaunay(s)
   let clip = (0.0, 0.0, 230.0, 230.0)
-  let c = @s.Canvas()
+  let c = @svg.Canvas()
   let col_vor = c.color(1)
 
   // Unbounded cells: boundary Delaunay edges (one adjacent triangle)
   // belong to hull-adjacent site pairs — assert that.
-  let hv = @s.hull(s)
-  for entry in @s.edge_adjacency(tris) {
+  let hv = @svg.hull(s)
+  for entry in @svg.edge_adjacency(tris) {
     let (ea, eb, ts) = entry
     if ts.length() == 1 && !(hv.contains(ea) && hv.contains(eb)) {
       abort("unbounded cell edge between hull sites")
     }
   }
 
-  for seg in @s.voronoi_segments(s, tris=tris, rect=clip) {
+  for seg in @svg.voronoi_segments(s, tris=tris, rect=clip) {
     c.line(seg.0, seg.1, dash=Some("4 3"), width=1.5, color=col_vor)
   }
 
   // one featured cell washed
-  let feat = @s.voronoi_cell(s[3], sites=s, rect=[
+  let feat = @svg.voronoi_cell(s[3], sites=s, rect=[
     (clip.0, clip.1),
     (clip.2, clip.1),
     (clip.2, clip.3),
     (clip.0, clip.3),
   ])
-  c.raw(@s.poly_el(feat, fill=c.color(1), opacity=0.12), covered=feat)
+  c.raw(@svg.poly_el(feat, fill=c.color(1), opacity=0.12), covered=feat)
 
   for p in s {
     c.raw(

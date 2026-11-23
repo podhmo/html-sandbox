@@ -1,6 +1,6 @@
 ---
 import {
-  "podhmo/svg-gen" @s,
+  "podhmo/svg-gen" @svg,
   "moonbitlang/core/env" @env,
   "moonbitlang/core/string" @string,
   "moonbitlang/core/double" @double,
@@ -419,7 +419,7 @@ async fn check(file : String) -> Unit {
         }
         // strip any nested tags (tspan etc.), then trim
         let body_text = strip_tags(body).trim().to_owned()
-        let w = @s.text_width(body_text, size=size)
+        let w = @svg.text_width(body_text, size=size)
         let lx = match a.get("text-anchor") {
           Some("middle") => x - w / 2.0
           Some("end") => x - w
@@ -498,7 +498,7 @@ async fn check(file : String) -> Unit {
   }
   let off : Array[String] = []
   for c, _ in colors {
-    if !@s.palette.contains(c) {
+    if !@svg.palette.contains(c) {
       off.push(c)
     }
   }

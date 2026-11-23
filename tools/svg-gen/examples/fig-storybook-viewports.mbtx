@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-storybook-viewports.mbtx -- one story previewed at three
@@ -11,9 +11,9 @@ fn main {
   let px = 0.3 // css px -> svg units
   let h = 180.0
 
-  let c = @s.Canvas()
+  let c = @svg.Canvas()
 
-  let nav = c.box(0.0, 0.0, @s.Auto, h, label=Some("story\nnav"))
+  let nav = c.box(0.0, 0.0, @svg.Auto, h, label=Some("story\nnav"))
   let x0 = c.right_of(nav, 48.0)
 
   // widths drawn to scale: the 768 frame is visibly wider than
@@ -22,7 +22,7 @@ fn main {
   let dashes = [Some("5 3"), None, Some("2 3")]
   let ws = [1.5, 2.5, 1.5]
   let frames = widths.mapi(fn(i, wpx) {
-    c.box(x0, 0.0, @s.Fixed(wpx * px), h, color=c.color(i), dash=dashes[i], width=ws[i])
+    c.box(x0, 0.0, @svg.Fixed(wpx * px), h, color=c.color(i), dash=dashes[i], width=ws[i])
   })
 
   // each label sits above its own frame's right edge, staggered so
@@ -33,7 +33,7 @@ fn main {
       f.x + f.w - 4.0,
       -10.0 - i.to_double() * 14.0,
       "\{wpx.to_int64()}px",
-      anchor=@s.End,
+      anchor=@svg.End,
       size=12.0,
     )
   }
@@ -42,7 +42,7 @@ fn main {
     x0 + (768.0 * px) / 2.0,
     h + 24.0,
     "same story, three ?w= widths",
-    anchor=@s.Middle,
+    anchor=@svg.Middle,
     size=13.0,
   )
 

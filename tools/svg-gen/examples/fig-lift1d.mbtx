@@ -1,6 +1,6 @@
 ---
 import {
-  "podhmo/svg-gen" @s,
+  "podhmo/svg-gen" @svg,
   "moonbitlang/core/math" @math,
 }
 ---
@@ -12,19 +12,19 @@ import {
 // it — so it is not hull.
 
 fn main {
-  let c = @s.Canvas()
+  let c = @svg.Canvas()
   let axis_y = 200.0
   let scale = 0.010
   let x0 = 30.0
   let x1 = 220.0
-  let lift = fn(x : Double) -> @s.Point {
+  let lift = fn(x : Double) -> @svg.Point {
     (x, axis_y - (x - 125.0) * (x - 125.0) * scale)
   }
   let xs = [45.0, 70.0, 105.0, 150.0, 195.0]
 
   // parabola + lifted points + lower hull = adjacent segments.
-  let para_pts = @s.sample(fn(x) { lift(x).1 }, x0=x0, x1=x1, n=120)
-  c.path(@s.path_of(para_pts), para_pts, width=1.5, opacity=Some(0.7))
+  let para_pts = @svg.sample(fn(x) { lift(x).1 }, x0=x0, x1=x1, n=120)
+  c.path(@svg.path_of(para_pts), para_pts, width=1.5, opacity=Some(0.7))
   c.line((x0, axis_y), (x1, axis_y), width=1.5)
 
   let lifted = xs.map(lift)
@@ -58,7 +58,7 @@ fn main {
       "<circle cx=\"\{p.0}\" cy=\"\{p.1}\" r=\"3.5\" fill=\"currentColor\"/>",
       covered=[p],
     )
-    let q : @s.Point = (xs[i], axis_y)
+    let q : @svg.Point = (xs[i], axis_y)
     c.raw(
       "<circle cx=\"\{xs[i]}\" cy=\"\{axis_y}\" r=\"3.5\" fill=\"currentColor\"/>",
       covered=[q],

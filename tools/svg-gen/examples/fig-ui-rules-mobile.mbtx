@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-ui-rules-mobile.mbtx -- the 360px collision the audit
@@ -8,17 +8,17 @@ import { "podhmo/svg-gen" @s }
 // under max-width:40em.
 
 fn main {
-  let c = @s.Canvas()
+  let c = @svg.Canvas()
   let w = 150.0
   let h = 240.0
 
-  let phone = fn(x : Double, y : Double, caption : String) -> @s.Shape {
-    let p = c.box(x, y, @s.Fixed(w), h, rx=14.0, opacity=Some(0.8))
+  let phone = fn(x : Double, y : Double, caption : String) -> @svg.Shape {
+    let p = c.box(x, y, @svg.Fixed(w), h, rx=14.0, opacity=Some(0.8))
     c.text(
       x + w / 2.0,
       y + h + 22.0,
       caption,
-      anchor=@s.Middle,
+      anchor=@svg.Middle,
       central=true,
       size=11.0,
       opacity=Some(0.6),
@@ -34,7 +34,7 @@ fn main {
     c.box(
       x1 + w - 78.0,
       y1 + h - 46.0,
-      @s.Fixed(66.0),
+      @svg.Fixed(66.0),
       28.0,
       label=Some("Submit"),
       size=11.0,
@@ -47,7 +47,7 @@ fn main {
     c.box(
       x1 + w - 60.0,
       y1 + h - 31.0,
-      @s.Fixed(52.0),
+      @svg.Fixed(52.0),
       26.0,
       label=Some("↑Top"),
       size=11.0,
@@ -66,7 +66,7 @@ fn main {
     c.box(
       x2 + w - 78.0,
       y2 + h - 46.0,
-      @s.Fixed(66.0),
+      @svg.Fixed(66.0),
       28.0,
       label=Some("Submit"),
       size=11.0,
@@ -79,7 +79,7 @@ fn main {
     c.box(
       x2 + 10.0,
       y2 + h - 46.0,
-      @s.Fixed(52.0),
+      @svg.Fixed(52.0),
       26.0,
       label=Some("↑Top"),
       size=11.0,

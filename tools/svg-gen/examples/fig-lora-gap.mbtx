@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-lora-gap.mbtx -- the real blocker is not training cost ($2)
@@ -9,28 +9,28 @@ import { "podhmo/svg-gen" @s }
 // of question, still open.
 
 fn main {
-  let c = @s.Canvas(margin=12.0)
+  let c = @svg.Canvas(margin=12.0)
 
-  let data = c.box(20.0, 60.0, @s.Auto, 40.0, label=Some("DADS素材\n74枚"), color=c.color(0))
-  let train = c.box(160.0, 60.0, @s.Auto, 40.0, label=Some("学習\n~$2"), color=c.color(1))
-  let lora = c.box(300.0, 60.0, @s.Auto, 40.0, label=Some("LoRA\n.safetensors"), color=c.color(2))
-  let png = c.box(510.0, 60.0, @s.Auto, 40.0, label=Some("生成\nPNG"), color=c.color(3))
-  let wall = c.box(660.0, 60.0, @s.Auto, 40.0, label=Some("slops\nPNG不可"), color=c.color(4))
+  let data = c.box(20.0, 60.0, @svg.Auto, 40.0, label=Some("DADS素材\n74枚"), color=c.color(0))
+  let train = c.box(160.0, 60.0, @svg.Auto, 40.0, label=Some("学習\n~$2"), color=c.color(1))
+  let lora = c.box(300.0, 60.0, @svg.Auto, 40.0, label=Some("LoRA\n.safetensors"), color=c.color(2))
+  let png = c.box(510.0, 60.0, @svg.Auto, 40.0, label=Some("生成\nPNG"), color=c.color(3))
+  let wall = c.box(660.0, 60.0, @svg.Auto, 40.0, label=Some("slops\nPNG不可"), color=c.color(4))
 
-  c.arrow(c.anchor(data, @s.E), c.anchor(train, @s.W))
-  c.arrow(c.anchor(train, @s.E), c.anchor(lora, @s.W))
-  c.arrow(c.anchor(lora, @s.E), c.anchor(png, @s.W))
-  c.arrow(c.anchor(png, @s.E), c.anchor(wall, @s.W), dash=Some("6 4"))
+  c.arrow(c.anchor(data, @svg.E), c.anchor(train, @svg.W))
+  c.arrow(c.anchor(train, @svg.E), c.anchor(lora, @svg.W))
+  c.arrow(c.anchor(lora, @svg.E), c.anchor(png, @svg.W))
+  c.arrow(c.anchor(png, @svg.E), c.anchor(wall, @svg.W), dash=Some("6 4"))
 
   // the same wall, earlier: SVG already got its embed route
-  let svg = c.box(310.0, 170.0, @s.Auto, 40.0, label=Some("SVG\nフェンス"), color=c.color(5))
-  let ok = c.box(660.0, 170.0, @s.Auto, 40.0, label=Some("埋め込み可"), color=c.color(1))
-  c.arrow(c.anchor(svg, @s.E), c.anchor(ok, @s.W))
+  let svg = c.box(310.0, 170.0, @svg.Auto, 40.0, label=Some("SVG\nフェンス"), color=c.color(5))
+  let ok = c.box(660.0, 170.0, @svg.Auto, 40.0, label=Some("埋め込み可"), color=c.color(1))
+  c.arrow(c.anchor(svg, @svg.E), c.anchor(ok, @svg.W))
 
   // the same question, still open: MathML
-  let math = c.box(310.0, 250.0, @s.Auto, 40.0, label=Some("MathML\nissue #73"))
-  let open = c.box(660.0, 250.0, @s.Auto, 40.0, label=Some("未回答"))
-  c.arrow(c.anchor(math, @s.E), c.anchor(open, @s.W), dash=Some("4 4"))
+  let math = c.box(310.0, 250.0, @svg.Auto, 40.0, label=Some("MathML\nissue #73"))
+  let open = c.box(660.0, 250.0, @svg.Auto, 40.0, label=Some("未回答"))
+  c.arrow(c.anchor(math, @svg.E), c.anchor(open, @svg.W), dash=Some("4 4"))
 
   c.text(
     20.0,

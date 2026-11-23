@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-docs-slops-map.mbtx -- where each directory's text sits on
@@ -11,7 +11,7 @@ import { "podhmo/svg-gen" @s }
 // section of a slops article that sits in sketch territory.
 
 fn main {
-  let c = @s.Canvas(margin=12.0)
+  let c = @svg.Canvas(margin=12.0)
 
   let x0 = 60.0
   let x1 = 560.0
@@ -23,7 +23,7 @@ fn main {
   c.arrow((x1 - 1.0, y0), (x1, y0), width=1.5)
   c.arrow((x0, y1 + 1.0), (x0, y1), width=1.5)
   c.text(x0, y0 + 20.0, "書き直して最新に保つ", size=11.0, opacity=Some(0.75))
-  c.text(x1, y0 + 20.0, "日付の時点のまま残す", anchor=@s.End, size=11.0, opacity=Some(0.75))
+  c.text(x1, y0 + 20.0, "日付の時点のまま残す", anchor=@svg.End, size=11.0, opacity=Some(0.75))
   c.text(x0 + 8.0, y1 + 4.0, "読み手: 何が起きたかを知りたい人", size=11.0, opacity=Some(0.75))
   c.text(x0 + 8.0, y0 - 10.0, "読み手: 次に手を動かす人やエージェント", size=11.0, opacity=Some(0.75))
 
@@ -36,7 +36,7 @@ fn main {
   ]
   let shapes = regions.map(fn(r) {
     let (x, y, w, h, label, k, dash) = r
-    let s = c.box(x, y, @s.Fixed(w), h, color=c.color(k), dash=dash, rx=10.0)
+    let s = c.box(x, y, @svg.Fixed(w), h, color=c.color(k), dash=dash, rx=10.0)
     c.text(x + 8.0, y + 15.0, label, size=11.0)
     s
   })
@@ -50,26 +50,26 @@ fn main {
   ]
   let pts = pairs.mapi(fn(i, e) {
     let (sk, sl) = e
-    let a : @s.Point = (345.0, 190.0 + i.to_double() * 19.0)
-    let b : @s.Point = (405.0, 104.0 + i.to_double() * 22.0)
+    let a : @svg.Point = (345.0, 190.0 + i.to_double() * 19.0)
+    let b : @svg.Point = (405.0, 104.0 + i.to_double() * 22.0)
     c.line(a, b, dash=Some("3 3"), opacity=Some(0.55), width=1.0, gap=5.0)
     ignore(c.circle(a.0, a.1, 4.0, color=c.color(2), width=2.5))
     ignore(c.circle(b.0, b.1, 4.0, color=c.color(3), width=2.5))
-    c.text(a.0 - 9.0, a.1, sk, anchor=@s.End, central=true, size=10.0, opacity=Some(0.85))
+    c.text(a.0 - 9.0, a.1, sk, anchor=@svg.End, central=true, size=10.0, opacity=Some(0.85))
     c.text(b.0 + 9.0, b.1, sl, central=true, size=10.0, opacity=Some(0.85))
     (a, b)
   })
 
   // the prescriptive section of answers-under-constraints sits in
   // sketch land
-  let rule : @s.Point = (345.0, 167.0)
+  let rule : @svg.Point = (345.0, 167.0)
   ignore(c.circle(rule.0, rule.1, 6.0, dash=Some("2 2"), width=1.5))
   c.line(pts[0].1, rule, dash=Some("1 3"), width=1.5, gap=8.0)
   c.text(
     rule.0 - 11.0,
     rule.1,
     "「記録の側でできること」の節",
-    anchor=@s.End,
+    anchor=@svg.End,
     central=true,
     size=10.0,
   )

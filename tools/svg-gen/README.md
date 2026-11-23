@@ -14,11 +14,11 @@ gets a small throwaway generator sharing a thin helper.
 - `svg.mbt` — the shared helper (zero deps beyond the stdlib). `Canvas` collects
   parts; `box`/`circle`/`text`/`line`/`arrow` draw them. The important
   properties:
-  - `c.anchor(shape, @s.E)` and friends compute edge endpoints from shape
+  - `c.anchor(shape, @svg.E)` and friends compute edge endpoints from shape
     geometry, so an arrow endpoint cannot drift off its box.
-  - `box(x, y, @s.Auto, h, label=Some(...))` sizes the box to the estimated
+  - `box(x, y, @svg.Auto, h, label=Some(...))` sizes the box to the estimated
     label width, so a label cannot outgrow its box.
-  - `arrow` takes `ends=@s.Single(@s.Both)` (or `Start`/`NoHead`) for
+  - `arrow` takes `ends=@svg.Single(@svg.Both)` (or `Start`/`NoHead`) for
     bidirectional edges such as request/response pairs, or `Pair` for
     two opposing arrows; `midpoint` finds label positions, and a
     `\n` inside a `label` string gives multi-line box text.

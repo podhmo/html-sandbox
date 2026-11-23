@@ -1,6 +1,6 @@
 ---
 import {
-  "podhmo/svg-gen" @s,
+  "podhmo/svg-gen" @svg,
   "moonbitlang/core/math" @math,
   "moonbitlang/core/double" @double,
 }
@@ -12,13 +12,13 @@ import {
 // as a text diagram. Asserts the set inclusions edge by edge.
 
 fn main {
-  let s = @s.sites
-  let tris = @s.delaunay(s)
-  let c = @s.Canvas()
+  let s = @svg.sites
+  let tris = @svg.delaunay(s)
+  let c = @svg.Canvas()
   let dx = 260.0
   let dy = 230.0
 
-  let dist = fn(a : @s.Point, b : @s.Point) {
+  let dist = fn(a : @svg.Point, b : @svg.Point) {
     @math.hypot(a.0 - b.0, a.1 - b.1)
   }
   let ekey = fn(a : Int, b : Int) -> (Int, Int) {
@@ -30,7 +30,7 @@ fn main {
   }
 
   let dt : Array[(Int, Int)] = []
-  for entry in @s.edge_adjacency(tris) {
+  for entry in @svg.edge_adjacency(tris) {
     let (ea, eb, _ts) = entry
     let k = ekey(ea, eb)
     if !dt.contains(k) {
@@ -84,7 +84,7 @@ fn main {
   let gg : Array[(Int, Int)] = []
   for e in edges {
     let (ea, eb) = e
-    let mid : @s.Point = ((s[ea].0 + s[eb].0) / 2.0, (s[ea].1 + s[eb].1) / 2.0)
+    let mid : @svg.Point = ((s[ea].0 + s[eb].0) / 2.0, (s[ea].1 + s[eb].1) / 2.0)
     let rr = dist(s[ea], s[eb]) / 2.0
     let mut empty = true
     for i, p in s {
@@ -124,13 +124,13 @@ fn main {
       )
     }
     for p in s {
-      let q : @s.Point = (p.0 + ox, p.1 + oy)
+      let q : @svg.Point = (p.0 + ox, p.1 + oy)
       c.raw(
         "<circle cx=\"\{q.0}\" cy=\"\{q.1}\" r=\"3\" fill=\"currentColor\"/>",
         covered=[q],
       )
     }
-    c.text(110.0 + ox, 215.0 + oy, cap, anchor=@s.Middle, size=12.0, opacity=Some(0.7))
+    c.text(110.0 + ox, 215.0 + oy, cap, anchor=@svg.Middle, size=12.0, opacity=Some(0.7))
   }
 
   panel(nng, -25.0, -15.0, "NNG (\{nng.length()})")

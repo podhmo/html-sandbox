@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-highlight.mbtx -- compare low-key ways to say "look here", from
@@ -7,17 +7,17 @@ import { "podhmo/svg-gen" @s }
 // band; these stay currentColor so they work on both themes.
 
 fn main {
-  let c = @s.Canvas()
+  let c = @svg.Canvas()
   let row_h = 64.0
 
   // (caption, mark): mark = None for box-option variants, whose style
   // is folded into the emphasized box's args instead.
-  let variants : Array[(String, (@s.Shape) -> Unit, Double, @s.Underline)] = [
-    ("wash 0.06", fn(s) { c.highlight(s, opacity=0.06) }, 1.5, @s.No),
-    ("wash 0.12", fn(s) { c.highlight(s, opacity=0.12) }, 1.5, @s.No),
-    ("dashed ring", fn(s) { c.highlight(s, mode=@s.Ring) }, 1.5, @s.No),
-    ("thick stroke", fn(_s) { () }, 2.5, @s.No),
-    ("underlined label", fn(_s) { () }, 1.5, @s.Yes),
+  let variants : Array[(String, (@svg.Shape) -> Unit, Double, @svg.Underline)] = [
+    ("wash 0.06", fn(s) { c.highlight(s, opacity=0.06) }, 1.5, @svg.No),
+    ("wash 0.12", fn(s) { c.highlight(s, opacity=0.12) }, 1.5, @svg.No),
+    ("dashed ring", fn(s) { c.highlight(s, mode=@svg.Ring) }, 1.5, @svg.No),
+    ("thick stroke", fn(_s) { () }, 2.5, @svg.No),
+    ("underlined label", fn(_s) { () }, 1.5, @svg.Yes),
   ]
 
   for i, v in variants {
@@ -27,23 +27,23 @@ fn main {
       150.0,
       y + 20.0,
       caption,
-      anchor=@s.End,
+      anchor=@svg.End,
       central=true,
       size=11.0,
       opacity=Some(0.6),
     )
-    let a = c.box(170.0, y, @s.Auto, 40.0, label=Some("plain"), size=12.0)
+    let a = c.box(170.0, y, @svg.Auto, 40.0, label=Some("plain"), size=12.0)
     let b = c.box(
       c.right_of(a, 60.0),
       y,
-      @s.Auto,
+      @svg.Auto,
       40.0,
       label=Some("emphasized"),
       size=12.0,
       width=width,
       underline=underline,
     )
-    c.arrow(c.anchor(a, @s.E), c.anchor(b, @s.W))
+    c.arrow(c.anchor(a, @svg.E), c.anchor(b, @svg.W))
     mark(b)
   }
 

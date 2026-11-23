@@ -1,14 +1,14 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-hull.mbtx -- P3: the convex hull is the boundary a triangulation
 // must cover. Hull edges in green; interior and hull sites share dots.
 
 fn main {
-  let s = @s.sites
-  let hv = @s.hull(s)
-  let c = @s.Canvas()
+  let s = @svg.sites
+  let hv = @svg.hull(s)
+  let c = @svg.Canvas()
 
   for i = 0; i < hv.length(); i = i + 1 {
     c.line(s[hv[i]], s[hv[(i + 1) % hv.length()]], width=2.0, color=c.color(2))

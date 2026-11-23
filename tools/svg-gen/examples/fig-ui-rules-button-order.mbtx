@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-ui-rules-button-order.mbtx -- the drift the ui-rules audit
@@ -8,18 +8,18 @@ import { "podhmo/svg-gen" @s }
 // convention fixes both.
 
 fn main {
-  let c = @s.Canvas()
+  let c = @svg.Canvas()
   let strip_w = 310.0
   let strip_h = 46.0
   let x = 150.0
 
-  let strip = fn(y : Double, caption : String) -> @s.Shape {
-    let s = c.box(x, y, @s.Fixed(strip_w), strip_h, rx=4.0, opacity=Some(0.7))
+  let strip = fn(y : Double, caption : String) -> @svg.Shape {
+    let s = c.box(x, y, @svg.Fixed(strip_w), strip_h, rx=4.0, opacity=Some(0.7))
     c.text(
       x - 14.0,
       y + strip_h / 2.0,
       caption,
-      anchor=@s.End,
+      anchor=@svg.End,
       central=true,
       size=11.0,
       opacity=Some(0.6),
@@ -27,11 +27,11 @@ fn main {
     s
   }
 
-  let btn = fn(bx : Double, by : Double, label : String, i : Int) -> @s.Shape {
+  let btn = fn(bx : Double, by : Double, label : String, i : Int) -> @svg.Shape {
     c.box(
       bx,
       by,
-      @s.Auto,
+      @svg.Auto,
       30.0,
       label=Some(label),
       size=12.0,
@@ -61,8 +61,8 @@ fn main {
   // flex-end
   let y3 = 150.0
   ignore(strip(y3, "after: .form-actions"))
-  let primary_w = @s.text_width("Confirm", size=12.0) + 24.0
-  let cancel_w = @s.text_width("Cancel", size=12.0) + 24.0
+  let primary_w = @svg.text_width("Confirm", size=12.0) + 24.0
+  let cancel_w = @svg.text_width("Cancel", size=12.0) + 24.0
   let primary_x = x + strip_w - 10.0 - primary_w
   let cancel_x = primary_x - 8.0 - cancel_w
   ignore(btn(cancel_x, y3 + 8.0, "Cancel", 2))

@@ -1,6 +1,6 @@
 ---
 import {
-  "podhmo/svg-gen" @s,
+  "podhmo/svg-gen" @svg,
   "moonbitlang/core/math" @math,
 }
 ---
@@ -10,20 +10,20 @@ import {
 // through the three sites is unique.
 
 fn main {
-  let pts = [@s.sites[0], @s.sites[2], @s.sites[8]]
+  let pts = [@svg.sites[0], @svg.sites[2], @svg.sites[8]]
   let rect = (0.0, 0.0, 230.0, 230.0)
-  let c = @s.Canvas()
-  let cc = @s.circum(pts[0], pts[1], pts[2])
+  let c = @svg.Canvas()
+  let cc = @svg.circum(pts[0], pts[1], pts[2])
 
   for e in [(0, 1), (1, 2)] {
-    let bi = @s.bisector(pts[e.0], pts[e.1])
-    let (p, q) = @s.line_rect(bi.mid, bi.dir, rect)
+    let bi = @svg.bisector(pts[e.0], pts[e.1])
+    let (p, q) = @svg.line_rect(bi.mid, bi.dir, rect)
     c.line(p, q, dash=Some("4 3"), opacity=Some(0.6))
   }
 
   // The center sits on both bisectors, so it is equidistant to all
   // three.
-  let d = fn(p : @s.Point) { @math.hypot(p.0 - cc.o.0, p.1 - cc.o.1) }
+  let d = fn(p : @svg.Point) { @math.hypot(p.0 - cc.o.0, p.1 - cc.o.1) }
   if !(
       (d(pts[0]) - cc.r).abs() < 1.0e-9 &&
       (d(pts[1]) - cc.r).abs() < 1.0e-9 &&

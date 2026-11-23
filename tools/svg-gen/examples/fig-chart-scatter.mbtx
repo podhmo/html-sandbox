@@ -1,6 +1,6 @@
 ---
 import {
-  "podhmo/svg-gen" @s,
+  "podhmo/svg-gen" @svg,
   "moonbitlang/core/math" @math,
   "moonbitlang/core/double" @double,
 }
@@ -12,14 +12,14 @@ import {
 // seeded PRNG, with a handful of timeout-ish outliers.
 
 fn main {
-  let c = @s.Canvas()
-  let rand = @s.rng(20261031U)
-  let g = @s.gauss(rand)
+  let c = @svg.Canvas()
+  let rand = @svg.rng(20261031U)
+  let g = @svg.gauss(rand)
 
   // virtual pairs: payload (KiB) spans 3 decades on a log axis;
   // latency grows ~linearly in log10(payload) plus noise and
   // outliers.
-  let pairs : Array[@s.Point] = []
+  let pairs : Array[@svg.Point] = []
   for i = 0; i < 220; i = i + 1 {
     let lx = 3.0 * rand() // log10(KiB): 0..3 -> 1KiB..1MiB
     let payload = @math.pow(10.0, lx)
@@ -46,7 +46,7 @@ fn main {
   let slope = num2 / den
   let per_decade = slope.round().to_int64()
 
-  let p = @s.Plot(
+  let p = @svg.Plot(
     c,
     {
       title: "ペイロード 1 桁ごとにレイテンシ +約 \{per_decade} ms（仮想データ）",
@@ -57,7 +57,7 @@ fn main {
     (0.0, 400.0),
     w=420.0,
     h=190.0,
-    xscale=@s.Log,
+    xscale=@svg.Log,
     xtitle=Some("ペイロード (KiB, log)"),
     ytitle=Some("レイテンシ (ms)"),
     grid=true,
@@ -86,7 +86,7 @@ fn main {
     p.xs.map(300.0),
     p.ys.map(lx(@math.log10(300.0))) - 8.0,
     "単回帰（説明用）",
-    anchor=@s.Middle,
+    anchor=@svg.Middle,
     size=10.0,
     opacity=Some(0.7),
   )

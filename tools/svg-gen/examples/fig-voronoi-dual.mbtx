@@ -1,6 +1,6 @@
 ---
 import {
-  "podhmo/svg-gen" @s,
+  "podhmo/svg-gen" @svg,
   "moonbitlang/core/math" @math,
   "moonbitlang/core/double" @double,
 }
@@ -13,18 +13,18 @@ import {
 // the figure illustrates: every circumcircle is empty, T = 2n-2-h.
 
 fn main {
-  let s = @s.sites
-  let tris = @s.delaunay(s)
-  let centers = tris.map(fn(t) { @s.circum(s[t.0], s[t.1], s[t.2]).o })
+  let s = @svg.sites
+  let tris = @svg.delaunay(s)
+  let centers = tris.map(fn(t) { @svg.circum(s[t.0], s[t.1], s[t.2]).o })
 
   // Assert the properties the figure claims (README: "assert spatial
   // claims the figure depends on").
-  let h = @s.hull(s).length()
+  let h = @svg.hull(s).length()
   if tris.length() != 2 * s.length() - 2 - h {
     abort("triangle count = 2n-2-h")
   }
   for t in tris {
-    let cc = @s.circum(s[t.0], s[t.1], s[t.2])
+    let cc = @svg.circum(s[t.0], s[t.1], s[t.2])
     for p in s {
       if !(@math.hypot(p.0 - cc.o.0, p.1 - cc.o.1) > cc.r - 1.0e-9) {
         abort("empty circumcircle")
@@ -32,11 +32,11 @@ fn main {
     }
   }
 
-  let c = @s.Canvas()
+  let c = @svg.Canvas()
   let col_dt = c.color(0) // Delaunay: solid blue
   let col_vor = c.color(1) // Voronoi: dashed orange
   let bsize = 230.0 // clip box for Voronoi rays (figure bounds)
-  for entry in @s.edge_adjacency(tris) {
+  for entry in @svg.edge_adjacency(tris) {
     let (ea, eb, t) = entry
     if t.length() == 2 {
       c.line(centers[t[0]], centers[t[1]], dash=Some("4 3"), opacity=Some(0.8), color=col_vor)
@@ -51,17 +51,17 @@ fn main {
       } nobreak {
         abort("edge not in triangle")
       }
-      let mid : @s.Point = (
+      let mid : @svg.Point = (
         (s[ea].0 + s[eb].0) / 2.0,
         (s[ea].1 + s[eb].1) / 2.0,
       )
-      let d : @s.Point = (-(s[eb].1 - s[ea].1), s[eb].0 - s[ea].0)
+      let d : @svg.Point = (-(s[eb].1 - s[ea].1), s[eb].0 - s[ea].0)
       let l = @math.hypot(d.0, d.1)
       let sg = ((s[third].0 - mid.0) * d.0 + (s[third].1 - mid.1) * d.1).signum()
       let sgn = if sg == 0.0 { 1.0 } else { sg }
-      let dir : @s.Point = (-sgn * d.0 / l, -sgn * d.1 / l)
+      let dir : @svg.Point = (-sgn * d.0 / l, -sgn * d.1 / l)
       let o = centers[t[0]]
-      let far : @s.Point = (o.0 + dir.0 * bsize, o.1 + dir.1 * bsize)
+      let far : @svg.Point = (o.0 + dir.0 * bsize, o.1 + dir.1 * bsize)
       let cand = [
         if far.0 > 0.0 { bsize / far.0 } else { @double.infinity },
         if far.0 < 0.0 { -20.0 / far.0 } else { @double.infinity },
@@ -93,7 +93,7 @@ fn main {
   // Highlight one triangle: its empty circumcircle is the figure's
   // claim, its center is a Voronoi vertex (dashed edges meet there).
   let feat = 4
-  let cc2 = @s.circum(s[tris[feat].0], s[tris[feat].1], s[tris[feat].2])
+  let cc2 = @svg.circum(s[tris[feat].0], s[tris[feat].1], s[tris[feat].2])
   ignore(c.circle(cc2.o.0, cc2.o.1, cc2.r, opacity=Some(0.45)))
   c.raw(
     "<circle cx=\"\{cc2.o.0}\" cy=\"\{cc2.o.1}\" r=\"2.5\" fill=\"currentColor\"/>",

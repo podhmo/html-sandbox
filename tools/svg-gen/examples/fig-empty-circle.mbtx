@@ -1,6 +1,6 @@
 ---
 import {
-  "podhmo/svg-gen" @s,
+  "podhmo/svg-gen" @svg,
   "moonbitlang/core/math" @math,
 }
 ---
@@ -11,15 +11,15 @@ import {
 // (vermillion). The quad comes from real Delaunay data.
 
 fn main {
-  let s = @s.sites
-  let tris = @s.delaunay(s)
-  let c = @s.Canvas()
+  let s = @svg.sites
+  let tris = @svg.delaunay(s)
+  let c = @svg.Canvas()
   let dx = 260.0
 
   // an interior Delaunay edge (a,c) with triangles abc and acd →
   // quad a-b-c-d.
   let mut quad : (Int, Int, Int, Int)? = None
-  for entry in @s.edge_adjacency(tris) {
+  for entry in @svg.edge_adjacency(tris) {
     let (ea, eb, t) = entry
     if t.length() == 2 {
       let t1 = tris[t[0]]
@@ -49,7 +49,7 @@ fn main {
   let cc = s[ic]
   let d = s[id]
 
-  let dot = fn(p : @s.Point, fill : String) {
+  let dot = fn(p : @svg.Point, fill : String) {
     c.raw(
       "<circle cx=\"\{p.0}\" cy=\"\{p.1}\" r=\"3.5\" fill=\"\{fill}\"/>",
       covered=[p],
@@ -57,7 +57,7 @@ fn main {
   }
 
   // Left: Delaunay triangles abc + acd; circumcircle of abc is empty.
-  let good = @s.circum(a, b, cc)
+  let good = @svg.circum(a, b, cc)
   if !(@math.hypot(d.0 - good.o.0, d.1 - good.o.1) > good.r - 1.0e-9) {
     abort("circumcircle of abc must be empty")
   }
@@ -70,15 +70,15 @@ fn main {
   for p in [a, b, cc, d] {
     dot(p, "currentColor")
   }
-  c.text(120.0, 215.0, "empty circle", anchor=@s.Middle, size=12.0, opacity=Some(0.7))
+  c.text(120.0, 215.0, "empty circle", anchor=@svg.Middle, size=12.0, opacity=Some(0.7))
 
   // Right: the other diagonal bd. Its triangle abd has bcd's vertex c
   // inside the circumcircle — violation.
-  let sa = @s.shift([a], dx=dx, dy=0.0)[0]
-  let sb = @s.shift([b], dx=dx, dy=0.0)[0]
-  let scc = @s.shift([cc], dx=dx, dy=0.0)[0]
-  let sd = @s.shift([d], dx=dx, dy=0.0)[0]
-  let bad = @s.circum(sa, sb, sd)
+  let sa = @svg.shift([a], dx=dx, dy=0.0)[0]
+  let sb = @svg.shift([b], dx=dx, dy=0.0)[0]
+  let scc = @svg.shift([cc], dx=dx, dy=0.0)[0]
+  let sd = @svg.shift([d], dx=dx, dy=0.0)[0]
+  let bad = @svg.circum(sa, sb, sd)
   if !(@math.hypot(scc.0 - bad.o.0, scc.1 - bad.o.1) < bad.r) {
     abort("vertex c must lie inside the bad circumcircle")
   }
@@ -91,7 +91,7 @@ fn main {
     dot(p, "currentColor")
   }
   dot(scc, c.color(3))
-  c.text(120.0 + dx, 215.0, "a site inside: not Delaunay", anchor=@s.Middle, size=12.0, opacity=Some(0.7))
+  c.text(120.0 + dx, 215.0, "a site inside: not Delaunay", anchor=@svg.Middle, size=12.0, opacity=Some(0.7))
 
   println(
     c.render(label=Some("empty circumcircle: every Delaunay triangle's circumcircle contains no other site (left); the other diagonal puts a site inside (right)")),

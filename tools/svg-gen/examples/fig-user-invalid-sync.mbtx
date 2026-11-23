@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // aria-invalid x :user-invalid sync: what the browser knows vs.
@@ -9,7 +9,7 @@ import { "podhmo/svg-gen" @s }
 // converging on the announcer + describedby link.
 
 fn main {
-  let c = @s.Canvas()
+  let c = @svg.Canvas()
 
   c.text(
     14.0,
@@ -22,7 +22,7 @@ fn main {
   let browser = c.box(
     20.0,
     44.0,
-    @s.Auto,
+    @svg.Auto,
     64.0,
     label=Some(":user-invalid\nUA が判定 (interaction後のみ)"),
     color=c.color(0),
@@ -31,19 +31,19 @@ fn main {
   let sync = c.box(
     320.0,
     44.0,
-    @s.Auto,
+    @svg.Auto,
     64.0,
     label=Some("form-errors.js\nblur capture → syncAria(el, true)"),
     color=c.color(1),
     size=12.0,
   )
-  c.arrow(c.anchor(browser, @s.E), c.anchor(sync, @s.W), width=1.5)
+  c.arrow(c.anchor(browser, @svg.E), c.anchor(sync, @svg.W), width=1.5)
   c.text(268.0, 56.0, "matches?", size=10.0, opacity=Some(0.7))
 
   let aria = c.box(
     600.0,
     8.0,
-    @s.Auto,
+    @svg.Auto,
     52.0,
     label=Some("aria-invalid=\"true\"\nserver-flagged は復元"),
     color=c.color(2),
@@ -52,7 +52,7 @@ fn main {
   let desc = c.box(
     600.0,
     76.0,
-    @s.Auto,
+    @svg.Auto,
     52.0,
     label=Some("aria-describedby += #comment-error\n表示中だけリンク"),
     color=c.color(3),
@@ -61,21 +61,21 @@ fn main {
   let announce = c.box(
     600.0,
     144.0,
-    @s.Auto,
+    @svg.Auto,
     52.0,
     label=Some("live region (polite)\n\"Add a comment: Comment is required.\""),
     color=c.color(4),
     size=12.0,
   )
-  c.arrow(c.anchor(sync, @s.E), c.anchor(aria, @s.W), width=1.5)
-  c.arrow(c.anchor(sync, @s.E), c.anchor(desc, @s.W), width=1.5)
-  c.arrow(c.anchor(sync, @s.E), c.anchor(announce, @s.W), width=1.5)
+  c.arrow(c.anchor(sync, @svg.E), c.anchor(aria, @svg.W), width=1.5)
+  c.arrow(c.anchor(sync, @svg.E), c.anchor(desc, @svg.W), width=1.5)
+  c.arrow(c.anchor(sync, @svg.E), c.anchor(announce, @svg.W), width=1.5)
 
   ignore(
     c.box(
       20.0,
       148.0,
-      @s.Auto,
+      @svg.Auto,
       48.0,
       label=Some("CSS (従来から)\n.field:has(:user-invalid) → 赤表示"),
       size=12.0,

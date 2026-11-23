@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-gom-scope-escape.mbtx -- where a Scope handle `s` may go.
@@ -8,7 +8,7 @@ import { "podhmo/svg-gen" @s }
 // accepted, uses that carry `s` past its edge are E0418.
 
 fn main {
-  let c = @s.Canvas()
+  let c = @svg.Canvas()
   c.text(0.0, 0.0, "Scope のハンドル s が行ってよい場所", size=15.0)
   c.text(
     0.0,
@@ -18,7 +18,7 @@ fn main {
     opacity=Some(0.65),
   )
 
-  let body = c.box(0.0, 44.0, @s.Fixed(330.0), 300.0, dash=Some("6 4"))
+  let body = c.box(0.0, 44.0, @svg.Fixed(330.0), 300.0, dash=Some("6 4"))
   c.text(body.x + 14.0, body.y + 22.0, "Scope.run <| fn s -> { ... }", size=12.0)
 
   let ok = c.color(2)
@@ -33,7 +33,7 @@ fn main {
   let mut y = body.y + 48.0
   for t in inside {
     ignore(
-      c.box(body.x + 20.0, y, @s.Auto, 36.0, label=Some(t), size=12.0, color=ok),
+      c.box(body.x + 20.0, y, @svg.Auto, 36.0, label=Some(t), size=12.0, color=ok),
     )
     y = y + 50.0
   }
@@ -48,10 +48,10 @@ fn main {
   let ox = body.x + body.w + 110.0
   y = body.y + 34.0
   for t in outside {
-    let b = c.box(ox, y, @s.Auto, 36.0, label=Some(t), size=12.0, color=ng, dash=Some("4 3"))
+    let b = c.box(ox, y, @svg.Auto, 36.0, label=Some(t), size=12.0, color=ng, dash=Some("4 3"))
     c.arrow(
       (body.x + body.w - 30.0, b.y + 18.0),
-      c.anchor(b, @s.W),
+      c.anchor(b, @svg.W),
       color=ng,
       width=1.5,
     )

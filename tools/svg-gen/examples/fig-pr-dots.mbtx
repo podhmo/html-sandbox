@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-pr-dots.mbtx -- why the commits list and the files view use
@@ -7,7 +7,7 @@ import { "podhmo/svg-gen" @s }
 // merge-base..head.
 
 fn main {
-  let c = @s.Canvas()
+  let c = @svg.Canvas()
   let base_i = 0
   let head_i = 1
   let mb_i = 2
@@ -16,14 +16,14 @@ fn main {
   let y_base = 60.0
   let y_head = 150.0
   let x0 = 40.0
-  let cen = fn(s : @s.Shape) -> @s.Point {
+  let cen = fn(s : @svg.Shape) -> @svg.Point {
     (s.x + s.w / 2.0, s.y + s.h / 2.0)
   }
 
   // base branch (top): merge-base, then commits that arrived after
   // the fork
   let mb = c.circle(x0, y_base, r, color=c.color(mb_i), width=2.5)
-  c.text(x0, y_base - r - 12.0, "merge-base", anchor=@s.Middle, size=13.0)
+  c.text(x0, y_base - r - 12.0, "merge-base", anchor=@svg.Middle, size=13.0)
   let b1 = c.circle(x0 + d, y_base, r, color=c.color(base_i))
   let _b2 = c.circle(x0 + 2.0 * d, y_base, r, color=c.color(base_i))
   let b3 = c.circle(x0 + 3.0 * d, y_base, r, color=c.color(base_i))
@@ -44,12 +44,12 @@ fn main {
     x0 + 2.0 * d,
     y_head + 34.0,
     "commits list: base..head (head-side only)",
-    anchor=@s.Middle,
+    anchor=@svg.Middle,
     size=13.0,
-    underline=@s.Yes,
+    underline=@svg.Yes,
   )
   for h in [h1, h2, h3] {
-    c.highlight(h, mode=@s.Ring)
+    c.highlight(h, mode=@svg.Ring)
   }
 
   // three-dot range: merge-base..head comparison (files view)
@@ -58,7 +58,7 @@ fn main {
     y_base - 46.0,
     "files view: merge-base → head",
     size=13.0,
-    underline=@s.Yes,
+    underline=@svg.Yes,
   )
   c.arrow(
     (x0 + d, y_base - 36.0),

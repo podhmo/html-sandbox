@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-voronoi-cell.mbtx -- V1: one Voronoi cell is the intersection of
@@ -7,16 +7,16 @@ import { "podhmo/svg-gen" @s }
 // cuts away the far half; what remains is the cell (washed fill).
 
 fn main {
-  let s = @s.sites
+  let s = @svg.sites
   let clip = (10.0, 10.0, 225.0, 220.0)
-  let c = @s.Canvas()
+  let c = @svg.Canvas()
 
   // Featured site: a central one (index 3 = (70,115) has 6 neighbors).
   let si = 3
   let site = s[si]
   // its Voronoi neighbors = Delaunay-adjacent sites
   let nbr : Array[Int] = []
-  for entry in @s.edge_adjacency(@s.delaunay(s)) {
+  for entry in @svg.edge_adjacency(@svg.delaunay(s)) {
     let (ea, eb, _ts) = entry
     if ea == si {
       nbr.push(eb)
@@ -25,7 +25,7 @@ fn main {
     }
   }
 
-  let cell = @s.voronoi_cell(site, sites=s, rect=[
+  let cell = @svg.voronoi_cell(site, sites=s, rect=[
     (clip.0, clip.1),
     (clip.2, clip.1),
     (clip.2, clip.3),
@@ -36,8 +36,8 @@ fn main {
   }
 
   for j in nbr {
-    let bi = @s.bisector(site, s[j])
-    let (p, q) = @s.line_rect(bi.mid, bi.dir, clip)
+    let bi = @svg.bisector(site, s[j])
+    let (p, q) = @svg.line_rect(bi.mid, bi.dir, clip)
     c.line(p, q, dash=Some("4 3"), opacity=Some(0.55))
     c.raw(
       "<circle cx=\"\{s[j].0}\" cy=\"\{s[j].1}\" r=\"3.5\" fill=\"currentColor\"/>",
@@ -55,14 +55,14 @@ fn main {
   }
 
   c.raw(
-    @s.poly_el(cell, fill=c.color(2), opacity=0.18, extra=Some(" stroke=\"\{c.color(2)}\" stroke-width=\"2\"")),
+    @svg.poly_el(cell, fill=c.color(2), opacity=0.18, extra=Some(" stroke=\"\{c.color(2)}\" stroke-width=\"2\"")),
     covered=cell,
   )
   c.raw(
     "<circle cx=\"\{site.0}\" cy=\"\{site.1}\" r=\"4\" fill=\"\{c.color(2)}\"/>",
     covered=[site],
   )
-  c.text(115.0, 240.0, "cell = half-planes kept", anchor=@s.Middle, size=12.0, opacity=Some(0.7))
+  c.text(115.0, 240.0, "cell = half-planes kept", anchor=@svg.Middle, size=12.0, opacity=Some(0.7))
 
   println(
     c.render(label=Some("one Voronoi cell: intersection of the near half-planes cut by bisectors to the site's neighbors")),

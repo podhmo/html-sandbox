@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-ghost-timeline.mbtx -- the gist-cli session on one time
@@ -9,7 +9,7 @@ import { "podhmo/svg-gen" @s }
 // function never existed in a commit.
 
 fn main {
-  let c = @s.Canvas()
+  let c = @svg.Canvas()
   let code = c.color(0)
   let doc = c.color(1)
   let ghost = c.color(3)
@@ -52,8 +52,8 @@ fn main {
     opacity=Some(0.65),
   )
 
-  c.text(x0 - 12.0, code_y, "コード", anchor=@s.End, central=true, size=12.0)
-  c.text(x0 - 12.0, doc_y, "レポート", anchor=@s.End, central=true, size=12.0)
+  c.text(x0 - 12.0, code_y, "コード", anchor=@svg.End, central=true, size=12.0)
+  c.text(x0 - 12.0, doc_y, "レポート", anchor=@svg.End, central=true, size=12.0)
   let end_x = x("02:11:30")
   c.line((x0, code_y), (end_x, code_y), opacity=Some(0.3))
   c.line((x0, doc_y), (end_x, doc_y), opacity=Some(0.3))
@@ -69,14 +69,14 @@ fn main {
     (g0 + g1) / 2.0,
     doc_y + 24.0,
     "本文に parse_files と [\"--gist\"] の腕がある",
-    anchor=@s.Middle,
+    anchor=@svg.Middle,
     size=11.0,
   )
   c.text(
     (g0 + g1) / 2.0,
     code_y - 16.0,
     "コードには一度も現れない (git log -S)",
-    anchor=@s.Middle,
+    anchor=@svg.Middle,
     size=11.0,
     opacity=Some(0.75),
   )
@@ -115,7 +115,7 @@ fn main {
       width=1.0,
     )
     for i, s in lines {
-      c.text(cx, ty + i.to_double() * 14.0, s, anchor=@s.Middle, size=10.0, opacity=Some(0.85))
+      c.text(cx, ty + i.to_double() * 14.0, s, anchor=@svg.Middle, size=10.0, opacity=Some(0.85))
     }
   }
   note("01:43:00", code_y, ["全体→局所の 10 コミット"], true)
@@ -136,7 +136,7 @@ fn main {
     (s0 + s1) / 2.0,
     (code_y + doc_y) / 2.0,
     "要約",
-    anchor=@s.Middle,
+    anchor=@svg.Middle,
     central=true,
     size=10.0,
     opacity=Some(0.8),
@@ -152,7 +152,7 @@ fn main {
       tx,
       axis_y + 68.0,
       "\{label[0]}:\{label[1]}",
-      anchor=@s.Middle,
+      anchor=@svg.Middle,
       size=10.0,
       opacity=Some(0.7),
     )

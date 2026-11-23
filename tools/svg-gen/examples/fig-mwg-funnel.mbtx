@@ -1,5 +1,5 @@
 ---
-import { "podhmo/svg-gen" @s }
+import { "podhmo/svg-gen" @svg }
 ---
 
 // fig-mwg-funnel.mbtx -- Picking TODO tasks from the
@@ -9,12 +9,12 @@ import { "podhmo/svg-gen" @s }
 // schematic — only 208 and 10 are real numbers.
 
 fn main {
-  let c = @s.Canvas()
+  let c = @svg.Canvas()
 
   let src = c.box(
     0.0,
     40.0,
-    @s.Auto,
+    @svg.Auto,
     60.0,
     label=Some("208 guides\nmodern-web-guidance list"),
     width=2.0,
@@ -22,8 +22,8 @@ fn main {
 
   // Three filter gates in a row; each drops a class of guides
   // downward.
-  let gate = fn(x : Double, y : Double, label : String, col : Int) -> @s.Shape {
-    c.box(x, y, @s.Auto, 56.0, label=Some(label), color=c.color(col), width=2.0)
+  let gate = fn(x : Double, y : Double, label : String, col : Int) -> @svg.Shape {
+    c.box(x, y, @svg.Auto, 56.0, label=Some(label), color=c.color(col), width=2.0)
   }
 
   let g1 = gate(260.0, 42.0, "executable JS?\nJS API 前提は除外", 0)
@@ -33,7 +33,7 @@ fn main {
   let out = c.box(
     800.0,
     40.0,
-    @s.Auto,
+    @svg.Auto,
     60.0,
     label=Some("10 tasks\n採用 9 + 判断留保 1"),
     color=c.color(2),
@@ -41,24 +41,24 @@ fn main {
   )
 
   // Flow arrows through the gates.
-  c.arrow(c.anchor(src, @s.E), c.anchor(g1, @s.W))
-  c.arrow(c.anchor(g1, @s.E), c.anchor(g2, @s.W))
-  c.arrow(c.anchor(g2, @s.E), c.anchor(g3, @s.W))
-  c.arrow(c.anchor(g3, @s.E), c.anchor(out, @s.W))
+  c.arrow(c.anchor(src, @svg.E), c.anchor(g1, @svg.W))
+  c.arrow(c.anchor(g1, @svg.E), c.anchor(g2, @svg.W))
+  c.arrow(c.anchor(g2, @svg.E), c.anchor(g3, @svg.W))
+  c.arrow(c.anchor(g3, @svg.E), c.anchor(out, @svg.W))
 
   // Drops below each gate (dashed = rejected), with example guide
   // ids.
-  let drop = fn(g : @s.Shape, labels : Array[String]) {
+  let drop = fn(g : @svg.Shape, labels : Array[String]) {
     let mut w = 0.0
     for s in labels {
-      w = w.max(@s.text_width(s, size=11.0))
+      w = w.max(@svg.text_width(s, size=11.0))
     }
     w = w + 16.0
     let label = labels.join("\n")
     let d = c.box(
       g.x + g.w / 2.0 - w / 2.0,
       g.y + 130.0,
-      @s.Fixed(w),
+      @svg.Fixed(w),
       labels.length().to_double() * 15.0 + 20.0,
       label=Some(label),
       dash=Some("5 4"),
@@ -66,7 +66,7 @@ fn main {
       size=11.0,
       pad_x=8.0,
     )
-    c.arrow(c.anchor(g, @s.S), c.anchor(d, @s.N), dash=Some("5 4"), opacity=Some(0.7))
+    c.arrow(c.anchor(g, @svg.S), c.anchor(d, @svg.N), dash=Some("5 4"), opacity=Some(0.7))
   }
 
   drop(g1, ["Temporal / built-in AI", "service worker / INP", "Web Components", "…大半"])
@@ -77,7 +77,7 @@ fn main {
   let note = c.box(
     800.0,
     150.0,
-    @s.Auto,
+    @svg.Auto,
     3.0 * 15.0 + 20.0,
     label=Some("speculation rules:\n宣言的 JSON だが <script> 要素\n→ 実装するかは子が判断 (wontfix 可)"),
     color=c.color(3),
@@ -85,7 +85,7 @@ fn main {
     size=11.0,
     pad_x=10.0,
   )
-  c.arrow(c.anchor(out, @s.S), c.anchor(note, @s.N), dash=Some("5 4"), opacity=Some(0.7))
+  c.arrow(c.anchor(out, @svg.S), c.anchor(note, @svg.N), dash=Some("5 4"), opacity=Some(0.7))
 
   c.text(10.0, 16.0, "schematic — dropped counts are not measured", size=11.0, opacity=Some(0.6))
 

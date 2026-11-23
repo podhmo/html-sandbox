@@ -1,6 +1,6 @@
 ---
 import {
-  "podhmo/svg-gen" @s,
+  "podhmo/svg-gen" @svg,
   "moonbitlang/core/math" @math,
 }
 ---
@@ -11,15 +11,15 @@ import {
 // "equal distance"; same length by construction.
 
 fn main {
-  let a : @s.Point = (70.0, 60.0)
-  let b : @s.Point = (170.0, 115.0)
-  let c = @s.Canvas()
+  let a : @svg.Point = (70.0, 60.0)
+  let b : @svg.Point = (170.0, 115.0)
+  let c = @svg.Canvas()
   let col_a = c.color(0)
   let col_b = c.color(1)
   let rect = (10.0, 10.0, 230.0, 170.0)
 
-  let bi = @s.bisector(a, b)
-  let (p, q) = @s.line_rect(bi.mid, bi.dir, rect)
+  let bi = @svg.bisector(a, b)
+  let (p, q) = @svg.line_rect(bi.mid, bi.dir, rect)
   c.line(p, q, width=2.0)
   c.raw("<circle cx=\"\{a.0}\" cy=\"\{a.1}\" r=\"4\" fill=\"\{col_a}\"/>", covered=[a])
   c.raw("<circle cx=\"\{b.0}\" cy=\"\{b.1}\" r=\"4\" fill=\"\{col_b}\"/>", covered=[b])
@@ -28,7 +28,7 @@ fn main {
   // length.
   let len = @math.hypot(bi.dir.0, bi.dir.1)
   for t in [-45.0, 55.0] {
-    let w : @s.Point = (
+    let w : @svg.Point = (
       bi.mid.0 + bi.dir.0 / len * t,
       bi.mid.1 + bi.dir.1 / len * t,
     )

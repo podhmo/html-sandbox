@@ -1,6 +1,6 @@
 ---
 import {
-  "podhmo/svg-gen" @s,
+  "podhmo/svg-gen" @svg,
   "moonbitlang/core/math" @math,
 }
 ---
@@ -13,8 +13,8 @@ import {
 // every run.
 
 fn main {
-  let c = @s.Canvas()
-  let g = @s.gauss(@s.rng(20261101U))
+  let c = @svg.Canvas()
+  let g = @svg.gauss(@svg.rng(20261101U))
   let sample = fn(mu : Double, sigma : Double, n : Int) {
     let arr = Array::makei(n, fn(_i) { @math.exp(mu + sigma * g()) })
     arr.sort()
@@ -26,11 +26,11 @@ fn main {
   let v23 = sample(@math.ln(105.0), 0.5, 600)
 
   let gain = (
-      (1.0 - @s.quantile(v23, q=0.99) / @s.quantile(v22, q=0.99)) * 100.0
+      (1.0 - @svg.quantile(v23, q=0.99) / @svg.quantile(v22, q=0.99)) * 100.0
     ).round()
   let gain_i = gain.to_int64()
 
-  let p = @s.Plot(
+  let p = @svg.Plot(
     c,
     {
       title: "v2.3 で p99 レイテンシが \{gain_i}% 改善（仮想データ）",
@@ -43,7 +43,7 @@ fn main {
     h=190.0,
     xtitle=Some("レイテンシ (ms)"),
     ytitle=Some("累積割合"),
-    yfmt=fn(v) { @s.fixed(v, d=1) },
+    yfmt=fn(v) { @svg.fixed(v, d=1) },
     grid=true,
   )
   p.frame()
@@ -62,7 +62,7 @@ fn main {
   })
   // direct labels where the curves are far apart (near their p80).
   let at = fn(sm : Array[Double], q : Double) {
-    p.xs.map(@s.quantile(sm, q=q))
+    p.xs.map(@svg.quantile(sm, q=q))
   }
   let y80 = p.ys.map(0.8)
   c.text(
