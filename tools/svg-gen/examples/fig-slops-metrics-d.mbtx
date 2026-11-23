@@ -1,0 +1,107 @@
+---
+import { "podhmo/svg-gen" @s }
+---
+
+// fig-slops-metrics-d.mbtx -- claude-vs-devin Cohen's d for the
+// measured features, overall vs inside the "変更の報告" genre
+// only (6 vs 6 members). Real measurements from the issue #172
+// aggregation (tools/slops-metrics/out/report.md and
+// out/genre.md). Darkness encodes |d|; the signed value is
+// printed in each cell. Rows above the gap are claude-high
+// features, below it devin-high.
+
+fn main {
+  let c = @s.Canvas::new()
+
+  let cols = ["全体 (65)", "変更の報告 (6v6)"]
+  // rows top-first; v = [overall d, within-genre d], sign =
+  // claude - devin.
+  let rows = [
+    ("節数/文", [0.95, 1.43]),
+    ("文末:「た」率", [1.12, 0.63]),
+    ("読点@文節末", [0.9, 1.1]),
+    ("読点", [0.8, 1.12]),
+    ("接続詞", [0.63, 1.07]),
+    ("形式名詞", [0.52, 0.96]),
+    ("無生物主語+動作動詞", [0.65, 0.42]),
+    ("連用形+読点", [0.79, 0.32]),
+    ("て形接続", [0.67, 0.31]),
+    ("係受け深さ平均", [0.51, 0.07]),
+    ("名詞3連積み上げ", [-0.62, -1.11]),
+    ("サ変名詞", [-1.11, -1.73]),
+    ("文末:体言止め率", [-0.81, -2.87]),
+  ]
+  let n_r = rows.length()
+  let n_c = cols.length()
+
+  let p = @s.Plot::new(
+    c,
+    {
+      title: "ジャンルを統制しても執筆者差は残る",
+      subtitle: "claude−devin の Cohen's d。右列は「変更の報告」内のみ (各6メンバー)",
+      footnote: "出典: issue #172 集計 / tools/slops-metrics measure.py, genre.py",
+    },
+    (0.0, n_c.to_double()),
+    (0.0, n_r.to_double()),
+    w=220.0,
+    h=340.0,
+  )
+  p.frame(
+    xticks=cols.mapi(fn(i, a) {
+      @s.Lab(i.to_double() + 0.5, a)
+    }),
+    yticks=rows.mapi(fn(j, r) {
+      @s.Lab(n_r.to_double() - 0.5 - j.to_double(), r.0)
+    }),
+  )
+  let mut mm = (0.0, 0.0)
+  p.data(fn(p) {
+    mm = p.heatmap(rows.map(fn(r) { r.1.map(fn(v) { v.abs() }) }))
+  })
+  p.heat_legend(mm, p.x1 - 80.0, p.y1 + 56.0, fmt=fn(v) { @s.fixed(v, 1) }, label="|d|")
+
+  let cw = (p.x1 - p.x0) / n_c.to_double()
+  let ch = (p.y1 - p.y0) / n_r.to_double()
+  for j, r in rows {
+    for i, v in r.1 {
+      let sign = if v > 0.0 { "+" } else { "" }
+      c.text(
+        p.x0 + (i.to_double() + 0.5) * cw,
+        p.y0 + (j.to_double() + 0.55) * ch,
+        "\{sign}\{@s.fixed(v, 2)}",
+        anchor=@s.Middle,
+        central=true,
+        size=8.0,
+        opacity=Some(0.8),
+      )
+    }
+  }
+  // divider between claude-high rows and devin-high rows.
+  c.line((p.x0, p.y0 + 10.0 * ch), (p.x1, p.y0 + 10.0 * ch), opacity=Some(0.45), width=1.0)
+  c.text(
+    p.x0 - 6.0,
+    p.y0 + 5.0 * ch,
+    "claude 側が高い",
+    anchor=@s.End,
+    central=true,
+    size=9.0,
+    opacity=Some(0.6),
+  )
+  c.text(
+    p.x0 - 6.0,
+    p.y0 + 11.5 * ch,
+    "devin 側が高い",
+    anchor=@s.End,
+    central=true,
+    size=9.0,
+    opacity=Some(0.6),
+  )
+
+  if !(rows.length() == 13 && rows.iter().all(fn(r) { r.1.length() == cols.length() })) {
+    abort("row shape")
+  }
+
+  println(
+    c.render(label="claude-vs-devin effect sizes overall vs within the 変更の報告 genre: the clause-chaining signature persists, dependency depth collapses"),
+  )
+}
