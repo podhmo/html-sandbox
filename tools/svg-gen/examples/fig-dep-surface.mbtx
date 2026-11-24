@@ -18,5 +18,5 @@ fn main {
   let mpa = c.color(0) // teal
   let spa = c.color(3) // vermillion
   c.hbars(items, x=10.0, y=10.0, max_w=200.0, label_w=Some(170.0), highlight=Some(4), size=11.0, bar_h=18.0, row_gap=10.0, colors=Some([mpa, mpa, spa, spa, spa]))
-  println(c.render(label=Some("放置のしやすさに効く依存面積。SPA は npm 側の間接依存が約200個に膨らむ")))
+  println(c.render(label=Some("放置のしやすさに効く依存面積。SPA は npm 直接依存16個から node_modules 実数が約200に膨らむ")))
 }

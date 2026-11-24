@@ -27,8 +27,8 @@
 <text x="355" y="174.15" font-size="11" text-anchor="middle" dominant-baseline="central" fill="currentColor">JSON のみ</text>
 <path d="M193 162 L297 162" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M288 166.05 L297 162 L288 157.95" fill="none" stroke="currentColor" stroke-width="1.5"/>
 <path d="M297 172 L193 172" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M202 167.95 L193 172 L202 176.05" fill="none" stroke="currentColor" stroke-width="1.5"/>
-<text x="200" y="146" font-size="11" fill="currentColor">POST mutation</text>
-<text x="200" y="182" font-size="11" text-anchor="middle" dominant-baseline="central" fill="currentColor">GET (loader)</text>
+<text x="200" y="146" font-size="11" fill="currentColor">POST mutation / GET (loader)</text>
+<text x="200" y="182" font-size="11" fill="currentColor">JSON</text>
 <text x="18" y="216" font-size="11" fill="currentColor">DOM reconcile — scroll / focus / draft は保持</text>
 </svg>
 ```
@@ -45,7 +45,7 @@
 
 ## 難しくなったこと
 
-- ブラウザが無料でやってくれた振る舞いを全部 opt-in で取り戻す。 `document.title`、遷移時フォーカス、スクロール復元、`beforeunload` 相当の離脱ガード。MPA なら full-page load が自動的にやる。SPA では router の subscribe/option で自分で配線する（次の記事で詳しく）
+- ブラウザが無料でやってくれた振る舞いを全部 opt-in で取り戻す。 `document.title`、遷移時フォーカス、スクロール復元。MPA なら full-page load が自動的にやるものを、SPA では router の subscribe/option で自分で配線する（次の記事で詳しく）。離脱ガードだけは別扱いで、MPA でも `beforeunload` は自動ではなく leave-guard.js で自前登録していた。ただし SPA では「ナビゲーション自体を止める」`useBlocker` と `ignoreBlocker` の設計が別途必要になった
 - PRG が消えた分の安全性を自前で持つ。 MPA は POST→302→GET なので F5 での二重送信も直リンクも安全。SPA では「invalidate を navigate より先に呼ぶ」（遷移先が古い loader snapshot を見せないため）、submit 後の navigate が leave-guard に引っかからないよう `submitted` フラグや `ignoreBlocker` を使う、といった約束を自分で守る。実際この辺りはレビューで実バグとして拾われた
 - クライアントが「サーバの真実」のコピーを持つ。 一覧の表示中に他者が消した issue、force-push で動いた head SHA（行内コメントの anchor）など、loader の snapshot は陳腐化する。MPA では fragment を取り直せばサーバの最新 HTML が来るので陳腐化は fetch のたびに自然解消する。SPA は invalidate の粒度とタイミングを設計する必要があり、stale anchor の再送のようなケースは明示的に書いた
 - uncontrolled な DOM と state の不整合がバグになる。 MPA の JS は DOM をそのまま読み書きするので「DOM が真実」。SPA で uncontrolled textarea + 別管理の dirty/blank フラグにすると、キャンセル→再オープンで「DOM は元に戻っているのにフラグだけ残る」という不整合が生まれた（実バグ）。controlled にするか、閉じるたびにフラグをリセットするかを決める必要がある

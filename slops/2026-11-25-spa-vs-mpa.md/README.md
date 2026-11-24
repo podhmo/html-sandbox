@@ -7,15 +7,17 @@ prev: ../2026-11-23-moonbit-port-for-quality.md
 # MPA+ajax から SPA への移植 — やったことと、実装から見えた差分
 
 > [!NOTE]
-> 執筆: Devin。作業対象は [podhmo/go-spa-sample](https://github.com/podhmo/go-spa-sample)。元実装は [podhmo/go-classic-mpa-sample](https://github.com/podhmo/go-classic-mpa-sample)（issue tracker「zatudan」、Go のサーバレンダリング + 素の JS による ajax 強化）。成果は stacked PR 16 本（[#1](https://github.com/podhmo/go-spa-sample/pull/1) から [#16](https://github.com/podhmo/go-spa-sample/pull/16) まで、いずれもオープン）。
+> 執筆: Devin。作業対象は [podhmo/go-spa-sample](https://github.com/podhmo/go-spa-sample)。元実装は [podhmo/go-classic-mpa-sample](https://github.com/podhmo/go-classic-mpa-sample)（issue tracker「zatudan」、Go のサーバレンダリング + 素の JS による ajax 強化）。成果は stacked PR 15 本（[#1](https://github.com/podhmo/go-spa-sample/pull/1) から [#16](https://github.com/podhmo/go-spa-sample/pull/16) まで。#3 は欠番。いずれもオープン）。
 
 ## この記事の構成
 
 1. やったこと（この README。自分が書いた分と、リポジトリ作成後に先行してあった分を分けて記す）
-2. [MPA+ajax と SPA の違いは何か](01-mpa-vs-spa.md) — 実装を元に、楽になったこと・難しくなったこと
-3. [SPA だからこそ必要になった modern-web-guidance](02-spa-guidance.md) — MPA が full-page load で無料でもらっていた振る舞いの再実装
-4. [追加したくなった UI 実装](03-ui-ideas.md) — ルールとは無関係に「あったらよさそう」と感じたもの
-5. [放置のしやすさの比較](04-maintainability.md) — 依存面積と dependabot 要不要、依存ライブラリの終了リスク
+2. [MPA+ajax と SPA の違いは何か](#01-mpa-vs-spamd) — 実装を元に、楽になったこと・難しくなったこと
+3. [SPA だからこそ必要になった modern-web-guidance](#02-spa-guidancemd) — MPA が full-page load で無料でもらっていた振る舞いの再実装
+4. [追加したくなった UI 実装](#03-ui-ideasmd) — ルールとは無関係に「あったらよさそう」と感じたもの
+5. [放置のしやすさの比較](#04-maintainabilitymd) — 依存面積と dependabot 要不要、依存ライブラリの終了リスク
+
+各節の見出しから元の Markdown ファイルにも飛べる。
 
 ## やったこと
 
@@ -44,10 +46,10 @@ master の履歴を見る限り、issues スコープの基礎は既にあった
 - SPA 版 ui-rules.md — MPA 版の規約を SPA の語彙に移植し、[正]/代案/変更予定/N/A の構造で整備（[PR #15](https://github.com/podhmo/go-spa-sample/pull/15)）
 - 離脱ガード + 空送信 disabled — `useBlocker` + `beforeunload` の両対応 leave-guard、コメント空送信の disabled 化（[PR #16](https://github.com/podhmo/go-spa-sample/pull/16)）
 
-全15本が GitHub の stacked PR（stack #3）として `master` 基点で積み上がっている。各 PR は Devin Review の findings を何ラウンドか往復しており、実バグ（返信ドラフトの保持、stale anchor の再送、uncontrolled textarea とフラグの不整合など）もその過程でいくつか直っている。
+上に挙げた15本すべてが GitHub の stacked PR として `master` 基点で積み上がっている（stack #3）。各 PR は Devin Review の findings を何ラウンドか往復しており、実バグ（返信ドラフトの保持、stale anchor の再送、uncontrolled textarea とフラグの不整合など）もその過程でいくつか直っている。
 
 ## 検証のやり方
 
 各機能は vitest browser mode（実 Chrome）で component 級のテストを書き、その後 playwright-cli で実サーバ + 実ブラウザの疎通確認をした。最終時点で 57 件の browser テストが通る。PR の files diff では実際に行内コメントを投稿し、squash merge まで実 git repo で確認済み。
 
-続き: [MPA+ajax と SPA の違いは何か](01-mpa-vs-spa.md)
+続き: [MPA+ajax と SPA の違いは何か](#01-mpa-vs-spamd)

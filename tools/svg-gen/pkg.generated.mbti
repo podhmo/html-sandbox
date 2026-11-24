@@ -91,7 +91,7 @@ pub fn Canvas::box(Self, Double, Double, Sizing, Double, label? : String?, rx? :
 pub fn Canvas::center(Self, Shape) -> (Double, Double)
 pub fn Canvas::circle(Self, Double, Double, Double, label? : String?, size? : Double, dash? : String?, opacity? : Double?, width? : Double, color? : String, underline? : Underline) -> Shape
 pub fn Canvas::color(Self, Int32) -> String
-pub fn Canvas::hbars(Self, Array[Hbar], x? : Double, y? : Double, bar_h? : Double, row_gap? : Double, max_w? : Double, label_w? : Double?, size? : Double, value_fmt? : (Double) -> String, fill_opacity? : Double, highlight? : Int32?) -> Unit
+pub fn Canvas::hbars(Self, Array[Hbar], x? : Double, y? : Double, bar_h? : Double, row_gap? : Double, max_w? : Double, label_w? : Double?, size? : Double, value_fmt? : (Double) -> String, fill_opacity? : Double, highlight? : Int32?, colors? : Array[String]?) -> Unit
 pub fn Canvas::highlight(Self, Shape, pad? : Double, opacity? : Double, mode? : HighlightMode, rx? : Double?) -> Unit
 pub fn Canvas::left_of(Self, Shape, Double, Double) -> Double
 pub fn Canvas::line(Self, (Double, Double), (Double, Double), via? : Array[(Double, Double)], gap? : Double, gap_start? : Double?, gap_end? : Double?, dash? : String?, opacity? : Double?, width? : Double, color? : String) -> Unit

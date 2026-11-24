@@ -4,7 +4,7 @@
 
 ## 依存面積
 
-| | MPA (go-classic-mpa-sample) | SPA (go-spa-sample) |
+| | MPA ([podhmo/go-classic-mpa-sample](https://github.com/podhmo/go-classic-mpa-sample)) | SPA ([podhmo/go-spa-sample](https://github.com/podhmo/go-spa-sample)) |
 | :--- | :--- | :--- |
 | Go 直接依存 | 3 (goldmark-alert, goldmark/v2, modernc.org/sqlite) | 2 (x/crypto, modernc.org/sqlite) |
 | npm 直接依存 | 0（package.json 自体が無い） | 16（prod 6 + dev 10） |
@@ -13,7 +13,7 @@
 | テンプレート | 25 | 0（JSX） |
 
 ```svg
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="31.100000000000023 0 381.4 154" width="381" height="154" role="img" aria-label="放置のしやすさに効く依存面積。SPA は npm 側の間接依存が約200個に膨らむ">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="31.100000000000023 0 381.4 154" width="381" height="154" role="img" aria-label="放置のしやすさに効く依存面積。SPA は npm 直接依存16個から node_modules 実数が約200に膨らむ">
 <rect x="176" y="118" width="208" height="26" rx="8" fill="currentColor" fill-opacity="0.08" stroke="none"/>
 <text x="172" y="19" font-size="11" text-anchor="end" dominant-baseline="central" fill="currentColor">MPA: Go 直接依存</text>
 <rect x="180" y="10" width="3.045685279187817" height="18" fill="#3B82C4" fill-opacity="0.45" stroke="#3B82C4" stroke-width="1"/>

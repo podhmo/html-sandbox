@@ -26,8 +26,8 @@ fn main {
   let b2 = c.box(10.0, 140.0, @svg.Fixed(180.0), 54.0, label=Some("ブラウザ\nrouter + loader + component"), color=c.color(client), size=11.0)
   let s2 = c.box(300.0, 150.0, @svg.Fixed(110.0), 34.0, label=Some("サーバ\nJSON のみ"), color=c.color(server), size=11.0)
   c.arrow(c.anchor(b2, @svg.E), c.anchor(s2, @svg.W), ends=@svg.Pair(10.0))
-  c.text(200.0, 146.0, "POST mutation", size=11.0)
-  c.text(200.0, 182.0, "GET (loader)", size=11.0)
+  c.text(200.0, 146.0, "POST mutation / GET (loader)", size=11.0)
+  c.text(200.0, 182.0, "JSON", size=11.0)
   // self-loop: DOM reconcile stays inside the client box
   c.text(18.0, 216.0, "DOM reconcile — scroll / focus / draft は保持", size=11.0)
 
