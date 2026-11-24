@@ -38,6 +38,12 @@ MPA の SSE live-updates は当初「port しない」と AI が途中で勝手�
 
 実装は MPA 版の設計（mutation と同じ tx で changes テーブルに hint を記録 → サーバが poll して SSE で配信）をほぼそのまま使えた。store の changes 機構は移植時に既に入っていたので、足したのは SSE エンドポイントと hub の配線だけ。SPA 側は `EventSource` の hint を受けて `router.invalidate()` するだけで、kind ごとのクライアントロジックを持たない。invalidate が loader を取り直して reconcile するので、追加・編集・削除・hide が全部同じ経路で画面に出る。MPA 側が fragment ごとの upsert ロジックを JS で書いていたのと対照的で、「invalidate 一点張り」で済むのは SPA のデータフローの利点が出た部分だと思う。description/title 変更の細かい追随は MPA/SPA 双方 future work。
 
+なお `router.invalidate()` は便利だが全部取り直しになる点には注意が必要だと思う。live 更新の度にアクティブな loader がまとめて走り直すので、長文コメントが入り乱れる場所（大きな discussion スレッドなど）ではちょっとだるい。MPA の fragment 差し替えが「変わった部分だけ」を運べたのに対して、SPA の invalidate 一点張りは簡潔さと引き換えに再取得の粒度を失っている。kind ごとの細かい分岐を持ちたくなったら、その時は invalidate の粒度を下げる（loader を分割する・再取得対象を選ぶ）設計が要るだろう。
+
+## コメントの head/tail 読み込み（load more）
+
+GitHub の長いスレッドにあるやつ: 先頭 N 件と末尾 N 件のコメントだけ読み込んで表示し、中間は畳んで「load more」ボタンで展開する。上の invalidate の話とも繋がっていて、長文コメントが入り乱れる場所ではそもそも初期表示のペイロード自体が重い。cursor ベースのページネーション（スレッドの中間を「このコメント以降を N 件」で取る）が API に要るので、純粋な UI 改善というよりはバックエンド込みの機能になる。これも追加したい候補として残しておく。
+
 ## まとめ
 
 一番実用的なのはトーストと Preview タブだと思う。どちらも「形」は既にある（CopyButton の bubble、Markdown component）ので、小さく足せる。
