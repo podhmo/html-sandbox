@@ -1,6 +1,6 @@
 # 追加したくなった UI 実装
 
-ui-rules.md や移植 parity とは関係なく、実装していて「あったらよさそう」と感じたもの。優先度ではなく思いつき順。これらは TODO 化していないので、この節が唯一の記録になる。
+[ui-rules.md](https://github.com/podhmo/go-spa-sample/blob/devin/1795551400-spa-ui-rules/docs/ja/ui-rules.md) や移植 parity とは関係なく、実装していて「あったらよさそう」と感じたもの。優先度ではなく思いつき順。これらは TODO 化していないので、この節が唯一の記録になる。
 
 ## トースト通知
 

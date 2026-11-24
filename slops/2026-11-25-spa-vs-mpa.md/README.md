@@ -28,7 +28,7 @@ master の履歴を見る限り、issues スコープの基礎は既にあった
 - `cmd/zatudan` の Go API サーバ（issues スコープ）の移植と `/api/v1` 骨格
 - issues の SPA 一式（一覧・詳細・作成/編集・コメント・hide/unhide・permalink・markdown 描画）と Vitest browser mode のテスト基盤
 - MPA のマークアップ・CSS・fmtTime 等の parity 合わせ、`oxfmt` 導入、CI workflow、`modern-web-guidance` の初回適用
-- TanStack Query の評価と「今は導入しない」という判断の記録（`docs/sketch/ja/tanstack-query.md`）
+- TanStack Query の評価と「今は導入しない」という判断の記録（[docs/sketch/ja/tanstack-query.md](https://github.com/podhmo/go-spa-sample/blob/master/docs/sketch/ja/tanstack-query.md)）
 - `/api` 疎通確認用の `cmd/fakeapi` スパイク
 
 つまり「MPA の API を Go で移植し、issues だけ SPA 化した雛形」が出発点。TODO.md に残っていたのは残り機能の移植と構成決定だった。
@@ -43,7 +43,7 @@ master の履歴を見る限り、issues スコープの基礎は既にあった
 - i18n (en/ja) — `en.ts` が正の型付き辞書（`ja: typeof en` で欠キーをコンパイル時に弾く）、nav の言語スイッチ（[PR #11](https://github.com/podhmo/go-spa-sample/pull/11)）
 - fakeapi 撤去 + 本番構成メモ — スパイク残骸を消し（[PR #12](https://github.com/podhmo/go-spa-sample/pull/12)）、embed 配信 + セッション vs 別配備 + token の比較だけ書いて決定は保留（[PR #13](https://github.com/podhmo/go-spa-sample/pull/13)）
 - SPA 固有のページ遷移品質 — `document.title` 更新、遷移時の `#main-content` フォーカス、スクロール復元、intent preload、route 単位のコード分割、遷移中 pending bar、markdown の lazy chunk 化、`content-visibility`（[PR #14](https://github.com/podhmo/go-spa-sample/pull/14)）。chrome-devtools-cli による LCP/DOM 計測基盤もこの時に導入
-- SPA 版 ui-rules.md — MPA 版の規約を SPA の語彙に移植し、[正]/代案/変更予定/N/A の構造で整備（[PR #15](https://github.com/podhmo/go-spa-sample/pull/15)）
+- SPA 版 [ui-rules.md](https://github.com/podhmo/go-spa-sample/blob/devin/1795551400-spa-ui-rules/docs/ja/ui-rules.md) — MPA 版の規約を SPA の語彙に移植し、[正]/代案/変更予定/N/A の構造で整備（[PR #15](https://github.com/podhmo/go-spa-sample/pull/15)）
 - 離脱ガード + 空送信 disabled — `useBlocker` + `beforeunload` の両対応 leave-guard、コメント空送信の disabled 化（[PR #16](https://github.com/podhmo/go-spa-sample/pull/16)）
 
 上に挙げた15本すべてが GitHub の stacked PR として `master` 基点で積み上がっている（stack `#3`）。各 PR は Devin Review の findings を何ラウンドか往復しており、実バグ（返信ドラフトの保持、stale anchor の再送、uncontrolled textarea とフラグの不整合など）もその過程でいくつか直っている。
