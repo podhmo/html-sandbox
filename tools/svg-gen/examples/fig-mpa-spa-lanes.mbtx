@@ -1,0 +1,35 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// Mutation lifecycle: who builds the new page. MPA: POST -> 302 ->
+// GET re-renders the whole HTML on the server. SPA: POST JSON ->
+// router.invalidate() refetches loader data -> navigate; the DOM is
+// reconciled in the browser, so scroll and drafts survive.
+// Colors: client-side boxes teal (0), server-side vermillion (3).
+
+fn main {
+  let c = @svg.Canvas()
+  let client = 0
+  let server = 3
+
+  // ---- MPA lane ----
+  c.text(10.0, 22.0, "MPA (POST -> 302 -> GET)", size=13.0)
+  let b1 = c.box(10.0, 40.0, @svg.Fixed(120.0), 34.0, label=Some("ブラウザ"), color=c.color(client), size=12.0)
+  let s1 = c.box(250.0, 30.0, @svg.Fixed(190.0), 54.0, label=Some("サーバ\ntemplates が HTML 全体を再生成"), color=c.color(server), size=11.0)
+  c.arrow(c.anchor(b1, @svg.E), c.anchor(s1, @svg.W), ends=@svg.Pair(10.0))
+  c.text(150.0, 46.0, "POST form", size=11.0)
+  c.text(150.0, 66.0, "302 → GET → HTML", size=11.0)
+
+  // ---- SPA lane ----
+  c.text(10.0, 122.0, "SPA (POST -> invalidate -> navigate)", size=13.0)
+  let b2 = c.box(10.0, 140.0, @svg.Fixed(180.0), 54.0, label=Some("ブラウザ\nrouter + loader + component"), color=c.color(client), size=11.0)
+  let s2 = c.box(300.0, 150.0, @svg.Fixed(110.0), 34.0, label=Some("サーバ\nJSON のみ"), color=c.color(server), size=11.0)
+  c.arrow(c.anchor(b2, @svg.E), c.anchor(s2, @svg.W), ends=@svg.Pair(10.0))
+  c.text(200.0, 146.0, "POST mutation / GET (loader)", size=11.0)
+  c.text(200.0, 182.0, "JSON", size=11.0)
+  // self-loop: DOM reconcile stays inside the client box
+  c.text(18.0, 216.0, "DOM reconcile — scroll / focus / draft は保持", size=11.0)
+
+  println(c.render(label=Some("mutation 後に画面を作り直す主体の違い。MPA はサーバ、SPA はブラウザ")))
+}

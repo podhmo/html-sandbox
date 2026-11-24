@@ -692,6 +692,7 @@ pub fn Canvas::hbars(
   value_fmt~ : (Double) -> String = num,
   fill_opacity~ : Double = 0.45,
   highlight~ : Int32? = None,
+  colors~ : Array[String]? = None,
 ) -> Unit {
   let lw = match label_w {
     Some(v) => v
@@ -718,9 +719,13 @@ pub fn Canvas::hbars(
     if highlight is Some(h) && h == i {
       self.highlight(bar, pad=4.0)
     }
+    let color = match colors {
+      Some(cs) if i < cs.length() => cs[i]
+      _ => "currentColor"
+    }
     let rect = El(
       "<rect x=\"\{num(bar.x)}\" y=\"\{num(by)}\" width=\"\{num(w)}\" height=\"\{num(bar_h)}\"" +
-      " fill=\"currentColor\" fill-opacity=\"\{num(fill_opacity)}\" stroke=\"currentColor\" stroke-width=\"1\"/>",
+      " fill=\"\{color}\" fill-opacity=\"\{num(fill_opacity)}\" stroke=\"\{color}\" stroke-width=\"1\"/>",
       [(x + lw, by), (x + lw + w, by + bar_h)],
     )
     let value = self.text_node(

@@ -1,0 +1,51 @@
+# 追加したくなった UI 実装
+
+[ui-rules.md](https://github.com/podhmo/go-spa-sample/blob/devin/1795551400-spa-ui-rules/docs/ja/ui-rules.md) や移植 parity とは関係なく、実装していて「あったらよさそう」と感じたもの。優先度ではなく思いつき順。これらは TODO 化していないので、この節が唯一の記録になる。
+
+## トースト通知
+
+MPA には `toast.js` + `announcer.js` がある。SPA 側では成功フィードバックを「遷移 + 再描画で代替」と ui-rules に書いて N/A 扱いにしたが、実際には投稿・保存が成功しても画面に何の応答も出ない箇所が残っている。コメント投稿後に `#comment-N` へ遷移するので「新しいコメントが見える」ことが半分のフィードバックだが、hide/unhide やラベル編集のような「同じ場所に留まる mutation」では本当に静か。
+
+実装の置きどころは決めていないが、`aria-live` の toast 群 + `role="status"` の組み合わせで、CopyButton の feedback bubble と同じ作り方がそのまま使えるはず。
+
+## Write / Preview のエディタタブ
+
+ui-rules の N/A 表に「Write / Preview エディタタブなし」と既に記してある。本文は GFM で書く仕様なので、markdown の見た目を投稿前に確かめたい場面は実際にある（特に pull の review comment で diff_snippet の引用と自分の文を組み合わせるとき）。
+
+実装は `Markdown` コンポーネントを textarea の横に切り替え表示するだけで、`React.lazy` のチャンクも既にできているので追加コストは小さい。textarea が uncontrolled な箇所（PullDetail の編集・DiffRow）は draft を controlled にするか、toggle 時に FormData を読む必要がある。
+
+## 相対時刻の自動追従（却下）
+
+最初は「『3分前』が時間とともに更新されないので、`<time>` のテキストだけ更新する小さい仕組みが欲しい」と書いていた。しかしフィードバックで却下: 相対時刻へのこだわりは欧米圏の文化で、日本を含むアジア圏ではむしろ使いにくいという認識がある。絶対時刻（ja なら `YYYY年M月D日 HH:MM`）のほうが読みやすく、相対時刻は全部無くしたいくらいだという。SPA だから簡単にできることと、やるべきことは別、といういい例になったので記録として残す。
+
+## `#comment-N` のスクロール + ハイライト
+
+投稿後の遷移では URL に `comment-N` の hash を付けているが、router の scroll-to-element 的な挙動と、着地点の一時ハイライト（`:target` や transition）を入れていない。GitHub 的には permalink クリックでそのコメントがハイライトされるのが自然で、今は「移動した先で自分で探す」状態。
+
+`onResolved` の subscriber で hash を見て scrollIntoView + 一時 class を付ける形で実装できそう。
+
+## キーボードショートカット
+
+`j`/`k` で一覧の行移動、`c` で新規作成、`g i`/`g d`/`g p` でセクション移動、あたりは GitHub 風の最低限で、issue tracker としては自然な拡張。reducer パターンのまま selection を state に持てるので相性は良い。IME との衝突だけ注意（入力中は無効化）。
+
+## diff のコンテキスト展開
+
+現在の `/pulls/{id}/files` は unified diff をそのまま出しているが、行数が多いと hunk 間の省略された部分を「展開」したくなる。MPA 側にも無い機能なので完全な新規。API 側に `context` パラメータかファイル単位の raw 取得を足す必要がある。
+
+## 軽い live 更新（実装済み）
+
+MPA の SSE live-updates は当初「port しない」と AI が途中で勝手に決めたものだったが、複数のエージェントがローカル CLI で discussion を更新しそれを人間が眺める viewer 用途が出てきたので、方針を翻して実装した（[PR #17](https://github.com/podhmo/go-spa-sample/pull/17)）。結果的にこの節で「あったらよさそう」と挙げた中で最初に入った機能になった。
+
+実装は MPA 版の設計（mutation と同じ tx で changes テーブルに hint を記録 → サーバが poll して SSE で配信）をほぼそのまま使えた。store の changes 機構は移植時に既に入っていたので、足したのは SSE エンドポイントと hub の配線だけ。SPA 側は `EventSource` の hint を受けて `router.invalidate()` するだけで、kind ごとのクライアントロジックを持たない。invalidate が loader を取り直して reconcile するので、追加・編集・削除・hide が全部同じ経路で画面に出る。MPA 側が fragment ごとの upsert ロジックを JS で書いていたのと対照的で、「invalidate 一点張り」で済むのは SPA のデータフローの利点が出た部分だと思う。description/title 変更の細かい追随は MPA/SPA 双方 future work。
+
+なお `router.invalidate()` は便利だが全部取り直しになる点には注意が必要だと思う。live 更新の度にアクティブな loader がまとめて走り直すので、長文コメントが入り乱れる場所（大きな discussion スレッドなど）ではちょっとだるい。
+
+ただし、これは SPA 自体の問題ではなく invalidate 方式を選んだこのアプリの問題だという指摘をもらった。普通の SPA ならモデルやストアと data binding されていて（props 渡しも含め）、トリガーの記述や参照の解決といった細かい話はあるにせよ、単に値を追加・削除・変更するだけで UI が追随する。MPA の fragment 差し替えが「変わった部分だけ」を運べたのと同じことが、data binding ではクライアント側だけで完結する。このアプリが loader + invalidate を選んだのは TanStack Query を見送った判断（[tanstack-query.md](https://github.com/podhmo/go-spa-sample/blob/master/docs/sketch/ja/tanstack-query.md)）と表裏で、store を持たない代償がここに出ている。kind ごとの細かい分岐が要るなら、invalidate の粒度を下げるより mutation 結果を store 的に反映する方向に寄せるほうが本筋だろう。
+
+## コメントの head/tail 読み込み（load more）
+
+GitHub の長いスレッドにあるやつ: 先頭 N 件と末尾 N 件のコメントだけ読み込んで表示し、中間は畳んで「load more」ボタンで展開する。上の invalidate の話とも繋がっていて、長文コメントが入り乱れる場所ではそもそも初期表示のペイロード自体が重い。cursor ベースのページネーション（スレッドの中間を「このコメント以降を N 件」で取る）が API に要るので、純粋な UI 改善というよりはバックエンド込みの機能になる。これも追加したい候補として残しておく。
+
+## まとめ
+
+一番実用的なのはトーストと Preview タブだと思う。どちらも「形」は既にある（CopyButton の bubble、Markdown component）ので、小さく足せる。

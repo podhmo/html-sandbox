@@ -1,0 +1,22 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// Dependency footprint the two codebases leave on the floor.
+// MPA: 3 direct Go deps + 18 dependency-free hand-written JS files.
+// SPA: 2 direct Go deps + 16 npm entries -> 197 dirs in node_modules.
+
+fn main {
+  let c = @svg.Canvas()
+  let items : Array[@svg.Hbar] = [
+    { label: "MPA: Go 直接依存", value: 3.0 },
+    { label: "MPA: npm パッケージ", value: 0.0 },
+    { label: "SPA: Go 直接依存", value: 2.0 },
+    { label: "SPA: npm 直接依存", value: 16.0 },
+    { label: "SPA: node_modules 実数", value: 197.0 },
+  ]
+  let mpa = c.color(0) // teal
+  let spa = c.color(3) // vermillion
+  c.hbars(items, x=10.0, y=10.0, max_w=200.0, label_w=Some(170.0), highlight=Some(4), size=11.0, bar_h=18.0, row_gap=10.0, colors=Some([mpa, mpa, spa, spa, spa]))
+  println(c.render(label=Some("放置のしやすさに効く依存面積。SPA は npm 直接依存16個から node_modules 実数が約200に膨らむ")))
+}
