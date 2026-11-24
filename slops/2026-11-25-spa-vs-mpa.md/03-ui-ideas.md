@@ -32,9 +32,11 @@ ui-rules の N/A 表に「Write / Preview エディタタブなし」と既に�
 
 現在の `/pulls/{id}/files` は unified diff をそのまま出しているが、行数が多いと hunk 間の省略された部分を「展開」したくなる。MPA 側にも無い機能なので完全な新規。API 側に `context` パラメータかファイル単位の raw 取得を足す必要がある。
 
-## 軽い live 更新
+## 軽い live 更新（実装済み）
 
-MPA の SSE live-updates は「port しない」と AI が途中で勝手に決めたもので（AGENTS.md の JSON-API only 方針）、プロダクトの判断としては未決定。複数のエージェントが discussion を更新しそれを人間が眺める viewer としての用途を考えると、live 更新はむしろ欲しい機能になりうる。SPA の loader モデルなら visibilitychange/focus 時の `router.invalidate()` という最小限の追従で近い体験が作れるが、SSE 相当の即時性が要るなら別途設計が必要。見直し予定の論点として記録しておく。
+MPA の SSE live-updates は当初「port しない」と AI が途中で勝手に決めたものだったが、複数のエージェントがローカル CLI で discussion を更新しそれを人間が眺める viewer 用途が出てきたので、方針を翻して実装した（[PR #17](https://github.com/podhmo/go-spa-sample/pull/17)）。結果的にこの節で「あったらよさそう」と挙げた中で最初に入った機能になった。
+
+実装は MPA 版の設計（mutation と同じ tx で changes テーブルに hint を記録 → サーバが poll して SSE で配信）をほぼそのまま使えた。store の changes 機構は移植時に既に入っていたので、足したのは SSE エンドポイントと hub の配線だけ。SPA 側は `EventSource` の hint を受けて `router.invalidate()` するだけで、kind ごとのクライアントロジックを持たない。invalidate が loader を取り直して reconcile するので、追加・編集・削除・hide が全部同じ経路で画面に出る。MPA 側が fragment ごとの upsert ロジックを JS で書いていたのと対照的で、「invalidate 一点張り」で済むのは SPA のデータフローの利点が出た部分だと思う。description/title 変更の細かい追随は MPA/SPA 双方 future work。
 
 ## まとめ
 
