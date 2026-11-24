@@ -38,7 +38,9 @@ MPA の SSE live-updates は当初「port しない」と AI が途中で勝手�
 
 実装は MPA 版の設計（mutation と同じ tx で changes テーブルに hint を記録 → サーバが poll して SSE で配信）をほぼそのまま使えた。store の changes 機構は移植時に既に入っていたので、足したのは SSE エンドポイントと hub の配線だけ。SPA 側は `EventSource` の hint を受けて `router.invalidate()` するだけで、kind ごとのクライアントロジックを持たない。invalidate が loader を取り直して reconcile するので、追加・編集・削除・hide が全部同じ経路で画面に出る。MPA 側が fragment ごとの upsert ロジックを JS で書いていたのと対照的で、「invalidate 一点張り」で済むのは SPA のデータフローの利点が出た部分だと思う。description/title 変更の細かい追随は MPA/SPA 双方 future work。
 
-なお `router.invalidate()` は便利だが全部取り直しになる点には注意が必要だと思う。live 更新の度にアクティブな loader がまとめて走り直すので、長文コメントが入り乱れる場所（大きな discussion スレッドなど）ではちょっとだるい。MPA の fragment 差し替えが「変わった部分だけ」を運べたのに対して、SPA の invalidate 一点張りは簡潔さと引き換えに再取得の粒度を失っている。kind ごとの細かい分岐を持ちたくなったら、その時は invalidate の粒度を下げる（loader を分割する・再取得対象を選ぶ）設計が要るだろう。
+なお `router.invalidate()` は便利だが全部取り直しになる点には注意が必要だと思う。live 更新の度にアクティブな loader がまとめて走り直すので、長文コメントが入り乱れる場所（大きな discussion スレッドなど）ではちょっとだるい。
+
+ただし、これは SPA 自体の問題ではなく invalidate 方式を選んだこのアプリの問題だという指摘をもらった。普通の SPA ならモデルやストアと data binding されていて（props 渡しも含め）、トリガーの記述や参照の解決といった細かい話はあるにせよ、単に値を追加・削除・変更するだけで UI が追随する。MPA の fragment 差し替えが「変わった部分だけ」を運べたのと同じことが、data binding ではクライアント側だけで完結する。このアプリが loader + invalidate を選んだのは TanStack Query を見送った判断（[tanstack-query.md](https://github.com/podhmo/go-spa-sample/blob/master/docs/sketch/ja/tanstack-query.md)）と表裏で、store を持たない代償がここに出ている。kind ごとの細かい分岐が要るなら、invalidate の粒度を下げるより mutation 結果を store 的に反映する方向に寄せるほうが本筋だろう。
 
 ## コメントの head/tail 読み込み（load more）
 
