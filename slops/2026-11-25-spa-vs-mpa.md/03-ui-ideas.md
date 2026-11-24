@@ -14,9 +14,9 @@ ui-rules の N/A 表に「Write / Preview エディタタブなし」と既に�
 
 実装は `Markdown` コンポーネントを textarea の横に切り替え表示するだけで、`React.lazy` のチャンクも既にできているので追加コストは小さい。textarea が uncontrolled な箇所（PullDetail の編集・DiffRow）は draft を controlled にするか、toggle 時に FormData を読む必要がある。
 
-## 相対時刻の自動追従
+## 相対時刻の自動追従（却下）
 
-`fmtTime` は render 時点でフォーマットするだけで、「3分前」が時間とともに更新されない。MPA も同じ仕様だったと思うので parity 上は問題ないが、SSE/polling なしの SPA でこそ「時刻表示だけでも新鮮にする」軽い手段になる。`setInterval` でリレンダリングするのではなく、TanStack 側の invalidate とは独立に `<time>` のテキストだけ更新する小さい仕組みで足りる。
+最初は「『3分前』が時間とともに更新されないので、`<time>` のテキストだけ更新する小さい仕組みが欲しい」と書いていた。しかしフィードバックで却下: 相対時刻へのこだわりは欧米圏の文化で、日本を含むアジア圏ではむしろ使いにくいという認識がある。絶対時刻（ja なら `YYYY年M月D日 HH:MM`）のほうが読みやすく、相対時刻は全部無くしたいくらいだという。SPA だから簡単にできることと、やるべきことは別、といういい例になったので記録として残す。
 
 ## `#comment-N` のスクロール + ハイライト
 
@@ -34,7 +34,7 @@ ui-rules の N/A 表に「Write / Preview エディタタブなし」と既に�
 
 ## 軽い live 更新
 
-MPA の SSE live-updates は「port しない」と決めた（AGENTS.md の JSON-API only 方針）。しかし SPA の loader モデルなら、 visibilitychange/focus 時の `router.invalidate()` という最小限の追従でかなり近い体験が作れる。他者の投稿を即時に映すほどの性質でもないので、これで十分かもしれない。
+MPA の SSE live-updates は「port しない」と AI が途中で勝手に決めたもので（AGENTS.md の JSON-API only 方針）、プロダクトの判断としては未決定。複数のエージェントが discussion を更新しそれを人間が眺める viewer としての用途を考えると、live 更新はむしろ欲しい機能になりうる。SPA の loader モデルなら visibilitychange/focus 時の `router.invalidate()` という最小限の追従で近い体験が作れるが、SSE 相当の即時性が要るなら別途設計が必要。見直し予定の論点として記録しておく。
 
 ## まとめ
 

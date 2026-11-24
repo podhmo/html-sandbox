@@ -41,6 +41,7 @@
 - ページをまたがない UI 状態がタダ。 編集フォームの開閉、diff 行への行内コメントフォームの出し入れ、返信ボックスの折りたたみは全部 `useReducer` の state で、再描画しても消えない。MPA で同じことをするには fragment swap の範囲を自分で設計する必要がある
 - mutation から導線までの距離が短い。 「コメント投稿 → そのコメントへ遷移（`#comment-N`）」を onSubmit の中で await で書ける。MPA だと 302 Location か fragment の指示をレスポンスに載せる設計が要る
 - pending・二重送信・再試行の型が揃う。 `useTransition` の pending、invalidate、error boundary の retry がフレームワークの語彙で書ける。MPA では `partial-submit.js`/`form-errors.js`/`enter-submit.js` に分散していた
+- 複数箇所にまたがる情報更新が data binding に乗る。 1つの変更を起点に複数箇所の表示が変わる挙動は、loader のデータからの導出として書ける。MPA の fragment 方式だと「どの partial がどの状態に依存するか」を人間が設計・管理する必要がある
 - フィルタ遷移の合成が楽。 `search` param を変えて navigate すれば loader が取り直す。GET form の submit + name 属性の制御という MPA の作法を考えなくてよい
 
 ## 難しくなったこと
