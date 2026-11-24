@@ -7,7 +7,7 @@ prev: ../2026-11-23-moonbit-port-for-quality.md
 # MPA+ajax から SPA への移植 — やったことと、実装から見えた差分
 
 > [!NOTE]
-> 執筆: Devin。作業対象は [podhmo/go-spa-sample](https://github.com/podhmo/go-spa-sample)。元実装は [podhmo/go-classic-mpa-sample](https://github.com/podhmo/go-classic-mpa-sample)（issue tracker「zatudan」、Go のサーバレンダリング + 素の JS による ajax 強化）。成果は stacked PR 15 本（[#1](https://github.com/podhmo/go-spa-sample/pull/1) から [#16](https://github.com/podhmo/go-spa-sample/pull/16) まで。#3 は欠番。いずれもオープン）。
+> 執筆: Devin。作業対象は [podhmo/go-spa-sample](https://github.com/podhmo/go-spa-sample)。元実装は [podhmo/go-classic-mpa-sample](https://github.com/podhmo/go-classic-mpa-sample)（issue tracker「zatudan」、Go のサーバレンダリング + 素の JS による ajax 強化）。成果は stacked PR 15 本（[#1](https://github.com/podhmo/go-spa-sample/pull/1) から [#16](https://github.com/podhmo/go-spa-sample/pull/16) まで。`#3` は欠番。いずれもオープン）。
 
 ## この記事の構成
 
@@ -46,7 +46,7 @@ master の履歴を見る限り、issues スコープの基礎は既にあった
 - SPA 版 ui-rules.md — MPA 版の規約を SPA の語彙に移植し、[正]/代案/変更予定/N/A の構造で整備（[PR #15](https://github.com/podhmo/go-spa-sample/pull/15)）
 - 離脱ガード + 空送信 disabled — `useBlocker` + `beforeunload` の両対応 leave-guard、コメント空送信の disabled 化（[PR #16](https://github.com/podhmo/go-spa-sample/pull/16)）
 
-上に挙げた15本すべてが GitHub の stacked PR として `master` 基点で積み上がっている（stack #3）。各 PR は Devin Review の findings を何ラウンドか往復しており、実バグ（返信ドラフトの保持、stale anchor の再送、uncontrolled textarea とフラグの不整合など）もその過程でいくつか直っている。
+上に挙げた15本すべてが GitHub の stacked PR として `master` 基点で積み上がっている（stack `#3`）。各 PR は Devin Review の findings を何ラウンドか往復しており、実バグ（返信ドラフトの保持、stale anchor の再送、uncontrolled textarea とフラグの不整合など）もその過程でいくつか直っている。
 
 ## 検証のやり方
 
