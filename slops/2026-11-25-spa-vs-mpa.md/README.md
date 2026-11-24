@@ -43,7 +43,7 @@ master の履歴を見る限り、issues スコープの基礎は既にあった
 - i18n (en/ja) — `en.ts` が正の型付き辞書（`ja: typeof en` で欠キーをコンパイル時に弾く）、nav の言語スイッチ（[PR #11](https://github.com/podhmo/go-spa-sample/pull/11)）
 - fakeapi 撤去 + 本番構成メモ — スパイク残骸を消し（[PR #12](https://github.com/podhmo/go-spa-sample/pull/12)）、embed 配信 + セッション vs 別配備 + token の比較だけ書いて決定は保留（[PR #13](https://github.com/podhmo/go-spa-sample/pull/13)）
 - SPA 固有のページ遷移品質 — `document.title` 更新、遷移時の `#main-content` フォーカス、スクロール復元、intent preload、route 単位のコード分割、遷移中 pending bar、markdown の lazy chunk 化、`content-visibility`（[PR #14](https://github.com/podhmo/go-spa-sample/pull/14)）。chrome-devtools-cli による LCP/DOM 計測基盤もこの時に導入
-- SPA 版 [ui-rules.md](https://github.com/podhmo/go-spa-sample/blob/devin/1795551400-spa-ui-rules/docs/ja/ui-rules.md) — MPA 版の規約を SPA の語彙に移植し、[正]/代案/変更予定/N/A の構造で整備（[PR #15](https://github.com/podhmo/go-spa-sample/pull/15)）
+- SPA 版 [ui-rules.md](https://github.com/podhmo/go-spa-sample/blob/master/docs/ja/ui-rules.md) — MPA 版の規約を SPA の語彙に移植し、[正]/代案/変更予定/N/A の構造で整備（[PR #15](https://github.com/podhmo/go-spa-sample/pull/15)）
 - 離脱ガード + 空送信 disabled — `useBlocker` + `beforeunload` の両対応 leave-guard、コメント空送信の disabled 化（[PR #16](https://github.com/podhmo/go-spa-sample/pull/16)）
 - live 更新 — changes テーブル（mutation と同じ tx で hint を記録、store に移植済みだった）を `WatchChanges` が poll して SSE hub に流し、`GET /api/v1/events` が hint-only の frame を配信。SPA は `EventSource` → debounce つき `router.invalidate()` するだけで、kind ごとのクライアントロジックは持たない。ローカル CLI（別プロセスの DB 直書き）でコメント/スレッドを書くと、開いている issues/discussions 画面がリロードなしで追随することをブラウザで確認済み（[PR #17](https://github.com/podhmo/go-spa-sample/pull/17)）。「SSE は port しない」という AI の暫定判断は取り消され、AGENTS.md も更新
 
