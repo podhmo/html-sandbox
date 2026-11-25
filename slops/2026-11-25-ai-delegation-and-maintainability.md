@@ -63,6 +63,21 @@ prev: 2026-11-25-spa-vs-mpa.md
 
 それでも、この自動往復には実利があった。人間が一度だけレビューするより、小さな失敗を何度も拾える。特に acceptance test 系の PR では、修正が新しい退化を生んでいないかを繰り返し見る意味がある。
 
+## Claude Code の `/ship` との対応関係
+
+この往復について書くにあたり、最近追加されたという Claude Code の [`/ship`](https://code.claude.com/docs/en/ship-command) も確認した。公式ドキュメントによると、[`/ship`](https://code.claude.com/docs/en/ship-command) は次を行う。
+
+1. 必要なら commit と push をし、GitHub PR を開く
+2. `/code-review` で変更を review する
+3. PR を watch し、failing check、merge conflict、reviewer comment、review finding に対する修正を push する
+4. merge は人間が行う
+
+既に PR がある場合は `/steward` が最初の review を省略して watch だけ始める、という。ドキュメント上も、どちらも usage を消費すると明記されている。ここは「待っているだけでもコスト感はある」という今回の感覚と近い。
+
+利用者から見える workflow としては、これは Devin 上で起きていたことにかなり近い。今回も、PR を作り、Devin Review が指摘し、Devin が直し、CI を待ち、また review される、というループが自動で回った。merge も人間側に残っている。この意味で「`/ship` は Devin 上で自動で行われていることそのものでは？」という第一印象は、かなり正しいと思う。
+
+ただし完全に同じではない。`/ship` は local clone で動く Claude Code CLI の command で、cloud session では使えないと書かれている。一方、今回の Devin 側では、明示的な `/ship` 相当の命令を打たなくても、PR作成、CI監視、Devin Review notification、修正 push が通常の開発 workflow の中で起きた。また `/ship` の review はドキュメント上 `/code-review` として説明されているのに対し、Devin 側では Devin Review という PR 向けの仕組みが別に見えている。実装が同じかどうかは分からないが、少なくとも利用者から見える自動化の境界と置き場所は違う。
+
 ## 今回やったこと: 管理しやすさを別の仕事としてやった
 
 構造再編は、受け入れチェックとは別の仕事だった。起点は [issue #20](https://github.com/podhmo/go-spa-sample/issues/20) の「ディレクトリ構造変えたい」「co-location」で、最初に [PR #24](https://github.com/podhmo/go-spa-sample/pull/24) が調査文書を作り、[docs/sketch/ja/directory-structure.md](https://github.com/podhmo/go-spa-sample/blob/master/docs/sketch/ja/directory-structure.md) に方針を残した。その後 [PR #25](https://github.com/podhmo/go-spa-sample/pull/25) で router tooling の記録を足し、実装は 3 本の stacked PR に分けた。
@@ -98,7 +113,9 @@ prev: 2026-11-25-spa-vs-mpa.md
 
 ここで非開発者が AI頼りで開発を進める問いに戻る。動くプロトタイプを作るだけなら、かなり上手くいく可能性はある。特に今回のように、元になる MPA、feature checklist、既存の UI ルール、テスト基盤があった場合、AIはそれらを根拠にかなり自律的に進められる。実際、動くところまでは速かった。
 
-一方、管理しやすいソフトウェアにするなら、単に任せるだけでは足りないと思う。必要なのは、人間が全部のコードを読むことではなく、「管理しやすさ」も成果物の要件として扱うことだ。AIは指示されれば調査し、選択肢を比較し、文書に残し、stacked PR に分けられる。しかし「その作業に時間とコストを使う価値がある」と判断するのは依頼者側になる。
+「非開発者には難しい」という第一印象だけで終わるのも、少し早い気がする。「ベストプラクティスに従って」「綺麗にして」「管理しやすくして」といった粗い指示でも、AIが一般的な方法を知っている領域なら、運が良ければそれなりにうまくいく。file-based routing、co-location、formatter、CI、generated file の扱いあたりは、明示しなくても候補に入りやすい。実際、今回も最初から個別の設計語を並べたわけではないが、「管理しやすくする」方向の作業として構造再編に進めた。
+
+ただし、それが運任せなのは問題だ。AIが一般的なベストプラクティスを知っていても、この project で何を管理しやすいと呼ぶかは別の話だ。だから、管理しやすいソフトウェアにするなら、単に任せるだけでは足りないと思う。必要なのは、人間が全部のコードを読むことではなく、「管理しやすさ」も成果物の要件として扱うことだ。AIは指示されれば調査し、選択肢を比較し、文書に残し、stacked PR に分けられる。しかし「その作業に時間とコストを使う価値がある」と判断するのは依頼者側になる。
 
 この意味で、非開発者がコードを書けなくても開発を進められるかという問いには、条件付きで yes と言える。ただし、その人はプログラマではなくても、編集者あるいはプロダクトオーナーとして振る舞う必要がある。AIに「動くもの」を作らせるだけでなく、「なぜその構造か」「次の変更はどこへ入るか」「受け入れは何か」「今回は何を変えないか」を問い続ける必要がある。逆に言えば、その問いをAIにぶつけられるなら、コードを自分で書かなくてもかなり進む。
 
@@ -128,6 +145,8 @@ Solid 2 については少し補足する。公式の説明では「Built to be 
 
 AI任せの変換は、非開発者でも「動くもの」まではかなり届くと思う。ただし「管理しやすいもの」は別の仕事で、受け入れチェックとも別の完了条件が要る。開発者から見ると大したことではない意思決定、たとえば `pages/` ではなく `routes/` にする、component を route に寄せる、generated file を CI で監視する、CSS を component に閉じる、という判断が、非開発者には「そもそも決めるべきことだと気づけるか」という難しさになる。
 
+一方で、過度に悲観する必要もない。「ベストプラクティスに従って」「綺麗にして」「管理しやすくして」と言うだけでも、AIの知識と既存の規約に乗れば、運が良ければかなり進む。問題は、それが project 固有の判断まで保証しないことだ。だから、最初に完全な設計語を知っている必要はないが、出来上がったものに対して「次の変更はどこへ入るのか」を問い直す必要はある。
+
 今回の答えとしては、AIに任せきりにするのではなく、AIに問い続ける形なら進む、というのが妥当そうだ。人間が書かなくてもよいが、人間が評価軸を持たないと、AIは動く方向に最短で進む。受け入れチェックで振る舞いを固め、そのあとに構造を整える、という2段階を最初から予定に入れておくと、同じ失敗を避けやすい。
 
 次に見るべきなのは Solid 2 の全面採用ではなく、まず [issue #22](https://github.com/podhmo/go-spa-sample/issues/22) の CSS closure だと思う。こちらは既に問題が具体化していて、今回の directory 再編と同じく「動くが管理しにくい」を直接減らせる。Solid 2 は [issue #21](https://github.com/podhmo/go-spa-sample/issues/21) の prototype として切り出すのがよい。
@@ -136,4 +155,5 @@ AI任せの変換は、非開発者でも「動くもの」まではかなり届
 
 - 記事の事実元: [前回の記事](2026-11-25-spa-vs-mpa.md)、[PR #23](https://github.com/podhmo/go-spa-sample/pull/23)、[PR #24](https://github.com/podhmo/go-spa-sample/pull/24)、[PR #26](https://github.com/podhmo/go-spa-sample/pull/26)、[PR #27](https://github.com/podhmo/go-spa-sample/pull/27)、[PR #28](https://github.com/podhmo/go-spa-sample/pull/28)、[docs/sketch/ja/directory-structure.md](https://github.com/podhmo/go-spa-sample/blob/master/docs/sketch/ja/directory-structure.md)、[docs/ja/libraries.md](https://github.com/podhmo/go-spa-sample/blob/master/docs/ja/libraries.md)
 - Solid 2 について: 2026-11-25 に [公式サイト](https://www.solidjs.com/) と [v2.0.0 release](https://github.com/solidjs/solid/releases/tag/solid-js%402.0.0)、[TanStack Router の Vite 設置ドキュメント](https://tanstack.com/router/latest/docs/installation/with-vite) を確認した。実装検証はしていない
+- Claude Code `/ship` について: 2026-11-25 に [公式ドキュメント](https://code.claude.com/docs/en/ship-command) と [commands 一覧](https://code.claude.com/docs/en/commands) を確認した。実際に `/ship` を実行はしていない
 - 図: `tools/svg-gen/examples/fig-ai-maintainability-gates.mbtx` から生成し、`check.mbtx` で 0 failure / 0 warning。headless Chrome で表示確認した
