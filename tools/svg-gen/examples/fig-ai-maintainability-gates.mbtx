@@ -1,0 +1,61 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// fig-ai-maintainability-gates.mbtx -- behavior and maintainability are
+// separate gates. Acceptance verification moves the implementation to the
+// right; structure work moves it upward. Positions are schematic.
+
+fn main {
+  let c = @svg.Canvas(margin=12.0)
+
+  let l = 80.0
+  let r = 560.0
+  let t = 46.0
+  let b = 300.0
+  c.text(10.0, 14.0, "動くことと管理しやすいことは別の軸（模式図）", size=13.0)
+
+  // axes and quadrant guide
+  c.line((l, b), (r, b), opacity=Some(0.65))
+  c.line((l, t), (l, b), opacity=Some(0.65))
+  c.line((l, (t + b) / 2.0), (r, (t + b) / 2.0), dash=Some("2 4"), opacity=Some(0.25))
+  c.line(((l + r) / 2.0, t), ((l + r) / 2.0, b), dash=Some("2 4"), opacity=Some(0.25))
+  c.text(r, b + 20.0, "機能が期待どおり動く", anchor=@svg.End, size=11.0, opacity=Some(0.8))
+  c.text(l - 8.0, t + 4.0, "管理しやすい", anchor=@svg.End, size=11.0, opacity=Some(0.8))
+
+  // points: x = verified behavior, y = maintainable shape
+  let initial : @svg.Point = (405.0, 250.0)
+  let checked : @svg.Point = (510.0, 250.0)
+  let restructured : @svg.Point = (510.0, 82.0)
+
+  ignore(c.circle(initial.0, initial.1, 7.0, color=c.color(3), width=2.5))
+  c.text(initial.0 - 12.0, initial.1 - 3.0, "移植直後", anchor=@svg.End, size=11.0)
+  c.text(initial.0 - 12.0, initial.1 + 11.0, "動くが巨大ファイル", anchor=@svg.End, size=11.0)
+
+  ignore(c.circle(checked.0, checked.1, 7.0, color=c.color(1), width=2.5))
+  c.text(checked.0 + 12.0, checked.1 - 3.0, "PR #23", size=11.0)
+  c.text(checked.0 + 12.0, checked.1 + 11.0, "受け入れ確認", size=11.0)
+
+  ignore(c.circle(restructured.0, restructured.1, 7.0, color=c.color(2), width=2.5))
+  c.text(restructured.0 - 12.0, restructured.1 - 9.0, "PR #26–28", anchor=@svg.End, size=11.0)
+  c.text(restructured.0 - 12.0, restructured.1 + 5.0, "URL と編集場所が対応", anchor=@svg.End, size=11.0)
+
+  c.arrow(initial, checked, color=c.color(1), width=2.0)
+  c.text((initial.0 + checked.0) / 2.0, initial.1 + 24.0, "振る舞いの確からしさ", anchor=@svg.Middle, size=10.0, opacity=Some(0.75))
+  c.arrow(checked, restructured, color=c.color(2), width=2.0)
+  c.text(checked.0 - 12.0, (checked.1 + restructured.1) / 2.0, "構造の整理", anchor=@svg.End, size=10.0, opacity=Some(0.75))
+
+  if !(initial.1 == checked.1) {
+    abort("acceptance checking changes confidence in behavior, not structure")
+  }
+  if !(checked.0 == restructured.0) {
+    abort("the restructuring arrow is vertical")
+  }
+  if !(restructured.1 < initial.1 && checked.0 > initial.0) {
+    abort("the point moves up and right")
+  }
+
+  println(
+    c.render(label=Some("schematic quadrant: x is verified behavior, y is maintainability; the initial SPA sits low-right, acceptance verification moves it right, and the routing refactor moves it upward")),
+  )
+}
