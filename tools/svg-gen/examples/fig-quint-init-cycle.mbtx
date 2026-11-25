@@ -1,0 +1,47 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// The init cycle the Quint model verifies: main's init touches lib,
+// lib's init reads back main, and instead of deadlock the cycle rule
+// serves main's partial globals. Lanes are packages, time runs down;
+// bars are the in-progress init frames, hue per package.
+
+fn main {
+  let c = @svg.Canvas()
+
+  let main_color = c.color(0) // blue
+  let lib_color = c.color(1) // orange
+  let cycle_color = c.color(3) // vermillion: the partial serve
+
+  let mx = 90.0 // main lane x
+  let lx = 330.0 // lib lane x
+  let lane_w = 20.0
+
+  // lane headers
+  c.text(mx + lane_w / 2.0, 0.0, "main", anchor=@svg.Middle, size=13.0)
+  c.text(lx + lane_w / 2.0, 0.0, "lib", anchor=@svg.Middle, size=13.0)
+
+  // init frames as vertical bars: main y 20..210, lib y 60..170
+  c.raw("<rect x=\"\{mx}\" y=\"20\" width=\"\{lane_w}\" height=\"190\" rx=\"6\" fill=\"\{main_color}\" fill-opacity=\"0.28\" stroke=\"\{main_color}\" stroke-width=\"1.5\"/>", covered=[(mx, 20.0), (mx + lane_w, 210.0)])
+  c.raw("<rect x=\"\{lx}\" y=\"60\" width=\"\{lane_w}\" height=\"110\" rx=\"6\" fill=\"\{lib_color}\" fill-opacity=\"0.28\" stroke=\"\{lib_color}\" stroke-width=\"1.5\"/>", covered=[(lx, 60.0), (lx + lane_w, 170.0)])
+
+  // 1: main init begins, touches lib -> lib init begins (nested)
+  c.arrow((mx + lane_w, 56.0), (lx, 66.0), color=main_color)
+  c.text((mx + lx) / 2.0 + lane_w / 2.0, 48.0, "main の init が lib の member を読む", anchor=@svg.Middle, size=9.5, opacity=Some(0.75))
+
+  // 2: lib reads back main mid-init -> partial serve, no wait (dashed)
+  c.arrow((lx, 116.0), (mx + lane_w, 126.0), dash=Some("5 4"), color=cycle_color, width=2.0)
+  c.text((mx + lx) / 2.0 + lane_w / 2.0, 108.0, "lib が init 中の main を読み返す", anchor=@svg.Middle, size=9.5, opacity=Some(0.75))
+  c.text((mx + lx) / 2.0 + lane_w / 2.0, 148.0, "待たずに partial な globals が返る", anchor=@svg.Middle, size=9.5)
+
+  // 3: lib completes, control returns
+  c.arrow((lx, 176.0), (mx + lane_w, 186.0), color=lib_color, opacity=Some(0.85))
+  c.text((mx + lx) / 2.0 + lane_w / 2.0, 170.0, "lib の init 完了で main に復帰", anchor=@svg.Middle, size=9.5, opacity=Some(0.75))
+
+  // end markers
+  c.text(lx + lane_w + 8.0, 174.0, "lib Ready", anchor=@svg.Start, size=9.5, opacity=Some(0.65))
+  c.text(mx + lane_w + 8.0, 214.0, "main Ready", anchor=@svg.Start, size=9.5, opacity=Some(0.65))
+
+  println(c.render(label=Some("循環 init のカスケード。main と lib の初期化が入れ子になり、読み返しは待機せず partial な値で返る。時間は下向き")))
+}

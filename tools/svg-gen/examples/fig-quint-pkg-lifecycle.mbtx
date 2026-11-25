@@ -1,0 +1,59 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// minigo package lifecycle, as extracted into the explicit model: the
+// forward chain Parsed -> Indexed -> Initializing -> Ready, with every
+// error path collapsing into Failed. Hue marks the terminal states
+// (green / vermillion) against the transient ones (blue / orange).
+
+fn main {
+  let h = 40.0
+  let gap = 46.0
+  let c = @svg.Canvas()
+
+  let y = 40.0
+  let parsed = c.box(0.0, y, @svg.Auto, h, label=Some("Parsed"), color=c.color(0), size=12.0)
+  let indexed = c.box(c.right_of(parsed, gap), y, @svg.Auto, h, label=Some("Indexed"), color=c.color(0), size=12.0)
+  let initializing = c.box(c.right_of(indexed, gap), y, @svg.Auto, h, label=Some("Initializing"), color=c.color(1), size=12.0)
+  let ready = c.box(c.right_of(initializing, gap), y, @svg.Auto, h, label=Some("Ready"), color=c.color(2), width=2.5, size=12.0)
+
+  c.arrow(c.anchor(parsed, @svg.E), c.anchor(indexed, @svg.W))
+  c.arrow(c.anchor(indexed, @svg.E), c.anchor(initializing, @svg.W))
+  c.arrow(c.anchor(initializing, @svg.E), c.anchor(ready, @svg.W))
+
+  // the once-consuming transition
+  let m1 = c.midpoint(c.anchor(indexed, @svg.E), c.anchor(initializing, @svg.W))
+  c.text(m1.0, m1.1 - 12.0, "initOnce 消費", anchor=@svg.Middle, size=9.0, opacity=Some(0.65))
+  let m2 = c.midpoint(c.anchor(parsed, @svg.E), c.anchor(indexed, @svg.W))
+  c.text(m2.0, m2.1 - 12.0, "index 構築", anchor=@svg.Middle, size=9.0, opacity=Some(0.65))
+  let m3 = c.midpoint(c.anchor(initializing, @svg.E), c.anchor(ready, @svg.W))
+  c.text(m3.0, m3.1 - 12.0, "init 成功", anchor=@svg.Middle, size=9.0, opacity=Some(0.65))
+
+  // failure sink below the middle
+  let failed = c.box(initializing.x - 10.0, y + 96.0, @svg.Auto, h, label=Some("Failed"), color=c.color(3), width=2.5, size=12.0)
+  c.arrow(
+    c.anchor(parsed, @svg.S),
+    c.anchor(failed, @svg.W),
+    via=[(c.anchor(parsed, @svg.S).0, c.anchor(failed, @svg.W).1)],
+    dash=Some("5 4"),
+  )
+  c.arrow(c.anchor(initializing, @svg.S), c.anchor(failed, @svg.N), dash=Some("5 4"))
+  let mf = c.midpoint(c.anchor(initializing, @svg.S), c.anchor(failed, @svg.N))
+  c.text(mf.0 + 42.0, mf.1 - 4.0, "init 失敗/panic", anchor=@svg.Middle, size=9.0, opacity=Some(0.65))
+  let mf2 = c.midpoint(c.anchor(parsed, @svg.S), c.anchor(failed, @svg.W))
+  c.text(mf2.0 - 30.0, mf2.1 - 10.0, "parse/index 失敗", anchor=@svg.Middle, size=9.0, opacity=Some(0.65))
+
+  // terminal markers
+  c.text(ready.x + ready.w / 2.0, y + h + 18.0, "終端(吸収)", anchor=@svg.Middle, size=9.0, opacity=Some(0.6))
+  c.text(failed.x + failed.w / 2.0, failed.y + h + 16.0, "終端 — ただし load 失敗時は initOnce 未消費", anchor=@svg.Middle, size=9.0, opacity=Some(0.6))
+
+  if !(parsed.y == indexed.y && indexed.y == initializing.y && initializing.y == ready.y) {
+    abort("state row must be aligned")
+  }
+  if !(failed.y > y + h) {
+    abort("failed must sit below the row")
+  }
+
+  println(c.render(label=Some("minigo のパッケージ初期化ライフサイクル。Parsed から Ready への前進チェーンと、全エラーが落ちる Failed。太枠は終端状態")))
+}

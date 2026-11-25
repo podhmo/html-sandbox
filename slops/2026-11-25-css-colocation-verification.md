@@ -2,6 +2,7 @@
 title: CSSをcomponentに閉じると、検証基盤の不足が見える
 description: go-spa-sample の global CSS を CSS Modules + co-location へ移した3本目の記録。CSS Modulesを選んだ理由、stacked PRで何を動かしたか、変更後に壊れていないことをどう確認したかを整理し、go-classic-mpa-sample の自作 storybook + playwright-cli と比較して SPA 側に足りない検証基盤を考える。
 prev: 2026-11-25-ai-delegation-and-maintainability.md
+next: 2026-11-25-quint-lazy-init.md
 ---
 
 # CSSをcomponentに閉じると、検証基盤の不足が見える
