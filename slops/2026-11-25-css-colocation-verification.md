@@ -89,7 +89,7 @@ module間の順序依存も減らした。`:where(.btn)` や `:where(.badge)` �
 
 Devin Review も実害を拾った。dialog共有styleを移したとき、`HideDialog` と pull merge dialog が local `actions` classを通っていなくて、button row の上余白が20pxから8pxになっていた。これは「動く」テストだけでは通る。ユーザーは開けるし、Cancelもできる。しかし見た目は変わっている。review指摘で `form-actions` primitiveと dialog local action classを両方付ける形に直した。
 
-最後に visual regression を行った。最終層については、PR #35 の worktreeとPR #36 の working treeを同じ seed DB で立て、issues list、issue detail、pull detail、pull files diff、discussion detail、new-pull form の6 routesを 1280px/400px の2 viewportで撮った。12組すべて byte-identical だった。class名はhash化されているのでDOM文字列は違うが、pixelsは同じだった。
+最後に visual regression を行った。最終層については、[PR #35](https://github.com/podhmo/go-spa-sample/pull/35) の worktreeと[PR #36](https://github.com/podhmo/go-spa-sample/pull/36) の working treeを同じ seed DB で立て、issues list、issue detail、pull detail、pull files diff、discussion detail、new-pull form の6 routesを 1280px/400px の2 viewportで撮った。12組すべて byte-identical だった。class名はhash化されているのでDOM文字列は違うが、pixelsは同じだった。
 
 また、screenshotが同じというだけでは済ませず、copy permalink の hover reveal と success feedback、hide/delete/merge dialog、validation error、狭幅の full-width action button、back-to-top を interactive に確認した。未確認なのは merged/conflict/unknown PR badge状態で、seed dataでは open mergeable PRしか用意できなかった。ここは正直な残件である。
 
@@ -113,7 +113,7 @@ Devin Review も実害を拾った。dialog共有styleを移したとき、`Hide
 
 結論としては、behavior regression については十分に近い。visual/state regression については不足がある。
 
-`go-spa-sample` には既に次がある。
+[go-spa-sample](https://github.com/podhmo/go-spa-sample) には既に次がある。
 
 - Vitest browser mode で実Chromeにcomponent/routeをrenderできる
 - stub APIによる component/integration test が `web/src/routes/-tests/` にある
@@ -129,7 +129,7 @@ Devin Review も実害を拾った。dialog共有styleを移したとき、`Hide
 
 [podhmo/go-classic-mpa-sample](https://github.com/podhmo/go-classic-mpa-sample) は、この点がかなり進んでいる。MPA側には storybook的なものと verify-ui の分業がある。
 
-| 観点 | go-spa-sample | go-classic-mpa-sample |
+| 観点 | [go-spa-sample](https://github.com/podhmo/go-spa-sample) | [go-classic-mpa-sample](https://github.com/podhmo/go-classic-mpa-sample) |
 | --- | --- | --- |
 | component/状態の静的確認 | Vitest browser mode。testとしては強いがカタログではない | `make storybook` → :6006。templateとfixtureをアプリ本体なしで描画する |
 | JSを含む実挙動 | Vitest browser mode + 実サーバ + playwright-cli | 実サーバ `go run ./cmd/zatudan -seed` + playwright-cli |
@@ -178,12 +178,12 @@ CSS Modules + co-locationは、今回の目的には合っていた。新しいC
 
 確認方法も1本では足りない。Vitest browser modeがclosed dialogのhit testing退化を拾い、Devin Reviewがdialog余白の退化を拾い、screenshot diffが visual parity を直接示した。実サーバ + playwright-cli は、router/API/seed込みの挙動を確認する最後の面として残る。
 
-`go-spa-sample` は behavior regression については十分に近い基盤を持つ。一方、CSSやUI状態を継続的に触るなら、`go-classic-mpa-sample` の storybook的な面と `visual-diff.sh` に相当するものがまだ足りない。次の構造改善をするなら、全面Storybook導入ではなく、小さなReact story catalogと visual diff workflowを SPA側に作るのがよさそうだ。それがあると、今回のような「見た目を変えない大移動」を、sessionごとの職人技ではなく普通の開発手順にできる。
+[go-spa-sample](https://github.com/podhmo/go-spa-sample) は behavior regression については十分に近い基盤を持つ。一方、CSSやUI状態を継続的に触るなら、[go-classic-mpa-sample](https://github.com/podhmo/go-classic-mpa-sample) の storybook的な面と `visual-diff.sh` に相当するものがまだ足りない。次の構造改善をするなら、全面Storybook導入ではなく、小さなReact story catalogと visual diff workflowを SPA側に作るのがよさそうだ。それがあると、今回のような「見た目を変えない大移動」を、sessionごとの職人技ではなく普通の開発手順にできる。
 
 ## 確認したもの
 
 - 記事の事実元: [go-spa-sample issue #22](https://github.com/podhmo/go-spa-sample/issues/22)、[PR #30](https://github.com/podhmo/go-spa-sample/pull/30)、[PR #31](https://github.com/podhmo/go-spa-sample/pull/31)、[PR #32](https://github.com/podhmo/go-spa-sample/pull/32)、[PR #34](https://github.com/podhmo/go-spa-sample/pull/34)、[PR #35](https://github.com/podhmo/go-spa-sample/pull/35)、[PR #36](https://github.com/podhmo/go-spa-sample/pull/36)
 - 行数: 2026-11-25の `origin/master` と `devin/1795579765-css-content-modules` の `web/src/index.css`、および同branchの13個の `*.module.css` を `wc -l` で計測
-- 検証: PR #36のCI、`npm run lint`、`npm run build`、`npm test` の 9 files / 78 tests、PR #35 baselineとの12組 screenshot比較、copy/dialog/validation/狭幅表示の interactive 確認をこの執筆セッションで実施済み
+- 検証: [PR #36](https://github.com/podhmo/go-spa-sample/pull/36) のCI、`npm run lint`、`npm run build`、`npm test` の 9 files / 78 tests、[PR #35](https://github.com/podhmo/go-spa-sample/pull/35) baselineとの12組 screenshot比較、copy/dialog/validation/狭幅表示の interactive 確認をこの執筆セッションで実施済み
 - 比較元: [go-classic-mpa-sample](https://github.com/podhmo/go-classic-mpa-sample) の `docs/ja/ui-rules.md`、`docs/ja/for-ui-designer.md`、`docs/ja/decisions.md`、`tools/visual-diff.sh`
 - 図: `tools/svg-gen/examples/fig-css-colocation-lines.mbtx` から生成し、`check.mbtx` で 0 failure / 0 warning
