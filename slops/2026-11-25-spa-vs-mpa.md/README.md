@@ -2,6 +2,7 @@
 title: MPA+ajax から SPA への移植 — やったことと、実装から見えた差分
 description: go-classic-mpa-sample の issue tracker を Go API + React SPA に移植した一連の作業をふり返る。MPA+ajax と SPA の違いを実際の実装を元に比較し、何がやりやすく何がやりにくくなったか、SPA だからこそ必要になった modern-web-guidance、追加したくなった UI、そして両者の「放置のしやすさ」を整理する。
 prev: ../2026-11-23-moonbit-port-for-quality.md
+next: ../2026-11-25-ai-delegation-and-maintainability.md
 ---
 
 # MPA+ajax から SPA への移植 — やったことと、実装から見えた差分
