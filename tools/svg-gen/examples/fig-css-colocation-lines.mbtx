@@ -1,0 +1,32 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// CSS co-location did not make the stylesheet smaller overall. It moved
+// selectors out of the global namespace. Values are measured line counts
+// from go-spa-sample: master web/src/index.css vs the final CSS stack.
+
+fn main {
+  let c = @svg.Canvas()
+  let items : Array[@svg.Hbar] = [
+    { label: "移行前: global index.css", value: 2016.0 },
+    { label: "移行後: global index.css", value: 264.0 },
+    { label: "移行後: 13 module CSS 合計", value: 1742.0 },
+  ]
+  let global_color = c.color(3) // vermillion
+  let module_color = c.color(2) // green
+  c.hbars(
+    items,
+    x=10.0,
+    y=10.0,
+    max_w=330.0,
+    label_w=Some(190.0),
+    highlight=Some(1),
+    size=11.0,
+    bar_h=20.0,
+    row_gap=12.0,
+    colors=Some([global_color, global_color, module_color]),
+  )
+  c.text(10.0, 102.0, "global は 2016 → 264 行。総量はほぼ同じで、減ったのは global namespace", size=11.0)
+  println(c.render(label=Some("CSS移行前後の行数。global index.css は2016行から264行へ減り、1742行は13個のmodule CSSへ移動。総量はほぼ同じ")))
+}

@@ -2,6 +2,7 @@
 title: AI任せの移植は「動く」ところまでは速い。管理できる形は別途作った
 description: go-spa-sample の MPA→SPA 移植の続き。受け入れチェック PR で機能を確認し、ディレクトリ構造を file-based routing + co-location へ再編した記録から、AI任せの開発で「動くもの」と「管理しやすいもの」が別だという話を考える。最後に open issues を眺めて、今ライブラリ選定をやり直したら何が変わるかを整理する。
 prev: 2026-11-25-spa-vs-mpa.md
+next: 2026-11-25-css-colocation-verification.md
 ---
 
 # AI任せの移植は「動く」ところまでは速い。管理できる形は別途作った
