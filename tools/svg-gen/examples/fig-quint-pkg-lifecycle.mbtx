@@ -33,15 +33,15 @@ fn main {
   // failure sink below the middle
   let failed = c.box(initializing.x - 10.0, y + 96.0, @svg.Auto, h, label=Some("Failed"), color=c.color(3), width=2.5, size=12.0)
   c.arrow(
-    c.anchor(indexed, @svg.S),
+    c.anchor(parsed, @svg.S),
     c.anchor(failed, @svg.W),
-    via=[(c.anchor(indexed, @svg.S).0, c.anchor(failed, @svg.W).1)],
+    via=[(c.anchor(parsed, @svg.S).0, c.anchor(failed, @svg.W).1)],
     dash=Some("5 4"),
   )
   c.arrow(c.anchor(initializing, @svg.S), c.anchor(failed, @svg.N), dash=Some("5 4"))
   let mf = c.midpoint(c.anchor(initializing, @svg.S), c.anchor(failed, @svg.N))
   c.text(mf.0 + 42.0, mf.1 - 4.0, "init 失敗/panic", anchor=@svg.Middle, size=9.0, opacity=Some(0.65))
-  let mf2 = c.midpoint(c.anchor(indexed, @svg.S), c.anchor(failed, @svg.W))
+  let mf2 = c.midpoint(c.anchor(parsed, @svg.S), c.anchor(failed, @svg.W))
   c.text(mf2.0 - 30.0, mf2.1 - 10.0, "parse/index 失敗", anchor=@svg.Middle, size=9.0, opacity=Some(0.65))
 
   // terminal markers

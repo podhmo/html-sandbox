@@ -41,10 +41,10 @@ minigo は Go のスクリプトをインタプリタとして実行する。パ
 <text x="376" y="48" font-size="9" text-anchor="middle" fill="currentColor" opacity="0.65">init 成功</text>
 <rect x="231.8" y="136" width="71.6" height="40" rx="8" fill="none" stroke="#D55E00" stroke-width="2.5"/>
 <text x="267.6" y="156" font-size="12" text-anchor="middle" dominant-baseline="central" fill="currentColor">Failed</text>
-<path d="M156.7 83 L156.7 156 L228.8 156" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="5 4"/><path d="M219.8 160.05 L228.8 156 L219.8 151.95" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="5 4"/>
+<path d="M35.8 83 L35.8 156 L228.8 156" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="5 4"/><path d="M219.8 160.05 L228.8 156 L219.8 151.95" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="5 4"/>
 <path d="M295.99069051690094 82.6483668138774 L269.00930948309906 133.3516331861226" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="5 4"/><path d="M269.6619427336617 123.5039649423067 L269.00930948309906 133.3516331861226 L276.81253313113064 127.30910054667412" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="5 4"/>
 <text x="324.5" y="104" font-size="9" text-anchor="middle" fill="currentColor" opacity="0.65">init 失敗/panic</text>
-<text x="164.25" y="108" font-size="9" text-anchor="middle" fill="currentColor" opacity="0.65">parse/index 失敗</text>
+<text x="103.80000000000001" y="108" font-size="9" text-anchor="middle" fill="currentColor" opacity="0.65">parse/index 失敗</text>
 <text x="431.5" y="98" font-size="9" text-anchor="middle" fill="currentColor" opacity="0.6">終端(吸収)</text>
 <text x="267.6" y="192" font-size="9" text-anchor="middle" fill="currentColor" opacity="0.6">終端 — ただし load 失敗時は initOnce 未消費</text>
 </svg>
@@ -101,7 +101,7 @@ minigo は Go のスクリプトをインタプリタとして実行する。パ
 
 ランダムシミュレーションの「300トレースで違反なし」は、ランダムに生成した300本の遷移列について不変条件が成り立った、というだけの話だ。速い代わりに網羅性はない。探索の粗い段階で仕様の間違い (型エラーや到達不能) を潰すのに向いている。
 
-全探索の「深さ7」は、初期状態から7ステップ以内で到達できるすべての状態で不変条件が成り立つ、という意味だ。今回の対象では indexing 3回 + init 開始 + 再帰 + 循環読み出し + 完了2回で7ステップ前後なので、完結するカスケードはだいたいカバーできる。ただしこれは「7ステップ以内では反例がない」のであって数学的な証明ではない。状態空間はステップ数に対して指数的に膨れるので、深さ8以降は現実的な時間では終わらなかった (深さ9の探索は数十分かけても終わらず断念した)。有限で小さいモデルに抽象化するのはこういう制約の裏返しでもある。
+全探索の「深さ7」は、初期状態から7ステップ以内で到達できるすべての状態で不変条件が成り立つ、という意味だ。今回の対象では、循環に絡む2パッケージの indexing 2回 + init 開始 + 依存先への再帰 + 循環読み出し + init 完了2回でちょうど7ステップなので、完結するカスケードはちゃんとカバーできる (plain の indexing や const-only の経路を含む列はより長くなるので、カバーは部分的なものにとどまる)。ただしこれは「7ステップ以内では反例がない」のであって数学的な証明ではない。状態空間はステップ数に対して指数的に膨れるので、深さ8以降は現実的な時間では終わらなかった (深さ9の探索は数十分かけても終わらず断念した)。有限で小さいモデルに抽象化するのはこういう制約の裏返しでもある。
 
 もう1つ、地味だが重要なのが witness (証人) の確認だ。「循環 init の partial serve は起きうるか」を確かめるために、`partialServes == 0` (まだ一度も起きていない) という不変条件をわざと指定して、違反が出ることを確認した。違反トレースが見つかる = その振る舞いがモデル上で実際に発生する、という証拠になる。モデルがそもそもその振る舞いを生成できないなら、不変条件が通っても何も検証していないのと同じだからだ。この「わざと壊れる性質で陰性対照を取る」という発想は、テストの世界の mutation testing に似ている。
 
