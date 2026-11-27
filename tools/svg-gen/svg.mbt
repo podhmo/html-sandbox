@@ -1156,10 +1156,18 @@ pub fn Canvas::port(
 
 ///|
 fn elbow_via(from : Point, to : Point, style : Elbow) -> Array[Point] {
-  match style {
-    Direct => []
-    HV => [(to.0, from.1)]
-    VH => [(from.0, to.1)]
+  let candidate = match style {
+    Direct => None
+    HV => Some((to.0, from.1))
+    VH => Some((from.0, to.1))
+  }
+  match candidate {
+    Some(p) => {
+      let at_from = (p.0 - from.0).abs() < 0.0001 && (p.1 - from.1).abs() < 0.0001
+      let at_to = (p.0 - to.0).abs() < 0.0001 && (p.1 - to.1).abs() < 0.0001
+      if at_from || at_to { [] } else { [p] }
+    }
+    None => []
   }
 }
 
@@ -1237,11 +1245,16 @@ pub fn Canvas::connect(
   match label {
     Some(s) => {
       let p = if bends.length() > 0 {
-        bends[0]
+        let b = bends[0]
+        if style is HV {
+          ((from.0 + b.0) / 2.0, from.1 - 8.0)
+        } else {
+          (from.0 + 8.0, (from.1 + b.1) / 2.0)
+        }
       } else {
-        ((from.0 + to.0) / 2.0, (from.1 + to.1) / 2.0)
+        ((from.0 + to.0) / 2.0, (from.1 + to.1) / 2.0 - 8.0)
       }
-      self.text(p.0, p.1 - 8.0, s, anchor=Middle, central=true, size=12)
+      self.text(p.0, p.1, s, anchor=Middle, central=true, size=12)
     }
     None => ()
   }
