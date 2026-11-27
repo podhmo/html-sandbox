@@ -1,0 +1,43 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// What is shared and what is isolated in the two execution shapes.
+// Position carries the repetition: every process column owns the whole
+// stack, while isolated sessions share parse/index assets but fork the
+// package state.
+
+fn main {
+  let c = @svg.Canvas(margin=12.0)
+  let repeated = c.color(3)
+  let shared = c.color(0)
+  let state = c.color(2)
+
+  c.text(30.0, 18.0, "process-per-test", size=13.0)
+  c.text(500.0, 18.0, "in-process + isolated session", size=13.0)
+
+  // Left: every test pays the whole stack again.
+  for i in [0, 1, 2] {
+    let y = 42.0 + i.to_double() * 68.0
+    let p = c.box(30.0, y, @svg.Auto, 34.0, label=Some("minigo process"), color=repeated, size=11.0)
+    let pi = c.box(190.0, y, @svg.Auto, 34.0, label=Some("parse/index"), color=repeated, size=11.0)
+    let st = c.box(330.0, y, @svg.Auto, 34.0, label=Some("package state"), color=state, size=11.0)
+    c.arrow(c.anchor(p, @svg.E), c.anchor(pi, @svg.W))
+    c.arrow(c.anchor(pi, @svg.E), c.anchor(st, @svg.W))
+  }
+  c.text(30.0, 246.0, "起動・ resolver 準備・ parse/index が各行で重複", size=11.0, opacity=Some(0.75))
+
+  // Right: parse/index assets are shared above per-test state.
+  let cache = c.box(610.0, 42.0, @svg.Auto, 38.0, label=Some("shared parse/index cache"), color=shared, width=2.5, size=11.0)
+  for i in [0, 1, 2] {
+    let y = 108.0 + i.to_double() * 52.0
+    let s = c.box(500.0, y, @svg.Auto, 32.0, label=Some("session \{i + 1}"), color=shared, size=11.0)
+    let st = c.box(670.0, y, @svg.Auto, 32.0, label=Some("package state"), color=state, size=11.0)
+    c.arrow(c.anchor(cache, @svg.S), c.anchor(s, @svg.N), dash=Some("4 3"))
+    c.arrow(c.anchor(s, @svg.E), c.anchor(st, @svg.W))
+  }
+  c.text(500.0, 268.0, "cache は共有、globals/init/test mutation は session ごと", size=11.0, opacity=Some(0.75))
+
+  c.text(30.0, 296.0, "青緑=再利用されるもの、緑=分離される状態、朱=従来は毎回重複していたもの", size=11.0, opacity=Some(0.75))
+  println(c.render(label=Some("process-per-test repeats the full stack; isolated sessions share parse and index assets but fork package state")))
+}
