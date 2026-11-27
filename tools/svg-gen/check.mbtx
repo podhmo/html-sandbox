@@ -77,7 +77,7 @@ let num_re : @string.Regex = @string.Regex::unsafe_from_string(
 
 ///|
 let path_tok_re : @string.Regex = @string.Regex::unsafe_from_string(
-  "[MLHVZmlhvzCSQTAa]|-?[0-9]*\\.?[0-9]+([eE]-?[0-9]+)?",
+  "[MLHVZmlhvzCSQTcsqtAa]|-?[0-9]*\\.?[0-9]+([eE]-?[0-9]+)?",
 )
 
 ///|
