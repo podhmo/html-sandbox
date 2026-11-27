@@ -1,0 +1,37 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// dev/027: Git graph
+// category: 時間
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/dev.html
+// reference shape: 形：commit を点、branch を色の違う線にし、分岐と merge の合流を描く
+// reference use: 使う場面：branch の運用、リリースの切り方
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  c.line((6.0, 56.0), (114.0, 56.0), width=2.0, color="#2563eb")
+  c.polyline([(30.0, 56.0), (42.0, 30.0), (78.0, 30.0), (90.0, 56.0)], width=2.0, color="#15803d")
+  c.polyline([(54.0, 30.0), (62.0, 12.0), (72.0, 12.0)], width=2.0, color="#c2410c")
+  ignore(c.circle(14.0, 56.0, 4.0, width=1.0, color="#2563eb", fill="#fff"))
+  ignore(c.circle(30.0, 56.0, 4.0, width=1.0, color="#2563eb", fill="#fff"))
+  ignore(c.circle(90.0, 56.0, 4.0, width=1.0, color="#2563eb", fill="#fff"))
+  ignore(c.circle(106.0, 56.0, 4.0, width=1.0, color="#2563eb", fill="#fff"))
+  ignore(c.circle(42.0, 30.0, 4.0, width=1.0, color="#15803d", fill="#fff"))
+  ignore(c.circle(60.0, 30.0, 4.0, width=1.0, color="#15803d", fill="#fff"))
+  ignore(c.circle(78.0, 30.0, 4.0, width=1.0, color="#15803d", fill="#fff"))
+  ignore(c.circle(72.0, 12.0, 4.0, width=1.0, color="#c2410c", fill="#fff"))
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("Git graph"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

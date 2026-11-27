@@ -1,0 +1,43 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// dev/037: 設計案の比較表
+// category: 判断
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/dev.html
+// reference shape: 形：行に案、列に観点を取り、案の間で差のある箇所だけ色を付け、推す案を枠で囲む
+// reference use: 使う場面：設計の選択肢を比べる（ADR）
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  ignore(c.rect(28.0, 8.0, 30.0, 16.0, width=1.0, color="#9aa4b5", fill="#f8f9fb"))
+  ignore(c.rect(28.0, 24.0, 30.0, 16.0, width=1.0, color="#9aa4b5", fill="#dcf3e3"))
+  ignore(c.rect(28.0, 40.0, 30.0, 16.0, width=1.0, color="#9aa4b5", fill="#f8f9fb"))
+  ignore(c.rect(28.0, 56.0, 30.0, 16.0, width=1.0, color="#9aa4b5", fill="#f8f9fb"))
+  ignore(c.rect(58.0, 8.0, 30.0, 16.0, width=1.0, color="#9aa4b5", fill="#f8f9fb"))
+  ignore(c.rect(58.0, 24.0, 30.0, 16.0, width=1.0, color="#9aa4b5", fill="#f8f9fb"))
+  ignore(c.rect(58.0, 40.0, 30.0, 16.0, width=1.0, color="#9aa4b5", fill="#f8f9fb"))
+  ignore(c.rect(58.0, 56.0, 30.0, 16.0, width=1.0, color="#9aa4b5", fill="#dcf3e3"))
+  ignore(c.rect(88.0, 8.0, 30.0, 16.0, width=1.0, color="#9aa4b5", fill="#f8f9fb"))
+  ignore(c.rect(88.0, 24.0, 30.0, 16.0, width=1.0, color="#9aa4b5", fill="#f8f9fb"))
+  ignore(c.rect(88.0, 40.0, 30.0, 16.0, width=1.0, color="#9aa4b5", fill="#fde5d6"))
+  ignore(c.rect(88.0, 56.0, 30.0, 16.0, width=1.0, color="#9aa4b5", fill="#f8f9fb"))
+  ignore(c.rect(4.0, 8.0, 22.0, 16.0, width=1.0, color="none", fill="#d5dae2"))
+  ignore(c.rect(4.0, 24.0, 22.0, 16.0, width=1.0, color="none", fill="#d5dae2"))
+  ignore(c.rect(4.0, 40.0, 22.0, 16.0, width=1.0, color="none", fill="#d5dae2"))
+  ignore(c.rect(4.0, 56.0, 22.0, 16.0, width=1.0, color="none", fill="#d5dae2"))
+  ignore(c.rect(28.0, 6.0, 30.0, 68.0, width=2.0, color="#15803d"))
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("設計案の比較表"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

@@ -1,0 +1,41 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/005: Bullet chart
+// category: 差
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+// reference shape: 形：実績の横棒に目標の縦線を重ね、背景の濃淡で悪い・普通・良いの範囲を示す。指標ごとに1行
+// reference use: 使う場面：複数の指標の目標に対する達成度を狭い場所に並べる
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  ignore(c.rect(10.0, 8.0, 100.0, 14.0, width=1.0, color="none", fill="#eef0f3"))
+  ignore(c.rect(10.0, 8.0, 70.0, 14.0, width=1.0, color="none", fill="#e1e5ea"))
+  ignore(c.rect(10.0, 8.0, 45.0, 14.0, width=1.0, color="none", fill="#d5dae2"))
+  ignore(c.rect(10.0, 12.0, 80.0, 6.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  c.line((82.0, 5.0), (82.0, 25.0), width=2.0, color="#c2410c")
+  ignore(c.rect(10.0, 32.0, 100.0, 14.0, width=1.0, color="none", fill="#eef0f3"))
+  ignore(c.rect(10.0, 32.0, 70.0, 14.0, width=1.0, color="none", fill="#e1e5ea"))
+  ignore(c.rect(10.0, 32.0, 45.0, 14.0, width=1.0, color="none", fill="#d5dae2"))
+  ignore(c.rect(10.0, 36.0, 52.0, 6.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  c.line((75.0, 29.0), (75.0, 49.0), width=2.0, color="#c2410c")
+  ignore(c.rect(10.0, 56.0, 100.0, 14.0, width=1.0, color="none", fill="#eef0f3"))
+  ignore(c.rect(10.0, 56.0, 70.0, 14.0, width=1.0, color="none", fill="#e1e5ea"))
+  ignore(c.rect(10.0, 56.0, 45.0, 14.0, width=1.0, color="none", fill="#d5dae2"))
+  ignore(c.rect(10.0, 60.0, 95.0, 6.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  c.line((95.0, 53.0), (95.0, 73.0), width=2.0, color="#c2410c")
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("Bullet chart"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

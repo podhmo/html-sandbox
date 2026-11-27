@@ -1,0 +1,46 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/011: XY heatmap
+// category: 相関
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+// reference shape: 形：行と列に2つの分類を取り、マスを値の濃さで塗る
+// reference use: 使う場面：2つの分類の間の傾向
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  ignore(c.rect(12.0, 6.0, 20.0, 16.0, width=1.0, color="#fff", fill="#eef3fd"))
+  ignore(c.rect(12.0, 22.0, 20.0, 16.0, width=1.0, color="#fff", fill="#c6d8fb"))
+  ignore(c.rect(12.0, 38.0, 20.0, 16.0, width=1.0, color="#fff", fill="#8db4f7"))
+  ignore(c.rect(12.0, 54.0, 20.0, 16.0, width=1.0, color="#fff", fill="#2563eb"))
+  ignore(c.rect(32.0, 6.0, 20.0, 16.0, width=1.0, color="#fff", fill="#c6d8fb"))
+  ignore(c.rect(32.0, 22.0, 20.0, 16.0, width=1.0, color="#fff", fill="#2563eb"))
+  ignore(c.rect(32.0, 38.0, 20.0, 16.0, width=1.0, color="#fff", fill="#c6d8fb"))
+  ignore(c.rect(32.0, 54.0, 20.0, 16.0, width=1.0, color="#fff", fill="#2563eb"))
+  ignore(c.rect(52.0, 6.0, 20.0, 16.0, width=1.0, color="#fff", fill="#8db4f7"))
+  ignore(c.rect(52.0, 22.0, 20.0, 16.0, width=1.0, color="#fff", fill="#c6d8fb"))
+  ignore(c.rect(52.0, 38.0, 20.0, 16.0, width=1.0, color="#fff", fill="#eef3fd"))
+  ignore(c.rect(52.0, 54.0, 20.0, 16.0, width=1.0, color="#fff", fill="#2563eb"))
+  ignore(c.rect(72.0, 6.0, 20.0, 16.0, width=1.0, color="#fff", fill="#2563eb"))
+  ignore(c.rect(72.0, 22.0, 20.0, 16.0, width=1.0, color="#fff", fill="#2563eb"))
+  ignore(c.rect(72.0, 38.0, 20.0, 16.0, width=1.0, color="#fff", fill="#2563eb"))
+  ignore(c.rect(72.0, 54.0, 20.0, 16.0, width=1.0, color="#fff", fill="#2563eb"))
+  ignore(c.rect(92.0, 6.0, 20.0, 16.0, width=1.0, color="#fff", fill="#eef3fd"))
+  ignore(c.rect(92.0, 22.0, 20.0, 16.0, width=1.0, color="#fff", fill="#c6d8fb"))
+  ignore(c.rect(92.0, 38.0, 20.0, 16.0, width=1.0, color="#fff", fill="#8db4f7"))
+  ignore(c.rect(92.0, 54.0, 20.0, 16.0, width=1.0, color="#fff", fill="#2563eb"))
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("XY heatmap"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

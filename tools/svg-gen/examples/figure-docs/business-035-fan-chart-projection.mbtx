@@ -1,0 +1,32 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/035: Fan chart (projection)
+// category: 時間での変化
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+// reference shape: 形：実績の線の先に、見込みの幅を扇形に広げて塗る
+// reference use: 使う場面：見込みの不確かさ
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  c.line((10.0, 70.0), (112.0, 70.0), width=1.0, color="#9aa4b5")
+  c.line((10.0, 6.0), (10.0, 70.0), width=1.0, color="#9aa4b5")
+  c.polygon([(60.0, 40.0), (112.0, 10.0), (112.0, 60.0)], width=1.0, color="#dbe8fd", fill="#eef3fd")
+  c.polygon([(60.0, 40.0), (112.0, 22.0), (112.0, 48.0)], width=1.0, color="#dbe8fd", fill="#dbe8fd")
+  c.polyline([(10.0, 55.0), (35.0, 48.0), (60.0, 40.0)], color="#2563eb")
+  c.line((60.0, 40.0), (112.0, 35.0), dash=Some("4 3"), color="#2563eb")
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("Fan chart (projection)"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

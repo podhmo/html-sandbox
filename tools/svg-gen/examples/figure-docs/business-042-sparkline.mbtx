@@ -1,0 +1,35 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/042: Sparkline
+// category: 時間での変化
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+// reference shape: 形：軸も目盛りもない小さな折れ線を表の各行に置き、最後の点だけ印を付ける
+// reference use: 使う場面：指標の一覧に、行ごとの推移を添える
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  c.line((8.0, 18.0), (40.0, 18.0), width=6.0, color="#d5dae2")
+  c.polyline([(50.0, 18.0), (58.0, 15.0), (66.0, 16.0), (74.0, 12.0), (82.0, 13.0), (90.0, 10.0), (98.0, 8.0)], width=1.2, color="#2563eb")
+  ignore(c.circle(98.0, 8.0, 2.0, width=1.0, color="#c2410c", fill="#c2410c"))
+  c.line((8.0, 40.0), (40.0, 40.0), width=6.0, color="#d5dae2")
+  c.polyline([(50.0, 34.0), (58.0, 36.0), (66.0, 35.0), (74.0, 38.0), (82.0, 37.0), (90.0, 39.0), (98.0, 40.0)], width=1.2, color="#2563eb")
+  ignore(c.circle(98.0, 40.0, 2.0, width=1.0, color="#c2410c", fill="#c2410c"))
+  c.line((8.0, 62.0), (40.0, 62.0), width=6.0, color="#d5dae2")
+  c.polyline([(50.0, 60.0), (58.0, 60.0), (66.0, 58.0), (74.0, 59.0), (82.0, 57.0), (90.0, 58.0), (98.0, 56.0)], width=1.2, color="#2563eb")
+  ignore(c.circle(98.0, 56.0, 2.0, width=1.0, color="#c2410c", fill="#c2410c"))
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("Sparkline"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

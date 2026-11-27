@@ -1,0 +1,33 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/066: Radar chart
+// category: 大きさ
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+// reference shape: 形：中心から項目ごとの軸を放射状に伸ばし、値の点を結ぶ
+// reference use: 使う場面：複数の項目のバランスを狭い場所で比べるとき
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  c.line((60.0, 40.0), (60.0, 8.0), width=1.0, color="#d5dae2")
+  c.line((60.0, 40.0), (88.0, 24.0), width=1.0, color="#d5dae2")
+  c.line((60.0, 40.0), (88.0, 56.0), width=1.0, color="#d5dae2")
+  c.line((60.0, 40.0), (60.0, 72.0), width=1.0, color="#d5dae2")
+  c.line((60.0, 40.0), (32.0, 56.0), width=1.0, color="#d5dae2")
+  c.line((60.0, 40.0), (32.0, 24.0), width=1.0, color="#d5dae2")
+  c.polygon([(60.0, 10.0), (77.0, 30.0), (83.0, 53.0), (60.0, 55.0), (36.0, 54.0), (41.0, 29.0)], width=1.0, color="#2563eb", fill="#dbe8fd")
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("Radar chart"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

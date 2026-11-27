@@ -1,0 +1,96 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/075: Heat map
+// category: 地理
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+// reference shape: 形：地図を格子に分け、マスを値の濃さで塗る
+// reference use: 使う場面：行政の区分によらない広がり
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  ignore(c.rect(10.0, 6.0, 10.0, 10.0, width=1.0, color="#fff", fill="#eef3fd"))
+  ignore(c.rect(10.0, 16.0, 10.0, 10.0, width=1.0, color="#fff", fill="#eef3fd"))
+  ignore(c.rect(10.0, 26.0, 10.0, 10.0, width=1.0, color="#fff", fill="#eef3fd"))
+  ignore(c.rect(10.0, 36.0, 10.0, 10.0, width=1.0, color="#fff", fill="#eef3fd"))
+  ignore(c.rect(10.0, 46.0, 10.0, 10.0, width=1.0, color="#fff", fill="#eef3fd"))
+  ignore(c.rect(10.0, 56.0, 10.0, 10.0, width=1.0, color="#fff", fill="#eef3fd"))
+  ignore(c.rect(10.0, 66.0, 10.0, 10.0, width=1.0, color="#fff", fill="#eef3fd"))
+  ignore(c.rect(20.0, 6.0, 10.0, 10.0, width=1.0, color="#fff", fill="#eef3fd"))
+  ignore(c.rect(20.0, 16.0, 10.0, 10.0, width=1.0, color="#fff", fill="#eef3fd"))
+  ignore(c.rect(20.0, 26.0, 10.0, 10.0, width=1.0, color="#fff", fill="#eef3fd"))
+  ignore(c.rect(20.0, 36.0, 10.0, 10.0, width=1.0, color="#fff", fill="#eef3fd"))
+  ignore(c.rect(20.0, 46.0, 10.0, 10.0, width=1.0, color="#fff", fill="#eef3fd"))
+  ignore(c.rect(20.0, 56.0, 10.0, 10.0, width=1.0, color="#fff", fill="#eef3fd"))
+  ignore(c.rect(20.0, 66.0, 10.0, 10.0, width=1.0, color="#fff", fill="#eef3fd"))
+  ignore(c.rect(30.0, 6.0, 10.0, 10.0, width=1.0, color="#fff", fill="#eef3fd"))
+  ignore(c.rect(30.0, 16.0, 10.0, 10.0, width=1.0, color="#fff", fill="#c6d8fb"))
+  ignore(c.rect(30.0, 26.0, 10.0, 10.0, width=1.0, color="#fff", fill="#c6d8fb"))
+  ignore(c.rect(30.0, 36.0, 10.0, 10.0, width=1.0, color="#fff", fill="#c6d8fb"))
+  ignore(c.rect(30.0, 46.0, 10.0, 10.0, width=1.0, color="#fff", fill="#c6d8fb"))
+  ignore(c.rect(30.0, 56.0, 10.0, 10.0, width=1.0, color="#fff", fill="#c6d8fb"))
+  ignore(c.rect(30.0, 66.0, 10.0, 10.0, width=1.0, color="#fff", fill="#eef3fd"))
+  ignore(c.rect(40.0, 6.0, 10.0, 10.0, width=1.0, color="#fff", fill="#c6d8fb"))
+  ignore(c.rect(40.0, 16.0, 10.0, 10.0, width=1.0, color="#fff", fill="#c6d8fb"))
+  ignore(c.rect(40.0, 26.0, 10.0, 10.0, width=1.0, color="#fff", fill="#8db4f7"))
+  ignore(c.rect(40.0, 36.0, 10.0, 10.0, width=1.0, color="#fff", fill="#8db4f7"))
+  ignore(c.rect(40.0, 46.0, 10.0, 10.0, width=1.0, color="#fff", fill="#8db4f7"))
+  ignore(c.rect(40.0, 56.0, 10.0, 10.0, width=1.0, color="#fff", fill="#c6d8fb"))
+  ignore(c.rect(40.0, 66.0, 10.0, 10.0, width=1.0, color="#fff", fill="#c6d8fb"))
+  ignore(c.rect(50.0, 6.0, 10.0, 10.0, width=1.0, color="#fff", fill="#c6d8fb"))
+  ignore(c.rect(50.0, 16.0, 10.0, 10.0, width=1.0, color="#fff", fill="#8db4f7"))
+  ignore(c.rect(50.0, 26.0, 10.0, 10.0, width=1.0, color="#fff", fill="#2563eb"))
+  ignore(c.rect(50.0, 36.0, 10.0, 10.0, width=1.0, color="#fff", fill="#2563eb"))
+  ignore(c.rect(50.0, 46.0, 10.0, 10.0, width=1.0, color="#fff", fill="#2563eb"))
+  ignore(c.rect(50.0, 56.0, 10.0, 10.0, width=1.0, color="#fff", fill="#8db4f7"))
+  ignore(c.rect(50.0, 66.0, 10.0, 10.0, width=1.0, color="#fff", fill="#c6d8fb"))
+  ignore(c.rect(60.0, 6.0, 10.0, 10.0, width=1.0, color="#fff", fill="#c6d8fb"))
+  ignore(c.rect(60.0, 16.0, 10.0, 10.0, width=1.0, color="#fff", fill="#8db4f7"))
+  ignore(c.rect(60.0, 26.0, 10.0, 10.0, width=1.0, color="#fff", fill="#2563eb"))
+  ignore(c.rect(60.0, 36.0, 10.0, 10.0, width=1.0, color="#fff", fill="#2563eb"))
+  ignore(c.rect(60.0, 46.0, 10.0, 10.0, width=1.0, color="#fff", fill="#2563eb"))
+  ignore(c.rect(60.0, 56.0, 10.0, 10.0, width=1.0, color="#fff", fill="#8db4f7"))
+  ignore(c.rect(60.0, 66.0, 10.0, 10.0, width=1.0, color="#fff", fill="#c6d8fb"))
+  ignore(c.rect(70.0, 6.0, 10.0, 10.0, width=1.0, color="#fff", fill="#c6d8fb"))
+  ignore(c.rect(70.0, 16.0, 10.0, 10.0, width=1.0, color="#fff", fill="#8db4f7"))
+  ignore(c.rect(70.0, 26.0, 10.0, 10.0, width=1.0, color="#fff", fill="#2563eb"))
+  ignore(c.rect(70.0, 36.0, 10.0, 10.0, width=1.0, color="#fff", fill="#2563eb"))
+  ignore(c.rect(70.0, 46.0, 10.0, 10.0, width=1.0, color="#fff", fill="#2563eb"))
+  ignore(c.rect(70.0, 56.0, 10.0, 10.0, width=1.0, color="#fff", fill="#8db4f7"))
+  ignore(c.rect(70.0, 66.0, 10.0, 10.0, width=1.0, color="#fff", fill="#c6d8fb"))
+  ignore(c.rect(80.0, 6.0, 10.0, 10.0, width=1.0, color="#fff", fill="#c6d8fb"))
+  ignore(c.rect(80.0, 16.0, 10.0, 10.0, width=1.0, color="#fff", fill="#c6d8fb"))
+  ignore(c.rect(80.0, 26.0, 10.0, 10.0, width=1.0, color="#fff", fill="#8db4f7"))
+  ignore(c.rect(80.0, 36.0, 10.0, 10.0, width=1.0, color="#fff", fill="#8db4f7"))
+  ignore(c.rect(80.0, 46.0, 10.0, 10.0, width=1.0, color="#fff", fill="#8db4f7"))
+  ignore(c.rect(80.0, 56.0, 10.0, 10.0, width=1.0, color="#fff", fill="#c6d8fb"))
+  ignore(c.rect(80.0, 66.0, 10.0, 10.0, width=1.0, color="#fff", fill="#c6d8fb"))
+  ignore(c.rect(90.0, 6.0, 10.0, 10.0, width=1.0, color="#fff", fill="#eef3fd"))
+  ignore(c.rect(90.0, 16.0, 10.0, 10.0, width=1.0, color="#fff", fill="#c6d8fb"))
+  ignore(c.rect(90.0, 26.0, 10.0, 10.0, width=1.0, color="#fff", fill="#c6d8fb"))
+  ignore(c.rect(90.0, 36.0, 10.0, 10.0, width=1.0, color="#fff", fill="#c6d8fb"))
+  ignore(c.rect(90.0, 46.0, 10.0, 10.0, width=1.0, color="#fff", fill="#c6d8fb"))
+  ignore(c.rect(90.0, 56.0, 10.0, 10.0, width=1.0, color="#fff", fill="#c6d8fb"))
+  ignore(c.rect(90.0, 66.0, 10.0, 10.0, width=1.0, color="#fff", fill="#eef3fd"))
+  ignore(c.rect(100.0, 6.0, 10.0, 10.0, width=1.0, color="#fff", fill="#eef3fd"))
+  ignore(c.rect(100.0, 16.0, 10.0, 10.0, width=1.0, color="#fff", fill="#eef3fd"))
+  ignore(c.rect(100.0, 26.0, 10.0, 10.0, width=1.0, color="#fff", fill="#eef3fd"))
+  ignore(c.rect(100.0, 36.0, 10.0, 10.0, width=1.0, color="#fff", fill="#eef3fd"))
+  ignore(c.rect(100.0, 46.0, 10.0, 10.0, width=1.0, color="#fff", fill="#eef3fd"))
+  ignore(c.rect(100.0, 56.0, 10.0, 10.0, width=1.0, color="#fff", fill="#eef3fd"))
+  ignore(c.rect(100.0, 66.0, 10.0, 10.0, width=1.0, color="#fff", fill="#eef3fd"))
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("Heat map"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

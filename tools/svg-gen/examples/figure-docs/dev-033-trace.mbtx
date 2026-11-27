@@ -1,0 +1,31 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// dev/033: Trace のタイムライン
+// category: 性能と信頼性
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/dev.html
+// reference shape: 形：1つのリクエストの処理（span）を、親子の順に横棒で階段状に並べ、棒の長さを所要時間にする
+// reference use: 使う場面：1件のリクエストのどこで時間がかかったか
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  ignore(c.rect(10.0, 6.0, 100.0, 9.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.rect(14.0, 19.0, 20.0, 9.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.rect(36.0, 32.0, 70.0, 9.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.rect(40.0, 45.0, 60.0, 9.0, width=1.0, color="#c2410c", fill="#fde5d6"))
+  ignore(c.rect(102.0, 58.0, 6.0, 9.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("Trace のタイムライン"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

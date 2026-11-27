@@ -1,0 +1,42 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// dev/008: Wardley map
+// category: 構造
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/dev.html
+// reference shape: 形：縦に利用者への近さ、横に成熟度（作りかけから汎用品）を取り、部品を点で置いて依存を線で結ぶ
+// reference use: 使う場面：作るか買うか、どこに投資するか
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  c.line((10.0, 72.0), (112.0, 72.0), color="#9aa4b5")
+  c.line((10.0, 4.0), (10.0, 72.0), color="#9aa4b5")
+  c.line((36.0, 8.0), (36.0, 72.0), dash=Some("3 2"), width=1.0, color="#d5dae2")
+  c.line((62.0, 8.0), (62.0, 72.0), dash=Some("3 2"), width=1.0, color="#d5dae2")
+  c.line((88.0, 8.0), (88.0, 72.0), dash=Some("3 2"), width=1.0, color="#d5dae2")
+  ignore(c.circle(70.0, 10.0, 4.0, width=1.0, color="#c2410c", fill="#c2410c"))
+  ignore(c.circle(40.0, 30.0, 4.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(80.0, 36.0, 4.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(96.0, 60.0, 4.0, width=1.0, color="#9aa4b5", fill="#d5dae2"))
+  ignore(c.circle(24.0, 50.0, 4.0, width=1.0, color="#15803d", fill="#dcf3e3"))
+  c.line((70.0, 10.0), (40.0, 30.0), width=1.0, color="#2563eb")
+  c.line((70.0, 10.0), (80.0, 36.0), width=1.0, color="#2563eb")
+  c.line((40.0, 30.0), (24.0, 50.0), width=1.0, color="#2563eb")
+  c.line((80.0, 36.0), (96.0, 60.0), width=1.0, color="#2563eb")
+  c.line((24.0, 50.0), (40.0, 50.0), dash=Some("3 2"), width=1.0, color="#15803d")
+  c.polygon([(40.0, 50.0), (36.0, 52.0), (36.0, 48.0)], width=1.0, color="#15803d", fill="#15803d")
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("Wardley map"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

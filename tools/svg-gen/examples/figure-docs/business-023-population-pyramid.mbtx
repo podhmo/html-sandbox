@@ -1,0 +1,41 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/023: Population pyramid
+// category: 分布
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+// reference shape: 形：年齢を縦に取り、男女を左右に背中合わせの横棒で描く
+// reference use: 使う場面：年齢と性別の分布
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  c.line((60.0, 4.0), (60.0, 76.0), color="#9aa4b5")
+  ignore(c.rect(48.0, 6.0, 12.0, 8.0, width=1.0, color="#c2410c", fill="#fde5d6"))
+  ignore(c.rect(60.0, 6.0, 9.0, 8.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.rect(40.0, 16.0, 20.0, 8.0, width=1.0, color="#c2410c", fill="#fde5d6"))
+  ignore(c.rect(60.0, 16.0, 17.0, 8.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.rect(30.0, 26.0, 30.0, 8.0, width=1.0, color="#c2410c", fill="#fde5d6"))
+  ignore(c.rect(60.0, 26.0, 27.0, 8.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.rect(22.0, 36.0, 38.0, 8.0, width=1.0, color="#c2410c", fill="#fde5d6"))
+  ignore(c.rect(60.0, 36.0, 35.0, 8.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.rect(18.0, 46.0, 42.0, 8.0, width=1.0, color="#c2410c", fill="#fde5d6"))
+  ignore(c.rect(60.0, 46.0, 39.0, 8.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.rect(20.0, 56.0, 40.0, 8.0, width=1.0, color="#c2410c", fill="#fde5d6"))
+  ignore(c.rect(60.0, 56.0, 37.0, 8.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.rect(25.0, 66.0, 35.0, 8.0, width=1.0, color="#c2410c", fill="#fde5d6"))
+  ignore(c.rect(60.0, 66.0, 32.0, 8.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("Population pyramid"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

@@ -1,0 +1,38 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/108: PEST（PESTLE）
+// category: 数が無い論点
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+// reference shape: 形：政治、経済、社会、技術（法、環境）の枠を並べ、各枠に外部の要因と影響の大きさの印を置く
+// reference use: 使う場面：外部環境の抜け漏れを確認する
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  ignore(c.rect(6.0, 6.0, 34.0, 32.0, width=1.0, color="#9aa4b5", fill="#f8f9fb"))
+  ignore(c.circle(15.0, 16.0, 4.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.rect(44.0, 6.0, 34.0, 32.0, width=1.0, color="#9aa4b5", fill="#f8f9fb"))
+  ignore(c.circle(53.0, 16.0, 4.0, width=1.0, color="#c2410c", fill="#c2410c"))
+  ignore(c.rect(82.0, 6.0, 34.0, 32.0, width=1.0, color="#9aa4b5", fill="#f8f9fb"))
+  ignore(c.circle(91.0, 16.0, 4.0, width=1.0, color="#9aa4b5", fill="#d5dae2"))
+  ignore(c.rect(6.0, 42.0, 34.0, 32.0, width=1.0, color="#9aa4b5", fill="#f8f9fb"))
+  ignore(c.circle(15.0, 52.0, 4.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.rect(44.0, 42.0, 34.0, 32.0, width=1.0, color="#9aa4b5", fill="#f8f9fb"))
+  ignore(c.circle(53.0, 52.0, 4.0, width=1.0, color="#9aa4b5", fill="#d5dae2"))
+  ignore(c.rect(82.0, 42.0, 34.0, 32.0, width=1.0, color="#9aa4b5", fill="#f8f9fb"))
+  ignore(c.circle(91.0, 52.0, 4.0, width=1.0, color="#c2410c", fill="#c2410c"))
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("PEST（PESTLE）"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

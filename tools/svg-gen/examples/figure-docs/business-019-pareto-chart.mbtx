@@ -1,0 +1,35 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/019: Pareto chart
+// category: 順位
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+// reference shape: 形：値の大きい順の縦棒に、累積の割合の線を重ね、80%に目安の線を引く
+// reference use: 使う場面：売上、顧客、不良などが少数の項目に集中していることを示すとき
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  c.line((10.0, 70.0), (112.0, 70.0), width=1.0, color="#9aa4b5")
+  c.line((10.0, 6.0), (10.0, 70.0), width=1.0, color="#9aa4b5")
+  ignore(c.rect(14.0, 20.0, 16.0, 50.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.rect(34.0, 42.0, 16.0, 28.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.rect(54.0, 55.0, 16.0, 15.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.rect(74.0, 61.0, 16.0, 9.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.rect(94.0, 64.0, 16.0, 6.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.polyline([(22.0, 30.0), (42.0, 15.0), (62.0, 8.0), (82.0, 5.0), (102.0, 4.0)], color="#c2410c")
+  c.line((10.0, 14.0), (112.0, 14.0), dash=Some("3 2"), width=1.0, color="#9aa4b5")
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("Pareto chart"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

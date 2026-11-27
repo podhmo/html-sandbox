@@ -1,0 +1,55 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/112: ハーベイボール
+// category: 数が無い論点
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+// reference shape: 形：行に案や競合、列に観点を取り、マスに塗った割合が0から100%の円を置く
+// reference use: 使う場面：数値化しにくい評価を表で比べる
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  ignore(c.circle(32.0, 14.0, 6.0, width=1.0, color="#9aa4b5", fill="#fff"))
+  ignore(c.circle(32.0, 34.0, 6.0, width=1.0, color="#9aa4b5", fill="#fff"))
+  c.path("M32,34 L32,28 A6,6 0 0,1 38.0,34.0 Z", [], width=1.0, color="none", fill="#2563eb")
+  ignore(c.circle(32.0, 54.0, 6.0, width=1.0, color="#9aa4b5", fill="#fff"))
+  c.path("M32,54 L32,48 A6,6 0 0,1 32.0,60.0 Z", [], width=1.0, color="none", fill="#2563eb")
+  ignore(c.circle(32.0, 74.0, 6.0, width=1.0, color="#9aa4b5", fill="#fff"))
+  c.path("M32,74 L32,68 A6,6 0 1,1 26.0,74.0 Z", [], width=1.0, color="none", fill="#2563eb")
+  ignore(c.circle(58.0, 14.0, 6.0, width=1.0, color="#9aa4b5", fill="#fff"))
+  c.path("M58,14 L58,8 A6,6 0 0,1 58.0,20.0 Z", [], width=1.0, color="none", fill="#2563eb")
+  ignore(c.circle(58.0, 34.0, 6.0, width=1.0, color="#9aa4b5", fill="#fff"))
+  c.path("M58,34 L58,28 A6,6 0 1,1 52.0,34.0 Z", [], width=1.0, color="none", fill="#2563eb")
+  ignore(c.circle(58.0, 54.0, 6.0, width=1.0, color="#9aa4b5", fill="#fff"))
+  ignore(c.circle(58.0, 54.0, 6.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(58.0, 74.0, 6.0, width=1.0, color="#9aa4b5", fill="#fff"))
+  ignore(c.circle(84.0, 14.0, 6.0, width=1.0, color="#9aa4b5", fill="#fff"))
+  ignore(c.circle(84.0, 14.0, 6.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(84.0, 34.0, 6.0, width=1.0, color="#9aa4b5", fill="#fff"))
+  ignore(c.circle(84.0, 54.0, 6.0, width=1.0, color="#9aa4b5", fill="#fff"))
+  c.path("M84,54 L84,48 A6,6 0 0,1 90.0,54.0 Z", [], width=1.0, color="none", fill="#2563eb")
+  ignore(c.circle(84.0, 74.0, 6.0, width=1.0, color="#9aa4b5", fill="#fff"))
+  c.path("M84,74 L84,68 A6,6 0 0,1 84.0,80.0 Z", [], width=1.0, color="none", fill="#2563eb")
+  ignore(c.circle(110.0, 14.0, 6.0, width=1.0, color="#9aa4b5", fill="#fff"))
+  c.path("M110,14 L110,8 A6,6 0 0,1 116.0,14.0 Z", [], width=1.0, color="none", fill="#2563eb")
+  ignore(c.circle(110.0, 34.0, 6.0, width=1.0, color="#9aa4b5", fill="#fff"))
+  c.path("M110,34 L110,28 A6,6 0 0,1 110.0,40.0 Z", [], width=1.0, color="none", fill="#2563eb")
+  ignore(c.circle(110.0, 54.0, 6.0, width=1.0, color="#9aa4b5", fill="#fff"))
+  c.path("M110,54 L110,48 A6,6 0 1,1 104.0,54.0 Z", [], width=1.0, color="none", fill="#2563eb")
+  ignore(c.circle(110.0, 74.0, 6.0, width=1.0, color="#9aa4b5", fill="#fff"))
+  ignore(c.circle(110.0, 74.0, 6.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("ハーベイボール"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

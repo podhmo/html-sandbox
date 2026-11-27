@@ -1,0 +1,33 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/045: 製品ライフサイクル
+// category: 時間での変化
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+// reference shape: 形：売上と利益の山形の線を、導入・成長・成熟・衰退の4つの期間に区切る
+// reference use: 使う場面：製品の段階ごとに施策を変えるとき
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  c.line((10.0, 70.0), (112.0, 70.0), width=1.0, color="#9aa4b5")
+  c.line((10.0, 6.0), (10.0, 70.0), width=1.0, color="#9aa4b5")
+  c.line((30.0, 6.0), (30.0, 70.0), dash=Some("2 2"), width=1.0, color="#d5dae2")
+  c.line((55.0, 6.0), (55.0, 70.0), dash=Some("2 2"), width=1.0, color="#d5dae2")
+  c.line((88.0, 6.0), (88.0, 70.0), dash=Some("2 2"), width=1.0, color="#d5dae2")
+  c.polyline([(10.0, 69.0), (14.0, 69.0), (18.0, 68.0), (22.0, 67.0), (26.0, 65.0), (30.0, 63.0), (34.0, 59.0), (38.0, 55.0), (42.0, 50.0), (46.0, 44.0), (50.0, 37.0), (54.0, 30.0), (58.0, 24.0), (62.0, 19.0), (66.0, 16.0), (70.0, 15.0), (74.0, 16.0), (78.0, 19.0), (82.0, 24.0), (86.0, 30.0), (90.0, 37.0), (94.0, 44.0), (98.0, 50.0), (102.0, 55.0), (106.0, 59.0), (110.0, 63.0)], color="#2563eb")
+  c.polyline([(20.0, 78.0), (24.0, 77.0), (28.0, 77.0), (32.0, 75.0), (36.0, 73.0), (40.0, 70.0), (44.0, 66.0), (48.0, 61.0), (52.0, 56.0), (56.0, 50.0), (60.0, 45.0), (64.0, 41.0), (68.0, 40.0), (72.0, 41.0), (76.0, 45.0), (80.0, 50.0), (84.0, 56.0), (88.0, 61.0), (92.0, 66.0), (96.0, 70.0), (100.0, 73.0), (104.0, 75.0), (108.0, 77.0), (112.0, 77.0)], color="#15803d")
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("製品ライフサイクル"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

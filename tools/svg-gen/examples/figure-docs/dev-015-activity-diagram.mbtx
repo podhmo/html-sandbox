@@ -1,0 +1,46 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// dev/015: Activity diagram
+// category: 状態と手順
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/dev.html
+// reference shape: 形：Flowchart に、並行処理の分岐（フォーク）と合流（ジョイン）を示す太い線を足す
+// reference use: 使う場面：並行して進む処理と、待ち合わせ
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  ignore(c.circle(60.0, 6.0, 3.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  c.line((60.0, 9.0), (60.0, 16.0), width=1.2, color="#2563eb")
+  c.polygon([(60.0, 16.0), (58.0, 12.0), (62.0, 12.0)], width=1.0, color="#2563eb", fill="#2563eb")
+  ignore(c.rect(20.0, 16.0, 80.0, 3.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  c.line((36.0, 19.0), (36.0, 30.0), width=1.2, color="#2563eb")
+  c.polygon([(36.0, 30.0), (34.0, 26.0), (38.0, 26.0)], width=1.0, color="#2563eb", fill="#2563eb")
+  c.line((84.0, 19.0), (84.0, 30.0), width=1.2, color="#2563eb")
+  c.polygon([(84.0, 30.0), (82.0, 26.0), (86.0, 26.0)], width=1.0, color="#2563eb", fill="#2563eb")
+  ignore(c.rect(20.0, 30.0, 32.0, 12.0, rx=2.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.text(36.0, 38.0, "通知", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  ignore(c.rect(68.0, 30.0, 32.0, 12.0, rx=2.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.text(84.0, 38.0, "集計", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  c.line((36.0, 42.0), (36.0, 54.0), width=1.2, color="#2563eb")
+  c.polygon([(36.0, 54.0), (34.0, 50.0), (38.0, 50.0)], width=1.0, color="#2563eb", fill="#2563eb")
+  c.line((84.0, 42.0), (84.0, 54.0), width=1.2, color="#2563eb")
+  c.polygon([(84.0, 54.0), (82.0, 50.0), (86.0, 50.0)], width=1.0, color="#2563eb", fill="#2563eb")
+  ignore(c.rect(20.0, 54.0, 80.0, 3.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  c.line((60.0, 57.0), (60.0, 68.0), width=1.2, color="#2563eb")
+  c.polygon([(60.0, 68.0), (58.0, 64.0), (62.0, 64.0)], width=1.0, color="#2563eb", fill="#2563eb")
+  ignore(c.circle(60.0, 72.0, 4.0, width=1.0, color="#2563eb", fill="#fff"))
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("Activity diagram"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

@@ -1,0 +1,38 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// dev/038: Requirement diagram
+// category: 判断
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/dev.html
+// reference shape: 形：要求を四角にし、それを満たす部品と検証する試験を、関係名を書いた線で結ぶ
+// reference use: 使う場面：要求の追跡、試験の抜け
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  ignore(c.rect(40.0, 4.0, 40.0, 16.0, rx=2.0, width=1.0, color="#c2410c", fill="#fde5d6"))
+  c.text(60.0, 14.0, "要求", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  ignore(c.rect(6.0, 52.0, 34.0, 16.0, rx=2.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.text(23.0, 62.0, "部品", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  ignore(c.rect(80.0, 52.0, 34.0, 16.0, rx=2.0, width=1.0, color="#15803d", fill="#dcf3e3"))
+  c.text(97.0, 62.0, "試験", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  c.line((23.0, 52.0), (50.0, 20.0), width=1.2, color="#2563eb")
+  c.polygon([(50.0, 20.0), (49.0, 24.0), (46.0, 22.0)], width=1.0, color="#2563eb", fill="#2563eb")
+  c.line((97.0, 52.0), (70.0, 20.0), width=1.2, color="#2563eb")
+  c.polygon([(70.0, 20.0), (74.0, 22.0), (71.0, 24.0)], width=1.0, color="#2563eb", fill="#2563eb")
+  c.text(28.0, 38.0, "satisfies", anchor=@svg.Middle, size=5.0, color="#5d6778")
+  c.text(94.0, 38.0, "verifies", anchor=@svg.Middle, size=5.0, color="#5d6778")
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("Requirement diagram"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

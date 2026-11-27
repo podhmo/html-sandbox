@@ -1,0 +1,31 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/050: Treemap
+// category: 内訳
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+// reference shape: 形：四角を要素の大きさに比例した四角に分け、階層は入れ子にする
+// reference use: 使う場面：階層のある内訳
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  ignore(c.rect(8.0, 6.0, 62.0, 68.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.rect(70.0, 6.0, 44.0, 40.0, width=1.0, color="#15803d", fill="#dcf3e3"))
+  ignore(c.rect(70.0, 46.0, 22.0, 28.0, width=1.0, color="#c2410c", fill="#fde5d6"))
+  ignore(c.rect(92.0, 46.0, 22.0, 28.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.rect(8.0, 46.0, 30.0, 28.0, width=1.0, color="#2563eb", fill="#c6d8fb"))
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("Treemap"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

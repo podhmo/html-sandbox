@@ -1,0 +1,58 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/064: Isotype (pictogram)
+// category: 大きさ
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+// reference shape: 形：人などの絵を量の数だけ並べる
+// reference use: 使う場面：整数の量を身近に見せる
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  ignore(c.circle(16.0, 14.0, 4.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.rect(12.0, 19.0, 8.0, 10.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(28.0, 14.0, 4.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.rect(24.0, 19.0, 8.0, 10.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(40.0, 14.0, 4.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.rect(36.0, 19.0, 8.0, 10.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(52.0, 14.0, 4.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.rect(48.0, 19.0, 8.0, 10.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(64.0, 14.0, 4.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.rect(60.0, 19.0, 8.0, 10.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(76.0, 14.0, 4.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.rect(72.0, 19.0, 8.0, 10.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(88.0, 14.0, 4.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.rect(84.0, 19.0, 8.0, 10.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(100.0, 14.0, 4.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.rect(96.0, 19.0, 8.0, 10.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(16.0, 38.0, 4.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.rect(12.0, 43.0, 8.0, 10.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(28.0, 38.0, 4.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.rect(24.0, 43.0, 8.0, 10.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(40.0, 38.0, 4.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.rect(36.0, 43.0, 8.0, 10.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(52.0, 38.0, 4.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.rect(48.0, 43.0, 8.0, 10.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(64.0, 38.0, 4.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.rect(60.0, 43.0, 8.0, 10.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(16.0, 62.0, 4.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.rect(12.0, 67.0, 8.0, 10.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(28.0, 62.0, 4.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.rect(24.0, 67.0, 8.0, 10.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(40.0, 62.0, 4.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.rect(36.0, 67.0, 8.0, 10.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("Isotype (pictogram)"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

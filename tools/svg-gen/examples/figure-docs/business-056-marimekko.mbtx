@@ -1,0 +1,38 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/056: Marimekko
+// category: 内訳
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+// reference shape: 形：列の幅を市場の大きさ、列の中の積み上げの高さを構成比にして、市場ごとに並べる
+// reference use: 使う場面：市場の大きさとその中のシェアを1枚で比べる
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  ignore(c.rect(8.0, 6.0, 44.0, 26.0, width=1.0, color="#fff", fill="#dbe8fd"))
+  ignore(c.rect(8.0, 32.0, 44.0, 19.0, width=1.0, color="#fff", fill="#dcf3e3"))
+  ignore(c.rect(8.0, 51.0, 44.0, 13.0, width=1.0, color="#fff", fill="#fde5d6"))
+  ignore(c.rect(8.0, 64.0, 44.0, 6.0, width=1.0, color="#fff", fill="#d5dae2"))
+  ignore(c.rect(52.0, 6.0, 34.0, 13.0, width=1.0, color="#fff", fill="#dbe8fd"))
+  ignore(c.rect(52.0, 19.0, 34.0, 32.0, width=1.0, color="#fff", fill="#dcf3e3"))
+  ignore(c.rect(52.0, 51.0, 34.0, 13.0, width=1.0, color="#fff", fill="#fde5d6"))
+  ignore(c.rect(52.0, 64.0, 34.0, 6.0, width=1.0, color="#fff", fill="#d5dae2"))
+  ignore(c.rect(86.0, 6.0, 26.0, 19.0, width=1.0, color="#fff", fill="#dbe8fd"))
+  ignore(c.rect(86.0, 25.0, 26.0, 13.0, width=1.0, color="#fff", fill="#dcf3e3"))
+  ignore(c.rect(86.0, 38.0, 26.0, 26.0, width=1.0, color="#fff", fill="#fde5d6"))
+  ignore(c.rect(86.0, 64.0, 26.0, 6.0, width=1.0, color="#fff", fill="#d5dae2"))
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("Marimekko"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

@@ -1,0 +1,32 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/090: 顧客の旅
+// category: 数が無い論点
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+// reference shape: 形：横に段階を並べ、各段階の行動と、満足と不満の上下を線で描く
+// reference use: 使う場面：段階ごとの体験と課題（不満）
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  c.line((8.0, 40.0), (112.0, 40.0), color="#9aa4b5")
+  ignore(c.circle(15.0, 66.0, 5.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(45.0, 66.0, 5.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(75.0, 66.0, 5.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(105.0, 66.0, 5.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.polyline([(15.0, 30.0), (45.0, 18.0), (75.0, 58.0), (105.0, 22.0)], color="#c2410c")
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("顧客の旅"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

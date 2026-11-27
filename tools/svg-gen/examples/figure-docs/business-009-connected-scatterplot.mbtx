@@ -1,0 +1,35 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/009: Connected scatterplot
+// category: 相関
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+// reference shape: 形：散布図の点を時間の順に線で結ぶ
+// reference use: 使う場面：2つの値の関係が時間でどう動いたか
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  c.line((10.0, 70.0), (112.0, 70.0), width=1.0, color="#9aa4b5")
+  c.line((10.0, 6.0), (10.0, 70.0), width=1.0, color="#9aa4b5")
+  c.polyline([(20.0, 60.0), (35.0, 50.0), (45.0, 55.0), (65.0, 35.0), (80.0, 40.0), (100.0, 15.0)], color="#2563eb")
+  ignore(c.circle(20.0, 60.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(35.0, 50.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(45.0, 55.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(65.0, 35.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(80.0, 40.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(100.0, 15.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("Connected scatterplot"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

@@ -1,0 +1,29 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/089: 漏斗
+// category: 数が無い論点
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+// reference shape: 形：上ほど広い台形を重ね、段階ごとに数が減る様子を描く
+// reference use: 使う場面：絞り込みと離脱
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  c.polygon([(8.0, 6.0), (112.0, 6.0), (96.0, 26.0), (24.0, 26.0)], width=1.0, color="#2563eb", fill="#dbe8fd")
+  c.polygon([(26.0, 29.0), (94.0, 29.0), (80.0, 49.0), (40.0, 49.0)], width=1.0, color="#2563eb", fill="#dbe8fd")
+  c.polygon([(42.0, 52.0), (78.0, 52.0), (70.0, 72.0), (50.0, 72.0)], width=1.0, color="#15803d", fill="#dcf3e3")
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("漏斗"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

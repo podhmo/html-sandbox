@@ -1,0 +1,37 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/070: Flow map
+// category: 地理
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+// reference shape: 形：地図の上で、出発地から到着地へ量に比例した太さの線を引く
+// reference use: 使う場面：地図の上の移動
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  ignore(c.rect(15.0, 8.0, 30.0, 22.0, width=1.0, color="#fff", fill="#f1f3f6"))
+  ignore(c.rect(45.0, 8.0, 30.0, 22.0, width=1.0, color="#fff", fill="#f1f3f6"))
+  ignore(c.rect(75.0, 8.0, 30.0, 22.0, width=1.0, color="#fff", fill="#f1f3f6"))
+  ignore(c.rect(15.0, 30.0, 30.0, 22.0, width=1.0, color="#fff", fill="#f1f3f6"))
+  ignore(c.rect(45.0, 30.0, 30.0, 22.0, width=1.0, color="#fff", fill="#f1f3f6"))
+  ignore(c.rect(75.0, 30.0, 30.0, 22.0, width=1.0, color="#fff", fill="#f1f3f6"))
+  ignore(c.rect(15.0, 52.0, 30.0, 22.0, width=1.0, color="#fff", fill="#f1f3f6"))
+  ignore(c.rect(45.0, 52.0, 30.0, 22.0, width=1.0, color="#fff", fill="#f1f3f6"))
+  ignore(c.rect(75.0, 52.0, 30.0, 22.0, width=1.0, color="#fff", fill="#f1f3f6"))
+  c.path("M25,20 Q60,0 95,40", [], width=5.0, color="#2563eb")
+  c.path("M25,20 Q40,60 60,62", [], width=2.0, color="#c2410c")
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("Flow map"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

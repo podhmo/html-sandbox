@@ -1,0 +1,75 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/074: Dot density
+// category: 地理
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+// reference shape: 形：一つひとつの出来事や場所を地図の上の点で置く
+// reference use: 使う場面：出来事の場所と集まり方
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  ignore(c.rect(15.0, 8.0, 30.0, 22.0, width=1.0, color="#fff", fill="#f1f3f6"))
+  ignore(c.rect(45.0, 8.0, 30.0, 22.0, width=1.0, color="#fff", fill="#f1f3f6"))
+  ignore(c.rect(75.0, 8.0, 30.0, 22.0, width=1.0, color="#fff", fill="#f1f3f6"))
+  ignore(c.rect(15.0, 30.0, 30.0, 22.0, width=1.0, color="#fff", fill="#f1f3f6"))
+  ignore(c.rect(45.0, 30.0, 30.0, 22.0, width=1.0, color="#fff", fill="#f1f3f6"))
+  ignore(c.rect(75.0, 30.0, 30.0, 22.0, width=1.0, color="#fff", fill="#f1f3f6"))
+  ignore(c.rect(15.0, 52.0, 30.0, 22.0, width=1.0, color="#fff", fill="#f1f3f6"))
+  ignore(c.rect(45.0, 52.0, 30.0, 22.0, width=1.0, color="#fff", fill="#f1f3f6"))
+  ignore(c.rect(75.0, 52.0, 30.0, 22.0, width=1.0, color="#fff", fill="#f1f3f6"))
+  ignore(c.circle(27.0, 39.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(33.0, 22.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(26.0, 29.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(62.0, 30.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(23.0, 43.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(46.0, 45.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(63.0, 33.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(43.0, 34.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(28.0, 43.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(66.0, 37.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(41.0, 32.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(33.0, 25.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(39.0, 25.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(38.0, 16.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(50.0, 36.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(28.0, 7.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(45.0, 48.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(34.0, 29.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(36.0, 43.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(31.0, 47.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(40.0, 46.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(45.0, 32.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(23.0, 27.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(41.0, 43.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(49.0, 27.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(51.0, 47.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(43.0, 30.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(39.0, 45.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(53.0, 24.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(51.0, 29.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(34.0, 50.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(57.0, 26.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(46.0, 41.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(35.0, 34.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(55.0, 14.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(50.0, 44.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(53.0, 19.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(50.0, 25.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(54.0, 42.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(48.0, 26.0, 2.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("Dot density"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

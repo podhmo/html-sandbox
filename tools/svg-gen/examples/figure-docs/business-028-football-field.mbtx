@@ -1,0 +1,31 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/028: Football field
+// category: 分布
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+// reference shape: 形：評価の方法（類似会社、類似取引、DCF など）ごとに、下限から上限の浮いた横棒を並べ、提示額を縦線で重ねる
+// reference use: 使う場面：企業価値や価格の幅を方法ごとに比べる
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  ignore(c.rect(25.0, 8.0, 45.0, 10.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.rect(40.0, 24.0, 55.0, 10.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.rect(30.0, 40.0, 55.0, 10.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.rect(50.0, 56.0, 30.0, 10.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.line((66.0, 4.0), (66.0, 74.0), width=2.0, color="#c2410c")
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("Football field"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

@@ -7,8 +7,9 @@
 MOON ?= moon
 RSVG ?= rsvg-convert
 FIGS := $(patsubst examples/fig-%.mbtx,build/fig-%.svg,$(wildcard examples/fig-*.mbtx))
+FIGURE_DOC_SVGS := $(patsubst examples/figure-docs/%.mbtx,build/figure-docs/%.svg,$(wildcard examples/figure-docs/*.mbtx))
 
-.PHONY: all svg check png clean vendor help
+.PHONY: all svg check png clean vendor help figure-docs figure-docs-generate figure-docs-svg figure-docs-check
 
 all: svg check png
 
@@ -29,6 +30,22 @@ build/fig-%.svg: examples/fig-%.mbtx vendor
 ## check: lint every SVG in build/ (viewBox, ids, banned constructs)
 check: svg
 	$(MOON) run check.mbtx build/*.svg
+
+## figure-docs: transcribe all upstream figure-docs probes and lint them
+figure-docs: figure-docs-svg figure-docs-check
+
+figure-docs-generate:
+	python3 examples/figure-docs/generate.py
+
+figure-docs-svg: vendor $(FIGURE_DOC_SVGS)
+
+build/figure-docs/%.svg: examples/figure-docs/%.mbtx vendor
+	@mkdir -p build/figure-docs
+	$(MOON) run $< > $@.tmp
+	mv $@.tmp $@
+
+figure-docs-check: figure-docs-svg
+	$(MOON) run check.mbtx build/figure-docs/*.svg
 
 ## png: rasterize every SVG for visual inspection
 png: $(FIGS:.svg=.png)

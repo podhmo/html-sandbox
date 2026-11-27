@@ -1,0 +1,38 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/043: Small multiples
+// category: 時間での変化
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+// reference shape: 形：同じ軸と同じ目盛りの小さな図を、地域や商品ごとに格子状に並べる
+// reference use: 使う場面：線が多すぎて1枚で読めない比較を分ける
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  ignore(c.rect(6.0, 4.0, 34.0, 34.0, width=1.0, color="#d5dae2"))
+  c.polyline([(8.0, 34.0), (14.0, 31.0), (20.0, 28.0), (26.0, 25.0), (32.0, 22.0), (38.0, 19.0)], width=1.2, color="#2563eb")
+  ignore(c.rect(6.0, 42.0, 34.0, 34.0, width=1.0, color="#d5dae2"))
+  c.polyline([(8.0, 72.0), (14.0, 66.0), (20.0, 60.0), (26.0, 54.0), (32.0, 70.0), (38.0, 64.0)], width=1.2, color="#2563eb")
+  ignore(c.rect(44.0, 4.0, 34.0, 34.0, width=1.0, color="#d5dae2"))
+  c.polyline([(46.0, 34.0), (52.0, 28.0), (58.0, 22.0), (64.0, 16.0), (70.0, 32.0), (76.0, 26.0)], width=1.2, color="#2563eb")
+  ignore(c.rect(44.0, 42.0, 34.0, 34.0, width=1.0, color="#d5dae2"))
+  c.polyline([(46.0, 72.0), (52.0, 63.0), (58.0, 54.0), (64.0, 67.0), (70.0, 58.0), (76.0, 71.0)], width=1.2, color="#2563eb")
+  ignore(c.rect(82.0, 4.0, 34.0, 34.0, width=1.0, color="#d5dae2"))
+  c.polyline([(84.0, 34.0), (90.0, 25.0), (96.0, 16.0), (102.0, 29.0), (108.0, 20.0), (114.0, 33.0)], width=1.2, color="#c2410c")
+  ignore(c.rect(82.0, 42.0, 34.0, 34.0, width=1.0, color="#d5dae2"))
+  c.polyline([(84.0, 72.0), (90.0, 60.0), (96.0, 70.0), (102.0, 58.0), (108.0, 68.0), (114.0, 56.0)], width=1.2, color="#2563eb")
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("Small multiples"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

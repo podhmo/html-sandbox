@@ -1,0 +1,29 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/022: Violin plot
+// category: 分布
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+// reference shape: 形：分布の形を左右対称の膨らみで描く
+// reference use: 使う場面：平均でまとめられない複雑な分布
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  c.path("M25,6 C40,25 30,45 38,55 S30,70 25,74 C20,70 12,60 12,55 S10,25 25,6Z", [], width=1.0, color="#2563eb", fill="#dbe8fd")
+  c.path("M60,6 C75,25 65,45 73,55 S65,70 60,74 C55,70 47,60 47,55 S45,25 60,6Z", [], width=1.0, color="#2563eb", fill="#dbe8fd")
+  c.path("M95,6 C110,25 100,45 108,55 S100,70 95,74 C90,70 82,60 82,55 S80,25 95,6Z", [], width=1.0, color="#2563eb", fill="#dbe8fd")
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("Violin plot"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

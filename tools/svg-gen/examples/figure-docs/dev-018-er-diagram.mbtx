@@ -1,0 +1,45 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// dev/018: ER diagram
+// category: データ
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/dev.html
+// reference shape: 形：テーブルをカラムが並ぶ四角で描き、関係を1対多の記号（カラスの足）付きの線で結ぶ
+// reference use: 使う場面：テーブルの設計、移行の範囲
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  ignore(c.rect(6.0, 24.0, 34.0, 30.0, width=1.0, color="#2563eb", fill="#fff"))
+  ignore(c.rect(6.0, 24.0, 34.0, 8.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.text(23.0, 30.0, "users", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  c.line((10.0, 39.0), (34.0, 39.0), width=2.0, color="#d5dae2")
+  c.line((10.0, 46.0), (30.0, 46.0), width=2.0, color="#d5dae2")
+  ignore(c.rect(80.0, 6.0, 34.0, 30.0, width=1.0, color="#2563eb", fill="#fff"))
+  ignore(c.rect(80.0, 6.0, 34.0, 8.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.text(97.0, 12.0, "orders", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  c.line((84.0, 21.0), (108.0, 21.0), width=2.0, color="#d5dae2")
+  c.line((84.0, 28.0), (104.0, 28.0), width=2.0, color="#d5dae2")
+  ignore(c.rect(80.0, 46.0, 34.0, 30.0, width=1.0, color="#2563eb", fill="#fff"))
+  ignore(c.rect(80.0, 46.0, 34.0, 8.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.text(97.0, 52.0, "items", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  c.line((84.0, 61.0), (108.0, 61.0), width=2.0, color="#d5dae2")
+  c.line((84.0, 68.0), (104.0, 68.0), width=2.0, color="#d5dae2")
+  c.line((40.0, 36.0), (80.0, 20.0), color="#2563eb")
+  c.line((97.0, 36.0), (97.0, 46.0), color="#2563eb")
+  c.line((74.0, 18.0), (80.0, 14.0), width=1.0, color="#2563eb")
+  c.line((74.0, 18.0), (80.0, 24.0), width=1.0, color="#2563eb")
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("ER diagram"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

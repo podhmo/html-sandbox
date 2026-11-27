@@ -1,0 +1,34 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/031: Line + column
+// category: 時間での変化
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+// reference shape: 形：量を棒、率を線で時間の軸に重ねる
+// reference use: 使う場面：量と率の時間での変化
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  c.line((10.0, 70.0), (112.0, 70.0), width=1.0, color="#9aa4b5")
+  c.line((10.0, 6.0), (10.0, 70.0), width=1.0, color="#9aa4b5")
+  ignore(c.rect(14.0, 45.0, 14.0, 25.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.rect(34.0, 40.0, 14.0, 30.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.rect(54.0, 50.0, 14.0, 20.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.rect(74.0, 35.0, 14.0, 35.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.rect(94.0, 30.0, 14.0, 40.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.polyline([(21.0, 30.0), (41.0, 40.0), (61.0, 50.0), (81.0, 35.0), (101.0, 25.0)], color="#c2410c")
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("Line + column"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

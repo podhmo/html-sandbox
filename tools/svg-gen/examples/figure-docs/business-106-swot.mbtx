@@ -1,0 +1,34 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/106: SWOT
+// category: 数が無い論点
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+// reference shape: 形：2x2の枠に、内部の強みと弱み、外部の機会と脅威を書く
+// reference use: 使う場面：今の位置づけを内と外、良い面と悪い面で整理する
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  ignore(c.rect(8.0, 6.0, 52.0, 34.0, width=1.0, color="none", fill="#dcf3e3"))
+  ignore(c.rect(8.0, 42.0, 52.0, 34.0, width=1.0, color="none", fill="#dbe8fd"))
+  ignore(c.rect(62.0, 6.0, 52.0, 34.0, width=1.0, color="none", fill="#fde5d6"))
+  ignore(c.rect(62.0, 42.0, 52.0, 34.0, width=1.0, color="none", fill="#d5dae2"))
+  c.text(34.0, 26.0, "S", anchor=@svg.Middle, size=8.0, color="#5d6778")
+  c.text(88.0, 26.0, "W", anchor=@svg.Middle, size=8.0, color="#5d6778")
+  c.text(34.0, 62.0, "O", anchor=@svg.Middle, size=8.0, color="#5d6778")
+  c.text(88.0, 62.0, "T", anchor=@svg.Middle, size=8.0, color="#5d6778")
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("SWOT"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

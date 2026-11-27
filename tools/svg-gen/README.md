@@ -32,8 +32,17 @@ gets a small throwaway generator sharing a thin helper.
   - `rightOf`/`leftOf`/`above`/`below` place shapes relative to each
     other; the canvas derives the `viewBox` from everything drawn
     (including estimated text extents), so nothing falls outside it.
-  - Output is `currentColor` + plain `<text>`, so figures follow the
-    site's light/dark theme and stay searchable.
+    `render(..., viewbox=Some(...))` keeps an explicit fixed coordinate
+    system when a figure needs one (small multiples, transcription
+    probes).
+  - `rect`/`circle`/`ellipse`/`polyline`/`polygon`/`path` cover the
+    low-level SVG marks used by diagram probes, with independent stroke,
+    fill, and opacity controls. `box` remains the higher-level labelled
+    node primitive.
+  - Output is `currentColor` + plain `<text>` by default, so figures
+    follow the site's light/dark theme and stay searchable. Text and
+    marks can opt into explicit colors when a probe or categorical
+    figure needs them.
 - `chart.mbt` — the data-figure half (the "chart-gen" seed from issue
   #113's figure guideline, see `docs/sketch/ja/figure-guidelines.md`).
   `Scale` maps data to pixels (linear or log, with nice ticks);
@@ -57,6 +66,11 @@ gets a small throwaway generator sharing a thin helper.
   Generators can also `abort` spatial claims the
   figure depends on ("these three boxes share the row") so the claim
   fails loudly at build time instead of silently in the picture.
+- `examples/figure-docs/` — mechanical transcription probes for the
+  112 business and 38 development reference figures from
+  `u-ichi/agent-plugins`. `make figure-docs` builds and lints them;
+  see that directory's README for why their literal colors are
+  intentional.
 - `Makefile` — `make all` runs every `examples/fig-*.mbtx`, lints
   `build/*.svg`, and rasterizes them with `rsvg-convert`. The `moon`
   toolchain runs the generators; `vendor.sh` installs `podhmo/svg-gen`

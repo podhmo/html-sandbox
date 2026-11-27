@@ -1,0 +1,31 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/095: 価値の連鎖
+// category: 数が無い論点
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+// reference shape: 形：事業の工程を左から右へ四角で並べ、価値や費用が生まれる工程に印を付ける
+// reference use: 使う場面：どの工程で価値と費用が生まれるか
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  ignore(c.rect(4.0, 25.0, 26.0, 30.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.rect(33.0, 25.0, 26.0, 30.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.rect(62.0, 25.0, 26.0, 30.0, width=1.0, color="#15803d", fill="#dcf3e3"))
+  ignore(c.rect(91.0, 25.0, 26.0, 30.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.polygon([(120.0, 40.0), (116.0, 34.0), (116.0, 46.0)], width=1.0, color="#2563eb", fill="#2563eb")
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("価値の連鎖"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

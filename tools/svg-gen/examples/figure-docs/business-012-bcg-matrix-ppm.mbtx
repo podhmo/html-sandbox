@@ -1,0 +1,33 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/012: BCG matrix（PPM）
+// category: 相関
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+// reference shape: 形：横軸に相対市場シェア（左が高い、対数）、縦軸に市場成長率を取り、事業を売上に比例した面積の円で4つの区画に置く
+// reference use: 使う場面：事業ごとに投資を増やすか、回収するか、やめるか
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  c.line((60.0, 4.0), (60.0, 76.0), color="#9aa4b5")
+  c.line((8.0, 40.0), (112.0, 40.0), color="#9aa4b5")
+  ignore(c.circle(35.0, 20.0, 10.0, width=1.0, color="#15803d", fill="#dcf3e3"))
+  ignore(c.circle(88.0, 22.0, 6.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(30.0, 58.0, 13.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(92.0, 62.0, 4.0, width=1.0, color="#9aa4b5", fill="#d5dae2"))
+  c.text(60.0, 79.0, "← 相対シェア 高", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("BCG matrix（PPM）"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

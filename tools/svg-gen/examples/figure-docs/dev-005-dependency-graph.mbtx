@@ -1,0 +1,43 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// dev/005: Dependency graph
+// category: 構造
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/dev.html
+// reference shape: 形：モジュールを点、依存を矢印にし、循環している矢印だけ色を変える
+// reference use: 使う場面：循環依存の把握、修正範囲の特定
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  ignore(c.circle(16.0, 40.0, 7.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(46.0, 16.0, 7.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(46.0, 64.0, 7.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(80.0, 40.0, 7.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(106.0, 16.0, 7.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.line((23.0, 36.0), (40.0, 20.0), width=1.2, color="#2563eb")
+  c.polygon([(40.0, 20.0), (39.0, 24.0), (36.0, 21.0)], width=1.0, color="#2563eb", fill="#2563eb")
+  c.line((23.0, 44.0), (40.0, 60.0), width=1.2, color="#2563eb")
+  c.polygon([(40.0, 60.0), (36.0, 59.0), (39.0, 56.0)], width=1.0, color="#2563eb", fill="#2563eb")
+  c.line((53.0, 20.0), (73.0, 36.0), width=1.2, color="#2563eb")
+  c.polygon([(73.0, 36.0), (69.0, 35.0), (71.0, 32.0)], width=1.0, color="#2563eb", fill="#2563eb")
+  c.line((73.0, 44.0), (53.0, 60.0), width=1.2, color="#c2410c")
+  c.polygon([(53.0, 60.0), (55.0, 56.0), (57.0, 59.0)], width=1.0, color="#c2410c", fill="#c2410c")
+  c.line((46.0, 57.0), (46.0, 23.0), width=1.2, color="#c2410c")
+  c.polygon([(46.0, 23.0), (48.0, 27.0), (44.0, 27.0)], width=1.0, color="#c2410c", fill="#c2410c")
+  c.line((87.0, 36.0), (100.0, 20.0), width=1.2, color="#2563eb")
+  c.polygon([(100.0, 20.0), (99.0, 24.0), (96.0, 22.0)], width=1.0, color="#2563eb", fill="#2563eb")
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("Dependency graph"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

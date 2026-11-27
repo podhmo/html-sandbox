@@ -1,0 +1,45 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/024: Dot strip plot
+// category: 分布
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+// reference shape: 形：1本の線の上に、一つひとつの値を点で置く
+// reference use: 使う場面：分布の中の個々の値
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  c.line((10.0, 40.0), (112.0, 40.0), color="#d5dae2")
+  ignore(c.circle(56.0, 40.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(25.0, 40.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(39.0, 40.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(85.0, 40.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(25.0, 40.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(79.0, 40.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(71.0, 40.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(59.0, 40.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(73.0, 40.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(74.0, 40.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(84.0, 40.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(61.0, 40.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(54.0, 40.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(54.0, 40.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(47.0, 40.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(64.0, 40.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(51.0, 40.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(84.0, 40.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("Dot strip plot"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

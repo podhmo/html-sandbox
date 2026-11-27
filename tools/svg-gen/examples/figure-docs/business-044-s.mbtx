@@ -1,0 +1,33 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/044: S字の普及曲線
+// category: 時間での変化
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+// reference shape: 形：横軸に時間、縦軸に累積の採用率を取ったS字の線に、採用者の区分（初期採用者から遅滞者まで）の帯を重ねる
+// reference use: 使う場面：新しい商品や技術がどの段階まで広がったか
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  ignore(c.rect(10.0, 6.0, 20.0, 64.0, width=1.0, color="none", fill="#f3f5f8"))
+  ignore(c.rect(30.0, 6.0, 25.0, 64.0, width=1.0, color="none", fill="#eef3fd"))
+  ignore(c.rect(55.0, 6.0, 30.0, 64.0, width=1.0, color="none", fill="#f3f5f8"))
+  ignore(c.rect(85.0, 6.0, 27.0, 64.0, width=1.0, color="none", fill="#eef3fd"))
+  c.line((10.0, 70.0), (112.0, 70.0), width=1.0, color="#9aa4b5")
+  c.line((10.0, 6.0), (10.0, 70.0), width=1.0, color="#9aa4b5")
+  c.polyline([(10.0, 70.0), (14.0, 70.0), (18.0, 69.0), (22.0, 69.0), (26.0, 69.0), (30.0, 68.0), (34.0, 67.0), (38.0, 65.0), (42.0, 63.0), (46.0, 59.0), (50.0, 55.0), (54.0, 49.0), (58.0, 42.0), (62.0, 36.0), (66.0, 29.0), (70.0, 23.0), (74.0, 19.0), (78.0, 15.0), (82.0, 13.0), (86.0, 11.0), (90.0, 10.0), (94.0, 9.0), (98.0, 9.0), (102.0, 9.0), (106.0, 8.0), (110.0, 8.0)], color="#2563eb")
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("S字の普及曲線"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

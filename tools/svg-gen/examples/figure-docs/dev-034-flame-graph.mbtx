@@ -1,0 +1,35 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// dev/034: Flame graph
+// category: 性能と信頼性
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/dev.html
+// reference shape: 形：呼び出し元を下、呼び出し先を上に積み、幅を CPU 時間（または消費量）にする
+// reference use: 使う場面：CPU やメモリを多く消費している関数の特定
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  ignore(c.rect(4.0, 70.0, 112.0, 12.0, width=1.0, color="#fff", fill="#fde5d6"))
+  ignore(c.rect(4.0, 57.0, 70.0, 12.0, width=1.0, color="#fff", fill="#fbd0b4"))
+  ignore(c.rect(74.0, 57.0, 42.0, 12.0, width=1.0, color="#fff", fill="#fbd0b4"))
+  ignore(c.rect(4.0, 44.0, 40.0, 12.0, width=1.0, color="#fff", fill="#f8b48a"))
+  ignore(c.rect(44.0, 44.0, 30.0, 12.0, width=1.0, color="#fff", fill="#f8b48a"))
+  ignore(c.rect(74.0, 44.0, 30.0, 12.0, width=1.0, color="#fff", fill="#f8b48a"))
+  ignore(c.rect(4.0, 31.0, 30.0, 12.0, width=1.0, color="#fff", fill="#f19763"))
+  ignore(c.rect(74.0, 31.0, 20.0, 12.0, width=1.0, color="#fff", fill="#f19763"))
+  ignore(c.rect(8.0, 18.0, 18.0, 12.0, width=1.0, color="#fff", fill="#e5793e"))
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("Flame graph"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}
