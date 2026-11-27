@@ -1,12 +1,13 @@
 ---
 import {
   "podhmo/svg-gen" @svg,
-  "moonbitlang/core/env" @env,
-  "moonbitlang/core/string" @string,
-  "moonbitlang/core/double" @double,
-  "moonbitlang/async/fs" @fs,
+  "moonbitlang/core/env",
+  "moonbitlang/core/string",
+  "moonbitlang/core/double",
+  "moonbitlang/async/fs",
 }
 ---
+
 // check.mbtx -- lint an SVG for the breakage patterns recorded in
 // slops/2026-10-27-writing-slops.md/03-svg-pitfalls.md. Port of
 // check.ts; same checks, same FAIL/WARN levels, exit 1 on FAIL.
@@ -27,8 +28,7 @@ import {
 //
 // Usage: moon run check.mbtx -- file.svg [more.svg ...]
 
-
-
+///|
 #derive(Debug)
 enum Level {
   Fail
@@ -44,10 +44,10 @@ fn level_name(l : Level) -> String {
 }
 
 ///|
-let fails : Ref[Int] = Ref(0)
+let fails : Ref[Int32] = Ref(0)
 
 ///|
-let warns : Ref[Int] = Ref(0)
+let warns : Ref[Int32] = Ref(0)
 
 ///|
 fn report(level : Level, file : String, msg : String) -> Unit {
@@ -58,15 +58,22 @@ fn report(level : Level, file : String, msg : String) -> Unit {
   println("\{level_name(level)} \{file}: \{msg}")
 }
 
-///| The core regex dialect uses POSIX classes; `\w`/`[\w:-]` become
+///|
+/// The core regex dialect uses POSIX classes; `\w`/`[\w:-]` become
 /// `[[:word:]]` / `[[:word:]:\\-]`.
-let tag_re : @string.Regex = @string.Regex::unsafe_from_string("<(/?)([[:word:]][[:word:]:\\-]*)([^<>]*)/?>")
+let tag_re : @string.Regex = @string.Regex::unsafe_from_string(
+  "<(/?)([[:word:]][[:word:]:\\-]*)([^<>]*)/?>",
+)
 
 ///|
-let attr_re : @string.Regex = @string.Regex::unsafe_from_string("([[:word:]:\\-]+)=\"([^\"]*)\"")
+let attr_re : @string.Regex = @string.Regex::unsafe_from_string(
+  "([[:word:]:\\-]+)=\"([^\"]*)\"",
+)
 
 ///|
-let num_re : @string.Regex = @string.Regex::unsafe_from_string("-?[0-9]*\\.?[0-9]+([eE]-?[0-9]+)?")
+let num_re : @string.Regex = @string.Regex::unsafe_from_string(
+  "-?[0-9]*\\.?[0-9]+([eE]-?[0-9]+)?",
+)
 
 ///|
 let path_tok_re : @string.Regex = @string.Regex::unsafe_from_string(
@@ -98,54 +105,122 @@ fn nums(s : StringView) -> Array[Double] {
   out
 }
 
-///| Collect the coordinate pairs a `d` attribute uses. Only the
-/// absolute commands this kit emits (M, L, H, V, Z) are understood;
-/// anything else is reported as unchecked rather than silently
-/// misparsed. A point may hold just one coordinate (H/V commands).
+///|
+/// Collect the coordinate pairs a `d` attribute uses. M/L/H/V/Z and
+/// the curve commands C/S/Q/T/A are understood in absolute and relative
+/// forms. Bézier control points are included because the curve is inside
+/// their convex hull; arc endpoints are included, while arc interiors are
+/// still approximated only by the emitting builder's own sampled bounds.
 fn path_points(d : StringView) -> (Array[(Double?, Double?)], Char?) {
   let pts : Array[(Double?, Double?)] = []
-  let pending : Array[Double] = []
+  let tokens : Array[String] = []
+  for m in path_tok_re.find(d) {
+    tokens.push(m.content().to_owned())
+  }
   let mut bad : Char? = None
   let mut cmd = ' '
-  for m in path_tok_re.find(d) {
-    let t = m.content()
-    let is_letter = t.length() == 1 && t.get_char(0) is Some(c) && c.is_ascii_alphabetic()
-    if is_letter {
-      let c = t.get_char(0).unwrap()
-      if "MLHVZ".contains(c.to_string()) {
-        ()
-      } else if bad is None {
-        bad = Some(c)
-      }
+  let mut cur = (0.0, 0.0)
+  let mut start = (0.0, 0.0)
+  let mut moved = false
+  let mut i = 0
+  let num_at = fn(j : Int32) -> Double {
+    @string.parse_double(tokens[j]) catch {
+      _ => abort("path_points: unparseable number")
+    }
+  }
+  let point = fn(x : Double, y : Double) -> Unit {
+    pts.push((Some(x), Some(y)))
+  }
+  while i < tokens.length() {
+    let t = tokens[i]
+    if t.length() == 1 && t.get_char(0) is Some(c) && c.is_ascii_alphabetic() {
       cmd = c
-      continue
-    }
-    let n = @string.parse_double(t) catch {
-      _ => continue
-    }
-    if cmd == 'H' || cmd == 'V' {
-      if cmd == 'H' {
-        pts.push((Some(n), None))
-      } else {
-        pts.push((None, Some(n)))
+      i += 1
+      if cmd == 'Z' || cmd == 'z' {
+        cur = start
       }
       continue
     }
-    if cmd == 'M' || cmd == 'L' {
-      pending.push(n)
-      if pending.length() == 2 {
-        pts.push((Some(pending[0]), Some(pending[1])))
-        pending.clear()
-      }
-      continue
+    let rel = cmd.is_ascii_lowercase()
+    let arity = match cmd {
+      'M' | 'm' | 'L' | 'l' | 'T' | 't' => 2
+      'H' | 'h' | 'V' | 'v' => 1
+      'S' | 's' | 'Q' | 'q' => 4
+      'C' | 'c' => 6
+      'A' | 'a' => 7
+      'Z' | 'z' => 0
+      _ => -1
     }
-    if cmd.is_ascii_lowercase() {
+    if arity < 0 {
       if bad is None {
         bad = Some(cmd)
       }
-    } else if bad is None && !"MLHV".contains(cmd.to_string()) {
-      bad = Some(cmd)
+      break
     }
+    if arity == 0 {
+      continue
+    }
+    if i + arity > tokens.length() {
+      if bad is None {
+        bad = Some(cmd)
+      }
+      break
+    }
+    let vx = fn(v : Double) -> Double { if rel { cur.0 + v } else { v } }
+    let vy = fn(v : Double) -> Double { if rel { cur.1 + v } else { v } }
+    match cmd {
+      'M' | 'm' | 'L' | 'l' => {
+        let x = vx(num_at(i))
+        let y = vy(num_at(i + 1))
+        point(x, y)
+        cur = (x, y)
+        if cmd == 'M' || cmd == 'm' {
+          if !moved {
+            start = cur
+            moved = true
+          }
+        }
+      }
+      'T' | 't' => {
+        let x = vx(num_at(i))
+        let y = vy(num_at(i + 1))
+        point(x, y)
+        cur = (x, y)
+      }
+      'H' | 'h' => {
+        let x = vx(num_at(i))
+        point(x, cur.1)
+        cur = (x, cur.1)
+      }
+      'V' | 'v' => {
+        let y = vy(num_at(i))
+        point(cur.0, y)
+        cur = (cur.0, y)
+      }
+      'C' | 'c' => {
+        let c1 = (vx(num_at(i)), vy(num_at(i + 1)))
+        let c2 = (vx(num_at(i + 2)), vy(num_at(i + 3)))
+        let p = (vx(num_at(i + 4)), vy(num_at(i + 5)))
+        point(c1.0, c1.1)
+        point(c2.0, c2.1)
+        point(p.0, p.1)
+        cur = p
+      }
+      'S' | 's' | 'Q' | 'q' => {
+        let c = (vx(num_at(i)), vy(num_at(i + 1)))
+        let p = (vx(num_at(i + 2)), vy(num_at(i + 3)))
+        point(c.0, c.1)
+        point(p.0, p.1)
+        cur = p
+      }
+      'A' | 'a' => {
+        let p = (vx(num_at(i + 5)), vy(num_at(i + 6)))
+        point(p.0, p.1)
+        cur = p
+      }
+      _ => ()
+    }
+    i += arity
   }
   (pts, bad)
 }
@@ -173,10 +248,7 @@ struct TextBox {
 ///|
 fn num_attr(a : Map[String, String], k : String) -> Double {
   match a.get(k) {
-    Some(v) =>
-      @string.parse_double(v) catch {
-        _ => 0.0
-      }
+    Some(v) => @string.parse_double(v) catch { _ => 0.0 }
     None => 0.0
   }
 }
@@ -207,12 +279,16 @@ async fn check(file : String) -> Unit {
     }
   }
   // \son\w+=/i -> attribute named on*
-  let on_re : @string.Regex = @string.Regex::unsafe_from_string("[[:space:]]on[[:word:]:\\-]+=")
+  let on_re : @string.Regex = @string.Regex::unsafe_from_string(
+    "[[:space:]]on[[:word:]:\\-]+=",
+  )
   if on_re.find(low).next() is Some(_) {
     report(Fail, file, "event handler attribute is not allowed")
   }
 
-  let svg_tag_re : @string.Regex = @string.Regex::unsafe_from_string("<svg([^>]*)>")
+  let svg_tag_re : @string.Regex = @string.Regex::unsafe_from_string(
+    "<svg([^>]*)>",
+  )
   guard svg_tag_re.find(svg).next() is Some(svg_tag) else {
     report(Fail, file, "no <svg> element")
     return
@@ -240,14 +316,16 @@ async fn check(file : String) -> Unit {
     y <= r[1] + r[3] + 2.0
   }
   let outside = fn(what : String, x : Double, y : Double) -> Unit {
-    report(Fail, file, "\{what} at (\{x.to_string()}, \{y.to_string()}) outside viewBox")
+    report(
+      Fail,
+      file,
+      "\{what} at (\{x.to_string()}, \{y.to_string()}) outside viewBox",
+    )
   }
 
-  if !(
-      svg.contains("role=\"img\"") ||
-      svg.contains("aria-label=") ||
-      svg.contains("<title>")
-    ) {
+  if !(svg.contains("role=\"img\"") ||
+    svg.contains("aria-label=") ||
+    svg.contains("<title>")) {
     report(Warn, file, "no aria-label, role=img, or <title>")
   }
 
@@ -310,9 +388,7 @@ async fn check(file : String) -> Unit {
     for k in ["stroke", "fill", "color"] {
       match a.get(k) {
         Some(v) =>
-          if v != "none" &&
-            v != "currentColor" &&
-            !v.has_prefix("url(") {
+          if v != "none" && v != "currentColor" && !v.has_prefix("url(") {
             colors[v] = true
           }
         None => ()
@@ -325,7 +401,7 @@ async fn check(file : String) -> Unit {
         let y = num_attr(a, "y")
         let w = num_attr(a, "width")
         let h = num_attr(a, "height")
-        container({ x, y, w, h, ellipse: false })
+        container({ x, y, w, h, ellipse: false, })
         for p in [(x, y), (x + w, y + h)] {
           if !inside(p.0, p.1) {
             outside("<rect> corner", p.0, p.1)
@@ -336,7 +412,13 @@ async fn check(file : String) -> Unit {
         let cx = num_attr(a, "cx")
         let cy = num_attr(a, "cy")
         let r = num_attr(a, "r")
-        container({ x: cx - r, y: cy - r, w: 2.0 * r, h: 2.0 * r, ellipse: true })
+        container({
+          x: cx - r,
+          y: cy - r,
+          w: 2.0 * r,
+          h: 2.0 * r,
+          ellipse: true,
+        })
         for p in [(cx - r, cy - r), (cx + r, cy + r)] {
           if !inside(p.0, p.1) {
             outside("<circle> edge", p.0, p.1)
@@ -348,15 +430,22 @@ async fn check(file : String) -> Unit {
         let cy = num_attr(a, "cy")
         let rx = num_attr(a, "rx")
         let ry = num_attr(a, "ry")
-        container({ x: cx - rx, y: cy - ry, w: 2.0 * rx, h: 2.0 * ry, ellipse: true })
+        container({
+          x: cx - rx,
+          y: cy - ry,
+          w: 2.0 * rx,
+          h: 2.0 * ry,
+          ellipse: true,
+        })
         for p in [(cx - rx, cy - ry), (cx + rx, cy + ry)] {
           if !inside(p.0, p.1) {
             outside("<ellipse> edge", p.0, p.1)
           }
         }
       }
-      "line" => {
-        for p in [
+      "line" =>
+        for
+          p in [
             (num_attr(a, "x1"), num_attr(a, "y1")),
             (num_attr(a, "x2"), num_attr(a, "y2")),
           ] {
@@ -364,7 +453,6 @@ async fn check(file : String) -> Unit {
             outside("<line> end", p.0, p.1)
           }
         }
-      }
       "polyline" | "polygon" => {
         let ns = nums(a.get("points").unwrap_or(""))
         let mut i = 0
@@ -419,7 +507,7 @@ async fn check(file : String) -> Unit {
         }
         // strip any nested tags (tspan etc.), then trim
         let body_text = strip_tags(body).trim().to_owned()
-        let w = @svg.text_width(body_text, size=size)
+        let w = @svg.text_width(body_text, size~)
         let lx = match a.get("text-anchor") {
           Some("middle") => x - w / 2.0
           Some("end") => x - w
@@ -460,9 +548,7 @@ async fn check(file : String) -> Unit {
         }
       }
     }
-    guard mine is Some(mine) else {
-      continue
-    }
+    guard mine is Some(mine) else { continue }
     if mine.ellipse {
       let cx = mine.x + mine.w / 2.0
       let cy = mine.y + mine.h / 2.0
@@ -511,7 +597,8 @@ async fn check(file : String) -> Unit {
   }
 }
 
-///| Remove <...> markup inside a text body (tspan etc.).
+///|
+/// Remove <...> markup inside a text body (tspan etc.).
 fn strip_tags(s : String) -> String {
   let out = StringBuilder()
   let mut depth = 0

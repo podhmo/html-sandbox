@@ -39,6 +39,11 @@ gets a small throwaway generator sharing a thin helper.
     low-level SVG marks used by diagram probes, with independent stroke,
     fill, and opacity controls. `box` remains the higher-level labelled
     node primitive.
+  - `PathBuilder` assembles typed `move_to`/`line_to`/`cubic_to`/
+    `quadratic_to`/`arc_to`/`close` paths while tracking their bounds;
+    `draw_path` emits them. `polyline_path`, `smooth_path`, `pie_slice`,
+    and `donut_slice` cover common polyline, spline, and arc figures
+    without hand-written SVG `d` strings (`fig-curve-builder.mbtx`).
   - Output is `currentColor` + plain `<text>` by default, so figures
     follow the site's light/dark theme and stay searchable. Text and
     marks can opt into explicit colors when a probe or categorical
@@ -61,6 +66,8 @@ gets a small throwaway generator sharing a thin helper.
   `check.mbtx` warns on literal colors outside `PALETTE`.
 - `check.mbtx` — an SVG lint built from the failure modes recorded in
   `slops/2026-10-27-writing-slops.md/03-svg-pitfalls.md` (see below).
+  Its path checker understands line and curve commands including
+  C/S/Q/T/A in absolute and relative forms.
 - `examples/fig-*.mbtx` — example generators. `moon run
   examples/fig-loop.mbtx` writes `build/fig-loop.svg` to stdout.
   Generators can also `abort` spatial claims the

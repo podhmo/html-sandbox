@@ -103,7 +103,7 @@
   [優先度分類](docs/sketch/ja/figure-docs-svg-gen-priority.md)、監査は
   [不足機能のメモ](docs/sketch/ja/figure-docs-svg-gen-audit.md)を参照
   （[issue #200](https://github.com/podhmo/html-sandbox/issues/200)）。
-  - [ ] **typed curve/path builder と curve-aware lint を作る**: move/line/
+  - [x] **typed curve/path builder と curve-aware lint を作る**: move/line/
     cubic/quadratic/arc/close を型付きで組み、endpoint/control point から
     bounds を推定する。`check.mbtx` が C/S/Q/A を検査できるようにする。
   - [ ] **connector/arrowhead/port/edge label を作る**: closed triangle head、
