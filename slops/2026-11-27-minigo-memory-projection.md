@@ -52,22 +52,7 @@ weak reference だけにすると、host が projection を保持していても
 
 ここで必要なのは「process が持つ」のでも「host call の間だけ持つ」のでもなく、「host projection が生きている間だけ持つ」という寿命だった。
 
-最終的な解は少し意地悪い。public projection の struct を、hidden owner を内蔵する wrapper allocation の中に配置し、host には interior pointer だけを渡す。実装の芯はこれだ。
-
-```go
-func newStructProjection(typ reflect.Type, orig runtime.Value) reflect.Value {
-	boxTyp := reflect.StructOf([]reflect.StructField{
-		{Name: "P", Type: typ},
-		{Name: "_", Type: anyType, PkgPath: "github.com/podhmo/minigo/vm"},
-	})
-	box := reflect.New(boxTyp)
-	fv := box.Elem().Field(1)
-	reflect.NewAt(fv.Type(), unsafe.Pointer(fv.UnsafeAddr())).Elem().Set(reflect.ValueOf(orig))
-	return box.Elem().Field(0).Addr()
-}
-```
-
-```svg
+最終的な解は少し意地悪い。public projection の struct を、hidden owner を内蔵する wrapper allocation の中に配置し、host には interior pointer だけを渡す。```svg
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -41 666.3000000000001 377" width="666" height="377" role="img" aria-label="minigo struct projection ownership before and after">
 <text x="0" y="-18" font-size="13" fill="currentColor" opacity="0.75">before: registry is the root</text>
 <rect x="190" y="0" width="93.60000000000002" height="48" rx="8" fill="none" stroke="#3B82C4" stroke-width="2"/>
@@ -141,24 +126,6 @@ t := template.Must(template.New("item").Funcs(template.FuncMap{
 
 `pureMethod` は最初、かなり素朴な静的判定だった。call、assignment、send、go、defer がなければ pure、くらいのものだ。そこに Devin Review が次々に反例を見つけた。
 
-最終形の分類器は、AST node を見て効果がありうるものを弾く形になった。完全な型検査ではないので、分からないものは安全側に倒す。
-
-```go
-func effectfulNode(m *runtime.Function, n ast.Node) bool {
-	switch x := n.(type) {
-	case *ast.AssignStmt, *ast.IncDecStmt, *ast.SendStmt, *ast.GoStmt, *ast.DeferStmt, *ast.SelectStmt:
-		return true
-	case *ast.CallExpr:
-		return !typeConversionCall(m, x)
-	case *ast.RangeStmt:
-		return x.Tok == token.ASSIGN || !rangeKnownNonChannel(m, x.X, x)
-	case *ast.UnaryExpr:
-		return x.Op == token.ARROW
-	}
-	return false
-}
-```
-
 | 反例 | 何が壊れるか | 入れた対応 |
 | --- | --- | --- |
 | `return <-p.Values` | refresh で channel を二度受信し、次の値がなければ描画が止まる | unary receive、select、unknown channel range を impure にする |
@@ -204,11 +171,34 @@ composite value を返す method、副作用のある method、channel を読む
 
 そこで、public struct の前に置いた allocation 全体に owner を持たせ、host には interior pointer を返す。host は先頭 field を指しているだけなのに、GC 的には allocation 全体を生かす。public type も変わらない。owner の寿命は projection の寿命と一致する。
 
+実装の芯はこれだった。
+
+```go
+func newStructProjection(typ reflect.Type, orig runtime.Value) reflect.Value {
+	boxTyp := reflect.StructOf([]reflect.StructField{
+		{Name: "P", Type: typ},
+		{Name: "_", Type: anyType, PkgPath: "github.com/podhmo/minigo/vm"},
+	})
+	box := reflect.New(boxTyp)
+	fv := box.Elem().Field(1)
+	reflect.NewAt(fv.Type(), unsafe.Pointer(fv.UnsafeAddr())).Elem().Set(reflect.ValueOf(orig))
+	return box.Elem().Field(0).Addr()
+}
+```
+
 これは Go の GC semantics をかなり直接的に利用した解法だった。unsafe が絡むので無条件で美しいとは言わないが、「weak registry だけでは round-trip できず、strong registry では leak する」という矛盾を、寿命の所有者を移すことで解いている。
 
 ## 面白かった脇道 2: interface key は値ではなく型つきの値だった
 
 memory の話とは別の方向で、interface-keyed host map の問題も出た。Go では `map[any]int{int8(1): 1}` を `1` で引いても一致しない。interface key は dynamic type と値のペアだからだ。
+
+最小例はこれだ。
+
+```go
+m := map[any]int{int8(1): 1}
+_, direct := m[1]       // false: untyped constant は int になる
+_, exact := m[int8(1)] // true: dynamic type まで一致する
+```
 
 これを見逃すと、host 側で `int64(1)` を入れたつもりが script 側では `int(1)` に潰れ、merge snapshot も「同じ値の数字」同士を同一キーと誤認する。`time.Duration` のような named integer も、kind だけでは int64 と区別できない。
 
@@ -217,6 +207,24 @@ memory の話とは別の方向で、interface-keyed host map の問題も出た
 ここも最初は memory fix とは関係ないように見えたが、実は同じ問題だった。host projection は単なるデータ変換ではなく、host object identity と script object identity をどう対応づけるかの問題だった。
 
 ## 面白かった脇道 3: review は fuzzer っぽかった
+
+最終形の分類器は、AST node を見て効果がありうるものを弾く形になった。完全な型検査ではないので、分からないものは安全側に倒す。
+
+```go
+func effectfulNode(m *runtime.Function, n ast.Node) bool {
+	switch x := n.(type) {
+	case *ast.AssignStmt, *ast.IncDecStmt, *ast.SendStmt, *ast.GoStmt, *ast.DeferStmt, *ast.SelectStmt:
+		return true
+	case *ast.CallExpr:
+		return !typeConversionCall(m, x)
+	case *ast.RangeStmt:
+		return x.Tok == token.ASSIGN || !rangeKnownNonChannel(m, x.X, x)
+	case *ast.UnaryExpr:
+		return x.Op == token.ARROW
+	}
+	return false
+}
+```
 
 今回の Devin Review は、通常の code review というより adversarial fuzzer に近かった。こちらが heuristic を 1 つ置くと、レビューはその boundary にぴったり乗る反例を返してきた。channel receive、composite result、grouped result、named scalar、shadowing、loop variable scope、type conversion shadowing、という並びは、人間が最初の実装で全部思いつくのはかなり難しい。
 
