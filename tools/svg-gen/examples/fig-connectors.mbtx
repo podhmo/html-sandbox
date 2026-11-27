@@ -44,14 +44,15 @@ fn main {
     width=2.0,
   )
 
-  c.connect(api, @svg.E, svc, @svg.W, label=Some("validate"))
-  c.connect(svc, @svg.S, db, @svg.N, label=Some("persist"))
+  c.connect(api, @svg.E, svc, @svg.W, label=Some("validate"), color=c.color(0))
+  c.connect(svc, @svg.S, db, @svg.N, label=Some("persist"), color=c.color(1))
   c.connect(
     api,
     @svg.S,
     jobs,
     @svg.N,
     label=Some("enqueue"),
+    color=c.color(5),
     dash=Some("5 4"),
     opacity=Some(0.75),
   )
