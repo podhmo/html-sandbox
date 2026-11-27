@@ -97,7 +97,7 @@
     文書構造メトリクス）を執筆者別に集計し、分ける力があるか眺める。
     分離度が見えた特徴量だけを lint の規則候補にする。
     [issue #172](https://github.com/podhmo/html-sandbox/issues/172)
-- [ ] **svg-gen に figure-docs の必須級機能を入れる**: business/dev references
+- [x] **svg-gen に figure-docs の必須級機能を入れる**: business/dev references
   150 図の probe で見えた不足のうち、raw な座標・制御点・baseline 計算を
   書き手へ戻す 4 件を入れる。優先度と対象図の分類は
   [優先度分類](docs/sketch/ja/figure-docs-svg-gen-priority.md)、監査は

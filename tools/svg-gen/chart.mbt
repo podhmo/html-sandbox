@@ -250,17 +250,25 @@ pub fn Canvas::bar_chart(
       minv = minv.min(neg)
     }
   } else {
-    for s in series {
-      for v in s.values {
-        maxv = maxv.max(v)
-        minv = minv.min(v)
+    for i = 0; i < labels.length(); i = i + 1 {
+      for s in series {
+        if i < s.values.length() {
+          let v = s.values[i]
+          maxv = maxv.max(v)
+          minv = minv.min(v)
+        }
       }
     }
   }
   if layout is Diverging {
     let a = maxv.abs().max(minv.abs())
-    maxv = a
-    minv = -a
+    if a == 0.0 {
+      maxv = 1.0
+      minv = -1.0
+    } else {
+      maxv = a
+      minv = -a
+    }
   }
   if maxv == minv {
     maxv = minv + 1.0
@@ -272,6 +280,15 @@ pub fn Canvas::bar_chart(
   if horizontal {
     let zero = x + (0.0 - minv) / span * w
     self.line((zero, y), (zero, y + h), width=1.0, opacity=Some(0.5))
+    self.text(x, y + h + 12.0, fmt_num(minv), size=9.0, opacity=Some(0.6))
+    self.text(
+      x + w,
+      y + h + 12.0,
+      fmt_num(maxv),
+      anchor=End,
+      size=9.0,
+      opacity=Some(0.6),
+    )
     let row = h / n
     for i = 0; i < labels.length(); i = i + 1 {
       let cy = y + i.to_double() * row
@@ -323,6 +340,22 @@ pub fn Canvas::bar_chart(
   } else {
     let zero = y + maxv / span * h
     self.line((x, zero), (x + w, zero), width=1.0, opacity=Some(0.5))
+    self.text(
+      x - 5.0,
+      y + 3.0,
+      fmt_num(maxv),
+      anchor=End,
+      size=9.0,
+      opacity=Some(0.6),
+    )
+    self.text(
+      x - 5.0,
+      y + h,
+      fmt_num(minv),
+      anchor=End,
+      size=9.0,
+      opacity=Some(0.6),
+    )
     let col = w / n
     for i = 0; i < labels.length(); i = i + 1 {
       let cx = x + i.to_double() * col
@@ -638,6 +671,8 @@ pub fn Plot::series(
 
 /// Filled area under a data series. Unlike `series`, x/y inputs are data
 /// coordinates and are mapped here; `baseline` is also a data y value.
+/// The baseline must be inside the plot's y domain (and positive on a log
+/// scale); pass it explicitly when zero is outside the domain.
 
 ///|
 pub fn Plot::area(

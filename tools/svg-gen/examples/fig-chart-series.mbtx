@@ -58,6 +58,7 @@ fn main {
     // colorful option: hue does the series distinction, width/dash
     // stays as a grayscale fallback so the figure still reads when
     // colors are unavailable (print, copy).
+    p.area(days, p50, baseline=0.0, color=c.color(0), opacity=0.08)
     p.band(days, p50, p90, color=c.color(3), opacity=0.12)
     p.series(
       days.mapi(fn(i, d) { (p.xs.map(d), p.ys.map(p90[i])) }),
