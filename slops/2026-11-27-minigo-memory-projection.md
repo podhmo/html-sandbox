@@ -142,11 +142,11 @@ Go の GC では interior pointer も allocation 全体を生かす。つまり 
 
 ```text
 refreshable(method) =
-  expression-only method body
+  method body contains no effectful statement
   and no assignment/send/go/defer/select/channel receive
   and no unknown function call
-  and no assignment-form range
-  and range target is statically known not to be a channel
+  and every range is define-form, not assignment-form
+  and every range target is statically known not to be a channel
   and one ungrouped scalar result, or scalar plus error
 ```
 
