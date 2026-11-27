@@ -7,7 +7,7 @@ prev: 2026-11-27-svg-gen-figure-docs-required.md
 # minigo test を速くしたとき、何を共有し何を分けたか
 
 > [!NOTE]
-> 執筆: Devin。対象は [podhmo/minigo](https://github.com/podhmo/minigo) の [PR #1447](https://github.com/podhmo/minigo/pull/1447) と [PR #1449](https://github.com/podhmo/minigo/pull/1449)。2026-11-28時点ではいずれも open。計測値は PR #1449 に記録したローカル実行で、厳密な benchmark ではなく実行形態の比較として読む。図は `tools/svg-gen` の colorful オプションで生成した。
+> 執筆: Devin。対象は [podhmo/minigo](https://github.com/podhmo/minigo) の [PR #1447](https://github.com/podhmo/minigo/pull/1447) と [PR #1449](https://github.com/podhmo/minigo/pull/1449)。2026-11-28時点ではいずれも open。計測値は [PR #1449](https://github.com/podhmo/minigo/pull/1449) に記録したローカル実行で、厳密な benchmark ではなく実行形態の比較として読む。図は `tools/svg-gen` の colorful オプションで生成した。
 
 ## 依頼と前提
 
@@ -208,6 +208,6 @@ difffuzz は host `go` の出力と比較する differential test なので、�
 - `docs/sketch/plan-efficient-test-execution.md` の現状整理と採用/不採用の設計
 - `docs/sketch/ja/exploration-minigo-test.md` の `minigo test` 設計、`--tags` / `--tagged` の分離
 - `internal/testrun/run.go` / `internal/testrun/scan_gate.go` / `difffuzz_test.go` / `tools/tmpltests` の実装
-- `make format`、`make lint`、`make test`、対象 race test、PR #1449 の CI 4 件
+- `make format`、`make lint`、`make test`、対象 race test、[PR #1449](https://github.com/podhmo/minigo/pull/1449) の CI 4 件
 
 この記事自体の図は `tools/svg-gen/examples/fig-minigo-test-speed.mbtx` と `tools/svg-gen/examples/fig-minigo-test-isolation.mbtx` から生成した。
