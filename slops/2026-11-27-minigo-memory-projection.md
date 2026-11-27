@@ -190,7 +190,7 @@ memory の話とは別の方向で、interface-keyed host map の問題も出た
 
 ## 結果として何が安定したか
 
-最後に go-classic-mpa-sample 側で同じ probe を再測定した。`StoryIssueDetailMarkdownRich` を warmup 後に 8 render × 6 batch 実行し、GC settling 後の heap delta は `+21384`, `+20008`, `+20448`, `+26744`, `+19920`, `-1064` bytes だった。小さな allocator 変動はあるが、render ごとの単調増加ではない。最後は negative になっている。少なくとも元の線形増加には戻っていない。
+最後に go-classic-mpa-sample 側で同じ probe を再測定した。`StoryIssueDetailMarkdownRich` を warmup 後に 8 render × 6 batch 実行し、GC settling 後に測った直前 batch からの heap delta は `+21384`, `+20008`, `+20448`, `+26744`, `+19920`, `-1064` bytes だった。ここでいう delta は warmup 起点からの累積ではなく、batch 間の差分だ。したがって合計すると `+107440` bytes で、完全に平坦だったわけではない。それでも最初に観測したような render 数に比例する明確な増加には戻っていないと判断した。ただし、この probe は粗い sanity check であり、完全な解放は upstream の session release regression test 側で確認している。
 
 [podhmo/minigo#1445](https://github.com/podhmo/minigo/pull/1445) では `make format`、`make lint`、`make test`、simcheck、race test、merge-base archcheck を通した。CI と Devin Review も最終的には green になり、記事執筆中に merge された。
 
