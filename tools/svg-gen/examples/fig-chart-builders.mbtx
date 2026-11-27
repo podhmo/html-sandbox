@@ -1,0 +1,50 @@
+---
+import {
+  "podhmo/svg-gen" @svg,
+}
+---
+
+// fig-chart-builders.mbtx -- categorical bar builder layouts: grouped
+// columns, stacked horizontal bars, and a diverging horizontal series.
+// Scales, zero lines, category spacing, and legend swatches are derived
+// from values rather than hand-placed rectangles.
+
+///|
+fn main {
+  let c = @svg.Canvas()
+  let labels = ["Q1", "Q2", "Q3", "Q4"]
+  let desktop = @svg.BarSeries("desktop", [42.0, 55.0, 49.0, 68.0])
+  let mobile = @svg.BarSeries("mobile", [30.0, 38.0, 51.0, 57.0])
+
+  c.text(20.0, 20.0, "grouped columns", size=13.0)
+  c.bar_chart(20.0, 42.0, 290.0, 130.0, labels, [desktop, mobile])
+
+  c.text(20.0, 225.0, "stacked horizontal bars", size=13.0)
+  c.bar_chart(
+    70.0,
+    245.0,
+    240.0,
+    130.0,
+    labels,
+    [desktop, mobile],
+    layout=@svg.Stacked,
+    horizontal=true,
+  )
+
+  c.text(390.0, 20.0, "diverging bar", size=13.0)
+  let sentiment = @svg.BarSeries("net score", [24.0, -12.0, 31.0, -28.0])
+  c.bar_chart(
+    450.0,
+    42.0,
+    190.0,
+    130.0,
+    labels,
+    [sentiment],
+    layout=@svg.Diverging,
+    horizontal=true,
+  )
+
+  println(
+    c.render(label=Some("Grouped, stacked, and diverging bar chart builders")),
+  )
+}

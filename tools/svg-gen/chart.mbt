@@ -190,6 +190,205 @@ pub(all) struct Bin {
 }
 
 ///|
+#derive(Eq)
+pub(all) enum BarsLayout {
+  Grouped
+  Stacked
+  Diverging
+}
+
+///|
+pub(all) struct BarSeries {
+  name : String
+  values : Array[Double]
+}
+
+///|
+pub fn BarSeries::BarSeries(
+  label : String,
+  values : Array[Double],
+) -> BarSeries {
+  { name: label, values, }
+}
+
+///|
+/// Categorical bar/column chart builder. `Grouped` places series side by
+/// side, `Stacked` accumulates positive and negative values separately,
+/// and `Diverging` uses a symmetric domain around zero. With
+/// `horizontal=true` categories are rows (bar chart); otherwise columns.
+pub fn Canvas::bar_chart(
+  self : Canvas,
+  x : Double,
+  y : Double,
+  w : Double,
+  h : Double,
+  labels : Array[String],
+  series : Array[BarSeries],
+  layout~ : BarsLayout = Grouped,
+  horizontal~ : Bool = false,
+) -> Unit {
+  if labels.length() == 0 || series.length() == 0 {
+    return
+  }
+  let mut minv = 0.0
+  let mut maxv = 0.0
+  if layout is Stacked {
+    for i = 0; i < labels.length(); i = i + 1 {
+      let mut pos = 0.0
+      let mut neg = 0.0
+      for s in series {
+        if i < s.values.length() {
+          let v = s.values[i]
+          if v >= 0.0 {
+            pos += v
+          } else {
+            neg += v
+          }
+        }
+      }
+      maxv = maxv.max(pos)
+      minv = minv.min(neg)
+    }
+  } else {
+    for s in series {
+      for v in s.values {
+        maxv = maxv.max(v)
+        minv = minv.min(v)
+      }
+    }
+  }
+  if layout is Diverging {
+    let a = maxv.abs().max(minv.abs())
+    maxv = a
+    minv = -a
+  }
+  if maxv == minv {
+    maxv = minv + 1.0
+  }
+  let span = maxv - minv
+  ignore(self.rect(x, y, w, h, fill="none", opacity=Some(0.35)))
+  let n = labels.length().to_double()
+  let ns = series.length().to_double()
+  if horizontal {
+    let zero = x + (0.0 - minv) / span * w
+    self.line((zero, y), (zero, y + h), width=1.0, opacity=Some(0.5))
+    let row = h / n
+    for i = 0; i < labels.length(); i = i + 1 {
+      let cy = y + i.to_double() * row
+      self.text(
+        x - 5.0,
+        cy + row / 2.0,
+        labels[i],
+        anchor=End,
+        central=true,
+        size=10.0,
+      )
+      let bw = if layout is Stacked { row * 0.55 } else { row * 0.7 / ns }
+      let mut acc_pos = 0.0
+      let mut acc_neg = 0.0
+      for j = 0; j < series.length(); j = j + 1 {
+        if i >= series[j].values.length() {
+          continue
+        }
+        let v = series[j].values[i]
+        let (v0, v1, yy) = if layout is Stacked {
+          if v >= 0.0 {
+            let r = (acc_pos, acc_pos + v, cy + row * 0.225)
+            acc_pos += v
+            r
+          } else {
+            let r = (acc_neg, acc_neg + v, cy + row * 0.225)
+            acc_neg += v
+            r
+          }
+        } else {
+          (0.0, v, cy + row * 0.15 + j.to_double() * bw)
+        }
+        let xa = x + (v0 - minv) / span * w
+        let xb = x + (v1 - minv) / span * w
+        let xx = xa.min(xb)
+        ignore(
+          self.rect(
+            xx,
+            yy,
+            (xb - xa).abs(),
+            bw,
+            fill=self.color(j),
+            fill_opacity=Some(0.45),
+            color=self.color(j),
+          ),
+        )
+      }
+    }
+  } else {
+    let zero = y + maxv / span * h
+    self.line((x, zero), (x + w, zero), width=1.0, opacity=Some(0.5))
+    let col = w / n
+    for i = 0; i < labels.length(); i = i + 1 {
+      let cx = x + i.to_double() * col
+      self.text(
+        cx + col / 2.0,
+        y + h + 12.0,
+        labels[i],
+        anchor=Middle,
+        size=10.0,
+      )
+      let bw = if layout is Stacked { col * 0.55 } else { col * 0.7 / ns }
+      let mut acc_pos = 0.0
+      let mut acc_neg = 0.0
+      for j = 0; j < series.length(); j = j + 1 {
+        if i >= series[j].values.length() {
+          continue
+        }
+        let v = series[j].values[i]
+        let (v0, v1, xx) = if layout is Stacked {
+          if v >= 0.0 {
+            let r = (acc_pos, acc_pos + v, cx + col * 0.225)
+            acc_pos += v
+            r
+          } else {
+            let r = (acc_neg, acc_neg + v, cx + col * 0.225)
+            acc_neg += v
+            r
+          }
+        } else {
+          (0.0, v, cx + col * 0.15 + j.to_double() * bw)
+        }
+        let ya = y + (maxv - v0) / span * h
+        let yb = y + (maxv - v1) / span * h
+        let yy = ya.min(yb)
+        ignore(
+          self.rect(
+            xx,
+            yy,
+            bw,
+            (yb - ya).abs(),
+            fill=self.color(j),
+            fill_opacity=Some(0.45),
+            color=self.color(j),
+          ),
+        )
+      }
+    }
+  }
+  for j = 0; j < series.length(); j = j + 1 {
+    let ly = y - 8.0 - (series.length() - 1 - j).to_double() * 13.0
+    ignore(
+      self.rect(
+        x + w + 8.0,
+        ly - 8.0,
+        8.0,
+        8.0,
+        fill=self.color(j),
+        fill_opacity=Some(0.45),
+        color=self.color(j),
+      ),
+    )
+    self.text(x + w + 20.0, ly, series[j].name, size=10.0)
+  }
+}
+
+///|
 pub struct Plot {
   x0 : Double
   y0 : Double
@@ -435,6 +634,64 @@ pub fn Plot::series(
       size=10.0,
     )
   }
+}
+
+/// Filled area under a data series. Unlike `series`, x/y inputs are data
+/// coordinates and are mapped here; `baseline` is also a data y value.
+
+///|
+pub fn Plot::area(
+  self : Plot,
+  xs : Array[Double],
+  ys : Array[Double],
+  baseline~ : Double = 0.0,
+  color~ : String = "currentColor",
+  opacity~ : Double = 0.25,
+) -> Unit {
+  if xs.length() < 2 || xs.length() != ys.length() {
+    return
+  }
+  let pts = xs.mapi(fn(i, x) { (self.xs.map(x), self.ys.map(ys[i])) })
+  let by = self.ys.map(baseline)
+  let poly = pts + [(pts[pts.length() - 1].0, by), (pts[0].0, by)]
+  self.inside(poly) |> ignore
+  let d = "M" + poly.map(fn(p) { "\{num(p.0)} \{num(p.1)}" }).join(" L") + " Z"
+  self.put(
+    "<path d=\"\{d}\" fill=\"\{color}\" fill-opacity=\"\{num(opacity)}\" stroke=\"none\"/>",
+    poly,
+  )
+}
+
+/// Band between two data series with the same x coordinates.
+
+///|
+pub fn Plot::band(
+  self : Plot,
+  xs : Array[Double],
+  lower : Array[Double],
+  upper : Array[Double],
+  color~ : String = "currentColor",
+  opacity~ : Double = 0.18,
+) -> Unit {
+  if xs.length() < 2 ||
+    xs.length() != lower.length() ||
+    xs.length() != upper.length() {
+    return
+  }
+  let up = xs.mapi(fn(i, x) { (self.xs.map(x), self.ys.map(upper[i])) })
+  let down = xs
+    .rev()
+    .mapi(fn(i, x) {
+      let j = xs.length() - 1 - i
+      (self.xs.map(x), self.ys.map(lower[j]))
+    })
+  let poly = up + down
+  self.inside(poly) |> ignore
+  let d = "M" + poly.map(fn(p) { "\{num(p.0)} \{num(p.1)}" }).join(" L") + " Z"
+  self.put(
+    "<path d=\"\{d}\" fill=\"\{color}\" fill-opacity=\"\{num(opacity)}\" stroke=\"none\"/>",
+    poly,
+  )
 }
 
 /// Step series for ECDF: horizontal then vertical at each point.

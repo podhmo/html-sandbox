@@ -110,7 +110,7 @@
     orthogonal elbow、shape edge 上の port、connector 上の label anchor を入れる。
   - [x] **baseline-aware な text measurement/placement を作る**: text block の
     bbox を扱い、shape/edge の上下左右へ baseline を意識して label を置けるようにする。
-  - [ ] **basic chart builder を作る**: column/bar（grouped/stacked/diverging）、
+  - [x] **basic chart builder を作る**: column/bar（grouped/stacked/diverging）、
     area/band、pie/donut slice をデータから組めるようにする。
 
 ### Future work

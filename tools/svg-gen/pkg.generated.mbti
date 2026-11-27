@@ -77,6 +77,19 @@ pub(all) enum ArrowHead {
   Closed
 }
 
+pub(all) struct BarSeries {
+  name : String
+  values : Array[Double]
+}
+pub fn BarSeries::BarSeries(String, Array[Double]) -> Self
+
+#derive(Eq)
+pub(all) enum BarsLayout {
+  Grouped
+  Stacked
+  Diverging
+}
+
 #derive(@debug.Debug)
 pub(all) struct Bin {
   x0 : Double
@@ -104,6 +117,7 @@ pub fn Canvas::Canvas(margin? : Double) -> Self
 pub fn Canvas::above(Self, Shape, Double, Double) -> Double
 pub fn Canvas::anchor(Self, Shape, Side) -> (Double, Double)
 pub fn Canvas::arrow(Self, (Double, Double), (Double, Double), via? : Array[(Double, Double)], head? : Double, ends? : Ends, gap? : Double, gap_start? : Double?, gap_end? : Double?, dash? : String?, opacity? : Double?, width? : Double, color? : String, head_kind? : ArrowHead) -> Unit
+pub fn Canvas::bar_chart(Self, Double, Double, Double, Double, Array[String], Array[BarSeries], layout? : BarsLayout, horizontal? : Bool) -> Unit
 pub fn Canvas::below(Self, Shape, Double) -> Double
 pub fn Canvas::box(Self, Double, Double, Sizing, Double, label? : String?, rx? : Double, pad_x? : Double, size? : Double, dash? : String?, opacity? : Double?, width? : Double, color? : String, underline? : Underline) -> Shape
 pub fn Canvas::center(Self, Shape) -> (Double, Double)
@@ -209,6 +223,8 @@ pub struct Plot {
   mut buf : Array[String]?
 }
 pub fn Plot::Plot(Canvas, ChartMeta, (Double, Double), (Double, Double), x? : Double, y? : Double, w? : Double, h? : Double, xscale? : ScaleKind, yscale? : ScaleKind, xtitle? : String?, ytitle? : String?, xfmt? : (Double) -> String, yfmt? : (Double) -> String, grid? : Bool) -> Self
+pub fn Plot::area(Self, Array[Double], Array[Double], baseline? : Double, color? : String, opacity? : Double) -> Unit
+pub fn Plot::band(Self, Array[Double], Array[Double], Array[Double], color? : String, opacity? : Double) -> Unit
 pub fn Plot::boxplot(Self, Array[BoxGroup], box_w? : Double, overlay? : Double, color? : String, rand? : (() -> Double)?) -> Unit
 pub fn Plot::data(Self, (Self) -> Unit) -> Unit
 pub fn Plot::dots(Self, Array[(Double, Double)], r? : Double, opacity? : Double, color? : String) -> Unit
