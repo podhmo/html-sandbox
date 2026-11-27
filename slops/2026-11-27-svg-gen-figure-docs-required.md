@@ -92,7 +92,7 @@ let p = c.port(svc, @svg.E, t=0.72)
 c.arrow(p, target, head_kind=@svg.Closed)
 ```
 
-`t` は辺の上の位置で、複数の線が出入りするときに port を中央からずらせる。生成図では、水平に出る接続と垂直に出る接続で自動的に orthogonal な折れ方が変わり、終端は closed triangle になっている。
+`t` は辺の上の位置で、複数の線が出入りするときに port を中央からずらせる。生成図では `t_from` / `t_to` もずらし、水平に出る接続と垂直に出る接続で自動的に orthogonal な折れ方が変わることを確認している。終端は closed triangle である。
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="8.799999999999997 20 479.75 218" width="480" height="218" role="img" aria-label="Ports, orthogonal connectors, closed arrowheads, and edge labels">
@@ -105,10 +105,10 @@ c.arrow(p, target, head_kind=@svg.Closed)
 <text x="295" y="199" font-size="14" text-anchor="middle" dominant-baseline="central" fill="currentColor">database</text>
 <rect x="20" y="170" width="110" height="58" rx="8" fill="none" stroke="currentColor" stroke-width="2"/>
 <text x="75" y="199" font-size="14" text-anchor="middle" dominant-baseline="central" fill="currentColor">worker</text>
-<path d="M133 61 L237 61" fill="none" stroke="#3B82C4" stroke-width="1.5"/><path d="M228 65.05 L237 61 L228 56.95 Z" fill="#3B82C4" stroke="#3B82C4" stroke-width="1.5"/>
-<text x="185" y="83" font-size="12" text-anchor="middle" fill="currentColor">validate</text>
-<path d="M295 95 L295 167" fill="none" stroke="#E69F00" stroke-width="1.5"/><path d="M290.95 158 L295 167 L299.05 158 Z" fill="#E69F00" stroke="#E69F00" stroke-width="1.5"/>
-<text x="261.9" y="135.8" font-size="12" text-anchor="middle" fill="currentColor">persist</text>
+<path d="M133 45.5 L240 45.5 L240 73.5" fill="none" stroke="#3B82C4" stroke-width="1.5"/><path d="M235.95 64.5 L240 73.5 L244.05 64.5 Z" fill="#3B82C4" stroke="#3B82C4" stroke-width="1.5"/>
+<text x="200.5" y="67.5" font-size="12" text-anchor="middle" fill="currentColor">validate</text>
+<path d="M267.5 95 L267.5 170 L317 170" fill="none" stroke="#E69F00" stroke-width="1.5"/><path d="M308 174.05 L317 170 L308 165.95 Z" fill="#E69F00" stroke="#E69F00" stroke-width="1.5"/>
+<text x="234.4" y="162.05" font-size="12" text-anchor="middle" fill="currentColor">persist</text>
 <path d="M75 95 L75 167" fill="none" stroke="#56B4E9" stroke-width="1.5" stroke-dasharray="5 4" opacity="0.75"/><path d="M70.95 158 L75 167 L79.05 158 Z" fill="#56B4E9" stroke="#56B4E9" stroke-width="1.5" stroke-dasharray="5 4" opacity="0.75"/>
 <text x="41.9" y="135.8" font-size="12" text-anchor="middle" fill="currentColor">enqueue</text>
 <path d="M133 199 L242 199" fill="none" stroke="#00A876" stroke-width="1.5"/><path d="M233 203.05 L242 199 L233 194.95 Z" fill="#00A876" stroke="#00A876" stroke-width="1.5"/>

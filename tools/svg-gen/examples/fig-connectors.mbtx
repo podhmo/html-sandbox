@@ -44,8 +44,26 @@ fn main {
     width=2.0,
   )
 
-  c.connect(api, @svg.E, svc, @svg.W, label=Some("validate"), color=c.color(0))
-  c.connect(svc, @svg.S, db, @svg.N, label=Some("persist"), color=c.color(1))
+  c.connect(
+    api,
+    @svg.E,
+    svc,
+    @svg.W,
+    label=Some("validate"),
+    t_from=0.25,
+    t_to=0.75,
+    color=c.color(0),
+  )
+  c.connect(
+    svc,
+    @svg.S,
+    db,
+    @svg.N,
+    label=Some("persist"),
+    t_from=0.25,
+    t_to=0.75,
+    color=c.color(1),
+  )
   c.connect(
     api,
     @svg.S,
