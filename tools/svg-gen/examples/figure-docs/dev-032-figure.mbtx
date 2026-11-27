@@ -1,0 +1,57 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// dev/032 transcription probe
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/dev.html
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away. The
+// reference name is kept as string data in the render label.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  ignore(c.rect(4.0, 4.0, 30.0, 12.0, rx=2.0, width=1.0, color="#9aa4b5", fill="#d5dae2"))
+  c.text(19.0, 12.0, "LB", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  c.line((14.0, 16.0), (10.0, 48.0), width=2.5, color="#2563eb")
+  c.polygon([(10.0, 48.0), (9.0, 44.0), (12.0, 45.0)], width=1.0, color="#2563eb", fill="#2563eb")
+  c.line((26.0, 16.0), (30.0, 48.0), width=0.6, color="#15803d")
+  c.polygon([(30.0, 48.0), (28.0, 45.0), (31.0, 44.0)], width=1.0, color="#15803d", fill="#15803d")
+  ignore(c.rect(2.0, 48.0, 16.0, 12.0, rx=2.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.text(10.0, 56.0, "v1", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  ignore(c.rect(22.0, 48.0, 16.0, 12.0, rx=2.0, width=1.0, color="#15803d", fill="#dcf3e3"))
+  c.text(30.0, 56.0, "v2", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  c.text(19.0, 72.0, "5%", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  ignore(c.rect(44.0, 4.0, 30.0, 12.0, rx=2.0, width=1.0, color="#9aa4b5", fill="#d5dae2"))
+  c.text(59.0, 12.0, "LB", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  c.line((54.0, 16.0), (50.0, 48.0), width=1.6, color="#2563eb")
+  c.polygon([(50.0, 48.0), (49.0, 44.0), (52.0, 45.0)], width=1.0, color="#2563eb", fill="#2563eb")
+  c.line((66.0, 16.0), (70.0, 48.0), width=1.6, color="#15803d")
+  c.polygon([(70.0, 48.0), (68.0, 45.0), (71.0, 44.0)], width=1.0, color="#15803d", fill="#15803d")
+  ignore(c.rect(42.0, 48.0, 16.0, 12.0, rx=2.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.text(50.0, 56.0, "v1", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  ignore(c.rect(62.0, 48.0, 16.0, 12.0, rx=2.0, width=1.0, color="#15803d", fill="#dcf3e3"))
+  c.text(70.0, 56.0, "v2", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  c.text(59.0, 72.0, "50%", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  ignore(c.rect(84.0, 4.0, 30.0, 12.0, rx=2.0, width=1.0, color="#9aa4b5", fill="#d5dae2"))
+  c.text(99.0, 12.0, "LB", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  c.line((94.0, 16.0), (90.0, 48.0), width=0.7, color="#2563eb")
+  c.polygon([(90.0, 48.0), (89.0, 44.0), (92.0, 45.0)], width=1.0, color="#2563eb", fill="#2563eb")
+  c.line((106.0, 16.0), (110.0, 48.0), width=2.6, color="#15803d")
+  c.polygon([(110.0, 48.0), (108.0, 45.0), (111.0, 44.0)], width=1.0, color="#15803d", fill="#15803d")
+  ignore(c.rect(82.0, 48.0, 16.0, 12.0, rx=2.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.text(90.0, 56.0, "v1", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  ignore(c.rect(102.0, 48.0, 16.0, 12.0, rx=2.0, width=1.0, color="#15803d", fill="#dcf3e3"))
+  c.text(110.0, 56.0, "v2", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  c.text(99.0, 72.0, "100%", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("段階的な公開"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

@@ -1,0 +1,46 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// dev/021 transcription probe
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/dev.html
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away. The
+// reference name is kept as string data in the render label.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  ignore(c.rect(4.0, 8.0, 24.0, 12.0, rx=2.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.text(16.0, 16.0, "app", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  ignore(c.rect(4.0, 34.0, 24.0, 12.0, rx=2.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.text(16.0, 42.0, "db", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  ignore(c.rect(4.0, 60.0, 24.0, 12.0, rx=2.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.text(16.0, 68.0, "log", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  ignore(c.rect(48.0, 30.0, 26.0, 20.0, rx=2.0, width=1.0, color="#15803d", fill="#dcf3e3"))
+  c.text(61.0, 42.0, "transform", anchor=@svg.Middle, size=5.0, color="#5d6778")
+  ignore(c.rect(92.0, 22.0, 24.0, 14.0, rx=2.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.text(104.0, 31.0, "DWH", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  ignore(c.rect(92.0, 46.0, 24.0, 14.0, rx=2.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.text(104.0, 55.0, "BI", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  c.line((28.0, 14.0), (48.0, 36.0), width=1.2, color="#2563eb")
+  c.polygon([(48.0, 36.0), (44.0, 35.0), (47.0, 32.0)], width=1.0, color="#2563eb", fill="#2563eb")
+  c.line((28.0, 40.0), (48.0, 40.0), width=1.2, color="#2563eb")
+  c.polygon([(48.0, 40.0), (44.0, 42.0), (44.0, 38.0)], width=1.0, color="#2563eb", fill="#2563eb")
+  c.line((28.0, 66.0), (48.0, 44.0), width=1.2, color="#2563eb")
+  c.polygon([(48.0, 44.0), (47.0, 48.0), (44.0, 45.0)], width=1.0, color="#2563eb", fill="#2563eb")
+  c.line((74.0, 38.0), (92.0, 30.0), width=1.2, color="#2563eb")
+  c.polygon([(92.0, 30.0), (89.0, 33.0), (88.0, 30.0)], width=1.0, color="#2563eb", fill="#2563eb")
+  c.line((74.0, 42.0), (92.0, 52.0), width=1.2, color="#2563eb")
+  c.polygon([(92.0, 52.0), (88.0, 52.0), (90.0, 49.0)], width=1.0, color="#2563eb", fill="#2563eb")
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("Data pipeline"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

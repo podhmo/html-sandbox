@@ -28,6 +28,18 @@ pub(all) struct Shape {
 }
 
 ///|
+/// Explicit output viewport for figures that must keep a fixed
+/// coordinate system (small-multiple thumbnails, reference probes).
+/// When omitted, `render` keeps deriving the viewBox from drawn content.
+#derive(Debug)
+pub(all) struct ViewBox {
+  x : Double
+  y : Double
+  w : Double
+  h : Double
+}
+
+///|
 #derive(Debug)
 pub(all) enum Sizing {
   Auto
@@ -306,6 +318,7 @@ fn stroke_attrs(
   opacity~ : Double?,
   width~ : Double,
   color~ : String,
+  stroke_opacity~ : Double? = None,
 ) -> String {
   let w = " stroke-width=\"\{num(width)}\""
   let d = match dash {
@@ -316,7 +329,20 @@ fn stroke_attrs(
     Some(v) => " opacity=\"\{num(v)}\""
     None => ""
   }
-  " stroke=\"\{esc(color)}\"" + w + d + o
+  let so = match stroke_opacity {
+    Some(v) => " stroke-opacity=\"\{num(v)}\""
+    None => ""
+  }
+  " stroke=\"\{esc(color)}\"" + w + d + o + so
+}
+
+///|
+fn fill_attrs(fill~ : String, fill_opacity~ : Double?) -> String {
+  let fo = match fill_opacity {
+    Some(v) => " fill-opacity=\"\{num(v)}\""
+    None => ""
+  }
+  " fill=\"\{esc(fill)}\"" + fo
 }
 
 /// Palette color for the colorful option. Indexes wrap around, but
@@ -416,6 +442,55 @@ pub fn Canvas::box(
   { x, y, w: ww, h, }
 }
 
+/// Low-level rectangle primitive. Unlike `box`, this is for diagram
+/// marks rather than label containers: dimensions are explicit and fill
+/// is available. A label can still be attached when the rectangle is a
+/// node in a conceptual diagram.
+///
+
+///|
+pub fn Canvas::rect(
+  self : Canvas,
+  x : Double,
+  y : Double,
+  w : Double,
+  h : Double,
+  label~ : String? = None,
+  rx~ : Double = 0,
+  size~ : Double = 14,
+  dash~ : String? = None,
+  opacity~ : Double? = None,
+  width~ : Double = 1.5,
+  color~ : String = "currentColor",
+  fill~ : String = "none",
+  fill_opacity~ : Double? = None,
+  stroke_opacity~ : Double? = None,
+  underline~ : Underline = No,
+) -> Shape {
+  let rect = El(
+    "<rect x=\"\{num(x)}\" y=\"\{num(y)}\" width=\"\{num(w)}\" height=\"\{num(h)}\" rx=\"\{num(rx)}\"" +
+    "\{fill_attrs(fill~, fill_opacity~)}\{stroke_attrs(dash~, opacity~, width~, color~, stroke_opacity~)}/>",
+    [(x, y), (x + w, y + h)],
+  )
+  let node = match label {
+    Some(l) =>
+      Group([
+        rect,
+        self.label_lines(
+          x + w / 2.0,
+          y + h / 2.0,
+          l,
+          size,
+          opacity~,
+          underline~,
+        ),
+      ])
+    None => rect
+  }
+  self.push(node)
+  { x, y, w, h, }
+}
+
 ///|
 pub fn Canvas::circle(
   self : Canvas,
@@ -428,11 +503,14 @@ pub fn Canvas::circle(
   opacity~ : Double? = None,
   width~ : Double = 1.5,
   color~ : String = "currentColor",
+  fill~ : String = "none",
+  fill_opacity~ : Double? = None,
+  stroke_opacity~ : Double? = None,
   underline~ : Underline = No,
 ) -> Shape {
   let ring = El(
     "<circle cx=\"\{num(cx)}\" cy=\"\{num(cy)}\" r=\"\{num(r)}\"" +
-    " fill=\"none\"\{stroke_attrs(dash~, opacity~, width~, color~)}/>",
+    "\{fill_attrs(fill~, fill_opacity~)}\{stroke_attrs(dash~, opacity~, width~, color~, stroke_opacity~)}/>",
     [(cx - r, cy - r), (cx + r, cy + r)],
   )
   let node = match label {
@@ -445,6 +523,78 @@ pub fn Canvas::circle(
 }
 
 ///|
+pub fn Canvas::ellipse(
+  self : Canvas,
+  cx : Double,
+  cy : Double,
+  rx : Double,
+  ry : Double,
+  dash~ : String? = None,
+  opacity~ : Double? = None,
+  width~ : Double = 1.5,
+  color~ : String = "currentColor",
+  fill~ : String = "none",
+  fill_opacity~ : Double? = None,
+  stroke_opacity~ : Double? = None,
+) -> Shape {
+  self.push(
+    El(
+      "<ellipse cx=\"\{num(cx)}\" cy=\"\{num(cy)}\" rx=\"\{num(rx)}\" ry=\"\{num(ry)}\"" +
+      "\{fill_attrs(fill~, fill_opacity~)}\{stroke_attrs(dash~, opacity~, width~, color~, stroke_opacity~)}/>",
+      [(cx - rx, cy - ry), (cx + rx, cy + ry)],
+    ),
+  )
+  { x: cx - rx, y: cy - ry, w: 2.0 * rx, h: 2.0 * ry, }
+}
+
+///|
+fn points_attr(pts : Array[Point]) -> String {
+  pts.map(fn(p) { "\{num(p.0)},\{num(p.1)}" }).join(" ")
+}
+
+///|
+pub fn Canvas::polyline(
+  self : Canvas,
+  pts : Array[Point],
+  dash~ : String? = None,
+  opacity~ : Double? = None,
+  width~ : Double = 1.5,
+  color~ : String = "currentColor",
+  fill~ : String = "none",
+  fill_opacity~ : Double? = None,
+  stroke_opacity~ : Double? = None,
+) -> Unit {
+  self.push(
+    El(
+      "<polyline points=\"\{points_attr(pts)}\"" +
+      "\{fill_attrs(fill~, fill_opacity~)}\{stroke_attrs(dash~, opacity~, width~, color~, stroke_opacity~)}/>",
+      pts,
+    ),
+  )
+}
+
+///|
+pub fn Canvas::polygon(
+  self : Canvas,
+  pts : Array[Point],
+  dash~ : String? = None,
+  opacity~ : Double? = None,
+  width~ : Double = 1.5,
+  color~ : String = "currentColor",
+  fill~ : String = "none",
+  fill_opacity~ : Double? = None,
+  stroke_opacity~ : Double? = None,
+) -> Unit {
+  self.push(
+    El(
+      "<polygon points=\"\{points_attr(pts)}\"" +
+      "\{fill_attrs(fill~, fill_opacity~)}\{stroke_attrs(dash~, opacity~, width~, color~, stroke_opacity~)}/>",
+      pts,
+    ),
+  )
+}
+
+///|
 pub fn Canvas::text(
   self : Canvas,
   x : Double,
@@ -454,10 +604,21 @@ pub fn Canvas::text(
   central~ : Bool = false,
   size~ : Double = 14,
   opacity~ : Double? = None,
+  color~ : String = "currentColor",
   underline~ : Underline = No,
 ) -> Unit {
   self.push(
-    self.text_node(x, y, s, anchor~, central~, size~, opacity~, underline~),
+    self.text_node(
+      x,
+      y,
+      s,
+      anchor~,
+      central~,
+      size~,
+      opacity~,
+      color~,
+      underline~,
+    ),
   )
 }
 
@@ -471,6 +632,7 @@ fn Canvas::text_node(
   central~ : Bool = false,
   size~ : Double = 14,
   opacity~ : Double? = None,
+  color~ : String = "currentColor",
   underline~ : Underline = No,
 ) -> Node {
   let a = match anchor {
@@ -497,7 +659,7 @@ fn Canvas::text_node(
     Custom(w) => w
   }
   let leaf = El(
-    "<text x=\"\{num(x)}\" y=\"\{num(y)}\" font-size=\"\{num(size)}\"\{a}\{bl} fill=\"currentColor\"\{o}>\{esc(s)}</text>",
+    "<text x=\"\{num(x)}\" y=\"\{num(y)}\" font-size=\"\{num(size)}\"\{a}\{bl} fill=\"\{esc(color)}\"\{o}>\{esc(s)}</text>",
     [(lx, ty), (lx + w, by)],
   )
   if uw > 0.0 {
@@ -715,7 +877,7 @@ pub fn Canvas::hbars(
       central=true,
       size~,
     )
-    let bar = { x: x + lw, y: by, w, h: bar_h, }
+    let bar = Shape::{ x: x + lw, y: by, w, h: bar_h, }
     if highlight is Some(h) && h == i {
       self.highlight(bar, pad=4.0)
     }
@@ -781,6 +943,7 @@ pub fn Canvas::line(
   opacity~ : Double? = None,
   width~ : Double = 1.5,
   color~ : String = "currentColor",
+  stroke_opacity~ : Double? = None,
 ) -> Unit {
   let pts = trim_ends(
     [from] + via + [to],
@@ -790,7 +953,7 @@ pub fn Canvas::line(
   let d = "M" + pts.map(fn(p) { "\{num(p.0)} \{num(p.1)}" }).join(" L")
   self.push(
     El(
-      "<path d=\"\{d}\" fill=\"none\"\{stroke_attrs(dash~, opacity~, width~, color~)}/>",
+      "<path d=\"\{d}\" fill=\"none\"\{stroke_attrs(dash~, opacity~, width~, color~, stroke_opacity~)}/>",
       pts,
     ),
   )
@@ -819,10 +982,14 @@ pub fn Canvas::path(
   opacity~ : Double? = None,
   width~ : Double = 1.5,
   color~ : String = "currentColor",
+  fill~ : String = "none",
+  fill_opacity~ : Double? = None,
+  stroke_opacity~ : Double? = None,
 ) -> Unit {
   self.push(
     El(
-      "<path d=\"\{d}\" fill=\"none\"\{stroke_attrs(dash~, opacity~, width~, color~)}/>",
+      "<path d=\"\{d}\"" +
+      "\{fill_attrs(fill~, fill_opacity~)}\{stroke_attrs(dash~, opacity~, width~, color~, stroke_opacity~)}/>",
       covered,
     ),
   )
@@ -834,28 +1001,25 @@ pub fn Canvas::render(
   width~ : Double? = None,
   height~ : Double? = None,
   label~ : String? = None,
+  viewbox~ : ViewBox? = None,
 ) -> String {
   let m = self.margin
   let bounds = merge_bounds(
     nodes_bounds(self.backdrop),
     nodes_bounds(self.parts),
   )
-  let vb = match bounds {
+  let derived = match bounds {
     Some(b) => {
       let w = b.max_x - b.min_x + 2.0 * m
       let h = b.max_y - b.min_y + 2.0 * m
-      "\{num(b.min_x - m)} \{num(b.min_y - m)} \{num(w)} \{num(h)}"
+      ViewBox::{ x: b.min_x - m, y: b.min_y - m, w, h, }
     }
-    None => "0 0 0 0"
+    None => ViewBox::{ x: 0.0, y: 0.0, w: 0.0, h: 0.0, }
   }
-  let w = match bounds {
-    Some(b) => b.max_x - b.min_x + 2.0 * m
-    None => 0.0
-  }
-  let h = match bounds {
-    Some(b) => b.max_y - b.min_y + 2.0 * m
-    None => 0.0
-  }
+  let frame = viewbox.unwrap_or(derived)
+  let vb = "\{num(frame.x)} \{num(frame.y)} \{num(frame.w)} \{num(frame.h)}"
+  let w = frame.w
+  let h = frame.h
   let wv = match width {
     Some(v) => num(v)
     None => w.round().to_int64().to_string()

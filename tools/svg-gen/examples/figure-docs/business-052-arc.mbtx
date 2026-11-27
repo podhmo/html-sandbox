@@ -1,0 +1,63 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/052 transcription probe
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away. The
+// reference name is kept as string data in the render label.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  ignore(c.circle(85.0, 70.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(83.0, 60.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(78.0, 52.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(70.0, 47.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(60.0, 45.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(50.0, 47.0, 3.0, width=1.0, color="#15803d", fill="#dcf3e3"))
+  ignore(c.circle(42.0, 52.0, 3.0, width=1.0, color="#15803d", fill="#dcf3e3"))
+  ignore(c.circle(37.0, 60.0, 3.0, width=1.0, color="#15803d", fill="#dcf3e3"))
+  ignore(c.circle(35.0, 70.0, 3.0, width=1.0, color="#c2410c", fill="#fde5d6"))
+  ignore(c.circle(95.0, 70.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(94.0, 61.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(90.0, 52.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(85.0, 45.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(78.0, 40.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(69.0, 36.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(60.0, 35.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(51.0, 36.0, 3.0, width=1.0, color="#15803d", fill="#dcf3e3"))
+  ignore(c.circle(43.0, 40.0, 3.0, width=1.0, color="#15803d", fill="#dcf3e3"))
+  ignore(c.circle(35.0, 45.0, 3.0, width=1.0, color="#15803d", fill="#dcf3e3"))
+  ignore(c.circle(30.0, 52.0, 3.0, width=1.0, color="#15803d", fill="#dcf3e3"))
+  ignore(c.circle(26.0, 61.0, 3.0, width=1.0, color="#c2410c", fill="#fde5d6"))
+  ignore(c.circle(25.0, 70.0, 3.0, width=1.0, color="#c2410c", fill="#fde5d6"))
+  ignore(c.circle(105.0, 70.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(104.0, 61.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(102.0, 53.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(97.0, 45.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(92.0, 38.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(85.0, 33.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(77.0, 28.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(69.0, 26.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(60.0, 25.0, 3.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(51.0, 26.0, 3.0, width=1.0, color="#15803d", fill="#dcf3e3"))
+  ignore(c.circle(43.0, 28.0, 3.0, width=1.0, color="#15803d", fill="#dcf3e3"))
+  ignore(c.circle(35.0, 33.0, 3.0, width=1.0, color="#15803d", fill="#dcf3e3"))
+  ignore(c.circle(28.0, 38.0, 3.0, width=1.0, color="#15803d", fill="#dcf3e3"))
+  ignore(c.circle(23.0, 45.0, 3.0, width=1.0, color="#15803d", fill="#dcf3e3"))
+  ignore(c.circle(18.0, 53.0, 3.0, width=1.0, color="#c2410c", fill="#fde5d6"))
+  ignore(c.circle(16.0, 61.0, 3.0, width=1.0, color="#c2410c", fill="#fde5d6"))
+  ignore(c.circle(15.0, 70.0, 3.0, width=1.0, color="#c2410c", fill="#fde5d6"))
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("Arc"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

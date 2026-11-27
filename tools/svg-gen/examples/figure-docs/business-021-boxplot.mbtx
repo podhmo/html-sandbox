@@ -1,0 +1,33 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/021 transcription probe
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away. The
+// reference name is kept as string data in the render label.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  c.line((25.0, 8.0), (25.0, 70.0), color="#2563eb")
+  ignore(c.rect(15.0, 25.0, 20.0, 25.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.line((15.0, 38.0), (35.0, 38.0), width=2.0, color="#c2410c")
+  c.line((60.0, 15.0), (60.0, 65.0), color="#2563eb")
+  ignore(c.rect(50.0, 30.0, 20.0, 18.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.line((50.0, 40.0), (70.0, 40.0), width=2.0, color="#c2410c")
+  c.line((95.0, 5.0), (95.0, 60.0), color="#2563eb")
+  ignore(c.rect(85.0, 18.0, 20.0, 22.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.line((85.0, 28.0), (105.0, 28.0), width=2.0, color="#c2410c")
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("Boxplot"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

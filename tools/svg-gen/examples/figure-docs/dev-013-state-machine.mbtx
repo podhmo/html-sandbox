@@ -1,0 +1,43 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// dev/013 transcription probe
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/dev.html
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away. The
+// reference name is kept as string data in the render label.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  ignore(c.circle(8.0, 40.0, 3.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.rect(16.0, 32.0, 28.0, 16.0, rx=2.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.text(30.0, 42.0, "待ち", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  ignore(c.rect(58.0, 8.0, 30.0, 16.0, rx=2.0, width=1.0, color="#15803d", fill="#dcf3e3"))
+  c.text(73.0, 18.0, "処理中", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  ignore(c.rect(58.0, 56.0, 30.0, 16.0, rx=2.0, width=1.0, color="#c2410c", fill="#fde5d6"))
+  c.text(73.0, 66.0, "失敗", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  ignore(c.rect(96.0, 32.0, 20.0, 16.0, rx=2.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.text(106.0, 42.0, "完了", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  c.line((11.0, 40.0), (16.0, 40.0), width=1.2, color="#2563eb")
+  c.polygon([(16.0, 40.0), (12.0, 42.0), (12.0, 38.0)], width=1.0, color="#2563eb", fill="#2563eb")
+  c.line((44.0, 36.0), (58.0, 18.0), width=1.2, color="#2563eb")
+  c.polygon([(58.0, 18.0), (57.0, 22.0), (54.0, 20.0)], width=1.0, color="#2563eb", fill="#2563eb")
+  c.line((88.0, 18.0), (100.0, 32.0), width=1.2, color="#2563eb")
+  c.polygon([(100.0, 32.0), (96.0, 30.0), (99.0, 28.0)], width=1.0, color="#2563eb", fill="#2563eb")
+  c.line((73.0, 24.0), (73.0, 56.0), width=1.2, color="#c2410c")
+  c.polygon([(73.0, 56.0), (71.0, 52.0), (75.0, 52.0)], width=1.0, color="#c2410c", fill="#c2410c")
+  c.line((58.0, 64.0), (40.0, 48.0), dash=Some("3 2"), width=1.0, color="#2563eb")
+  c.polygon([(40.0, 48.0), (44.0, 49.0), (42.0, 52.0)], width=1.0, color="#2563eb", fill="#2563eb")
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("State machine"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

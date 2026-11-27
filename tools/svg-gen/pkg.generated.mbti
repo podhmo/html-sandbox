@@ -89,18 +89,22 @@ pub fn Canvas::arrow(Self, (Double, Double), (Double, Double), via? : Array[(Dou
 pub fn Canvas::below(Self, Shape, Double) -> Double
 pub fn Canvas::box(Self, Double, Double, Sizing, Double, label? : String?, rx? : Double, pad_x? : Double, size? : Double, dash? : String?, opacity? : Double?, width? : Double, color? : String, underline? : Underline) -> Shape
 pub fn Canvas::center(Self, Shape) -> (Double, Double)
-pub fn Canvas::circle(Self, Double, Double, Double, label? : String?, size? : Double, dash? : String?, opacity? : Double?, width? : Double, color? : String, underline? : Underline) -> Shape
+pub fn Canvas::circle(Self, Double, Double, Double, label? : String?, size? : Double, dash? : String?, opacity? : Double?, width? : Double, color? : String, fill? : String, fill_opacity? : Double?, stroke_opacity? : Double?, underline? : Underline) -> Shape
 pub fn Canvas::color(Self, Int32) -> String
+pub fn Canvas::ellipse(Self, Double, Double, Double, Double, dash? : String?, opacity? : Double?, width? : Double, color? : String, fill? : String, fill_opacity? : Double?, stroke_opacity? : Double?) -> Shape
 pub fn Canvas::hbars(Self, Array[Hbar], x? : Double, y? : Double, bar_h? : Double, row_gap? : Double, max_w? : Double, label_w? : Double?, size? : Double, value_fmt? : (Double) -> String, fill_opacity? : Double, highlight? : Int32?, colors? : Array[String]?) -> Unit
 pub fn Canvas::highlight(Self, Shape, pad? : Double, opacity? : Double, mode? : HighlightMode, rx? : Double?) -> Unit
 pub fn Canvas::left_of(Self, Shape, Double, Double) -> Double
-pub fn Canvas::line(Self, (Double, Double), (Double, Double), via? : Array[(Double, Double)], gap? : Double, gap_start? : Double?, gap_end? : Double?, dash? : String?, opacity? : Double?, width? : Double, color? : String) -> Unit
+pub fn Canvas::line(Self, (Double, Double), (Double, Double), via? : Array[(Double, Double)], gap? : Double, gap_start? : Double?, gap_end? : Double?, dash? : String?, opacity? : Double?, width? : Double, color? : String, stroke_opacity? : Double?) -> Unit
 pub fn Canvas::midpoint(Self, (Double, Double), (Double, Double)) -> (Double, Double)
-pub fn Canvas::path(Self, String, Array[(Double, Double)], dash? : String?, opacity? : Double?, width? : Double, color? : String) -> Unit
+pub fn Canvas::path(Self, String, Array[(Double, Double)], dash? : String?, opacity? : Double?, width? : Double, color? : String, fill? : String, fill_opacity? : Double?, stroke_opacity? : Double?) -> Unit
+pub fn Canvas::polygon(Self, Array[(Double, Double)], dash? : String?, opacity? : Double?, width? : Double, color? : String, fill? : String, fill_opacity? : Double?, stroke_opacity? : Double?) -> Unit
+pub fn Canvas::polyline(Self, Array[(Double, Double)], dash? : String?, opacity? : Double?, width? : Double, color? : String, fill? : String, fill_opacity? : Double?, stroke_opacity? : Double?) -> Unit
 pub fn Canvas::raw(Self, String, covered? : Array[(Double, Double)]) -> Unit
-pub fn Canvas::render(Self, width? : Double?, height? : Double?, label? : String?) -> String
+pub fn Canvas::rect(Self, Double, Double, Double, Double, label? : String?, rx? : Double, size? : Double, dash? : String?, opacity? : Double?, width? : Double, color? : String, fill? : String, fill_opacity? : Double?, stroke_opacity? : Double?, underline? : Underline) -> Shape
+pub fn Canvas::render(Self, width? : Double?, height? : Double?, label? : String?, viewbox? : ViewBox?) -> String
 pub fn Canvas::right_of(Self, Shape, Double) -> Double
-pub fn Canvas::text(Self, Double, Double, String, anchor? : TextAnchor, central? : Bool, size? : Double, opacity? : Double?, underline? : Underline) -> Unit
+pub fn Canvas::text(Self, Double, Double, String, anchor? : TextAnchor, central? : Bool, size? : Double, opacity? : Double?, color? : String, underline? : Underline) -> Unit
 
 #derive(@debug.Debug)
 pub(all) struct ChartMeta {
@@ -229,6 +233,14 @@ pub(all) enum Underline {
   No
   Yes
   Custom(Double)
+}
+
+#derive(@debug.Debug)
+pub(all) struct ViewBox {
+  x : Double
+  y : Double
+  w : Double
+  h : Double
 }
 
 // Type aliases

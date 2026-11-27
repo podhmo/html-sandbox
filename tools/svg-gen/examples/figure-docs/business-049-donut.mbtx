@@ -1,0 +1,29 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/049 transcription probe
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away. The
+// reference name is kept as string data in the render label.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  c.path("M60,40 L60,8 A32,32 0 0 1 90,52 Z", [], width=1.0, color="#2563eb", fill="#dbe8fd")
+  c.path("M60,40 L90,52 A32,32 0 0 1 35,60 Z", [], width=1.0, color="#15803d", fill="#dcf3e3")
+  c.path("M60,40 L35,60 A32,32 0 0 1 60,8 Z", [], width=1.0, color="#c2410c", fill="#fde5d6")
+  ignore(c.circle(60.0, 40.0, 16.0, width=1.0, color="#fff", fill="#fff"))
+  c.text(60.0, 43.0, "合計", anchor=@svg.Middle, size=8.0, color="#5d6778")
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("Donut"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

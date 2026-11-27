@@ -1,0 +1,30 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/097 transcription probe
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away. The
+// reference name is kept as string data in the render label.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  ignore(c.circle(30.0, 40.0, 12.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.circle(90.0, 40.0, 12.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.path("M40,30 Q60,8 80,30", [], color="#2563eb")
+  c.path("M80,50 Q60,72 40,50", [], color="#c2410c")
+  c.text(60.0, 16.0, "+", anchor=@svg.Middle, size=9.0, color="#5d6778")
+  c.text(60.0, 70.0, "−", anchor=@svg.Middle, size=9.0, color="#5d6778")
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("因果ループ"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

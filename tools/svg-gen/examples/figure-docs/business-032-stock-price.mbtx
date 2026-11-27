@@ -1,0 +1,38 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/032 transcription probe
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away. The
+// reference name is kept as string data in the render label.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  c.line((15.0, 20.0), (15.0, 60.0), color="#9aa4b5")
+  ignore(c.rect(10.0, 30.0, 10.0, 15.0, width=1.0, color="#c2410c", fill="#fde5d6"))
+  c.line((31.0, 15.0), (31.0, 55.0), color="#9aa4b5")
+  ignore(c.rect(26.0, 25.0, 10.0, 20.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.line((47.0, 25.0), (47.0, 65.0), color="#9aa4b5")
+  ignore(c.rect(42.0, 35.0, 10.0, 15.0, width=1.0, color="#c2410c", fill="#fde5d6"))
+  c.line((63.0, 10.0), (63.0, 50.0), color="#9aa4b5")
+  ignore(c.rect(58.0, 20.0, 10.0, 20.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.line((79.0, 18.0), (79.0, 58.0), color="#9aa4b5")
+  ignore(c.rect(74.0, 28.0, 10.0, 12.0, width=1.0, color="#c2410c", fill="#fde5d6"))
+  c.line((95.0, 8.0), (95.0, 45.0), color="#9aa4b5")
+  ignore(c.rect(90.0, 15.0, 10.0, 18.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.line((111.0, 12.0), (111.0, 48.0), color="#9aa4b5")
+  ignore(c.rect(106.0, 20.0, 10.0, 16.0, width=1.0, color="#c2410c", fill="#fde5d6"))
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("Stock price"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

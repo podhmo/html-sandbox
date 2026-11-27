@@ -1,0 +1,31 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/076 transcription probe
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away. The
+// reference name is kept as string data in the render label.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  ignore(c.rect(8.0, 8.0, 8.0, 40.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.rect(8.0, 52.0, 8.0, 20.0, width=1.0, color="#15803d", fill="#dcf3e3"))
+  ignore(c.rect(104.0, 6.0, 8.0, 30.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  ignore(c.rect(104.0, 40.0, 8.0, 32.0, width=1.0, color="#c2410c", fill="#fde5d6"))
+  c.path("M16,8 C60,8 60,6 104,6 L104,30 C60,30 60,32 16,32Z", [], width=1.0, color="none", fill="#dbe8fd", fill_opacity=Some(0.8))
+  c.path("M16,32 C60,32 60,40 104,40 L104,56 C60,56 60,48 16,48Z", [], width=1.0, color="none", fill="#fde5d6", fill_opacity=Some(0.8))
+  c.path("M16,52 C60,52 60,56 104,56 L104,72 C60,72 60,72 16,72Z", [], width=1.0, color="none", fill="#dcf3e3", fill_opacity=Some(0.8))
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("Sankey"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

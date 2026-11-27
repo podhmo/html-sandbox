@@ -1,0 +1,39 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// business/025 transcription probe
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away. The
+// reference name is kept as string data in the render label.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  c.line((20.0, 12.0), (70.0, 12.0), color="#9aa4b5")
+  ignore(c.circle(20.0, 12.0, 4.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(70.0, 12.0, 4.0, width=1.0, color="#c2410c", fill="#c2410c"))
+  c.line((35.0, 27.0), (95.0, 27.0), color="#9aa4b5")
+  ignore(c.circle(35.0, 27.0, 4.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(95.0, 27.0, 4.0, width=1.0, color="#c2410c", fill="#c2410c"))
+  c.line((15.0, 42.0), (50.0, 42.0), color="#9aa4b5")
+  ignore(c.circle(15.0, 42.0, 4.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(50.0, 42.0, 4.0, width=1.0, color="#c2410c", fill="#c2410c"))
+  c.line((40.0, 57.0), (80.0, 57.0), color="#9aa4b5")
+  ignore(c.circle(40.0, 57.0, 4.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(80.0, 57.0, 4.0, width=1.0, color="#c2410c", fill="#c2410c"))
+  c.line((55.0, 72.0), (100.0, 72.0), color="#9aa4b5")
+  ignore(c.circle(55.0, 72.0, 4.0, width=1.0, color="#2563eb", fill="#2563eb"))
+  ignore(c.circle(100.0, 72.0, 4.0, width=1.0, color="#c2410c", fill="#c2410c"))
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("Dot plot"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

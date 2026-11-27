@@ -97,6 +97,21 @@
     文書構造メトリクス）を執筆者別に集計し、分ける力があるか眺める。
     分離度が見えた特徴量だけを lint の規則候補にする。
     [issue #172](https://github.com/podhmo/html-sandbox/issues/172)
+- [ ] **svg-gen に figure-docs の必須級機能を入れる**: business/dev references
+  150 図の probe で見えた不足のうち、raw な座標・制御点・baseline 計算を
+  書き手へ戻す 4 件を入れる。優先度と対象図の分類は
+  [優先度分類](docs/sketch/ja/figure-docs-svg-gen-priority.md)、監査は
+  [不足機能のメモ](docs/sketch/ja/figure-docs-svg-gen-audit.md)を参照
+  （[issue #200](https://github.com/podhmo/html-sandbox/issues/200)）。
+  - [ ] **typed curve/path builder と curve-aware lint を作る**: move/line/
+    cubic/quadratic/arc/close を型付きで組み、endpoint/control point から
+    bounds を推定する。`check.mbtx` が C/S/Q/A を検査できるようにする。
+  - [ ] **connector/arrowhead/port/edge label を作る**: closed triangle head、
+    orthogonal elbow、shape edge 上の port、connector 上の label anchor を入れる。
+  - [ ] **baseline-aware な text measurement/placement を作る**: text block の
+    bbox を扱い、shape/edge の上下左右へ baseline を意識して label を置けるようにする。
+  - [ ] **basic chart builder を作る**: column/bar（grouped/stacked/diverging）、
+    area/band、pie/donut slice をデータから組めるようにする。
 
 ### Future work
 

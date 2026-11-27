@@ -1,0 +1,30 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// dev/035 transcription probe
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/dev.html
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away. The
+// reference name is kept as string data in the render label.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  c.line((10.0, 70.0), (112.0, 70.0), width=1.0, color="#9aa4b5")
+  c.line((10.0, 6.0), (10.0, 70.0), width=1.0, color="#9aa4b5")
+  c.polyline([(10.0, 62.0), (20.0, 61.0), (30.0, 60.0), (40.0, 62.0), (50.0, 61.0), (60.0, 60.0), (70.0, 62.0), (80.0, 61.0), (90.0, 60.0), (100.0, 62.0), (110.0, 61.0)], color="#2563eb")
+  c.polyline([(10.0, 48.0), (20.0, 46.0), (30.0, 44.0), (40.0, 42.0), (50.0, 48.0), (60.0, 46.0), (70.0, 44.0), (80.0, 42.0), (90.0, 48.0), (100.0, 46.0), (110.0, 44.0)], color="#15803d")
+  c.polyline([(10.0, 30.0), (20.0, 28.0), (30.0, 26.0), (40.0, 30.0), (50.0, 28.0), (60.0, 26.0), (70.0, 22.0), (80.0, 20.0), (90.0, 26.0), (100.0, 30.0), (110.0, 28.0)], color="#c2410c")
+  c.line((10.0, 20.0), (112.0, 20.0), dash=Some("3 2"), width=1.0, color="#9aa4b5")
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("遅延の分位の推移"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

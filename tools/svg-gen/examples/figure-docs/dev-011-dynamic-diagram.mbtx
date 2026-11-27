@@ -1,0 +1,41 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// dev/011 transcription probe
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/dev.html
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away. The
+// reference name is kept as string data in the render label.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  ignore(c.rect(6.0, 10.0, 28.0, 14.0, rx=2.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.text(20.0, 19.0, "Web", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  ignore(c.rect(46.0, 10.0, 28.0, 14.0, rx=2.0, width=1.0, color="#15803d", fill="#dcf3e3"))
+  c.text(60.0, 19.0, "API", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  ignore(c.rect(86.0, 10.0, 28.0, 14.0, rx=2.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.text(100.0, 19.0, "Auth", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  ignore(c.rect(46.0, 54.0, 28.0, 14.0, rx=2.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.text(60.0, 63.0, "DB", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  c.line((34.0, 17.0), (46.0, 17.0), width=1.2, color="#2563eb")
+  c.polygon([(46.0, 17.0), (42.0, 19.0), (42.0, 15.0)], width=1.0, color="#2563eb", fill="#2563eb")
+  c.text(40.0, 14.0, "1", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  c.line((74.0, 15.0), (86.0, 15.0), width=1.2, color="#2563eb")
+  c.polygon([(86.0, 15.0), (82.0, 17.0), (82.0, 13.0)], width=1.0, color="#2563eb", fill="#2563eb")
+  c.text(80.0, 12.0, "2", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  c.line((60.0, 24.0), (60.0, 54.0), width=1.2, color="#2563eb")
+  c.polygon([(60.0, 54.0), (58.0, 50.0), (62.0, 50.0)], width=1.0, color="#2563eb", fill="#2563eb")
+  c.text(64.0, 40.0, "3", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("Dynamic diagram"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

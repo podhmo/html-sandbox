@@ -1,0 +1,43 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// dev/028 transcription probe
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/dev.html
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away. The
+// reference name is kept as string data in the render label.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  ignore(c.rect(4.0, 32.0, 20.0, 14.0, rx=2.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.text(14.0, 41.0, "build", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  ignore(c.rect(34.0, 14.0, 22.0, 14.0, rx=2.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.text(45.0, 23.0, "test", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  ignore(c.rect(34.0, 50.0, 22.0, 14.0, rx=2.0, width=1.0, color="#2563eb", fill="#dbe8fd"))
+  c.text(45.0, 59.0, "lint", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  c.line((24.0, 39.0), (34.0, 21.0), width=1.2, color="#2563eb")
+  c.polygon([(34.0, 21.0), (34.0, 25.0), (31.0, 23.0)], width=1.0, color="#2563eb", fill="#2563eb")
+  c.line((24.0, 39.0), (34.0, 57.0), width=1.2, color="#2563eb")
+  c.polygon([(34.0, 57.0), (31.0, 55.0), (34.0, 53.0)], width=1.0, color="#2563eb", fill="#2563eb")
+  c.polygon([(70.0, 39.0), (76.0, 33.0), (82.0, 39.0), (76.0, 45.0)], width=1.0, color="#c2410c", fill="#fde5d6")
+  c.line((56.0, 21.0), (70.0, 39.0), width=1.2, color="#2563eb")
+  c.polygon([(70.0, 39.0), (66.0, 37.0), (69.0, 35.0)], width=1.0, color="#2563eb", fill="#2563eb")
+  c.line((56.0, 57.0), (70.0, 39.0), width=1.2, color="#2563eb")
+  c.polygon([(70.0, 39.0), (69.0, 43.0), (66.0, 41.0)], width=1.0, color="#2563eb", fill="#2563eb")
+  c.line((82.0, 39.0), (92.0, 39.0), width=1.2, color="#2563eb")
+  c.polygon([(92.0, 39.0), (88.0, 41.0), (88.0, 37.0)], width=1.0, color="#2563eb", fill="#2563eb")
+  ignore(c.rect(92.0, 32.0, 24.0, 14.0, rx=2.0, width=1.0, color="#15803d", fill="#dcf3e3"))
+  c.text(104.0, 41.0, "deploy", anchor=@svg.Middle, size=6.0, color="#5d6778")
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("CI/CD pipeline"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}

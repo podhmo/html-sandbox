@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 296.8 62.4" width="296.8" height="62.4" role="img" aria-label="nice-semantic-dev">
+<rect width="296.8" height="62.4" fill="white" stroke="#d5dae2"/>
+<g transform="translate(0 0) scale(0.78)"><rect x="4" y="4" width="112" height="72" rx="0" fill="none" stroke="#9aa4b5" stroke-width="1" stroke-dasharray="3 2"/>
+<text x="10" y="12" font-size="6" fill="#5d6778">prod</text>
+<rect x="10" y="16" width="46" height="54" rx="0" fill="none" stroke="#2563eb" stroke-width="1"/>
+<rect x="64" y="16" width="46" height="54" rx="0" fill="none" stroke="#2563eb" stroke-width="1"/>
+<rect x="16" y="26" width="34" height="14" rx="2" fill="#dcf3e3" stroke="#15803d" stroke-width="1"/>
+<text x="33" y="35" font-size="6" text-anchor="middle" fill="#5d6778">API</text>
+<rect x="16" y="48" width="34" height="14" rx="2" fill="#dbe8fd" stroke="#2563eb" stroke-width="1"/>
+<text x="33" y="57" font-size="6" text-anchor="middle" fill="#5d6778">Worker</text>
+<rect x="70" y="26" width="34" height="14" rx="2" fill="#dbe8fd" stroke="#2563eb" stroke-width="1"/>
+<text x="87" y="35" font-size="6" text-anchor="middle" fill="#5d6778">DB</text>
+<path d="M50 33 L70 33" fill="none" stroke="#2563eb" stroke-width="1.2"/>
+<polygon points="70,33 66,35 66,31" fill="#2563eb" stroke="#2563eb" stroke-width="1"/></g>
+<g transform="translate(101.6 0) scale(0.78)"><path d="M6 56 L114 56" fill="none" stroke="#2563eb" stroke-width="2"/>
+<polyline points="30,56 42,30 78,30 90,56" fill="none" stroke="#15803d" stroke-width="2"/>
+<polyline points="54,30 62,12 72,12" fill="none" stroke="#c2410c" stroke-width="2"/>
+<circle cx="14" cy="56" r="4" fill="#fff" stroke="#2563eb" stroke-width="1"/>
+<circle cx="30" cy="56" r="4" fill="#fff" stroke="#2563eb" stroke-width="1"/>
+<circle cx="90" cy="56" r="4" fill="#fff" stroke="#2563eb" stroke-width="1"/>
+<circle cx="106" cy="56" r="4" fill="#fff" stroke="#2563eb" stroke-width="1"/>
+<circle cx="42" cy="30" r="4" fill="#fff" stroke="#15803d" stroke-width="1"/>
+<circle cx="60" cy="30" r="4" fill="#fff" stroke="#15803d" stroke-width="1"/>
+<circle cx="78" cy="30" r="4" fill="#fff" stroke="#15803d" stroke-width="1"/>
+<circle cx="72" cy="12" r="4" fill="#fff" stroke="#c2410c" stroke-width="1"/></g>
+<g transform="translate(203.2 0) scale(0.78)"><rect x="10" y="6" width="100" height="9" rx="0" fill="#dbe8fd" stroke="#2563eb" stroke-width="1"/>
+<rect x="14" y="19" width="20" height="9" rx="0" fill="#dbe8fd" stroke="#2563eb" stroke-width="1"/>
+<rect x="36" y="32" width="70" height="9" rx="0" fill="#dbe8fd" stroke="#2563eb" stroke-width="1"/>
+<rect x="40" y="45" width="60" height="9" rx="0" fill="#fde5d6" stroke="#c2410c" stroke-width="1"/>
+<rect x="102" y="58" width="6" height="9" rx="0" fill="#dbe8fd" stroke="#2563eb" stroke-width="1"/></g>
+</svg>

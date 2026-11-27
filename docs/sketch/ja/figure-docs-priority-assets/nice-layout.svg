@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 296.8 62.4" width="296.8" height="62.4" role="img" aria-label="nice-layout">
+<rect width="296.8" height="62.4" fill="white" stroke="#d5dae2"/>
+<g transform="translate(0 0) scale(0.78)"><rect x="4" y="32" width="20" height="14" rx="2" fill="#dbe8fd" stroke="#2563eb" stroke-width="1"/>
+<text x="14" y="41" font-size="6" text-anchor="middle" fill="#5d6778">build</text>
+<rect x="34" y="14" width="22" height="14" rx="2" fill="#dbe8fd" stroke="#2563eb" stroke-width="1"/>
+<text x="45" y="23" font-size="6" text-anchor="middle" fill="#5d6778">test</text>
+<rect x="34" y="50" width="22" height="14" rx="2" fill="#dbe8fd" stroke="#2563eb" stroke-width="1"/>
+<text x="45" y="59" font-size="6" text-anchor="middle" fill="#5d6778">lint</text>
+<path d="M24 39 L34 21" fill="none" stroke="#2563eb" stroke-width="1.2"/>
+<polygon points="34,21 34,25 31,23" fill="#2563eb" stroke="#2563eb" stroke-width="1"/>
+<path d="M24 39 L34 57" fill="none" stroke="#2563eb" stroke-width="1.2"/>
+<polygon points="34,57 31,55 34,53" fill="#2563eb" stroke="#2563eb" stroke-width="1"/>
+<polygon points="70,39 76,33 82,39 76,45" fill="#fde5d6" stroke="#c2410c" stroke-width="1"/>
+<path d="M56 21 L70 39" fill="none" stroke="#2563eb" stroke-width="1.2"/>
+<polygon points="70,39 66,37 69,35" fill="#2563eb" stroke="#2563eb" stroke-width="1"/>
+<path d="M56 57 L70 39" fill="none" stroke="#2563eb" stroke-width="1.2"/>
+<polygon points="70,39 69,43 66,41" fill="#2563eb" stroke="#2563eb" stroke-width="1"/>
+<path d="M82 39 L92 39" fill="none" stroke="#2563eb" stroke-width="1.2"/>
+<polygon points="92,39 88,41 88,37" fill="#2563eb" stroke="#2563eb" stroke-width="1"/>
+<rect x="92" y="32" width="24" height="14" rx="2" fill="#dcf3e3" stroke="#15803d" stroke-width="1"/>
+<text x="104" y="41" font-size="6" text-anchor="middle" fill="#5d6778">deploy</text></g>
+<g transform="translate(101.6 0) scale(0.78)"><rect x="4" y="70" width="112" height="12" rx="0" fill="#fde5d6" stroke="#fff" stroke-width="1"/>
+<rect x="4" y="57" width="70" height="12" rx="0" fill="#fbd0b4" stroke="#fff" stroke-width="1"/>
+<rect x="74" y="57" width="42" height="12" rx="0" fill="#fbd0b4" stroke="#fff" stroke-width="1"/>
+<rect x="4" y="44" width="40" height="12" rx="0" fill="#f8b48a" stroke="#fff" stroke-width="1"/>
+<rect x="44" y="44" width="30" height="12" rx="0" fill="#f8b48a" stroke="#fff" stroke-width="1"/>
+<rect x="74" y="44" width="30" height="12" rx="0" fill="#f8b48a" stroke="#fff" stroke-width="1"/>
+<rect x="4" y="31" width="30" height="12" rx="0" fill="#f19763" stroke="#fff" stroke-width="1"/>
+<rect x="74" y="31" width="20" height="12" rx="0" fill="#f19763" stroke="#fff" stroke-width="1"/>
+<rect x="8" y="18" width="18" height="12" rx="0" fill="#e5793e" stroke="#fff" stroke-width="1"/></g>
+<g transform="translate(203.2 0) scale(0.78)"><path d="M8 72 L112 72" fill="none" stroke="#9aa4b5" stroke-width="1.5"/>
+<rect x="10" y="8" width="50" height="12" rx="0" fill="#dbe8fd" stroke="#2563eb" stroke-width="1"/>
+<rect x="40" y="28" width="55" height="12" rx="0" fill="#dcf3e3" stroke="#15803d" stroke-width="1"/>
+<rect x="70" y="48" width="40" height="12" rx="0" fill="#fde5d6" stroke="#c2410c" stroke-width="1"/></g>
+</svg>

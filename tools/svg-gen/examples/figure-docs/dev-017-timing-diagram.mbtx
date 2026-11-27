@@ -1,0 +1,31 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// dev/017 transcription probe
+// source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/dev.html
+//
+// Mechanical transcription probe: each SVG element in the reference is
+// emitted through the lowest-level svg-gen primitive that can represent
+// it. Coordinates and fixed light-theme colors are intentionally kept so
+// unsupported surface area is visible instead of redesigned away. The
+// reference name is kept as string data in the render label.
+
+fn main {
+  let c = @svg.Canvas(margin=0.0)
+  c.line((4.0, 18.0), (116.0, 18.0), width=1.0, color="#d5dae2")
+  c.line((4.0, 42.0), (116.0, 42.0), width=1.0, color="#d5dae2")
+  c.line((4.0, 66.0), (116.0, 66.0), width=1.0, color="#d5dae2")
+  c.polyline([(10.0, 20.0), (30.0, 20.0), (30.0, 10.0), (70.0, 10.0), (70.0, 20.0), (110.0, 20.0)], color="#2563eb")
+  c.polyline([(10.0, 44.0), (45.0, 44.0), (45.0, 34.0), (95.0, 34.0), (95.0, 44.0), (110.0, 44.0)], color="#15803d")
+  c.line((70.0, 4.0), (70.0, 76.0), dash=Some("3 2"), width=1.0, color="#c2410c")
+  c.polyline([(10.0, 68.0), (60.0, 68.0), (60.0, 58.0), (110.0, 58.0)], color="#c2410c")
+  println(
+    c.render(
+      width=Some(120.0),
+      height=Some(80.0),
+      label=Some("Timing diagram"),
+      viewbox=Some(@svg.ViewBox::{ x: 0.0, y: 0.0, w: 120.0, h: 80.0 }),
+    ),
+  )
+}
