@@ -119,3 +119,31 @@ n=600 の ECDF を 2 系列そのまま描くと、ステップの頂点が 1200
 ## 検査を通った横長SVGでも、縮小すると読めなくなる
 
 [探索ノート用スキルの記事](https://github.com/podhmo/html-sandbox/tree/96f82be97a99a71ff0998f40a4670dbb9adead01/slops/2026-11-07-exploration-notes-from-issue-133.md)で、幅約680の実体とリンクの図は、境界・ラベルの検査を通り、原寸のPNGでも読めていた。しかしブログの狭い画面では、記事幅に収める縮小によってラベルが読みにくくなった。小さな配置に変え、共通・探索用という短いラベルと縦向きのリンクの矢印を使い、正式名は本文に残した。原寸だけでなく記事内の表示幅でも確認する必要がある。座標の検査を通ることは、CSSで縮小したあとも文字が読めることを保証しない。
+
+## 追記: figure-docs 対応で見つけた落とし穴
+
+[figure-docs 150図の写経から svg-gen に必須級機能を足した記録](../2026-11-27-svg-gen-figure-docs-required.md)の実装中に出た、図の作成者にも関係する失敗を短く残す。
+
+## path 文字列の lowercase command は別の命令として数える
+
+SVG path では uppercase/lowercase で absolute/relative が変わる。lint の parser を C/S/Q/T/A に対応させたとき、token regex が uppercase だけを通し、lowercase の `c/s/q/t` を落としていた。`M0 0Z c1 1 2 2 3 3` のような相対曲線で、数字だけが残って直前の `Z` の引数に見えた。command の arity を実装しても tokenizer が対応していなければ意味がない。
+
+## arity 0 の command でも入力を進める
+
+`Z` は引数を取らない。parser が arity 0 の command で token index を進めないと、`Z` の後ろに malformed な数字が続いたときに同じ token を読み続ける。lint が停止せず、後続の SVG も検査されなかった。小さな parser でも、1 step で必ず入力を消費するか、消費しないなら即座に診断して止める必要がある。
+
+## 自動の直角折れ点は退化することがある
+
+horizontal-then-vertical routing の折れ点 `(to.x, from.y)` は、from/to が水平に揃っていると終点と同じになる。長さ 0 の segment が残ると、arrowhead の方向計算がつぶれる。自動で折れ点を足すときは、from/to と一致する点を落とす。退化した折れ点は座標上は合法でも、描画プリミティブには意味がない。
+
+## connector label の offset は中心ではなく箱の端から測る
+
+複数行の edge label を線から 10px 離しても、それが中心までの距離なら、推定高さ 28.8px の box は線に重なる。label の位置は「path 上の点」だけでは足りず、その点を通る segment の方向、text box の幅と高さ、法線方向への投影を使って、箱の端から clearance を取る必要がある。elbow の中点に置く、でも線に重なることはある。
+
+## circle/ellipse の port は bounding box の話か決める
+
+shape が x/y/w/h の bounding box だけを持つなら、edge port も bounding box の辺に置かれる。circle や ellipse に同じ API を使うと、曲線状の輪郭ではなく外接矩形の辺に接続する。`t=0.75` のような位置は円の外に出ることがある。曲線に接する port が必要なら、shape に円/楕円の種類情報が要る。
+
+## colorful の色 index は意味ではない
+
+`c.color(2)` は categorical palette の 3 番目であって、positive、warning、selected の意味ではない。diverging chart で positive/negative を色で分けたい、heatmap で値を色にしたい、という用途には semantic color や scale が別途要る。palette が colorful でも、色の意味は本文か API で明示しないと読み違える。
