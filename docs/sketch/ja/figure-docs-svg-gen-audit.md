@@ -150,6 +150,9 @@ bbox を baseline込みで扱う配置 helper、または shape/edge の上下�
 低レベル写経という意味では、今回追加した primitive によって 150/150 図は
 svg-gen で生成できる。ただし「これらの図を楽に書かせられるか」という意味では
 まだ足りない。優先度が高いのは curve/path builder、closed arrowhead と elbow
-connector、group/transform、bar/area/pie 系の chart primitive、そして curve-aware
-lint。地理図・contour・sankey/chord/network の自動 layout アルゴリズムは、
+connector、baseline-aware な text placement、bar/area/pie 系の chart primitive、
+そして curve-aware lint。group/transform も有用だが、`.mbtx` がコードなので
+必須級よりは下がる。地理図・contour・sankey/chord/network の自動 layout アルゴリズムは、
 svg-gen に入れる範囲を別途決めるべき大きめの領域である。
+
+優先度分類は[figure-docs 向け svg-gen 機能の優先度分類](./figure-docs-svg-gen-priority.md)にまとめた。

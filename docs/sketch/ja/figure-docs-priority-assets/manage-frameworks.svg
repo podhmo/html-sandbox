@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 296.8 62.4" width="296.8" height="62.4" role="img" aria-label="manage-frameworks">
+<rect width="296.8" height="62.4" fill="white" stroke="#d5dae2"/>
+<g transform="translate(0 0) scale(0.78)"><rect x="8" y="6" width="52" height="34" rx="0" fill="#dcf3e3" stroke="none" stroke-width="1"/>
+<rect x="8" y="42" width="52" height="34" rx="0" fill="#dbe8fd" stroke="none" stroke-width="1"/>
+<rect x="62" y="6" width="52" height="34" rx="0" fill="#fde5d6" stroke="none" stroke-width="1"/>
+<rect x="62" y="42" width="52" height="34" rx="0" fill="#d5dae2" stroke="none" stroke-width="1"/>
+<text x="34" y="26" font-size="8" text-anchor="middle" fill="#5d6778">S</text>
+<text x="88" y="26" font-size="8" text-anchor="middle" fill="#5d6778">W</text>
+<text x="34" y="62" font-size="8" text-anchor="middle" fill="#5d6778">O</text>
+<text x="88" y="62" font-size="8" text-anchor="middle" fill="#5d6778">T</text></g>
+<g transform="translate(101.6 0) scale(0.78)"><path d="M60 4 L60 76" fill="none" stroke="#9aa4b5" stroke-width="1.5"/>
+<path d="M8 40 L112 40" fill="none" stroke="#9aa4b5" stroke-width="1.5"/>
+<rect x="10" y="42" width="48" height="32" rx="0" fill="#dcf3e3" stroke="none" stroke-width="1"/>
+<circle cx="34" cy="58" r="5" fill="#15803d" stroke="#15803d" stroke-width="1"/>
+<circle cx="86" cy="58" r="5" fill="#dbe8fd" stroke="#2563eb" stroke-width="1"/>
+<circle cx="34" cy="22" r="5" fill="#dbe8fd" stroke="#2563eb" stroke-width="1"/>
+<circle cx="86" cy="22" r="4" fill="#fde5d6" stroke="#c2410c" stroke-width="1"/></g>
+<g transform="translate(203.2 0) scale(0.78)"><circle cx="32" cy="14" r="6" fill="#fff" stroke="#9aa4b5" stroke-width="1"/>
+<circle cx="32" cy="34" r="6" fill="#fff" stroke="#9aa4b5" stroke-width="1"/>
+<path d="M32,34 L32,28 A6,6 0 0,1 38.0,34.0 Z" fill="#2563eb" stroke="none" stroke-width="1"/>
+<circle cx="32" cy="54" r="6" fill="#fff" stroke="#9aa4b5" stroke-width="1"/>
+<path d="M32,54 L32,48 A6,6 0 0,1 32.0,60.0 Z" fill="#2563eb" stroke="none" stroke-width="1"/>
+<circle cx="32" cy="74" r="6" fill="#fff" stroke="#9aa4b5" stroke-width="1"/>
+<path d="M32,74 L32,68 A6,6 0 1,1 26.0,74.0 Z" fill="#2563eb" stroke="none" stroke-width="1"/>
+<circle cx="58" cy="14" r="6" fill="#fff" stroke="#9aa4b5" stroke-width="1"/>
+<path d="M58,14 L58,8 A6,6 0 0,1 58.0,20.0 Z" fill="#2563eb" stroke="none" stroke-width="1"/>
+<circle cx="58" cy="34" r="6" fill="#fff" stroke="#9aa4b5" stroke-width="1"/>
+<path d="M58,34 L58,28 A6,6 0 1,1 52.0,34.0 Z" fill="#2563eb" stroke="none" stroke-width="1"/>
+<circle cx="58" cy="54" r="6" fill="#fff" stroke="#9aa4b5" stroke-width="1"/>
+<circle cx="58" cy="54" r="6" fill="#2563eb" stroke="#2563eb" stroke-width="1"/>
+<circle cx="58" cy="74" r="6" fill="#fff" stroke="#9aa4b5" stroke-width="1"/>
+<circle cx="84" cy="14" r="6" fill="#fff" stroke="#9aa4b5" stroke-width="1"/>
+<circle cx="84" cy="14" r="6" fill="#2563eb" stroke="#2563eb" stroke-width="1"/>
+<circle cx="84" cy="34" r="6" fill="#fff" stroke="#9aa4b5" stroke-width="1"/>
+<circle cx="84" cy="54" r="6" fill="#fff" stroke="#9aa4b5" stroke-width="1"/>
+<path d="M84,54 L84,48 A6,6 0 0,1 90.0,54.0 Z" fill="#2563eb" stroke="none" stroke-width="1"/>
+<circle cx="84" cy="74" r="6" fill="#fff" stroke="#9aa4b5" stroke-width="1"/>
+<path d="M84,74 L84,68 A6,6 0 0,1 84.0,80.0 Z" fill="#2563eb" stroke="none" stroke-width="1"/>
+<circle cx="110" cy="14" r="6" fill="#fff" stroke="#9aa4b5" stroke-width="1"/>
+<path d="M110,14 L110,8 A6,6 0 0,1 116.0,14.0 Z" fill="#2563eb" stroke="none" stroke-width="1"/>
+<circle cx="110" cy="34" r="6" fill="#fff" stroke="#9aa4b5" stroke-width="1"/>
+<path d="M110,34 L110,28 A6,6 0 0,1 110.0,40.0 Z" fill="#2563eb" stroke="none" stroke-width="1"/>
+<circle cx="110" cy="54" r="6" fill="#fff" stroke="#9aa4b5" stroke-width="1"/>
+<path d="M110,54 L110,48 A6,6 0 1,1 104.0,54.0 Z" fill="#2563eb" stroke="none" stroke-width="1"/>
+<circle cx="110" cy="74" r="6" fill="#fff" stroke="#9aa4b5" stroke-width="1"/>
+<circle cx="110" cy="74" r="6" fill="#2563eb" stroke="#2563eb" stroke-width="1"/></g>
+</svg>

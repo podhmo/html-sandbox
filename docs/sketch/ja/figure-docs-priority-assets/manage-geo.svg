@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 195.2 62.4" width="195.2" height="62.4" role="img" aria-label="manage-geo">
+<rect width="195.2" height="62.4" fill="white" stroke="#d5dae2"/>
+<g transform="translate(0 0) scale(0.78)"><rect x="15" y="8" width="30" height="22" rx="0" fill="#eef3fd" stroke="#fff" stroke-width="1"/>
+<rect x="45" y="8" width="30" height="22" rx="0" fill="#2563eb" stroke="#fff" stroke-width="1"/>
+<rect x="75" y="8" width="30" height="22" rx="0" fill="#8db4f7" stroke="#fff" stroke-width="1"/>
+<rect x="15" y="30" width="30" height="22" rx="0" fill="#c6d8fb" stroke="#fff" stroke-width="1"/>
+<rect x="45" y="30" width="30" height="22" rx="0" fill="#eef3fd" stroke="#fff" stroke-width="1"/>
+<rect x="75" y="30" width="30" height="22" rx="0" fill="#2563eb" stroke="#fff" stroke-width="1"/>
+<rect x="15" y="52" width="30" height="22" rx="0" fill="#8db4f7" stroke="#fff" stroke-width="1"/>
+<rect x="45" y="52" width="30" height="22" rx="0" fill="#c6d8fb" stroke="#fff" stroke-width="1"/>
+<rect x="75" y="52" width="30" height="22" rx="0" fill="#eef3fd" stroke="#fff" stroke-width="1"/></g>
+<g transform="translate(101.6 0) scale(0.78)"><ellipse cx="60" cy="40" rx="48" ry="31" fill="none" stroke="#2563eb" stroke-width="1" stroke-opacity="0.3"/>
+<ellipse cx="60" cy="40" rx="36" ry="23" fill="none" stroke="#2563eb" stroke-width="1" stroke-opacity="0.47"/>
+<ellipse cx="60" cy="40" rx="24" ry="16" fill="none" stroke="#2563eb" stroke-width="1" stroke-opacity="0.64"/>
+<ellipse cx="60" cy="40" rx="12" ry="8" fill="none" stroke="#2563eb" stroke-width="1" stroke-opacity="0.81"/></g>
+</svg>
