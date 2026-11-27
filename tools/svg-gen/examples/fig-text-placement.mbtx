@@ -29,5 +29,9 @@ fn main {
     c.rect(240.0, 72.0, m.width, m.height, dash=Some("3 3"), opacity=Some(0.5)),
   )
   c.text(240.0, 72.0 + m.ascent, "measured label", size=12.0)
-  println(c.render(label=Some("Baseline-aware labels around shapes")))
+  let a = (250.0, 150.0)
+  let b = (360.0, 190.0)
+  c.arrow(a, b, head_kind=@svg.Closed)
+  c.label_edge([a, b], t=0.5, "edge label\nwith ascent", offset=18.0)
+  println(c.render(label=Some("Baseline-aware labels around shapes and edges")))
 }

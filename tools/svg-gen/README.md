@@ -49,8 +49,9 @@ gets a small throwaway generator sharing a thin helper.
     heads, `point_along` gives stable edge-label anchors, and
     `elbow_arrow` exposes the bend routing directly
     (`fig-connectors.mbtx`).
-  - `text_metrics` exposes width/ascent/descent estimates, and
-    `label_side` places labels outside shapes with baseline-aware gaps;
+  - `text_metrics`/`text_block_metrics` expose width/ascent/descent
+    estimates, `label_side` places shape labels with baseline-aware gaps,
+    and `label_edge` centers multi-line connector labels by arc length;
     south labels no longer overlap the shape border
     (`fig-text-placement.mbtx`).
   - Output is `currentColor` + plain `<text>` by default, so figures
