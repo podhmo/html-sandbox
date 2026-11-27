@@ -52,6 +52,10 @@ pub let sites : Array[(Double, Double)]
 
 pub fn smooth_path(Array[(Double, Double)]) -> PathBuilder
 
+pub fn text_block_metrics(String, size~ : Double) -> TextMetrics
+
+pub fn text_metrics(String, size~ : Double) -> TextMetrics
+
 pub fn text_width(String, size~ : Double) -> Double
 
 pub fn ticks(Double, Double, count? : Int32) -> Array[Double]
@@ -105,12 +109,14 @@ pub fn Canvas::box(Self, Double, Double, Sizing, Double, label? : String?, rx? :
 pub fn Canvas::center(Self, Shape) -> (Double, Double)
 pub fn Canvas::circle(Self, Double, Double, Double, label? : String?, size? : Double, dash? : String?, opacity? : Double?, width? : Double, color? : String, fill? : String, fill_opacity? : Double?, stroke_opacity? : Double?, underline? : Underline) -> Shape
 pub fn Canvas::color(Self, Int32) -> String
-pub fn Canvas::connect(Self, Shape, Side, Shape, Side, label? : String?, t_from? : Double, t_to? : Double, head? : Double, gap? : Double, dash? : String?, opacity? : Double?, width? : Double, color? : String) -> Unit
+pub fn Canvas::connect(Self, Shape, Side, Shape, Side, label? : String?, t_from? : Double, t_to? : Double, head? : Double, gap? : Double, dash? : String?, opacity? : Double?, width? : Double, color? : String, label_offset? : Double) -> Unit
 pub fn Canvas::draw_path(Self, PathBuilder, dash? : String?, opacity? : Double?, width? : Double, color? : String, fill? : String, fill_opacity? : Double?, stroke_opacity? : Double?) -> Unit
 pub fn Canvas::elbow_arrow(Self, (Double, Double), (Double, Double), style? : Elbow, via? : Array[(Double, Double)], head? : Double, ends? : Ends, gap? : Double, dash? : String?, opacity? : Double?, width? : Double, color? : String, head_kind? : ArrowHead) -> Unit
 pub fn Canvas::ellipse(Self, Double, Double, Double, Double, dash? : String?, opacity? : Double?, width? : Double, color? : String, fill? : String, fill_opacity? : Double?, stroke_opacity? : Double?) -> Shape
 pub fn Canvas::hbars(Self, Array[Hbar], x? : Double, y? : Double, bar_h? : Double, row_gap? : Double, max_w? : Double, label_w? : Double?, size? : Double, value_fmt? : (Double) -> String, fill_opacity? : Double, highlight? : Int32?, colors? : Array[String]?) -> Unit
 pub fn Canvas::highlight(Self, Shape, pad? : Double, opacity? : Double, mode? : HighlightMode, rx? : Double?) -> Unit
+pub fn Canvas::label_edge(Self, Array[(Double, Double)], t~ : Double, String, offset? : Double, size? : Double, opacity? : Double?, color? : String) -> Unit
+pub fn Canvas::label_side(Self, Shape, Side, String, gap? : Double, size? : Double, opacity? : Double?, color? : String) -> Unit
 pub fn Canvas::left_of(Self, Shape, Double, Double) -> Double
 pub fn Canvas::line(Self, (Double, Double), (Double, Double), via? : Array[(Double, Double)], gap? : Double, gap_start? : Double?, gap_end? : Double?, dash? : String?, opacity? : Double?, width? : Double, color? : String, stroke_opacity? : Double?) -> Unit
 pub fn Canvas::midpoint(Self, (Double, Double), (Double, Double)) -> (Double, Double)
@@ -261,6 +267,13 @@ pub(all) enum TextAnchor {
   Start
   Middle
   End
+}
+
+pub(all) struct TextMetrics {
+  width : Double
+  ascent : Double
+  descent : Double
+  height : Double
 }
 
 #derive(@debug.Debug)

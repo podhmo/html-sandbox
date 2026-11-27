@@ -979,6 +979,163 @@ pub fn Canvas::anchor(_self : Canvas, shape : Shape, side : Side) -> Point {
 }
 
 ///|
+/// Estimated text metrics. Width uses the same deterministic CJK/ASCII
+/// estimate as the canvas bounds; ascent and descent use the SVG font-size
+/// heuristics already used for text coverage.
+pub(all) struct TextMetrics {
+  width : Double
+  ascent : Double
+  descent : Double
+  height : Double
+}
+
+///|
+pub fn text_metrics(s : String, size~ : Double) -> TextMetrics {
+  let ascent = size
+  let descent = size * 0.2
+  { width: text_width(s, size~), ascent, descent, height: ascent + descent, }
+}
+
+///|
+/// Metrics for a `\n`-separated text block. Width is the widest line;
+/// height uses the same 1.2em line box as single-line text coverage.
+pub fn text_block_metrics(s : String, size~ : Double) -> TextMetrics {
+  let lines = s.split("\n").to_array()
+  let ascent = size
+  let descent = size * 0.2
+  let width = lines.fold(init=0.0, fn(w, line) {
+    w.max(text_width(line.to_owned(), size~))
+  })
+  { width, ascent, descent, height: lines.length().to_double() * size * 1.2, }
+}
+
+///|
+/// Place a possibly multi-line label beside a connector polyline. `t` is
+/// normalized arc length; `offset` is clearance between the connector
+/// and the nearest edge of the label's estimated box, measured
+/// perpendicular to the local segment. The block is vertically centered
+/// using baseline-aware ascent and descent rather than treating the
+/// first baseline as the box top.
+pub fn Canvas::label_edge(
+  self : Canvas,
+  pts : Array[Point],
+  t~ : Double,
+  s : String,
+  offset~ : Double = 10.0,
+  size~ : Double = 12.0,
+  opacity~ : Double? = None,
+  color~ : String = "currentColor",
+) -> Unit {
+  let p = self.point_along(pts, t)
+  let lens = []
+  let mut total = 0.0
+  for i = 0; i < pts.length() - 1; i = i + 1 {
+    let l = @math.hypot(pts[i + 1].0 - pts[i].0, pts[i + 1].1 - pts[i].1)
+    lens.push(l)
+    total += l
+  }
+  let mut want = total * t
+  let mut seg = 0
+  for i = 0; i < lens.length(); i = i + 1 {
+    if want <= lens[i] || i == lens.length() - 1 {
+      seg = i
+      break
+    }
+    want -= lens[i]
+  }
+  let (dx, dy) = if pts.length() < 2 {
+    (1.0, 0.0)
+  } else {
+    let dx0 = pts[seg + 1].0 - pts[seg].0
+    let dy0 = pts[seg + 1].1 - pts[seg].1
+    let len0 = @math.hypot(dx0, dy0)
+    let len = if len0 == 0.0 { 1.0 } else { len0 }
+    (dx0 / len, dy0 / len)
+  }
+  let nx = -dy
+  let ny = dx
+  let m = text_block_metrics(s, size~)
+  let normal_half = nx.abs() * m.width / 2.0 + ny.abs() * m.height / 2.0
+  let clearance = offset + normal_half
+  let cx = p.0 + nx * clearance
+  let top_center = p.1 + ny * clearance - m.height / 2.0
+  let lines = s.split("\n").to_array()
+  for i = 0; i < lines.length(); i = i + 1 {
+    self.text(
+      cx,
+      top_center + i.to_double() * size * 1.2 + m.ascent,
+      lines[i].to_owned(),
+      anchor=Middle,
+      size~,
+      opacity~,
+      color~,
+    )
+  }
+}
+
+///|
+/// Place a single-line label outside a shape with a real gap measured
+/// from the glyph bounding box. In particular, a south label's baseline
+/// is moved down by its ascent instead of letting the glyph top overlap
+/// the shape.
+pub fn Canvas::label_side(
+  self : Canvas,
+  shape : Shape,
+  side : Side,
+  s : String,
+  gap~ : Double = 6.0,
+  size~ : Double = 12.0,
+  opacity~ : Double? = None,
+  color~ : String = "currentColor",
+) -> Unit {
+  let m = text_metrics(s, size~)
+  let cx = shape.x + shape.w / 2.0
+  let cy = shape.y + shape.h / 2.0
+  match side {
+    N =>
+      self.text(
+        cx,
+        shape.y - gap - m.descent,
+        s,
+        anchor=Middle,
+        size~,
+        opacity~,
+        color~,
+      )
+    S =>
+      self.text(
+        cx,
+        shape.y + shape.h + gap + m.ascent,
+        s,
+        anchor=Middle,
+        size~,
+        opacity~,
+        color~,
+      )
+    W =>
+      self.text(
+        shape.x - gap,
+        cy + (m.ascent - m.descent) / 2.0,
+        s,
+        anchor=End,
+        size~,
+        opacity~,
+        color~,
+      )
+    E =>
+      self.text(
+        shape.x + shape.w + gap,
+        cy + (m.ascent - m.descent) / 2.0,
+        s,
+        anchor=Start,
+        size~,
+        opacity~,
+        color~,
+      )
+  }
+}
+
+///|
 pub fn Canvas::center(_self : Canvas, shape : Shape) -> Point {
   (shape.x + shape.w / 2.0, shape.y + shape.h / 2.0)
 }
@@ -1165,9 +1322,14 @@ fn elbow_via(from : Point, to : Point, style : Elbow) -> Array[Point] {
   }
   match candidate {
     Some(p) => {
-      let at_from = (p.0 - from.0).abs() < 0.0001 && (p.1 - from.1).abs() < 0.0001
+      let at_from = (p.0 - from.0).abs() < 0.0001 &&
+        (p.1 - from.1).abs() < 0.0001
       let at_to = (p.0 - to.0).abs() < 0.0001 && (p.1 - to.1).abs() < 0.0001
-      if at_from || at_to { [] } else { [p] }
+      if at_from || at_to {
+        []
+      } else {
+        [p]
+      }
     }
     None => []
   }
@@ -1225,6 +1387,7 @@ pub fn Canvas::connect(
   opacity~ : Double? = None,
   width~ : Double = 1.5,
   color~ : String = "currentColor",
+  label_offset~ : Double = 4.0,
 ) -> Unit {
   let from = self.port(from_shape, from_side, t=t_from)
   let to = self.port(to_shape, to_side, t=t_to)
@@ -1245,19 +1408,7 @@ pub fn Canvas::connect(
     color~,
   )
   match label {
-    Some(s) => {
-      let p = if bends.length() > 0 {
-        let b = bends[0]
-        if style is HV {
-          ((from.0 + b.0) / 2.0, from.1 - 8.0)
-        } else {
-          (from.0 + 8.0, (from.1 + b.1) / 2.0)
-        }
-      } else {
-        ((from.0 + to.0) / 2.0, (from.1 + to.1) / 2.0 - 8.0)
-      }
-      self.text(p.0, p.1, s, anchor=Middle, central=true, size=12)
-    }
+    Some(s) => self.label_edge([from] + bends + [to], t=0.5, s, size=12.0)
     None => ()
   }
 }
