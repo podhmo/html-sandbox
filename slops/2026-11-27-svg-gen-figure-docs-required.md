@@ -180,7 +180,7 @@ p.area(days, p50, baseline=0.0, color=c.color(0), opacity=0.08)
 p.band(days, p50, p90, color=c.color(3), opacity=0.12)
 ```
 
-生成例では、grouped columns、stacked horizontal bars、diverging bar、all-zero diverging fallback を並べている。zero line と scale endpoint は値から計算される。
+生成例では、grouped columns、stacked horizontal bars、diverging bar、all-zero diverging fallback を並べている。zero line と scale endpoint は値から計算される。desktop/mobile の 2 系列は、grouped columns では常に desktop が左、mobile が右、stacked horizontal bars では zero line から同じ順に積まれる。色が落ちた場合は、この系列順を位置の手掛かりにする。
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-4.9 -3 724.4 401.8" width="724" height="402" role="img" aria-label="Grouped, stacked, and diverging bar chart builders">
