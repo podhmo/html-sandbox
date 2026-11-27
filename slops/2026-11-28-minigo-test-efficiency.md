@@ -31,7 +31,7 @@ prev: 2026-11-27-svg-gen-figure-docs-required.md
 
 ## どのくらい速くなったか
 
-PR に残した値はこうだった。
+PR に残した値はこうだった。測定回数と並列度は記録されていないので、ここでは条件の分かる実行形態比較として扱う。
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 503.5 208.2" width="504" height="208" role="img" aria-label="minigo test efficiency measurements: difffuzz, text/template, and parse suites before and after">
@@ -53,8 +53,8 @@ PR に残した値はこうだった。
 <text x="192" y="132.5" font-size="11" text-anchor="end" dominant-baseline="central" fill="currentColor">parse after</text>
 <rect x="200" y="125" width="20.852130325814535" height="15" fill="#3B82C4" fill-opacity="0.45" stroke="#3B82C4" stroke-width="1"/>
 <text x="226.85213032581453" y="132.5" font-size="10" dominant-baseline="central" fill="currentColor" opacity="0.7">0.96</text>
-<text x="10" y="180" font-size="11" fill="currentColor" opacity="0.75">単位は秒。計測は 2026-11-27 のローカル実行。after は semantics を保つ形</text>
-<text x="10" y="196" font-size="11" fill="currentColor" opacity="0.75">朱=before、青緑=after。順序でもbefore/afterを区別する</text>
+<text x="10" y="180" font-size="11" fill="currentColor" opacity="0.75">単位は秒。出典は minigo PR #1449 のローカル実行記録。after は semantics を保つ形</text>
+<text x="10" y="196" font-size="11" fill="currentColor" opacity="0.75">測定回数・並列度は記録なし。朱=before、青緑=after</text>
 </svg>
 ```
 
