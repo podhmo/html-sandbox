@@ -11,7 +11,7 @@ prev: 2026-11-27-minigo-memory-projection.md
 
 ## 依頼と前提
 
-最初の依頼は、[issue #200](https://github.com/podhmo/html-sandbox/issues/200) の一環として、`tools/svg-gen` が `u-ichi/agent-plugins` の figure-docs references にある図を描けるか確認することだった。対象は `business.html` の 112 図と `dev.html` の 38 図、あわせて 150 図。まず `examples/figure-docs/` の中で全部描き、不足している機能を洗い出してほしい、というものだった。
+最初の依頼は、[issue #200](https://github.com/podhmo/html-sandbox/issues/200) の一環として、`tools/svg-gen` が [u-ichi/agent-plugins](https://github.com/u-ichi/agent-plugins) の figure-docs references にある図を描けるか確認することだった。対象は `business.html` の 112 図と `dev.html` の 38 図、あわせて 150 図。まず `examples/figure-docs/` の中で全部描き、不足している機能を洗い出してほしい、というものだった。
 
 途中で方向が 2 回足された。
 
