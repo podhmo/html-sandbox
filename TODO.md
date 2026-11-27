@@ -106,7 +106,7 @@
   - [x] **typed curve/path builder と curve-aware lint を作る**: move/line/
     cubic/quadratic/arc/close を型付きで組み、endpoint/control point から
     bounds を推定する。`check.mbtx` が C/S/Q/A を検査できるようにする。
-  - [ ] **connector/arrowhead/port/edge label を作る**: closed triangle head、
+  - [x] **connector/arrowhead/port/edge label を作る**: closed triangle head、
     orthogonal elbow、shape edge 上の port、connector 上の label anchor を入れる。
   - [ ] **baseline-aware な text measurement/placement を作る**: text block の
     bbox を扱い、shape/edge の上下左右へ baseline を意識して label を置けるようにする。

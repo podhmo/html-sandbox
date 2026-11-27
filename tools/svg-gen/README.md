@@ -44,6 +44,11 @@ gets a small throwaway generator sharing a thin helper.
     `draw_path` emits them. `polyline_path`, `smooth_path`, `pie_slice`,
     and `donut_slice` cover common polyline, spline, and arc figures
     without hand-written SVG `d` strings (`fig-curve-builder.mbtx`).
+  - Diagram connectors are shape-aware: `port` addresses points along a
+    shape edge, `connect` routes orthogonal arrows with closed triangle
+    heads, `point_along` gives stable edge-label anchors, and
+    `elbow_arrow` exposes the bend routing directly
+    (`fig-connectors.mbtx`).
   - Output is `currentColor` + plain `<text>` by default, so figures
     follow the site's light/dark theme and stay searchable. Text and
     marks can opt into explicit colors when a probe or categorical

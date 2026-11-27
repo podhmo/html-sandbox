@@ -1,0 +1,72 @@
+---
+import {
+  "podhmo/svg-gen" @svg,
+}
+---
+
+// fig-connectors.mbtx -- diagram connectors: ports stay on shape
+// edges, `connect` chooses an orthogonal exit direction, arrowheads are
+// closed triangles, and edge labels anchor at bend or midpoint geometry.
+
+///|
+fn main {
+  let c = @svg.Canvas()
+  let api = c.box(
+    20.0,
+    30.0,
+    @svg.Fixed(110.0),
+    62.0,
+    label=Some("api\nhandler"),
+    width=2.0,
+  )
+  let svc = c.box(
+    240.0,
+    30.0,
+    @svg.Fixed(110.0),
+    62.0,
+    label=Some("service"),
+    width=2.0,
+  )
+  let db = c.box(
+    245.0,
+    170.0,
+    @svg.Fixed(100.0),
+    58.0,
+    label=Some("database"),
+    width=2.0,
+  )
+  let jobs = c.box(
+    20.0,
+    170.0,
+    @svg.Fixed(110.0),
+    58.0,
+    label=Some("worker"),
+    width=2.0,
+  )
+
+  c.connect(api, @svg.E, svc, @svg.W, label=Some("validate"))
+  c.connect(svc, @svg.S, db, @svg.N, label=Some("persist"))
+  c.connect(
+    api,
+    @svg.S,
+    jobs,
+    @svg.N,
+    label=Some("enqueue"),
+    dash=Some("5 4"),
+    opacity=Some(0.75),
+  )
+  c.connect(jobs, @svg.E, db, @svg.W, label=Some("write"), color=c.color(2))
+
+  // Ports can be biased along an edge, useful when several edges fan out.
+  let p = c.port(svc, @svg.E, t=0.72)
+  c.arrow(p, (410.0, p.1 + 30.0), head_kind=@svg.Closed, color=c.color(0))
+  c.text(412.0, p.1 + 30.0, "biased port", size=11)
+
+  println(
+    c.render(
+      label=Some(
+        "Ports, orthogonal connectors, closed arrowheads, and edge labels",
+      ),
+    ),
+  )
+}
