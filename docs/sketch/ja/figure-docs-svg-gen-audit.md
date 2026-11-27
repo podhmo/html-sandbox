@@ -77,6 +77,7 @@ head だけなので、線の終点と方向から closed arrowhead を自動配
 - orthogonal elbow connector（水平→垂直→水平などの型）
 - shape edge 上の port 指定（今の N/S/E/W より細かい位置）
 - edge label の auto placement はなくても、anchor 計算 helper は欲しい
+- arrowhead・port・label を connector の向きや形状に追従させる自動計算
 
 ### 3. 図形の reuse / composition がない
 
@@ -136,6 +137,13 @@ heatmap の色階調、positive/negative/neutral の semantic color がない。
 実際の framework diagram では、bold、複数行の wrapping、部分 styling、
 正確な text measurement が必要になる。現状の幅推定は ASCII/CJK の粗い近似で、
 表や dense diagram では溢れ検出も近似に依存する。
+
+周辺配置も primitive 同士の座標意味が揃っていない。`text(x, y)` の `y` は
+baseline だが、`below(shape, gap)` は shape 下端からの y を返すので、そのまま
+組み合わせると下側 label は glyph の上端が shape 側へ食い込みやすい。上側は
+`above(shape, gap, h)` が高さを引くため比較的誤魔化しやすい。text block の
+bbox を baseline込みで扱う配置 helper、または shape/edge の上下左右へ label を
+置く専用 helper が必要である。
 
 ## 結論
 
