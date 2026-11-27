@@ -52,7 +52,20 @@ weak reference だけにすると、host が projection を保持していても
 
 ここで必要なのは「process が持つ」のでも「host call の間だけ持つ」のでもなく、「host projection が生きている間だけ持つ」という寿命だった。
 
-最終的な解は少し意地悪い。public projection の struct を、hidden owner を内蔵する wrapper allocation の中に配置し、host には interior pointer だけを渡す。
+最終的な解は少し意地悪い。public projection の struct を、hidden owner を内蔵する wrapper allocation の中に配置し、host には interior pointer だけを渡す。実装の芯はこれだ。
+
+```go
+func newStructProjection(typ reflect.Type, orig runtime.Value) reflect.Value {
+	boxTyp := reflect.StructOf([]reflect.StructField{
+		{Name: "P", Type: typ},
+		{Name: "_", Type: anyType, PkgPath: "github.com/podhmo/minigo/vm"},
+	})
+	box := reflect.New(boxTyp)
+	fv := box.Elem().Field(1)
+	reflect.NewAt(fv.Type(), unsafe.Pointer(fv.UnsafeAddr())).Elem().Set(reflect.ValueOf(orig))
+	return box.Elem().Field(0).Addr()
+}
+```
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -41 666.3000000000001 377" width="666" height="377" role="img" aria-label="minigo struct projection ownership before and after">
@@ -105,6 +118,17 @@ Go の GC では interior pointer も allocation 全体を生かす。つまり 
 
 もう 1 件の再現は template callback だった。callback が `item.N` を 7 から 8 に変えて同じ pointer を返す。期待では `Label()` も `.N` も 8 なので `8/8` になる。ところが実際には `7/8` になった。data field は refresh されるが、先に評価した method result は残っていた。
 
+再現の核は小さい。`update` は mutation して同じ `item` を返し、template はその返り値の `.Label` と `.N` を続けて見る。
+
+```go
+t := template.Must(template.New("item").Funcs(template.FuncMap{
+	"update": func() any {
+		item.N = 8
+		return item
+	},
+}).Parse(`{{with update}}{{.Label}}/{{.N}}{{end}}`))
+```
+
 ここで重要な前提がある。projection 内の method は、host 側では普通の method として見えない。`text/template` は任意の function-valued struct field を勝手に呼んでくれないので、template から見える形にするには、projection 作成時に niladic method を eager に実行して結果を field に入れておく必要があった。
 
 つまり `Label()` は「読むたびに呼ばれる method」ではなく、「projection を作った時点で計算された値」だった。callback 後に同じ object を refresh しても、その値を再計算しなければ古いままになる。
@@ -116,6 +140,24 @@ Go の GC では interior pointer も allocation 全体を生かす。つまり 
 ## review が反例を積み上げる
 
 `pureMethod` は最初、かなり素朴な静的判定だった。call、assignment、send、go、defer がなければ pure、くらいのものだ。そこに Devin Review が次々に反例を見つけた。
+
+最終形の分類器は、AST node を見て効果がありうるものを弾く形になった。完全な型検査ではないので、分からないものは安全側に倒す。
+
+```go
+func effectfulNode(m *runtime.Function, n ast.Node) bool {
+	switch x := n.(type) {
+	case *ast.AssignStmt, *ast.IncDecStmt, *ast.SendStmt, *ast.GoStmt, *ast.DeferStmt, *ast.SelectStmt:
+		return true
+	case *ast.CallExpr:
+		return !typeConversionCall(m, x)
+	case *ast.RangeStmt:
+		return x.Tok == token.ASSIGN || !rangeKnownNonChannel(m, x.X, x)
+	case *ast.UnaryExpr:
+		return x.Op == token.ARROW
+	}
+	return false
+}
+```
 
 | 反例 | 何が壊れるか | 入れた対応 |
 | --- | --- | --- |
