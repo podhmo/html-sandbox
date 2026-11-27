@@ -1043,12 +1043,15 @@ pub fn Canvas::label_edge(
     }
     want -= lens[i]
   }
-  let dx0 = pts[seg + 1].0 - pts[seg].0
-  let dy0 = pts[seg + 1].1 - pts[seg].1
-  let len0 = @math.hypot(dx0, dy0)
-  let len = if len0 == 0.0 { 1.0 } else { len0 }
-  let dx = dx0 / len
-  let dy = dy0 / len
+  let (dx, dy) = if pts.length() < 2 {
+    (1.0, 0.0)
+  } else {
+    let dx0 = pts[seg + 1].0 - pts[seg].0
+    let dy0 = pts[seg + 1].1 - pts[seg].1
+    let len0 = @math.hypot(dx0, dy0)
+    let len = if len0 == 0.0 { 1.0 } else { len0 }
+    (dx0 / len, dy0 / len)
+  }
   let nx = -dy
   let ny = dx
   let m = text_block_metrics(s, size~)
