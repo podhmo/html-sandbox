@@ -1,7 +1,7 @@
 ---
 import {
   "podhmo/svg-gen" @svg,
-  "moonbitlang/core/math" @math,
+  "moonbitlang/core/math",
 }
 ---
 
@@ -11,6 +11,7 @@ import {
 // chord over a skipped point (vermillion) leaves that point below
 // it — so it is not hull.
 
+///|
 fn main {
   let c = @svg.Canvas()
   let axis_y = 200.0
@@ -23,8 +24,8 @@ fn main {
   let xs = [45.0, 70.0, 105.0, 150.0, 195.0]
 
   // parabola + lifted points + lower hull = adjacent segments.
-  let para_pts = @svg.sample(fn(x) { lift(x).1 }, x0=x0, x1=x1, n=120)
-  c.path(@svg.path_of(para_pts), para_pts, width=1.5, opacity=Some(0.7))
+  let para_pts = @svg.sample(fn(x) { lift(x).1 }, x0~, x1~, n=120)
+  c.draw_path(@svg.polyline_path(para_pts), width=1.5, opacity=Some(0.7))
   c.line((x0, axis_y), (x1, axis_y), width=1.5)
 
   let lifted = xs.map(lift)
@@ -32,14 +33,10 @@ fn main {
     c.line(lifted[i], lifted[i + 1], width=3.0, color=c.color(0))
     // adjacency on the axis, mirrored below as small arcs
     let midx = (xs[i] + xs[i + 1]) / 2.0
-    c.raw(
-      "<path d=\"M\{xs[i]} \{axis_y + 14.0} Q\{midx} \{axis_y + 26.0} \{xs[i + 1]} \{axis_y + 14.0}\" fill=\"none\" stroke=\"\{c.color(0)}\" stroke-width=\"1.5\"/>",
-      covered=[
-        (xs[i], axis_y + 14.0),
-        (xs[i + 1], axis_y + 14.0),
-        (midx, axis_y + 26.0),
-      ],
-    )
+    let arc = @svg.PathBuilder::PathBuilder()
+    arc.move_to((xs[i], axis_y + 14.0))
+    arc.quadratic_to((midx, axis_y + 26.0), (xs[i + 1], axis_y + 14.0))
+    c.draw_path(arc, width=1.5, color=c.color(0))
   }
   // a chord skipping one site: the middle lifted point falls below
   // it.
@@ -68,6 +65,10 @@ fn main {
   c.text(15.0, 20.0, "x²", size=11.0, central=true)
 
   println(
-    c.render(label=Some("1D lifting: points on x go up to the parabola x^2; the lower hull is exactly adjacent pairs — Delaunay in 1D is sorted adjacency")),
+    c.render(
+      label=Some(
+        "1D lifting: points on x go up to the parabola x^2; the lower hull is exactly adjacent pairs — Delaunay in 1D is sorted adjacency",
+      ),
+    ),
   )
 }

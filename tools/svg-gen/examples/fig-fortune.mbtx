@@ -1,8 +1,8 @@
 ---
 import {
   "podhmo/svg-gen" @svg,
-  "moonbitlang/core/math" @math,
-  "moonbitlang/core/double" @double,
+  "moonbitlang/core/math",
+  "moonbitlang/core/double",
 }
 ---
 
@@ -13,6 +13,7 @@ import {
 // the parabola pile; breakpoints where two parabolas tie trace
 // Voronoi edges.
 
+///|
 fn main {
   // sites above the sweep line (screen y grows downward, sweep below).
   let s = @svg.sites
@@ -31,7 +32,7 @@ fn main {
   // beach line = pointwise max (nearest to the sweep line = largest y).
   let n = 600
   let beach : Array[@svg.Point] = []
-  let beach_set : Array[Int] = []
+  let beach_set : Array[Int32] = []
   let mut prev_top = -1
   let breaks : Array[@svg.Point] = []
   for i = 0; i <= n; i = i + 1 {
@@ -59,7 +60,7 @@ fn main {
   if breaks.length() < 4 {
     abort("several parabolas share the beach line")
   }
-  let hue_of = fn(i : Int) -> Int {
+  let hue_of = fn(i : Int32) -> Int32 {
     for j, v in beach_set {
       if v == i {
         break j
@@ -70,12 +71,18 @@ fn main {
   }
 
   for i, _st in s {
-    let pts = @svg.sample(fns[i], x0=x0, x1=x1, n=160)
-      .filter(fn(p) { p.1 > -10.0 && p.1 < ly + 5.0 })
+    let pts = @svg.sample(fns[i], x0~, x1~, n=160).filter(fn(p) {
+      p.1 > -10.0 && p.1 < ly + 5.0
+    })
     if hue_of(i) >= 0 {
-      c.path(@svg.path_of(pts), pts, dash=Some("5 3"), opacity=Some(0.8), color=c.color(hue_of(i)))
+      c.draw_path(
+        @svg.polyline_path(pts),
+        dash=Some("5 3"),
+        opacity=Some(0.8),
+        color=c.color(hue_of(i)),
+      )
     } else {
-      c.path(@svg.path_of(pts), pts, dash=Some("4 3"), opacity=Some(0.25))
+      c.draw_path(@svg.polyline_path(pts), dash=Some("4 3"), opacity=Some(0.25))
     }
   }
   for i, st in s {
@@ -92,7 +99,7 @@ fn main {
       )
     }
   }
-  c.path(@svg.path_of(beach), beach, width=3.0)
+  c.draw_path(@svg.polyline_path(beach), width=3.0)
   c.line((x0, ly), (x1, ly), width=2.0, color=c.color(5))
   for bp in breaks {
     c.raw(
@@ -100,9 +107,20 @@ fn main {
       covered=[bp],
     )
   }
-  c.text(x1 - 6.0, ly - 8.0, "sweep", anchor=@svg.End, size=11.0, opacity=Some(0.7))
+  c.text(
+    x1 - 6.0,
+    ly - 8.0,
+    "sweep",
+    anchor=@svg.End,
+    size=11.0,
+    opacity=Some(0.7),
+  )
 
   println(
-    c.render(label=Some("Fortune's sweep: site parabolas (dashed), their top envelope is the beach line (thick), breakpoints trace Voronoi edges")),
+    c.render(
+      label=Some(
+        "Fortune's sweep: site parabolas (dashed), their top envelope is the beach line (thick), breakpoints trace Voronoi edges",
+      ),
+    ),
   )
 }

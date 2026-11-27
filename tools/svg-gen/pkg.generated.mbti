@@ -16,6 +16,8 @@ pub fn circum((Double, Double), (Double, Double), (Double, Double)) -> Circum
 
 pub fn delaunay(Array[(Double, Double)]) -> Array[(Int32, Int32, Int32)]
 
+pub fn donut_slice(Double, Double, Double, Double, start~ : Double, end~ : Double) -> PathBuilder
+
 pub fn edge_adjacency(Array[(Int32, Int32, Int32)]) -> Array[(Int32, Int32, Array[Int32])]
 
 pub let few_sites : Array[(Double, Double)]
@@ -32,7 +34,11 @@ pub let palette : Array[String]
 
 pub fn path_of(Array[(Double, Double)]) -> String
 
+pub fn pie_slice(Double, Double, Double, start~ : Double, end~ : Double) -> PathBuilder
+
 pub fn poly_el(Array[(Double, Double)], fill~ : String, opacity~ : Double, extra? : String?) -> String
+
+pub fn polyline_path(Array[(Double, Double)]) -> PathBuilder
 
 pub fn quantile(Array[Double], q~ : Double) -> Double
 
@@ -43,6 +49,8 @@ pub fn sample((Double) -> Double, x0~ : Double, x1~ : Double, n? : Int32) -> Arr
 pub fn shift(Array[(Double, Double)], dx~ : Double, dy~ : Double) -> Array[(Double, Double)]
 
 pub let sites : Array[(Double, Double)]
+
+pub fn smooth_path(Array[(Double, Double)]) -> PathBuilder
 
 pub fn text_width(String, size~ : Double) -> Double
 
@@ -91,6 +99,7 @@ pub fn Canvas::box(Self, Double, Double, Sizing, Double, label? : String?, rx? :
 pub fn Canvas::center(Self, Shape) -> (Double, Double)
 pub fn Canvas::circle(Self, Double, Double, Double, label? : String?, size? : Double, dash? : String?, opacity? : Double?, width? : Double, color? : String, fill? : String, fill_opacity? : Double?, stroke_opacity? : Double?, underline? : Underline) -> Shape
 pub fn Canvas::color(Self, Int32) -> String
+pub fn Canvas::draw_path(Self, PathBuilder, dash? : String?, opacity? : Double?, width? : Double, color? : String, fill? : String, fill_opacity? : Double?, stroke_opacity? : Double?) -> Unit
 pub fn Canvas::ellipse(Self, Double, Double, Double, Double, dash? : String?, opacity? : Double?, width? : Double, color? : String, fill? : String, fill_opacity? : Double?, stroke_opacity? : Double?) -> Shape
 pub fn Canvas::hbars(Self, Array[Hbar], x? : Double, y? : Double, bar_h? : Double, row_gap? : Double, max_w? : Double, label_w? : Double?, size? : Double, value_fmt? : (Double) -> String, fill_opacity? : Double, highlight? : Int32?, colors? : Array[String]?) -> Unit
 pub fn Canvas::highlight(Self, Shape, pad? : Double, opacity? : Double, mode? : HighlightMode, rx? : Double?) -> Unit
@@ -143,6 +152,21 @@ pub(all) enum HighlightMode {
   Wash
   Ring
 }
+
+pub struct PathBuilder {
+  mut current : (Double, Double)?
+  mut start : (Double, Double)?
+  // private fields
+}
+pub fn PathBuilder::PathBuilder() -> Self
+pub fn PathBuilder::arc_to(Self, Double, Double, (Double, Double), rotation? : Double, large_arc? : Bool, sweep? : Bool) -> Unit
+pub fn PathBuilder::close(Self) -> Unit
+pub fn PathBuilder::covered(Self) -> Array[(Double, Double)]
+pub fn PathBuilder::cubic_to(Self, (Double, Double), (Double, Double), (Double, Double)) -> Unit
+pub fn PathBuilder::d(Self) -> String
+pub fn PathBuilder::line_to(Self, (Double, Double)) -> Unit
+pub fn PathBuilder::move_to(Self, (Double, Double)) -> Unit
+pub fn PathBuilder::quadratic_to(Self, (Double, Double), (Double, Double)) -> Unit
 
 pub struct Plot {
   x0 : Double

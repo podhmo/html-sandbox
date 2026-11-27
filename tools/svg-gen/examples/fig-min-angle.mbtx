@@ -1,8 +1,8 @@
 ---
 import {
   "podhmo/svg-gen" @svg,
-  "moonbitlang/core/math" @math,
-  "moonbitlang/core/double" @double,
+  "moonbitlang/core/math",
+  "moonbitlang/core/double",
 }
 ---
 
@@ -11,13 +11,14 @@ import {
 // smaller minimum angle. The smallest angle is marked with an arc and
 // its measured degree.
 
+///|
 fn main {
   let s = @svg.sites
   let tris = @svg.delaunay(s)
   let c = @svg.Canvas()
   let dx = 260.0
 
-  let mut quad : (Int, Int, Int, Int)? = None
+  let mut quad : (Int32, Int32, Int32, Int32)? = None
   for entry in @svg.edge_adjacency(tris) {
     let (ea, eb, t) = entry
     if t.length() == 2 {
@@ -39,9 +40,7 @@ fn main {
       break
     }
   }
-  guard quad is Some(q) else {
-    abort("no interior edge")
-  }
+  guard quad is Some(q) else { abort("no interior edge") }
 
   let angle_at = fn(v : @svg.Point, p : @svg.Point, qq : @svg.Point) -> Double {
     let u = @math.atan2(p.1 - v.1, p.0 - v.0)
@@ -54,7 +53,10 @@ fn main {
   }
 
   // min angle over a triangle list (vertex indices into pts)
-  let min_angle = fn(pts : Array[@svg.Point], tr : Array[(Int, Int, Int)]) -> (Double, (Int, Int, Int)) {
+  let min_angle = fn(
+    pts : Array[@svg.Point],
+    tr : Array[(Int32, Int32, Int32)],
+  ) -> (Double, (Int32, Int32, Int32)) {
     let mut best = @double.infinity
     let mut mark = (0, 0, 0)
     for t in tr {
@@ -72,7 +74,12 @@ fn main {
     (best, mark)
   }
 
-  let draw_tri_set = fn(pts : Array[@svg.Point], tr : Array[(Int, Int, Int)], cap : String, cap_x : Double) -> Double {
+  let draw_tri_set = fn(
+    pts : Array[@svg.Point],
+    tr : Array[(Int32, Int32, Int32)],
+    cap : String,
+    cap_x : Double,
+  ) -> Double {
     for t in tr {
       for e in [(0, 1), (1, 2), (2, 0)] {
         let ea = if e.0 == 0 { t.0 } else if e.0 == 1 { t.1 } else { t.2 }
@@ -98,7 +105,7 @@ fn main {
       let t = t0 + (t1 - t0) * i.to_double() / 16.0
       (v.0 + rad * @math.cos(t), v.1 + rad * @math.sin(t))
     })
-    c.path(@svg.path_of(arc), arc, width=2.5, color=c.color(3))
+    c.draw_path(@svg.polyline_path(arc), width=2.5, color=c.color(3))
     let mid = (t0 + t1) / 2.0
     c.text(
       v.0 + (rad + 14.0) * @math.cos(mid),
@@ -125,15 +132,22 @@ fn main {
     abort("flip shrinks the min angle (\{ga} vs \{ba})")
   }
 
+  ignore(draw_tri_set(s, [(q.0, q.1, q.2), (q.0, q.2, q.3)], "Delaunay", 112.0))
+  let p2 = @svg.shift(s, dx~, dy=0.0)
   ignore(
-    draw_tri_set(s, [(q.0, q.1, q.2), (q.0, q.2, q.3)], "Delaunay", 112.0),
-  )
-  let p2 = @svg.shift(s, dx=dx, dy=0.0)
-  ignore(
-    draw_tri_set(p2, [(q.0, q.1, q.3), (q.1, q.2, q.3)], "other diagonal", 112.0 + dx),
+    draw_tri_set(
+      p2,
+      [(q.0, q.1, q.3), (q.1, q.2, q.3)],
+      "other diagonal",
+      112.0 + dx,
+    ),
   )
 
   println(
-    c.render(label=Some("Delaunay maximizes the minimum angle; the other diagonal leaves a smaller one")),
+    c.render(
+      label=Some(
+        "Delaunay maximizes the minimum angle; the other diagonal leaves a smaller one",
+      ),
+    ),
   )
 }

@@ -345,6 +345,285 @@ fn fill_attrs(fill~ : String, fill_opacity~ : Double?) -> String {
   " fill=\"\{esc(fill)}\"" + fo
 }
 
+///|
+/// Typed SVG path assembly. Unlike raw `d` strings, every command also
+/// records the points needed for bounds: endpoints for straight lines,
+/// endpoints plus control hull points for Bézier curves, and sampled
+/// points for elliptical arcs.
+pub struct PathBuilder {
+  priv cmds : Array[String]
+  priv covered_pts : Array[Point]
+  mut current : Point?
+  mut start : Point?
+}
+
+///|
+pub fn PathBuilder::PathBuilder() -> PathBuilder {
+  { cmds: [], covered_pts: [], current: None, start: None, }
+}
+
+///|
+fn fmt_pt(p : Point) -> String {
+  "\{num(p.0)} \{num(p.1)}"
+}
+
+///|
+fn PathBuilder::need_current(self : PathBuilder) -> Point {
+  match self.current {
+    Some(p) => p
+    None => abort("path command needs move_to first")
+  }
+}
+
+///|
+fn PathBuilder::cover(self : PathBuilder, p : Point) -> Unit {
+  self.covered_pts.push(p)
+}
+
+///|
+pub fn PathBuilder::move_to(self : PathBuilder, p : Point) -> Unit {
+  self.cmds.push("M\{fmt_pt(p)}")
+  self.current = Some(p)
+  self.start = Some(p)
+  self.cover(p)
+}
+
+///|
+pub fn PathBuilder::line_to(self : PathBuilder, p : Point) -> Unit {
+  self.need_current() |> ignore
+  self.cmds.push("L\{fmt_pt(p)}")
+  self.current = Some(p)
+  self.cover(p)
+}
+
+///|
+pub fn PathBuilder::cubic_to(
+  self : PathBuilder,
+  c1 : Point,
+  c2 : Point,
+  p : Point,
+) -> Unit {
+  self.need_current() |> ignore
+  self.cmds.push("C\{fmt_pt(c1)} \{fmt_pt(c2)} \{fmt_pt(p)}")
+  // A cubic Bézier is contained in its control-point convex hull, so
+  // these four points are a conservative bound without solving extrema.
+  self.cover(c1)
+  self.cover(c2)
+  self.cover(p)
+  self.current = Some(p)
+}
+
+///|
+pub fn PathBuilder::quadratic_to(
+  self : PathBuilder,
+  c : Point,
+  p : Point,
+) -> Unit {
+  self.need_current() |> ignore
+  self.cmds.push("Q\{fmt_pt(c)} \{fmt_pt(p)}")
+  self.cover(c)
+  self.cover(p)
+  self.current = Some(p)
+}
+
+///|
+fn angle_point(
+  cx : Double,
+  cy : Double,
+  rx : Double,
+  ry : Double,
+  phi : Double,
+  theta : Double,
+) -> Point {
+  let cp = @math.cos(phi)
+  let sp = @math.sin(phi)
+  let ct = @math.cos(theta)
+  let st = @math.sin(theta)
+  (cx + rx * cp * ct - ry * sp * st, cy + rx * sp * ct + ry * cp * st)
+}
+
+///|
+/// Add an SVG elliptical arc command. `rotation` is in degrees. Bounds
+/// are sampled along the arc; this is slightly conservative for very
+/// small steps and avoids exposing endpoint-parameterization math to
+/// callers.
+pub fn PathBuilder::arc_to(
+  self : PathBuilder,
+  rx : Double,
+  ry : Double,
+  to : Point,
+  rotation~ : Double = 0,
+  large_arc~ : Bool = false,
+  sweep~ : Bool = true,
+) -> Unit {
+  let from = self.need_current()
+  let mut arx = rx.abs()
+  let mut ary = ry.abs()
+  if arx == 0.0 || ary == 0.0 || (from.0 == to.0 && from.1 == to.1) {
+    self.line_to(to)
+    return
+  }
+  let phi = rotation * @math.PI / 180.0
+  let cp = @math.cos(phi)
+  let sp = @math.sin(phi)
+  let dx = (from.0 - to.0) / 2.0
+  let dy = (from.1 - to.1) / 2.0
+  let x1p = cp * dx + sp * dy
+  let y1p = -sp * dx + cp * dy
+  let lambda = x1p * x1p / (arx * arx) + y1p * y1p / (ary * ary)
+  if lambda > 1.0 {
+    let scale = lambda.sqrt()
+    arx *= scale
+    ary *= scale
+  }
+  let rx2 = arx * arx
+  let ry2 = ary * ary
+  let x1p2 = x1p * x1p
+  let y1p2 = y1p * y1p
+  let den = rx2 * y1p2 + ry2 * x1p2
+  let num0 = rx2 * ry2 - rx2 * y1p2 - ry2 * x1p2
+  let ratio = if den == 0.0 { 0.0 } else { @cmp.maximum(0.0, num0 / den) }
+  let sign = if large_arc == sweep { -1.0 } else { 1.0 }
+  let coef = sign * ratio.sqrt()
+  let cxp = coef * arx * y1p / ary
+  let cyp = coef * -ary * x1p / arx
+  let cx = cp * cxp - sp * cyp + (from.0 + to.0) / 2.0
+  let cy = sp * cxp + cp * cyp + (from.1 + to.1) / 2.0
+  let theta = @math.atan2((y1p - cyp) / ary, (x1p - cxp) / arx)
+  let end_theta = @math.atan2((-y1p - cyp) / ary, (-x1p - cxp) / arx)
+  let mut delta = end_theta - theta
+  if sweep && delta < 0.0 {
+    delta += 2.0 * @math.PI
+  } else if !sweep && delta > 0.0 {
+    delta -= 2.0 * @math.PI
+  }
+  self.cmds.push(
+    "A\{num(arx)} \{num(ary)} \{num(rotation)} " +
+    (if large_arc { "1" } else { "0" }) +
+    " " +
+    (if sweep { "1" } else { "0" }) +
+    " \{fmt_pt(to)}",
+  )
+  let steps = 32
+  for i in 1..<=steps {
+    let t = theta + delta * i.to_double() / steps.to_double()
+    self.cover(angle_point(cx, cy, arx, ary, phi, t))
+  }
+  self.current = Some(to)
+}
+
+///|
+pub fn PathBuilder::close(self : PathBuilder) -> Unit {
+  match self.start {
+    Some(p) => {
+      self.cmds.push("Z")
+      self.current = Some(p)
+      self.cover(p)
+    }
+    None => abort("close needs move_to first")
+  }
+}
+
+///|
+pub fn PathBuilder::d(self : PathBuilder) -> String {
+  self.cmds.join(" ")
+}
+
+///|
+pub fn PathBuilder::covered(self : PathBuilder) -> Array[Point] {
+  self.covered_pts.copy()
+}
+
+///|
+/// Straight polyline as a typed path.
+pub fn polyline_path(pts : Array[Point]) -> PathBuilder {
+  if pts.length() == 0 {
+    abort("polyline_path needs at least one point")
+  }
+  let b = PathBuilder::PathBuilder()
+  b.move_to(pts[0])
+  for i in 1..<pts.length() {
+    b.line_to(pts[i])
+  }
+  b
+}
+
+///|
+/// Catmull-Rom spline through every input point, emitted as cubic
+/// Bézier segments. This keeps authors in data coordinates instead of
+/// hand-writing control points for smooth density/area curves.
+pub fn smooth_path(pts : Array[Point]) -> PathBuilder {
+  if pts.length() < 2 {
+    abort("smooth_path needs at least two points")
+  }
+  let b = PathBuilder::PathBuilder()
+  b.move_to(pts[0])
+  for i in 0..<(pts.length() - 1) {
+    let p0 = if i == 0 { pts[0] } else { pts[i - 1] }
+    let p1 = pts[i]
+    let p2 = pts[i + 1]
+    let p3 = if i + 2 < pts.length() { pts[i + 2] } else { p2 }
+    let c1 = (p1.0 + (p2.0 - p0.0) / 6.0, p1.1 + (p2.1 - p0.1) / 6.0)
+    let c2 = (p2.0 - (p3.0 - p1.0) / 6.0, p2.1 - (p3.1 - p1.1) / 6.0)
+    b.cubic_to(c1, c2, p2)
+  }
+  b
+}
+
+///|
+fn polar(cx : Double, cy : Double, r : Double, deg : Double) -> Point {
+  let a = deg * @math.PI / 180.0
+  (cx + r * @math.cos(a), cy + r * @math.sin(a))
+}
+
+///|
+/// Pie slice path. Angles are degrees in screen coordinates: 0 is east,
+/// positive angles move clockwise. Use a negative/positive delta across
+/// 180 degrees for a large slice.
+pub fn pie_slice(
+  cx : Double,
+  cy : Double,
+  r : Double,
+  start~ : Double,
+  end~ : Double,
+) -> PathBuilder {
+  let b = PathBuilder::PathBuilder()
+  let p0 = polar(cx, cy, r, start)
+  let p1 = polar(cx, cy, r, end)
+  let delta = end - start
+  b.move_to((cx, cy))
+  b.line_to(p0)
+  b.arc_to(r, r, p1, large_arc=delta.abs() > 180.0, sweep=delta >= 0.0)
+  b.close()
+  b
+}
+
+///|
+/// Donut slice path. Angle convention follows `pie_slice`.
+pub fn donut_slice(
+  cx : Double,
+  cy : Double,
+  inner : Double,
+  outer : Double,
+  start~ : Double,
+  end~ : Double,
+) -> PathBuilder {
+  let b = PathBuilder::PathBuilder()
+  let outer0 = polar(cx, cy, outer, start)
+  let outer1 = polar(cx, cy, outer, end)
+  let inner1 = polar(cx, cy, inner, end)
+  let inner0 = polar(cx, cy, inner, start)
+  let delta = end - start
+  let large = delta.abs() > 180.0
+  let forward = delta >= 0.0
+  b.move_to(outer0)
+  b.arc_to(outer, outer, outer1, large_arc=large, sweep=forward)
+  b.line_to(inner1)
+  b.arc_to(inner, inner, inner0, large_arc=large, sweep=!forward)
+  b.close()
+  b
+}
+
 /// Palette color for the colorful option. Indexes wrap around, but
 /// the guideline caps categorical color use at six anyway.
 
@@ -956,6 +1235,45 @@ pub fn Canvas::line(
       "<path d=\"\{d}\" fill=\"none\"\{stroke_attrs(dash~, opacity~, width~, color~, stroke_opacity~)}/>",
       pts,
     ),
+  )
+}
+
+/// Draw a typed path. Prefer this over `path` for new figures: the
+/// builder tracks the points needed for the derived viewBox while it
+/// assembles the SVG commands.
+///
+/// Example:
+///
+/// ```moonbit
+/// let p = @svg.PathBuilder::PathBuilder()
+/// p.move_to((0.0, 0.0))
+/// p.cubic_to((20.0, -20.0), (40.0, 20.0), (60.0, 0.0))
+/// c.draw_path(p, width=2.0)
+/// ```
+///
+
+///|
+pub fn Canvas::draw_path(
+  self : Canvas,
+  path : PathBuilder,
+  dash~ : String? = None,
+  opacity~ : Double? = None,
+  width~ : Double = 1.5,
+  color~ : String = "currentColor",
+  fill~ : String = "none",
+  fill_opacity~ : Double? = None,
+  stroke_opacity~ : Double? = None,
+) -> Unit {
+  self.path(
+    path.d(),
+    path.covered(),
+    dash~,
+    opacity~,
+    width~,
+    color~,
+    fill~,
+    fill_opacity~,
+    stroke_opacity~,
   )
 }
 
