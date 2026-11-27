@@ -64,7 +64,7 @@ upstream の分類は business 9 類・dev 9 類。すべてを本体に入れ�
 - 相関（6）: Scatterplot、Line + Column、Connected scatterplot、Bubble、XY heatmap、BCG matrix
 - 順位（7）: Ordered bar/column/proportional symbol、Dot strip plot、Slope、Lollipop chart、Pareto chart
 - 分布（9）: Histogram、Boxplot、Violin、Population pyramid、Dot strip/dot/barcode plot、Cumulative curve、Football field
-- 時間での変化（16）: Line/Column/Line+column/Stock/Slope/Area/Fan/Connected scatter/Calendar heatmap/Priestley/Circle timeline/Seismogram/Cohort heatmap/Sparkline/Small multiples/普及曲線/製品ライフサイクル
+- 時間での変化（17）: Line/Column/Line+column/Stock/Slope/Area/Fan/Connected scatter/Calendar heatmap/Priestley/Circle timeline/Seismogram/Cohort heatmap/Sparkline/Small multiples/普及曲線/製品ライフサイクル
 - 内訳（12）: Stacked/proportional bar、Pie、Donut、Treemap、Voronoi、Arc、Gridplot、Venn、Waterfall、Marimekko、KPIツリー
 - 大きさ（10）: Column/Bar、Paired column/bar、Proportional stacked bar/symbol、Isotype、Lollipop、Radar、Parallel coordinates
 - 地理（8）: Choropleth、Proportional symbol、Flow map、Contour、Cartogram 2種、Dot density、Heat map
