@@ -1,0 +1,35 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// Measured wall time before/after the minigo test execution reuse work.
+// Vermillion bars are the old shape, teal bars the new one; color only
+// repeats the before/after grouping already carried by row order.
+
+fn main {
+  let c = @svg.Canvas()
+  let before = c.color(3)
+  let after = c.color(0)
+  let items : Array[@svg.Hbar] = [
+    { label: "difffuzz 887件 before", value: 11.97 },
+    { label: "difffuzz 887件 after", value: 2.91 },
+    { label: "text/template before", value: 3.91 },
+    { label: "text/template after", value: 2.90 },
+    { label: "parse before", value: 1.29 },
+    { label: "parse after", value: 0.96 },
+  ]
+  c.hbars(
+    items,
+    x=10.0,
+    y=10.0,
+    max_w=260.0,
+    label_w=Some(190.0),
+    size=11.0,
+    bar_h=15.0,
+    row_gap=8.0,
+    colors=Some([before, after, before, after, before, after]),
+  )
+  c.text(10.0, 180.0, "単位は秒。出典は minigo PR #1449 のローカル実行記録。after は semantics を保つ形", size=11.0, opacity=Some(0.75))
+  c.text(10.0, 196.0, "測定回数・並列度は記録なし。朱=before、青緑=after", size=11.0, opacity=Some(0.75))
+  println(c.render(label=Some("minigo test efficiency measurements: difffuzz, text/template, and parse suites before and after")))
+}
