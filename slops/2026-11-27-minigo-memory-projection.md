@@ -52,7 +52,9 @@ weak reference だけにすると、host が projection を保持していても
 
 ここで必要なのは「process が持つ」のでも「host call の間だけ持つ」のでもなく、「host projection が生きている間だけ持つ」という寿命だった。
 
-最終的な解は少し意地悪い。public projection の struct を、hidden owner を内蔵する wrapper allocation の中に配置し、host には interior pointer だけを渡す。```svg
+最終的な解は少し意地悪い。public projection の struct を、hidden owner を内蔵する wrapper allocation の中に配置し、host には interior pointer だけを渡す。
+
+```svg
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -41 666.3000000000001 377" width="666" height="377" role="img" aria-label="minigo struct projection ownership before and after">
 <text x="0" y="-18" font-size="13" fill="currentColor" opacity="0.75">before: registry is the root</text>
 <rect x="190" y="0" width="93.60000000000002" height="48" rx="8" fill="none" stroke="#3B82C4" stroke-width="2"/>
