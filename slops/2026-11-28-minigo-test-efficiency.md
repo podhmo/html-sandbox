@@ -136,7 +136,7 @@ tmpltests の方は地味に見える。`text/template` が 3.91s から 2.90s�
 | upstream stdlib test のうち internal test | 使える | scratch GOROOT と source shim を library 経由で渡せる。benchmark は compile するが実行しない |
 | difffuzz の独立 fixture | 使える | fixture 同士が入力も oracle も共有しない。並列化は scheduling の話 |
 | 通常の package unit test | 条件つきで使える | go test どおり shared package state で逐次実行するなら意味が近い。`--isolate` は別契約として opt-in |
-| minigo を library として組み込む harness | 使える | `testrun.Run` を直接呼べば CLI process を立てずに済む |
+| minigo repository 内の harness | 使える | `internal/testrun.Run` を直接呼べば CLI process を立てずに済む |
 
 特に tmpltests は相性がよかった。なぜなら、もともとの実行意味が「テストごとに独立」だったからだ。process-per-test を isolated session-per-test に置き換えても、大きな意味変更にならない。ここがいちばん自然な適用先だった。
 
@@ -154,6 +154,7 @@ tmpltests の方は地味に見える。`text/template` が 3.91s から 2.90s�
 | 固定 port、固定ファイル、singleton resource を使う test | 並列化すると衝突する。直列でも cleanup 順序が意味を持つ |
 | test 同士が package state を順序込みで共有することを前提にした suite | `--isolate` を付けると意味が変わる。shared mode の逐次実行でなければならない |
 | host blocking call が process kill を見ない harness | timeout で止まらない可能性が残る。`time.Sleep` は直したが、任意の host I/O まで保証はしない |
+| minigo 外部 module から `internal/testrun` を直接 import する harness | Go の internal package 規則で import できない。外部からは CLI 経由か、公開 API として切り出す変更が必要 |
 
 「in-process なら速い」ではなく、「process 境界が持っていた隔離性を必要としないなら速い」という方が正しい。
 
