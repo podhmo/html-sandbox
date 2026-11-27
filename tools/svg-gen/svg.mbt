@@ -1139,7 +1139,9 @@ pub fn Canvas::midpoint(_self : Canvas, from : Point, to : Point) -> Point {
 
 ///|
 /// Point on a shape edge. `t` moves along the edge from left-to-right or
-/// top-to-bottom; `0.5` is the side's port centre.
+/// top-to-bottom; `0.5` is the side's port centre. Ports are defined on
+/// the shape's bounding box, so circular and elliptical outlines use the
+/// box edge rather than their curved outline.
 pub fn Canvas::port(
   _self : Canvas,
   shape : Shape,
