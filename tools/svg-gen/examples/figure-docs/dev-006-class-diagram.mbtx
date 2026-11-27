@@ -2,16 +2,14 @@
 import { "podhmo/svg-gen" @svg }
 ---
 
-// dev/006: Class diagram
-// category: 構造
+// dev/006 transcription probe
 // source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/dev.html
-// reference shape: 形：型を3つに区切った四角（名前、属性、操作）にし、継承は白い三角の矢印、関連は線と数で結ぶ
-// reference use: 使う場面：ドメインのモデル、型の設計
 //
 // Mechanical transcription probe: each SVG element in the reference is
 // emitted through the lowest-level svg-gen primitive that can represent
 // it. Coordinates and fixed light-theme colors are intentionally kept so
-// unsupported surface area is visible instead of redesigned away.
+// unsupported surface area is visible instead of redesigned away. The
+// reference name is kept as string data in the render label.
 
 fn main {
   let c = @svg.Canvas(margin=0.0)

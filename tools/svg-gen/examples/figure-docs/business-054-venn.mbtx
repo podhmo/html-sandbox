@@ -2,16 +2,14 @@
 import { "podhmo/svg-gen" @svg }
 ---
 
-// business/054: Venn
-// category: 内訳
+// business/054 transcription probe
 // source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
-// reference shape: 形：重なる円で、2つ以上の集まりの重なりを描く
-// reference use: 使う場面：重なりの模式図
 //
 // Mechanical transcription probe: each SVG element in the reference is
 // emitted through the lowest-level svg-gen primitive that can represent
 // it. Coordinates and fixed light-theme colors are intentionally kept so
-// unsupported surface area is visible instead of redesigned away.
+// unsupported surface area is visible instead of redesigned away. The
+// reference name is kept as string data in the render label.
 
 fn main {
   let c = @svg.Canvas(margin=0.0)

@@ -2,16 +2,14 @@
 import { "podhmo/svg-gen" @svg }
 ---
 
-// business/041: Cohort retention heatmap
-// category: 時間での変化
+// business/041 transcription probe
 // source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
-// reference shape: 形：行に獲得した月、列に経過した月を取り、継続率をマスの濃さで塗る（右下が階段状に欠ける）
-// reference use: 使う場面：継続率が獲得の時期でどう違うか（会員、サブスクリプション）
 //
 // Mechanical transcription probe: each SVG element in the reference is
 // emitted through the lowest-level svg-gen primitive that can represent
 // it. Coordinates and fixed light-theme colors are intentionally kept so
-// unsupported surface area is visible instead of redesigned away.
+// unsupported surface area is visible instead of redesigned away. The
+// reference name is kept as string data in the render label.
 
 fn main {
   let c = @svg.Canvas(margin=0.0)

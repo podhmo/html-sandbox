@@ -2,16 +2,14 @@
 import { "podhmo/svg-gen" @svg }
 ---
 
-// business/107: アンゾフの成長マトリクス
-// category: 数が無い論点
+// business/107 transcription probe
 // source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
-// reference shape: 形：縦に市場（既存、新規）、横に製品（既存、新規）を取った2x2に、成長の打ち手を置く
-// reference use: 使う場面：どの方向で事業を伸ばすか
 //
 // Mechanical transcription probe: each SVG element in the reference is
 // emitted through the lowest-level svg-gen primitive that can represent
 // it. Coordinates and fixed light-theme colors are intentionally kept so
-// unsupported surface area is visible instead of redesigned away.
+// unsupported surface area is visible instead of redesigned away. The
+// reference name is kept as string data in the render label.
 
 fn main {
   let c = @svg.Canvas(margin=0.0)

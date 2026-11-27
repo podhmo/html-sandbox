@@ -2,16 +2,14 @@
 import { "podhmo/svg-gen" @svg }
 ---
 
-// business/093: 関係者とお金・物の流れ
-// category: 数が無い論点
+// business/093 transcription probe
 // source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
-// reference shape: 形：関係者を四角で置き、お金と物とデータの流れを種類の違う矢印で結ぶ
-// reference use: 使う場面：誰が払い、誰が受け取り、何が動くか
 //
 // Mechanical transcription probe: each SVG element in the reference is
 // emitted through the lowest-level svg-gen primitive that can represent
 // it. Coordinates and fixed light-theme colors are intentionally kept so
-// unsupported surface area is visible instead of redesigned away.
+// unsupported surface area is visible instead of redesigned away. The
+// reference name is kept as string data in the render label.
 
 fn main {
   let c = @svg.Canvas(margin=0.0)

@@ -66,13 +66,14 @@ chart 向けの `Plot` が中心で、参照図の写経には次が足りなか
 ### 2. 矢印と connector が弱い
 
 dev references では 84 個の polygon が主に closed arrowhead として使われている。
-現在の `arrow` は open-V の head だけなので、sequence diagram や flowchart の
-塗りつぶし三角 arrowhead を primitive では書けない。`via` で折れ線はできるが、
-orthogonal connector、port、edge label、再配置はすべて作者側の計算になる。
+塗りつぶし三角そのものは `polygon` で写経できるが、現在の `arrow` は open-V の
+head だけなので、線の終点と方向から closed arrowhead を自動配置できない。
+`via` で折れ線はできるが、orthogonal connector、port、edge label、再配置は
+すべて作者側の計算になる。
 
 必要なもの:
 
-- closed/filled arrowhead（少なくとも triangle）
+- `arrow` に接続できる closed/filled arrowhead（少なくとも triangle）
 - orthogonal elbow connector（水平→垂直→水平などの型）
 - shape edge 上の port 指定（今の N/S/E/W より細かい位置）
 - edge label の auto placement はなくても、anchor 計算 helper は欲しい

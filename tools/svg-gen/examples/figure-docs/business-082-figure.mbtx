@@ -2,16 +2,14 @@
 import { "podhmo/svg-gen" @svg }
 ---
 
-// business/082: 同心円
-// category: 数が無い論点
+// business/082 transcription probe
 // source: https://raw.githubusercontent.com/u-ichi/agent-plugins/c10dce225fe205bdacb64f754cc5b6fc61ead8f2/plugins/figure-docs/skills/figure-docs/references/business.html
-// reference shape: 形：外側から内側へ絞った範囲を重ねた円で描く。円の大きさは値に比例させないので、額は円の外に書く
-// reference use: 使う場面：TAM、SAM、SOM のような絞り込んだ範囲の包含関係。大きさの差を伝えるなら、面積を値に合わせた入れ子の四角にする
 //
 // Mechanical transcription probe: each SVG element in the reference is
 // emitted through the lowest-level svg-gen primitive that can represent
 // it. Coordinates and fixed light-theme colors are intentionally kept so
-// unsupported surface area is visible instead of redesigned away.
+// unsupported surface area is visible instead of redesigned away. The
+// reference name is kept as string data in the render label.
 
 fn main {
   let c = @svg.Canvas(margin=0.0)

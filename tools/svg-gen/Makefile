@@ -45,7 +45,7 @@ build/figure-docs/%.svg: examples/figure-docs/%.mbtx vendor
 	mv $@.tmp $@
 
 figure-docs-check: figure-docs-svg
-	$(MOON) run check.mbtx build/figure-docs/*.svg
+	$(MOON) run check.mbtx $(FIGURE_DOC_SVGS)
 
 ## png: rasterize every SVG for visual inspection
 png: $(FIGS:.svg=.png)

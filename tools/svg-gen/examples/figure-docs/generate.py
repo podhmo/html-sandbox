@@ -134,16 +134,14 @@ def emit(source, html_text, url):
 import {{ "podhmo/svg-gen" @svg }}
 ---
 
-// {source}/{i:03d}: {name}
-// category: {category}
+// {source}/{i:03d} transcription probe
 // source: {url}
-// reference shape: {shape}
-// reference use: {use}
 //
 // Mechanical transcription probe: each SVG element in the reference is
 // emitted through the lowest-level svg-gen primitive that can represent
 // it. Coordinates and fixed light-theme colors are intentionally kept so
-// unsupported surface area is visible instead of redesigned away.
+// unsupported surface area is visible instead of redesigned away. The
+// reference name is kept as string data in the render label.
 
 fn main {{
   let c = @svg.Canvas(margin=0.0)
@@ -158,21 +156,33 @@ fn main {{
   )
 }}
 '''
-        (OUT / fn).write_text(text)
-        outputs.append(fn)
+        outputs.append((fn, text))
     return outputs
 
-def main():
+def write_outputs(outputs):
     OUT.mkdir(parents=True, exist_ok=True)
+    current = {fn for fn, _ in outputs}
     for old in OUT.glob("*.mbtx"):
-        old.unlink()
-    total = []
+        if old.name not in current:
+            old.unlink()
+    for fn, text in outputs:
+        target = OUT / fn
+        tmp = target.with_suffix(target.suffix + ".tmp")
+        tmp.write_text(text)
+        tmp.replace(target)
+
+def main():
+    outputs = []
+    counts = []
     for source in SOURCES:
         text, url = fetch(source)
         got = emit(source, text, url)
-        total += got
-        print(source, len(got))
-    print("total", len(total))
+        outputs += got
+        counts.append((source, len(got)))
+    write_outputs(outputs)
+    for source, count in counts:
+        print(source, count)
+    print("total", len(outputs))
 
 if __name__ == "__main__":
     main()
