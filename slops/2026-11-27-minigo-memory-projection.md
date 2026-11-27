@@ -13,7 +13,7 @@ prev: 2026-11-25-quint-lazy-init.md
 
 今回の話は、最初は [podhmo/go-classic-mpa-sample](https://github.com/podhmo/go-classic-mpa-sample) 側の地味な改善だった。前提となる storybook 自体は以前の記事 [minigo を clone して組み込み、sqlite なしで全ページをモック表示する storybook を no-JS MPA に立てた](2026-11-14-minigo-storybook.md) で作ったものだ。今回は `TODO.md` に積まれた storybook 周りの項目を順番に片付けていて、CSS coverage の fixture gap を埋め、visual-diff を light/dark に広げ、storybook テストの `go test -count=1` を Makefile に固定する、という種類の仕事だった。
 
-その過程で `StoryIssueDetailMarkdownRich` を `NewSession` 付きで何度も描画する memory probe を書いた。すると heap が render 回数にほぼ比例して増えた。アプリ側の fixture や markdown rendering が悪い可能性もあったが、 probe は「同じ story を繰り返し render するだけ」なので、蓄積される理由が見当たらない。ここで初めて、問題は go-classic-mpa-sample ではなく、その下で Go ソースを解釈している [podhmo/minigo](https://github.com/podhmo/minigo) 側にあるのではないか、と疑い始めた。
+その過程で `StoryIssueDetailMarkdownRich` を `NewSession` 付きで何度も描画する memory probe を書いた。すると heap が render 回数にほぼ比例して増えた。アプリ側の fixture や markdown rendering が悪い可能性もあったが、 probe は「同じ story を繰り返し render するだけ」なので、蓄積される理由が見当たらない。ここで初めて、問題は [podhmo/go-classic-mpa-sample](https://github.com/podhmo/go-classic-mpa-sample) ではなく、その下で Go ソースを解釈している [podhmo/minigo](https://github.com/podhmo/minigo) 側にあるのではないか、と疑い始めた。
 
 結果としてこれが入口だった。最終的には [PR #1445](https://github.com/podhmo/minigo/pull/1445) として、session lifetime、host projection、map key の型、merge snapshot、method refresh まで幅広く触ることになった。ブランチの commit 数は 71 に膨らんだ。一見すると大げさだが、大半は Devin Review が見つけた個別の反例を 1 件ずつ潰したものだった。
 
@@ -190,7 +190,7 @@ memory の話とは別の方向で、interface-keyed host map の問題も出た
 
 ## 結果として何が安定したか
 
-最後に go-classic-mpa-sample 側で同じ probe を再測定した。`StoryIssueDetailMarkdownRich` を warmup 後に 8 render × 6 batch 実行し、GC settling 後に測った直前 batch からの heap delta は `+21384`, `+20008`, `+20448`, `+26744`, `+19920`, `-1064` bytes だった。ここでいう delta は warmup 起点からの累積ではなく、batch 間の差分だ。したがって合計すると `+107440` bytes で、完全に平坦だったわけではない。それでも最初に観測したような render 数に比例する明確な増加には戻っていないと判断した。ただし、この probe は粗い sanity check であり、完全な解放は upstream の session release regression test 側で確認している。
+最後に [podhmo/go-classic-mpa-sample](https://github.com/podhmo/go-classic-mpa-sample) 側で同じ probe を再測定した。`StoryIssueDetailMarkdownRich` を warmup 後に 8 render × 6 batch 実行し、GC settling 後に測った直前 batch からの heap delta は `+21384`, `+20008`, `+20448`, `+26744`, `+19920`, `-1064` bytes だった。ここでいう delta は warmup 起点からの累積ではなく、batch 間の差分だ。したがって合計すると `+107440` bytes で、完全に平坦だったわけではない。それでも最初に観測したような render 数に比例する明確な増加には戻っていないと判断した。ただし、この probe は粗い sanity check であり、完全な解放は upstream の session release regression test 側で確認している。
 
 [podhmo/minigo#1445](https://github.com/podhmo/minigo/pull/1445) では `make format`、`make lint`、`make test`、simcheck、race test、merge-base archcheck を通した。CI と Devin Review も最終的には green になり、記事執筆中に merge された。
 
