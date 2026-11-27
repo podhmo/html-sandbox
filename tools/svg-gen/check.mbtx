@@ -158,7 +158,10 @@ fn path_points(d : StringView) -> (Array[(Double?, Double?)], Char?) {
       break
     }
     if arity == 0 {
-      continue
+      if bad is None {
+        bad = Some(cmd)
+      }
+      break
     }
     if i + arity > tokens.length() {
       if bad is None {
