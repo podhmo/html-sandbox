@@ -44,6 +44,19 @@ fn main {
     horizontal=true,
   )
 
+  c.text(390.0, 225.0, "all-zero diverging fallback", size=13.0)
+  let zeroes = @svg.BarSeries("zero", [0.0, 0.0])
+  c.bar_chart(
+    450.0,
+    245.0,
+    190.0,
+    80.0,
+    ["A", "B"],
+    [zeroes],
+    layout=@svg.Diverging,
+    horizontal=true,
+  )
+
   println(
     c.render(label=Some("Grouped, stacked, and diverging bar chart builders")),
   )
