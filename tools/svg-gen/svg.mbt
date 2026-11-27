@@ -979,6 +979,86 @@ pub fn Canvas::anchor(_self : Canvas, shape : Shape, side : Side) -> Point {
 }
 
 ///|
+/// Estimated text metrics. Width uses the same deterministic CJK/ASCII
+/// estimate as the canvas bounds; ascent and descent use the SVG font-size
+/// heuristics already used for text coverage.
+pub(all) struct TextMetrics {
+  width : Double
+  ascent : Double
+  descent : Double
+  height : Double
+}
+
+///|
+pub fn text_metrics(s : String, size~ : Double) -> TextMetrics {
+  let ascent = size
+  let descent = size * 0.2
+  { width: text_width(s, size~), ascent, descent, height: ascent + descent, }
+}
+
+///|
+/// Place a single-line label outside a shape with a real gap measured
+/// from the glyph bounding box. In particular, a south label's baseline
+/// is moved down by its ascent instead of letting the glyph top overlap
+/// the shape.
+pub fn Canvas::label_side(
+  self : Canvas,
+  shape : Shape,
+  side : Side,
+  s : String,
+  gap~ : Double = 6.0,
+  size~ : Double = 12.0,
+  opacity~ : Double? = None,
+  color~ : String = "currentColor",
+) -> Unit {
+  let m = text_metrics(s, size~)
+  let cx = shape.x + shape.w / 2.0
+  let cy = shape.y + shape.h / 2.0
+  match side {
+    N =>
+      self.text(
+        cx,
+        shape.y - gap - m.descent,
+        s,
+        anchor=Middle,
+        size~,
+        opacity~,
+        color~,
+      )
+    S =>
+      self.text(
+        cx,
+        shape.y + shape.h + gap + m.ascent,
+        s,
+        anchor=Middle,
+        size~,
+        opacity~,
+        color~,
+      )
+    W =>
+      self.text(
+        shape.x - gap,
+        cy + (m.ascent - m.descent) / 2.0,
+        s,
+        anchor=End,
+        size~,
+        opacity~,
+        color~,
+      )
+    E =>
+      self.text(
+        shape.x + shape.w + gap,
+        cy + (m.ascent - m.descent) / 2.0,
+        s,
+        anchor=Start,
+        size~,
+        opacity~,
+        color~,
+      )
+  }
+}
+
+///|
 pub fn Canvas::center(_self : Canvas, shape : Shape) -> Point {
   (shape.x + shape.w / 2.0, shape.y + shape.h / 2.0)
 }
@@ -1165,9 +1245,14 @@ fn elbow_via(from : Point, to : Point, style : Elbow) -> Array[Point] {
   }
   match candidate {
     Some(p) => {
-      let at_from = (p.0 - from.0).abs() < 0.0001 && (p.1 - from.1).abs() < 0.0001
+      let at_from = (p.0 - from.0).abs() < 0.0001 &&
+        (p.1 - from.1).abs() < 0.0001
       let at_to = (p.0 - to.0).abs() < 0.0001 && (p.1 - to.1).abs() < 0.0001
-      if at_from || at_to { [] } else { [p] }
+      if at_from || at_to {
+        []
+      } else {
+        [p]
+      }
     }
     None => []
   }

@@ -108,7 +108,7 @@
     bounds を推定する。`check.mbtx` が C/S/Q/A を検査できるようにする。
   - [x] **connector/arrowhead/port/edge label を作る**: closed triangle head、
     orthogonal elbow、shape edge 上の port、connector 上の label anchor を入れる。
-  - [ ] **baseline-aware な text measurement/placement を作る**: text block の
+  - [x] **baseline-aware な text measurement/placement を作る**: text block の
     bbox を扱い、shape/edge の上下左右へ baseline を意識して label を置けるようにする。
   - [ ] **basic chart builder を作る**: column/bar（grouped/stacked/diverging）、
     area/band、pie/donut slice をデータから組めるようにする。
