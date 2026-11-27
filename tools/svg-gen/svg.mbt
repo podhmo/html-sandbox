@@ -64,6 +64,25 @@ pub(all) enum Heads {
 }
 
 ///|
+/// Shape of arrowheads. `Open` is the historical two-stroke V; `Closed`
+/// is a filled triangle used by diagram and flow notation.
+#derive(Eq)
+pub(all) enum ArrowHead {
+  Open
+  Closed
+}
+
+///|
+/// Orthogonal connector routing: horizontal-then-vertical, vertical-then-
+/// horizontal, or a straight line.
+#derive(Eq)
+pub(all) enum Elbow {
+  HV
+  VH
+  Direct
+}
+
+///|
 /// Underline style for text, porting the TS `boolean | number` option:
 /// `No` draws nothing, `Yes` draws the default 2px rule, `Custom(w)`
 /// draws a rule of width `w`. As a sum type the off/on/custom cases are
@@ -1011,6 +1030,7 @@ pub fn Canvas::arrow(
   opacity~ : Double? = None,
   width~ : Double = 1.5,
   color~ : String = "currentColor",
+  head_kind~ : ArrowHead = Open,
 ) -> Unit {
   match ends {
     Pair(split) => {
@@ -1038,6 +1058,7 @@ pub fn Canvas::arrow(
         opacity~,
         width~,
         color~,
+        head_kind~,
       )
       self.arrow(
         shift(to, 1.0),
@@ -1052,6 +1073,7 @@ pub fn Canvas::arrow(
         opacity~,
         width~,
         color~,
+        head_kind~,
       )
     }
     Single(heads) => {
@@ -1072,9 +1094,14 @@ pub fn Canvas::arrow(
         let by = qy - head * uy
         let pxn = -uy * head * 0.45
         let pyn = ux * head * 0.45
+        let (tail, fill) = if head_kind is Closed {
+          (" Z", " fill=\"\{color}\"")
+        } else {
+          ("", " fill=\"none\"")
+        }
         (
-          "<path d=\"M\{num(bx + pxn)} \{num(by + pyn)} L\{num(qx)} \{num(qy)} L\{num(bx - pxn)} \{num(by - pyn)}\"" +
-          " fill=\"none\"\{stroke_attrs(dash~, opacity~, width~, color~)}/>",
+          "<path d=\"M\{num(bx + pxn)} \{num(by + pyn)} L\{num(qx)} \{num(qy)} L\{num(bx - pxn)} \{num(by - pyn)}\{tail}\"" +
+          "\{fill}\{stroke_attrs(dash~, opacity~, width~, color~)}/>",
           [(bx + pxn, by + pyn), (bx - pxn, by - pyn)],
         )
       }
@@ -1108,6 +1135,151 @@ pub fn Canvas::arrow(
 ///|
 pub fn Canvas::midpoint(_self : Canvas, from : Point, to : Point) -> Point {
   ((from.0 + to.0) / 2.0, (from.1 + to.1) / 2.0)
+}
+
+///|
+/// Point on a shape edge. `t` moves along the edge from left-to-right or
+/// top-to-bottom; `0.5` is the side's port centre.
+pub fn Canvas::port(
+  _self : Canvas,
+  shape : Shape,
+  side : Side,
+  t~ : Double = 0.5,
+) -> Point {
+  match side {
+    N => (shape.x + shape.w * t, shape.y)
+    S => (shape.x + shape.w * t, shape.y + shape.h)
+    W => (shape.x, shape.y + shape.h * t)
+    E => (shape.x + shape.w, shape.y + shape.h * t)
+  }
+}
+
+///|
+fn elbow_via(from : Point, to : Point, style : Elbow) -> Array[Point] {
+  match style {
+    Direct => []
+    HV => [(to.0, from.1)]
+    VH => [(from.0, to.1)]
+  }
+}
+
+///|
+/// Arrow with an optional orthogonal elbow. `via` can still be supplied
+/// for explicit extra bends after the automatic corner.
+pub fn Canvas::elbow_arrow(
+  self : Canvas,
+  from : Point,
+  to : Point,
+  style~ : Elbow = HV,
+  via~ : Array[Point] = [],
+  head~ : Double = 9,
+  ends~ : Ends = Single(End),
+  gap~ : Double = 3,
+  dash~ : String? = None,
+  opacity~ : Double? = None,
+  width~ : Double = 1.5,
+  color~ : String = "currentColor",
+  head_kind~ : ArrowHead = Closed,
+) -> Unit {
+  self.arrow(
+    from,
+    to,
+    via=elbow_via(from, to, style) + via,
+    head~,
+    ends~,
+    gap~,
+    dash~,
+    opacity~,
+    width~,
+    color~,
+    head_kind~,
+  )
+}
+
+///|
+/// Connect two shape ports. The first side decides whether the connector
+/// leaves horizontally (`HV`) or vertically (`VH`); the end side picks
+/// the arrival port. When `label` is present it is centred at the elbow.
+pub fn Canvas::connect(
+  self : Canvas,
+  from_shape : Shape,
+  from_side : Side,
+  to_shape : Shape,
+  to_side : Side,
+  label~ : String? = None,
+  t_from~ : Double = 0.5,
+  t_to~ : Double = 0.5,
+  head~ : Double = 9,
+  gap~ : Double = 3,
+  dash~ : String? = None,
+  opacity~ : Double? = None,
+  width~ : Double = 1.5,
+  color~ : String = "currentColor",
+) -> Unit {
+  let from = self.port(from_shape, from_side, t=t_from)
+  let to = self.port(to_shape, to_side, t=t_to)
+  let style = match from_side {
+    E | W => HV
+    N | S => VH
+  }
+  let bends = elbow_via(from, to, style)
+  self.elbow_arrow(
+    from,
+    to,
+    style~,
+    head~,
+    gap~,
+    dash~,
+    opacity~,
+    width~,
+    color~,
+  )
+  match label {
+    Some(s) => {
+      let p = if bends.length() > 0 {
+        bends[0]
+      } else {
+        ((from.0 + to.0) / 2.0, (from.1 + to.1) / 2.0)
+      }
+      self.text(p.0, p.1 - 8.0, s, anchor=Middle, central=true, size=12)
+    }
+    None => ()
+  }
+}
+
+///|
+/// Point at normalized length `t` along a connector polyline. Useful as a
+/// stable label anchor when edges gain or lose bend points.
+pub fn Canvas::point_along(
+  _self : Canvas,
+  pts : Array[Point],
+  t : Double,
+) -> Point {
+  if pts.length() == 0 {
+    abort("point_along needs at least one point")
+  }
+  if pts.length() == 1 {
+    return pts[0]
+  }
+  let lens = []
+  let mut total = 0.0
+  for i = 0; i < pts.length() - 1; i = i + 1 {
+    let l = @math.hypot(pts[i + 1].0 - pts[i].0, pts[i + 1].1 - pts[i].1)
+    lens.push(l)
+    total += l
+  }
+  let mut want = total * t
+  for i = 0; i < lens.length(); i = i + 1 {
+    if want <= lens[i] || i == lens.length() - 1 {
+      let r = if lens[i] == 0.0 { 0.0 } else { want / lens[i] }
+      return (
+        pts[i].0 + (pts[i + 1].0 - pts[i].0) * r,
+        pts[i].1 + (pts[i + 1].1 - pts[i].1) * r,
+      )
+    }
+    want -= lens[i]
+  }
+  pts[pts.length() - 1]
 }
 
 ///|

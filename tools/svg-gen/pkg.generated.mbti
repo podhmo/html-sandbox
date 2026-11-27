@@ -67,6 +67,12 @@ pub fn voronoi_segments(Array[(Double, Double)], tris~ : Array[(Int32, Int32, In
 // Errors
 
 // Types and methods
+#derive(Eq)
+pub(all) enum ArrowHead {
+  Open
+  Closed
+}
+
 #derive(@debug.Debug)
 pub(all) struct Bin {
   x0 : Double
@@ -93,13 +99,15 @@ pub struct Canvas {
 pub fn Canvas::Canvas(margin? : Double) -> Self
 pub fn Canvas::above(Self, Shape, Double, Double) -> Double
 pub fn Canvas::anchor(Self, Shape, Side) -> (Double, Double)
-pub fn Canvas::arrow(Self, (Double, Double), (Double, Double), via? : Array[(Double, Double)], head? : Double, ends? : Ends, gap? : Double, gap_start? : Double?, gap_end? : Double?, dash? : String?, opacity? : Double?, width? : Double, color? : String) -> Unit
+pub fn Canvas::arrow(Self, (Double, Double), (Double, Double), via? : Array[(Double, Double)], head? : Double, ends? : Ends, gap? : Double, gap_start? : Double?, gap_end? : Double?, dash? : String?, opacity? : Double?, width? : Double, color? : String, head_kind? : ArrowHead) -> Unit
 pub fn Canvas::below(Self, Shape, Double) -> Double
 pub fn Canvas::box(Self, Double, Double, Sizing, Double, label? : String?, rx? : Double, pad_x? : Double, size? : Double, dash? : String?, opacity? : Double?, width? : Double, color? : String, underline? : Underline) -> Shape
 pub fn Canvas::center(Self, Shape) -> (Double, Double)
 pub fn Canvas::circle(Self, Double, Double, Double, label? : String?, size? : Double, dash? : String?, opacity? : Double?, width? : Double, color? : String, fill? : String, fill_opacity? : Double?, stroke_opacity? : Double?, underline? : Underline) -> Shape
 pub fn Canvas::color(Self, Int32) -> String
+pub fn Canvas::connect(Self, Shape, Side, Shape, Side, label? : String?, t_from? : Double, t_to? : Double, head? : Double, gap? : Double, dash? : String?, opacity? : Double?, width? : Double, color? : String) -> Unit
 pub fn Canvas::draw_path(Self, PathBuilder, dash? : String?, opacity? : Double?, width? : Double, color? : String, fill? : String, fill_opacity? : Double?, stroke_opacity? : Double?) -> Unit
+pub fn Canvas::elbow_arrow(Self, (Double, Double), (Double, Double), style? : Elbow, via? : Array[(Double, Double)], head? : Double, ends? : Ends, gap? : Double, dash? : String?, opacity? : Double?, width? : Double, color? : String, head_kind? : ArrowHead) -> Unit
 pub fn Canvas::ellipse(Self, Double, Double, Double, Double, dash? : String?, opacity? : Double?, width? : Double, color? : String, fill? : String, fill_opacity? : Double?, stroke_opacity? : Double?) -> Shape
 pub fn Canvas::hbars(Self, Array[Hbar], x? : Double, y? : Double, bar_h? : Double, row_gap? : Double, max_w? : Double, label_w? : Double?, size? : Double, value_fmt? : (Double) -> String, fill_opacity? : Double, highlight? : Int32?, colors? : Array[String]?) -> Unit
 pub fn Canvas::highlight(Self, Shape, pad? : Double, opacity? : Double, mode? : HighlightMode, rx? : Double?) -> Unit
@@ -107,8 +115,10 @@ pub fn Canvas::left_of(Self, Shape, Double, Double) -> Double
 pub fn Canvas::line(Self, (Double, Double), (Double, Double), via? : Array[(Double, Double)], gap? : Double, gap_start? : Double?, gap_end? : Double?, dash? : String?, opacity? : Double?, width? : Double, color? : String, stroke_opacity? : Double?) -> Unit
 pub fn Canvas::midpoint(Self, (Double, Double), (Double, Double)) -> (Double, Double)
 pub fn Canvas::path(Self, String, Array[(Double, Double)], dash? : String?, opacity? : Double?, width? : Double, color? : String, fill? : String, fill_opacity? : Double?, stroke_opacity? : Double?) -> Unit
+pub fn Canvas::point_along(Self, Array[(Double, Double)], Double) -> (Double, Double)
 pub fn Canvas::polygon(Self, Array[(Double, Double)], dash? : String?, opacity? : Double?, width? : Double, color? : String, fill? : String, fill_opacity? : Double?, stroke_opacity? : Double?) -> Unit
 pub fn Canvas::polyline(Self, Array[(Double, Double)], dash? : String?, opacity? : Double?, width? : Double, color? : String, fill? : String, fill_opacity? : Double?, stroke_opacity? : Double?) -> Unit
+pub fn Canvas::port(Self, Shape, Side, t? : Double) -> (Double, Double)
 pub fn Canvas::raw(Self, String, covered? : Array[(Double, Double)]) -> Unit
 pub fn Canvas::rect(Self, Double, Double, Double, Double, label? : String?, rx? : Double, size? : Double, dash? : String?, opacity? : Double?, width? : Double, color? : String, fill? : String, fill_opacity? : Double?, stroke_opacity? : Double?, underline? : Underline) -> Shape
 pub fn Canvas::render(Self, width? : Double?, height? : Double?, label? : String?, viewbox? : ViewBox?) -> String
@@ -126,6 +136,13 @@ pub(all) struct ChartMeta {
 pub(all) struct Circum {
   o : (Double, Double)
   r : Double
+}
+
+#derive(Eq)
+pub(all) enum Elbow {
+  HV
+  VH
+  Direct
 }
 
 #derive(Eq)
