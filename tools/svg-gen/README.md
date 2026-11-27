@@ -69,6 +69,10 @@ gets a small throwaway generator sharing a thin helper.
   seeded-PRNG virtual data; `data.mbt` holds the shared virtual
   datasets so "same data, different figure" comparisons cite one
   source; `ecdf_points` thins step vertices for inline embedding.
+  `Canvas::bar_chart` builds grouped, stacked, and diverging
+  column/bar charts from categorical values; `Plot::area` and
+  `Plot::band` fill data-coordinate regions; pie and donut slice
+  builders live beside `PathBuilder` (`fig-chart-builders.mbtx`).
 - Color is opt-in (the "colorful" option): `color: c.color(i)` on a
   stroke or fill picks from `PALETTE`, six categorical hues adjusted
   to stay legible on both themes. Text stays `currentColor`; use hue

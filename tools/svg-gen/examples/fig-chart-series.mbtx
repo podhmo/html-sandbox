@@ -1,5 +1,7 @@
 ---
-import { "podhmo/svg-gen" @svg }
+import {
+  "podhmo/svg-gen" @svg,
+}
 ---
 
 // fig-chart-series.mbtx -- daily latency percentiles around a deploy.
@@ -7,6 +9,7 @@ import { "podhmo/svg-gen" @svg }
 // the trend, a vertical event line for the deploy. Data is virtual —
 // two weeks of daily-aggregated p50/p90 from a seeded PRNG.
 
+///|
 fn main {
   let c = @svg.Canvas()
   let g = @svg.gauss(@svg.rng(20261030U))
@@ -29,9 +32,8 @@ fn main {
   let mean = fn(a : Array[Double]) {
     a.fold(init=0.0, fn(acc, v) { acc + v }) / a.length().to_double()
   }
-  let drop = (
-      (1.0 - mean(p90[8:].to_array()) / mean(p90[0:8].to_array())) * 100.0
-    ).round()
+  let drop = ((1.0 - mean(p90[8:].to_array()) / mean(p90[0:8].to_array())) *
+  100.0).round()
   let drop_i = drop.to_int64()
 
   let p = @svg.Plot(
@@ -56,6 +58,8 @@ fn main {
     // colorful option: hue does the series distinction, width/dash
     // stays as a grayscale fallback so the figure still reads when
     // colors are unavailable (print, copy).
+    p.area(days, p50, baseline=0.0, color=c.color(0), opacity=0.08)
+    p.band(days, p50, p90, color=c.color(3), opacity=0.12)
     p.series(
       days.mapi(fn(i, d) { (p.xs.map(d), p.ys.map(p90[i])) }),
       dash=Some("5 3"),
@@ -83,6 +87,10 @@ fn main {
   }
 
   println(
-    c.render(label=Some("daily p50/p90 latency: p90 drops about \{drop_i}% after the 10/08 deploy (virtual data)")),
+    c.render(
+      label=Some(
+        "daily p50/p90 latency: p90 drops about \{drop_i}% after the 10/08 deploy (virtual data)",
+      ),
+    ),
   )
 }
