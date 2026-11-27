@@ -1,0 +1,54 @@
+---
+import { "podhmo/svg-gen" @svg }
+---
+
+// fig-minigo-projection-lifetime.mbtx -- ownership before and after the
+// hostbridge fix. Solid arrows are strong ownership; dashed arrows are
+// weak registry references. Hue separates the three object families and
+// the line style remains meaningful without colour.
+
+fn main {
+  let c = @svg.Canvas()
+
+  // Before: the process-wide registry itself owns both sides of the
+  // projection mapping. The two strong references branch from the root;
+  // they are not an ownership chain through the projection.
+  c.text(0.0, -18.0, "before: registry is the root", size=13.0, opacity=Some(0.75))
+  let reg0 = c.box(190.0, 0.0, @svg.Auto, 48.0, label=Some("process\nregistry"), color=c.color(0), width=2.0)
+  let proj0 = c.box(0.0, 96.0, @svg.Auto, 48.0, label=Some("host\nprojection"), color=c.color(1), width=2.0)
+  let orig0 = c.box(390.0, 96.0, @svg.Auto, 48.0, label=Some("script original\n+ session"), color=c.color(2), width=2.0)
+  c.arrow(c.anchor(reg0, @svg.S), c.anchor(proj0, @svg.N), color=c.color(0), width=2.5)
+  c.arrow(c.anchor(reg0, @svg.S), c.anchor(orig0, @svg.N), color=c.color(0), width=2.5)
+  c.text(106.0, 72.0, "strong", anchor=@svg.Middle, size=10.0, opacity=Some(0.65))
+  c.text(367.0, 72.0, "strong", anchor=@svg.Middle, size=10.0, opacity=Some(0.65))
+  c.text(0.0, 160.0, "dropped sessions stay reachable", size=11.0, opacity=Some(0.7))
+
+  // After: the registry only observes weakly. Host reachability owns the
+  // projection wrapper, and the hidden owner inside that allocation owns
+  // the script original for exactly the projection's lifetime.
+  let y = 218.0
+  c.text(0.0, y - 8.0, "after: projection owns the original", size=13.0, opacity=Some(0.75))
+  let host = c.box(0.0, y + 32.0, @svg.Auto, 44.0, label=Some("host"), color=c.color(3), width=2.0)
+  let wrap = c.box(c.right_of(host, 72.0), y, @svg.Fixed(292.0), 108.0, color=c.color(1), width=1.5)
+  c.text(wrap.x + 12.0, wrap.y + 17.0, "wrapper allocation", size=11.0, opacity=Some(0.7))
+  let proj1 = c.box(wrap.x + 18.0, wrap.y + 34.0, @svg.Auto, 46.0, label=Some("public\nprojection"), color=c.color(1), width=2.5)
+  let hidden = c.box(c.right_of(proj1, 28.0), proj1.y, @svg.Auto, 46.0, label=Some("hidden\nowner"), color=c.color(4), width=2.0)
+  let orig1 = c.box(c.right_of(wrap, 72.0), host.y, @svg.Auto, 44.0, label=Some("script original\n+ session"), color=c.color(2), width=2.0)
+  let reg1 = c.box(wrap.x + 48.0, y - 78.0, @svg.Auto, 42.0, label=Some("process registry\nweak + cleanup"), color=c.color(0), dash=Some("4 3"))
+
+  c.arrow(c.anchor(host, @svg.E), c.anchor(proj1, @svg.W), color=c.color(3), width=2.5)
+  c.arrow(c.anchor(hidden, @svg.E), c.anchor(orig1, @svg.W), via=[(wrap.x + wrap.w + 24.0, hidden.y + hidden.h / 2.0)], color=c.color(4), width=2.5)
+  c.arrow(c.anchor(reg1, @svg.S), c.anchor(proj1, @svg.N), color=c.color(0), dash=Some("4 4"), opacity=Some(0.8))
+  c.text(host.x + 44.0, host.y - 8.0, "strong", anchor=@svg.Middle, size=10.0, opacity=Some(0.65))
+  c.text(wrap.x + wrap.w + 42.0, hidden.y - 8.0, "strong", anchor=@svg.Middle, size=10.0, opacity=Some(0.65))
+  c.text(reg1.x - 20.0, reg1.y + 52.0, "weak", anchor=@svg.End, size=10.0, opacity=Some(0.65))
+
+  if !(wrap.x < proj1.x && proj1.x + proj1.w < wrap.x + wrap.w) {
+    abort("public projection inside wrapper")
+  }
+  if !(wrap.x < hidden.x && hidden.x + hidden.w < wrap.x + wrap.w) {
+    abort("hidden owner inside wrapper")
+  }
+
+  println(c.render(label=Some("minigo struct projection ownership before and after")))
+}
